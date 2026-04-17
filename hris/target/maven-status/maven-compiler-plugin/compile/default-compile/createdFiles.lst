@@ -11,6 +11,7 @@ com\hris\admin\controller\AdminRequestController.class
 com\hris\analytics\entity\ExportRecord$ExportRecordBuilder.class
 com\hris\auth\enums\PermissionAction.class
 com\hris\analytics\entity\AuditLog$AuditLogBuilder.class
+com\hris\dashboard\dto\HrDashboardDto.class
 com\hris\notification\repository\NotificationEventRepository.class
 com\hris\auth\entity\UserRole$UserRoleBuilder.class
 com\hris\auth\enums\ContractType.class
@@ -67,8 +68,10 @@ com\hris\admin\dto\CreateAdminRequestDto.class
 com\hris\auth\entity\User.class
 com\hris\leave\entity\LeaveBalance.class
 com\hris\config\RetryConfig.class
+com\hris\dashboard\dto\SupervisorDashboardDto.class
 com\hris\leave\dto\FileAttachmentDto.class
 com\hris\admin\dto\AdminRequestTypeDto.class
+com\hris\dashboard\dto\DirectorDashboardDto.class
 com\hris\leave\entity\LeavePolicy.class
 com\hris\organisation\entity\Project.class
 com\hris\notification\entity\Notification.class
@@ -84,12 +87,15 @@ com\hris\analytics\repository\AbsenceImpactReportRepository.class
 com\hris\analytics\entity\LeaveMetrics.class
 com\hris\auth\entity\RolePermission$RolePermissionBuilder.class
 com\hris\organisation\service\WorkScheduleService.class
+com\hris\dashboard\dto\LeaveBalanceSummaryDto.class
 com\hris\analytics\entity\HeadcountMetrics$HeadcountMetricsBuilder.class
 com\hris\analytics\repository\AuditLogRepository.class
 com\hris\common\exception\EntityNotFoundException.class
 com\hris\leave\entity\FileAttachment.class
 com\hris\auth\repository\RolePermissionRepository.class
 com\hris\analytics\entity\HeadcountMetrics.class
+com\hris\dashboard\controller\DashboardController.class
+com\hris\dashboard\dto\EmployeeDashboardDto.class
 com\hris\analytics\repository\HeadcountMetricsRepository.class
 com\hris\common\exception\FileAttachmentValidationException.class
 com\hris\approval\dto\ApprovalDecisionDto.class
@@ -97,6 +103,7 @@ com\hris\config\JacksonConfig.class
 com\hris\organisation\entity\Project$ProjectBuilder.class
 com\hris\notification\mapper\NotificationMapper.class
 com\hris\leave\dto\LeaveBalanceDto.class
+com\hris\dashboard\service\DashboardService.class
 com\hris\organisation\controller\WorkScheduleController.class
 com\hris\organisation\dto\ProjectDepartmentAssignDto.class
 com\hris\auth\mapper\UserMapperImpl.class
@@ -110,6 +117,7 @@ com\hris\leave\service\LeaveRequestService.class
 com\hris\organisation\repository\WorkScheduleRepository.class
 com\hris\approval\mapper\ApprovalMapper.class
 com\hris\notification\service\NotificationPublisher.class
+com\hris\dashboard\dto\LeaveMetricsSummaryDto.class
 com\hris\auth\controller\RoleController.class
 com\hris\auth\service\UserService.class
 com\hris\analytics\entity\LeaveMetrics$LeaveMetricsBuilder.class
@@ -151,10 +159,12 @@ com\hris\auth\controller\DepartmentController.class
 com\hris\common\PageResponse.class
 com\hris\leave\mapper\LeaveMapper.class
 com\hris\organisation\dto\ProjectAssignmentCreateDto.class
+com\hris\dashboard\dto\AdminRequestSummaryDto.class
 com\hris\analytics\entity\AnalyticsDashboard.class
 com\hris\approval\enums\WorkflowStatus.class
 com\hris\admin\controller\AdminRequestTypeController.class
 com\hris\organisation\dto\ProjectAssignmentResponseDto.class
+com\hris\dashboard\dto\LeaveRequestSummaryDto.class
 com\hris\approval\entity\ApprovalWorkflow$ApprovalWorkflowBuilder.class
 com\hris\auth\dto\EmployeeResponseDto.class
 com\hris\admin\dto\AdminRequestRejectDto.class
@@ -201,6 +211,7 @@ com\hris\common\GlobalExceptionHandler.class
 com\hris\config\SchedulingConfig.class
 com\hris\leave\repository\LeavePolicyRepository.class
 com\hris\analytics\enums\AuditAction.class
+com\hris\dashboard\dto\ApprovalSummaryDto.class
 com\hris\auth\repository\DepartmentRepository.class
 com\hris\common\exception\DepartmentDeletionNotAllowedException.class
 com\hris\analytics\service\LeaveMetricsService.class

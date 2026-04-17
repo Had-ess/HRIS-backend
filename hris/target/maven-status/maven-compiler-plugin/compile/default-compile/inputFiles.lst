@@ -1,3 +1,5 @@
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\service\DashboardService.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\DirectorDashboardDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\entity\ProjectDepartment.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\mapper\DepartmentMapper.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\notification\service\DeadLetterQueueHandler.java
@@ -25,6 +27,7 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\controller\UserController.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\dto\DepartmentCreateDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\dto\UserResponseDto.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\ApprovalSummaryDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\repository\LeaveTypeRepository.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\common\ApiResponse.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\controller\LeaveBalanceController.java
@@ -46,6 +49,7 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\config\SecurityConfig.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\entity\UserRole.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\enums\PermissionAction.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\HrDashboardDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\service\ProjectAssignmentCleanupService.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\notification\repository\NotificationRepository.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\analytics\repository\HeadcountMetricsRepository.java
@@ -68,8 +72,11 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\notification\service\NotificationPublisher.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\service\LeaveRequestService.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\analytics\repository\ExportRecordRepository.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\controller\DashboardController.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\SupervisorDashboardDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\entity\Project.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\analytics\repository\LeaveMetricsRepository.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\LeaveBalanceSummaryDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\repository\FileAttachmentRepository.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\dto\ProjectAssignmentCreateDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\controller\DepartmentController.java
@@ -85,6 +92,7 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\common\GlobalExceptionHandler.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\service\EmployeeService.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\dto\EmployeeCreateDto.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\AdminRequestSummaryDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\controller\WorkScheduleController.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\entity\LeaveBalance.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\analytics\service\AuditLogService.java
@@ -102,6 +110,7 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\mapper\LeaveMapper.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\analytics\repository\AnalyticsDashboardRepository.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\entity\RolePermission.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\LeaveRequestSummaryDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\repository\PublicHolidayRepository.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\leave\controller\LeaveTypeController.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\approval\service\ApprovalStepService.java
@@ -112,6 +121,8 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\entity\Role.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\auth\repository\RolePermissionRepository.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\common\ScopeFilter.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\EmployeeDashboardDto.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\dashboard\dto\LeaveMetricsSummaryDto.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\common\exception\DepartmentDeletionNotAllowedException.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\organisation\entity\ProjectAssignment.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\main\java\com\hris\analytics\controller\AnalyticsController.java

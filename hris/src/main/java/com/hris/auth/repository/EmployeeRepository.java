@@ -18,5 +18,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     boolean existsByDepartmentId(UUID departmentId);
 
+    long countByDepartmentId(UUID departmentId);
+
     Page<Employee> findAll(Pageable pageable);
 }

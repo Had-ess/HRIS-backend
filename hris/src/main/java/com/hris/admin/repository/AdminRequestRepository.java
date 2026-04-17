@@ -16,4 +16,10 @@ public interface AdminRequestRepository extends JpaRepository<AdminRequest, UUID
     Page<AdminRequest> findByRequesterIdOrderBySubmittedAtDesc(UUID requesterId, Pageable pageable);
 
     Page<AdminRequest> findByStatusInOrderBySubmittedAtDesc(List<AdminRequestStatus> statuses, Pageable pageable);
+
+    List<AdminRequest> findTop5ByRequesterIdOrderBySubmittedAtDesc(UUID requesterId);
+
+    long countByStatusIn(List<AdminRequestStatus> statuses);
+
+    List<AdminRequest> findTop5ByStatusInOrderBySubmittedAtDesc(List<AdminRequestStatus> statuses);
 }
