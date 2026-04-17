@@ -1,0 +1,52 @@
+package com.hris.analytics.controller;
+
+import com.hris.analytics.entity.AuditLog;
+import com.hris.analytics.entity.LeaveMetrics;
+import com.hris.analytics.service.AuditLogService;
+import com.hris.analytics.service.LeaveMetricsService;
+import com.hris.analytics.service.ScopeFilterResolver;
+import com.hris.common.ApiResponse;
+import com.hris.common.ScopeFilter;
+import com.hris.security.SecurityUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/analytics")
+@RequiredArgsConstructor
+public class AnalyticsController {
+
+    private final LeaveMetricsService leaveMetricsService;
+    private final ScopeFilterResolver scopeFilterResolver;
+    private final AuditLogService auditLogService;
+
+    @GetMapping("/leave-metrics")
+    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'HR_ADMIN', 'DIRECTOR')")
+    public ResponseEntity<ApiResponse<List<LeaveMetrics>>> getLeaveMetrics(
+            @RequestParam String period, Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        ScopeFilter scope = scopeFilterResolver.resolve(userId);
+        return ResponseEntity.ok(ApiResponse.ok(leaveMetricsService.getByPeriod(period, scope)));
+    }
+
+    @GetMapping("/audit-logs")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.ok(auditLogService.getAll(pageable)));
+    }
+
+    @GetMapping("/audit-logs/by-resource")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Page<AuditLog>>> getByResource(
+            @RequestParam String resource, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.ok(auditLogService.getByResource(resource, pageable)));
+    }
+}

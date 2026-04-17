@@ -1,0 +1,83 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: hris_postgres
+    environment:
+      POSTGRES_DB: hris_db
+      POSTGRES_USER: hris_user
+      POSTGRES_PASSWORD: hris_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hris_user -d hris_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hris_network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: hris_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: hris_user
+      RABBITMQ_DEFAULT_PASS: hris_pass
+      RABBITMQ_DEFAULT_VHOST: hris_vhost
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hris_network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: hris_keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/hris_db
+      KC_DB_USERNAME: hris_user
+      KC_DB_PASSWORD: hris_pass
+      KC_DB_SCHEMA: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8180
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8180/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - hris_network
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+
+networks:
+  hris_network:
+    driver: bridge

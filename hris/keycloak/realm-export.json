@@ -1,0 +1,171 @@
+{
+  "realm": "hris",
+  "enabled": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionMaxLifespan": 1800,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "EMPLOYEE",
+        "description": "Standard employee role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "DEPT_MANAGER",
+        "description": "Department manager role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "PROJECT_SUPERVISOR",
+        "description": "Project supervisor role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "HR_ADMIN",
+        "description": "HR administrator role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "DIRECTOR",
+        "description": "Director role",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "hris-backend",
+      "name": "HRIS Backend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "secret": "hris-backend-secret",
+      "redirectUris": [],
+      "webOrigins": [],
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false
+    },
+    {
+      "clientId": "hris-frontend",
+      "name": "HRIS Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "serviceAccountsEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "ahmed",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "ahmed@hris.local",
+      "firstName": "Ahmed",
+      "lastName": "Benali",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "employee",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "EMPLOYEE"
+      ]
+    },
+    {
+      "username": "sara",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "sara@hris.local",
+      "firstName": "Sara",
+      "lastName": "Idrissi",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "dept_manager",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DEPT_MANAGER"
+      ]
+    },
+    {
+      "username": "nour",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "nour@hris.local",
+      "firstName": "Nour",
+      "lastName": "Elhadi",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "project_supervisor",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PROJECT_SUPERVISOR"
+      ]
+    },
+    {
+      "username": "rania",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "rania@hris.local",
+      "firstName": "Rania",
+      "lastName": "Mansouri",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "hr_admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "HR_ADMIN"
+      ]
+    },
+    {
+      "username": "karim",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "karim@hris.local",
+      "firstName": "Karim",
+      "lastName": "Tazi",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "director",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DIRECTOR"
+      ]
+    }
+  ]
+}

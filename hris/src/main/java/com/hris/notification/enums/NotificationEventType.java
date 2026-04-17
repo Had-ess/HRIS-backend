@@ -1,0 +1,6 @@
+package com.hris.notification.enums;
+
+public enum NotificationEventType {
+    LEAVE_SUBMITTED, LEAVE_APPROVED, LEAVE_REJECTED,
+    ADMIN_REQUEST_SUBMITTED, ADMIN_REQUEST_PROCESSED
+}
