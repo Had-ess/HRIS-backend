@@ -8,19 +8,25 @@ import com.hris.leave.dto.LeaveRequestResponseDto;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.enums.LeaveStatus;
 import com.hris.leave.mapper.LeaveMapper;
+import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -84,5 +90,49 @@ public class LeaveRequestController {
             attachment.getStoragePath(),
             attachment.getUploadedAt()
         )));
+    }
+
+    @GetMapping("/{id}/attachments")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<FileAttachmentDto>>> getAttachments(
+            @PathVariable UUID id,
+            Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        List<FileAttachmentDto> attachments = leaveRequestService.getAttachments(id, userId).stream()
+            .map(attachment -> new FileAttachmentDto(
+                attachment.getId(),
+                attachment.getRequestId(),
+                attachment.getFileName(),
+                attachment.getMimeType(),
+                attachment.getStoragePath(),
+                attachment.getUploadedAt()
+            ))
+            .toList();
+        return ResponseEntity.ok(ApiResponse.ok(attachments));
+    }
+
+    @GetMapping("/{id}/attachments/{attachmentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Resource> downloadAttachment(
+            @PathVariable UUID id,
+            @PathVariable UUID attachmentId,
+            Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        AttachmentDownload download = leaveRequestService.downloadAttachment(id, attachmentId, userId);
+        return ResponseEntity.ok()
+            .header(
+                HttpHeaders.CONTENT_DISPOSITION,
+                ContentDisposition.attachment().filename(download.fileName()).build().toString()
+            )
+            .contentType(resolveMediaType(download.mimeType()))
+            .body(download.resource());
+    }
+
+    private MediaType resolveMediaType(String mimeType) {
+        try {
+            return MediaType.parseMediaType(mimeType);
+        } catch (IllegalArgumentException e) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
     }
 }

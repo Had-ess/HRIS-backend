@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.core.io.InputStreamResource;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -59,6 +60,12 @@ public class LeaveRequestService {
         "application/pdf",
         "image/png",
         "image/jpeg"
+    );
+    private static final Set<String> ALLOWED_ATTACHMENT_EXTENSIONS = Set.of(
+        "pdf",
+        "png",
+        "jpg",
+        "jpeg"
     );
 
     private final LeaveRequestRepository leaveRequestRepository;
@@ -293,13 +300,14 @@ public class LeaveRequestService {
         }
 
         validateAttachment(file);
+        String sanitizedFileName = sanitizeAttachmentFilename(file.getOriginalFilename());
 
         String storagePath = fileStorageService.store(file, requestId);
 
         FileAttachment attachment = FileAttachment.builder()
             .requestId(requestId)
-            .fileName(file.getOriginalFilename())
-            .mimeType(file.getContentType())
+            .fileName(sanitizedFileName)
+            .mimeType(file.getContentType().toLowerCase())
             .storagePath(storagePath)
             .uploadedById(uploaderId)
             .uploadedAt(Instant.now())
@@ -314,8 +322,40 @@ public class LeaveRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<FileAttachment> getAttachments(UUID requestId) {
+    public List<FileAttachment> getAttachments(UUID requestId, UUID accessorId) {
+        LeaveRequest request = leaveRequestRepository.findById(requestId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!canAccessLeaveAttachments(request, accessorId)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                "You are not allowed to access attachments for this leave request");
+        }
+
         return fileAttachmentRepository.findByRequestId(requestId);
+    }
+
+    @Transactional(readOnly = true)
+    public AttachmentDownload downloadAttachment(UUID requestId, UUID attachmentId, UUID accessorId) {
+        LeaveRequest request = leaveRequestRepository.findById(requestId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!canAccessLeaveAttachments(request, accessorId)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                "You are not allowed to access attachments for this leave request");
+        }
+
+        FileAttachment attachment = fileAttachmentRepository.findById(attachmentId)
+            .orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
+
+        if (!attachment.getRequestId().equals(requestId)) {
+            throw new EntityNotFoundException("Attachment not found");
+        }
+
+        return new AttachmentDownload(
+            attachment.getFileName(),
+            attachment.getMimeType(),
+            new InputStreamResource(fileStorageService.retrieve(attachment.getStoragePath()))
+        );
     }
 
     private NotificationEvent buildSubmittedEvent(LeaveRequest request,ApprovalStep step,Employee employee) {
@@ -412,6 +452,17 @@ public class LeaveRequestService {
         return request.getEmployeeId().equals(employee.getId());
     }
 
+    private boolean canAccessLeaveAttachments(LeaveRequest request, UUID requesterId) {
+        if (canAccessLeaveRequest(request, requesterId)) {
+            return true;
+        }
+
+        return approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", request.getId())
+            .map(workflow -> approvalStepRepository.findByWorkflowId(workflow.getId()).stream()
+                .anyMatch(step -> requesterId.equals(step.getApproverId())))
+            .orElse(false);
+    }
+
     private boolean isHrAdmin(UUID userId) {
         return userRoleRepository.findByUserIdAndIsActiveTrue(userId).stream()
             .anyMatch(userRole -> userRole.getRole() != null
@@ -426,14 +477,38 @@ public class LeaveRequestService {
     }
 
     private void validateAttachment(MultipartFile file) {
-        if (file.getContentType() == null || !ALLOWED_ATTACHMENT_MIME_TYPES.contains(file.getContentType())) {
+        if (file == null || file.isEmpty()) {
+            throw new FileAttachmentValidationException("Attachment file is required");
+        }
+
+        String contentType = file.getContentType() == null ? null : file.getContentType().toLowerCase();
+        if (contentType == null || !ALLOWED_ATTACHMENT_MIME_TYPES.contains(contentType)) {
             throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, PNG, JPEG");
+                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+        }
+
+        String sanitizedFilename = sanitizeAttachmentFilename(file.getOriginalFilename());
+        int extensionSeparator = sanitizedFilename.lastIndexOf('.');
+        String extension = extensionSeparator >= 0
+            ? sanitizedFilename.substring(extensionSeparator + 1).toLowerCase()
+            : "";
+
+        if (!ALLOWED_ATTACHMENT_EXTENSIONS.contains(extension)) {
+            throw new FileAttachmentValidationException(
+                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
         }
 
         if (file.getSize() > MAX_ATTACHMENT_SIZE_BYTES) {
             throw new FileAttachmentValidationException(
                 "Attachment exceeds the maximum allowed size of 10 MB");
         }
+    }
+
+    private String sanitizeAttachmentFilename(String originalFilename) {
+        String sanitizedFilename = fileStorageService.sanitizeFilename(originalFilename);
+        if (sanitizedFilename == null || sanitizedFilename.isBlank()) {
+            return "unknown";
+        }
+        return sanitizedFilename;
     }
 }

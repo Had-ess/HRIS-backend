@@ -75,6 +75,7 @@ com\hris\notification\entity\Notification.class
 com\hris\leave\repository\LeaveRequestRepository.class
 com\hris\auth\entity\Employee.class
 com\hris\organisation\repository\ProjectAssignmentRepository.class
+com\hris\leave\service\AttachmentDownload.class
 com\hris\leave\entity\LeaveType$LeaveTypeBuilder.class
 com\hris\organisation\entity\PublicHoliday.class
 com\hris\analytics\entity\ExportRecord.class

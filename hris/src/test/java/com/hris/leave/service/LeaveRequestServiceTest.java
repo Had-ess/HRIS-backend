@@ -20,7 +20,9 @@ import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.dto.CreateLeaveRequestDto;
+import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.entity.LeaveBalance;
+import com.hris.leave.entity.FileAttachment;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.enums.LeaveStatus;
@@ -44,6 +46,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,6 +56,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -112,6 +117,11 @@ class LeaveRequestServiceTest {
             .name("Annual Leave")
             .requiresJustification(false)
             .build();
+
+        lenient().when(fileStorageService.sanitizeFilename(anyString())).thenAnswer(invocation -> {
+            String filename = invocation.getArgument(0);
+            return filename == null ? "unknown" : filename.replaceAll("[^a-zA-Z0-9._-]", "_");
+        });
     }
 
     @Nested
@@ -687,7 +697,7 @@ class LeaveRequestServiceTest {
 
             assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
                 .isInstanceOf(FileAttachmentValidationException.class)
-                .hasMessage("Unsupported attachment type. Allowed types: PDF, PNG, JPEG");
+                .hasMessage("Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
         }
 
         @Test
@@ -729,6 +739,101 @@ class LeaveRequestServiceTest {
             assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("You are not allowed to upload attachments for this leave request");
+        }
+
+        @Test
+        @DisplayName("should reject attachment upload when request is already completed")
+        void shouldThrow_WhenUploadingForInvalidState() {
+            UUID requestId = UUID.randomUUID();
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(employeeId)
+                .status(LeaveStatus.APPROVED)
+                .build();
+            MultipartFile file = new MockMultipartFile(
+                "file", "scan.pdf", "application/pdf", "pdf".getBytes());
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+
+            assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
+                .isInstanceOf(InvalidWorkflowStateException.class)
+                .hasMessage("Attachments can only be uploaded for leave requests that are pending approval");
+        }
+    }
+
+    @Nested
+    @DisplayName("downloadAttachment()")
+    class DownloadAttachmentTests {
+
+        @Test
+        @DisplayName("should deny attachment access to unrelated user")
+        void shouldDenyUnauthorizedAttachmentAccess() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(UUID.randomUUID())
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
+                .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> leaveRequestService.downloadAttachment(requestId, attachmentId, requesterId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("You are not allowed to access attachments for this leave request");
+        }
+
+        @Test
+        @DisplayName("should allow attachment access to assigned approver")
+        void shouldAllowAttachmentAccessForAssignedApprover() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+            UUID workflowId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(UUID.randomUUID())
+                .build();
+            FileAttachment attachment = FileAttachment.builder()
+                .id(attachmentId)
+                .requestId(requestId)
+                .fileName("medical_note.pdf")
+                .mimeType("application/pdf")
+                .storagePath(requestId + "/stored.pdf")
+                .uploadedById(UUID.randomUUID())
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
+                .thenReturn(Optional.of(ApprovalWorkflow.builder()
+                    .id(workflowId)
+                    .subjectType("LEAVE")
+                    .subjectId(requestId)
+                    .build()));
+            when(approvalStepRepository.findByWorkflowId(workflowId)).thenReturn(List.of(
+                ApprovalStep.builder()
+                    .id(UUID.randomUUID())
+                    .workflowId(workflowId)
+                    .approverId(requesterId)
+                    .status(StepStatus.PENDING)
+                    .build()
+            ));
+            when(fileAttachmentRepository.findById(attachmentId)).thenReturn(Optional.of(attachment));
+            when(fileStorageService.retrieve(attachment.getStoragePath()))
+                .thenReturn(new ByteArrayInputStream("pdf".getBytes()));
+
+            AttachmentDownload result = leaveRequestService.downloadAttachment(requestId, attachmentId, requesterId);
+
+            assertThat(result.fileName()).isEqualTo("medical_note.pdf");
+            assertThat(result.mimeType()).isEqualTo("application/pdf");
+            assertThat(result.resource()).isNotNull();
         }
     }
 }
