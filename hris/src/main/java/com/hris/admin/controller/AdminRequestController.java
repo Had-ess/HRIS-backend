@@ -1,6 +1,7 @@
 package com.hris.admin.controller;
 
 import com.hris.admin.dto.AdminRequestResponseDto;
+import com.hris.admin.dto.AdminRequestRejectDto;
 import com.hris.admin.dto.CreateAdminRequestDto;
 import com.hris.admin.entity.AdminRequest;
 import com.hris.admin.mapper.AdminRequestMapper;
@@ -60,11 +61,29 @@ public class AdminRequestController {
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
+    @PatchMapping("/{id}/in-progress")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> markInProgress(@PathVariable UUID id, Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        adminRequestService.markInProgress(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     @PatchMapping("/{id}/reject")
     @PreAuthorize("hasRole('HR_ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> reject(@PathVariable UUID id, Authentication auth) {
+    public ResponseEntity<ApiResponse<Void>> reject(
+            @PathVariable UUID id,
+            @RequestBody(required = false) AdminRequestRejectDto dto,
+            Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
-        adminRequestService.reject(id, userId);
+        adminRequestService.reject(id, userId, dto != null ? dto.reason() : null);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancel(@PathVariable UUID id, Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        adminRequestService.cancel(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

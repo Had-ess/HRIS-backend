@@ -5,6 +5,8 @@ import com.hris.common.PageResponse;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
 import com.hris.organisation.dto.ProjectCreateDto;
+import com.hris.organisation.dto.ProjectDepartmentAssignDto;
+import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.dto.ProjectResponseDto;
 import com.hris.organisation.service.ProjectService;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -57,6 +60,29 @@ public class ProjectController {
             @PathVariable UUID id,
             @PathVariable UUID asgId) {
         projectService.removeAssignment(id, asgId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @GetMapping("/{id}/departments")
+    public ResponseEntity<ApiResponse<List<ProjectDepartmentResponseDto>>> getDepartments(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(projectService.getDepartments(id)));
+    }
+
+    @PostMapping("/{id}/departments")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<ProjectDepartmentResponseDto>> assignDepartment(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProjectDepartmentAssignDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok(projectService.assignDepartment(id, dto)));
+    }
+
+    @DeleteMapping("/{id}/departments/{departmentId}")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> removeDepartment(
+            @PathVariable UUID id,
+            @PathVariable UUID departmentId) {
+        projectService.removeDepartment(id, departmentId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

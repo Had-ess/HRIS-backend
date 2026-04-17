@@ -1,5 +1,6 @@
 com\hris\admin\service\AdminRequestServiceTest$RejectTests.class
 com\hris\leave\service\LeaveRequestServiceTest$CreateTests.class
+com\hris\organisation\controller\WorkScheduleControllerTest.class
 com\hris\security\JwtAuthenticationFilterTest.class
 com\hris\leave\service\LeaveRequestServiceTest$GetByIdTests.class
 com\hris\leave\service\LeaveRequestServiceTest.class
@@ -7,6 +8,7 @@ com\hris\auth\service\RoleServiceTest.class
 com\hris\notification\service\NotificationConsumerTest.class
 com\hris\approval\service\ApprovalRouterTest.class
 com\hris\approval\service\ApprovalRouterTest$ResolveStepsTests.class
+com\hris\auth\service\DepartmentServiceTest.class
 com\hris\approval\service\ApprovalStepServiceTest$RejectTests.class
 com\hris\leave\entity\LeaveBalanceTest.class
 com\hris\approval\service\ApprovalStepServiceTest$ApproveTests.class

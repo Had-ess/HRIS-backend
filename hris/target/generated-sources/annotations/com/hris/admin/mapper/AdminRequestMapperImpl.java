@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-17T18:12:20+0100",
+    date = "2026-04-17T19:19:05+0100",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.9 (Oracle Corporation)"
 )
 @Component
@@ -33,6 +33,7 @@ public class AdminRequestMapperImpl implements AdminRequestMapper {
         UrgencyLevel urgencyLevel = null;
         AdminRequestStatus status = null;
         String metadata = null;
+        String rejectionReason = null;
         Instant submittedAt = null;
         Instant resolvedAt = null;
         UUID resolvedById = null;
@@ -45,11 +46,12 @@ public class AdminRequestMapperImpl implements AdminRequestMapper {
         urgencyLevel = request.getUrgencyLevel();
         status = request.getStatus();
         metadata = request.getMetadata();
+        rejectionReason = request.getRejectionReason();
         submittedAt = request.getSubmittedAt();
         resolvedAt = request.getResolvedAt();
         resolvedById = request.getResolvedById();
 
-        AdminRequestResponseDto adminRequestResponseDto = new AdminRequestResponseDto( id, requesterId, requestTypeId, trackingNumber, description, urgencyLevel, status, metadata, submittedAt, resolvedAt, resolvedById );
+        AdminRequestResponseDto adminRequestResponseDto = new AdminRequestResponseDto( id, requesterId, requestTypeId, trackingNumber, description, urgencyLevel, status, metadata, rejectionReason, submittedAt, resolvedAt, resolvedById );
 
         return adminRequestResponseDto;
     }

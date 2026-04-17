@@ -1,7 +1,10 @@
 package com.hris.common;
 
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.common.exception.DepartmentDeletionNotAllowedException;
+import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.FileAttachmentValidationException;
+import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.common.exception.InvalidRoleHierarchyException;
@@ -71,6 +74,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleInvalidProjectAssignment(
             InvalidProjectAssignmentException ex) {
         return ResponseEntity.badRequest()
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DepartmentDeletionNotAllowedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDepartmentDeletionNotAllowed(
+            DepartmentDeletionNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateProjectDepartmentAssignmentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateProjectDepartmentAssignment(
+            DuplicateProjectDepartmentAssignmentException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidAdminRequestStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidAdminRequestState(
+            InvalidAdminRequestStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
             .body(ApiResponse.error(ex.getMessage()));
     }
 

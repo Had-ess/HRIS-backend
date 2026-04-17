@@ -97,6 +97,8 @@ com\hris\config\JacksonConfig.class
 com\hris\organisation\entity\Project$ProjectBuilder.class
 com\hris\notification\mapper\NotificationMapper.class
 com\hris\leave\dto\LeaveBalanceDto.class
+com\hris\organisation\controller\WorkScheduleController.class
+com\hris\organisation\dto\ProjectDepartmentAssignDto.class
 com\hris\auth\mapper\UserMapperImpl.class
 com\hris\analytics\entity\AuditLog.class
 com\hris\approval\enums\StepStatus.class
@@ -111,6 +113,7 @@ com\hris\notification\service\NotificationPublisher.class
 com\hris\auth\controller\RoleController.class
 com\hris\auth\service\UserService.class
 com\hris\analytics\entity\LeaveMetrics$LeaveMetricsBuilder.class
+com\hris\organisation\dto\ProjectDepartmentResponseDto.class
 com\hris\organisation\entity\ProjectDepartment$ProjectDepartmentBuilder.class
 com\hris\approval\repository\ApprovalWorkflowRepository.class
 com\hris\notification\service\NotificationConsumer$2.class
@@ -134,6 +137,7 @@ com\hris\leave\entity\LeaveBalance$LeaveBalanceBuilder.class
 com\hris\auth\controller\EmployeeController.class
 com\hris\notification\service\DeadLetterQueueHandler.class
 com\hris\admin\mapper\AdminRequestMapper.class
+com\hris\common\exception\InvalidAdminRequestStateException.class
 com\hris\approval\controller\ApprovalStepController.class
 com\hris\organisation\entity\PublicHoliday$PublicHolidayBuilder.class
 com\hris\admin\entity\AdminRequest$AdminRequestBuilder.class
@@ -153,10 +157,12 @@ com\hris\admin\controller\AdminRequestTypeController.class
 com\hris\organisation\dto\ProjectAssignmentResponseDto.class
 com\hris\approval\entity\ApprovalWorkflow$ApprovalWorkflowBuilder.class
 com\hris\auth\dto\EmployeeResponseDto.class
+com\hris\admin\dto\AdminRequestRejectDto.class
 com\hris\approval\dto\ApprovalWorkflowResponseDto.class
 com\hris\common\ApiResponse.class
 com\hris\organisation\entity\ProjectAssignment$ProjectAssignmentBuilder.class
 com\hris\auth\controller\UserController.class
+com\hris\organisation\dto\WorkScheduleDto.class
 com\hris\notification\entity\Notification$NotificationBuilder.class
 com\hris\auth\mapper\UserMapper.class
 com\hris\common\exception\StepAlreadyDecidedException.class
@@ -180,6 +186,7 @@ com\hris\auth\entity\Department.class
 com\hris\analytics\entity\AbsenceImpactReport$AbsenceImpactReportBuilder.class
 com\hris\leave\repository\FileAttachmentRepository.class
 com\hris\security\JwtAuthenticationFilter.class
+com\hris\common\exception\DuplicateProjectDepartmentAssignmentException.class
 com\hris\leave\controller\LeaveTypeController.class
 com\hris\auth\service\DepartmentService.class
 com\hris\leave\entity\LeaveType.class
@@ -195,4 +202,5 @@ com\hris\config\SchedulingConfig.class
 com\hris\leave\repository\LeavePolicyRepository.class
 com\hris\analytics\enums\AuditAction.class
 com\hris\auth\repository\DepartmentRepository.class
+com\hris\common\exception\DepartmentDeletionNotAllowedException.class
 com\hris\analytics\service\LeaveMetricsService.class

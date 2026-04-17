@@ -2,19 +2,26 @@ package com.hris.organisation.service;
 
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.enums.EmployeeStatus;
+import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
 import com.hris.organisation.dto.ProjectCreateDto;
+import com.hris.organisation.dto.ProjectDepartmentAssignDto;
+import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.dto.ProjectResponseDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.entity.ProjectDepartment;
 import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.organisation.repository.ProjectDepartmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,6 +38,8 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final ProjectDepartmentRepository projectDepartmentRepository;
+    private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final ProjectMapper projectMapper;
     private final AuditLogService auditLogService;
@@ -102,6 +112,69 @@ public class ProjectService {
             assignmentId, assignment, null);
     }
 
+    @Transactional(readOnly = true)
+    public List<ProjectDepartmentResponseDto> getDepartments(UUID projectId) {
+        ensureProjectExists(projectId);
+
+        return projectDepartmentRepository.findByProjectId(projectId).stream()
+            .map(link -> {
+                Department department = departmentRepository.findById(link.getDepartmentId())
+                    .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+                return new ProjectDepartmentResponseDto(
+                    link.getId(),
+                    department.getId(),
+                    department.getName(),
+                    department.getCode(),
+                    department.isActive(),
+                    link.isLead()
+                );
+            })
+            .toList();
+    }
+
+    @Transactional
+    public ProjectDepartmentResponseDto assignDepartment(UUID projectId, ProjectDepartmentAssignDto dto) {
+        ensureProjectExists(projectId);
+        Department department = departmentRepository.findById(dto.departmentId())
+            .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+
+        if (projectDepartmentRepository.existsByProjectIdAndDepartmentId(projectId, dto.departmentId())) {
+            throw new DuplicateProjectDepartmentAssignmentException(
+                "Department is already assigned to this project");
+        }
+
+        ProjectDepartment link = ProjectDepartment.builder()
+            .projectId(projectId)
+            .departmentId(dto.departmentId())
+            .isLead(Boolean.TRUE.equals(dto.isLead()))
+            .build();
+
+        ProjectDepartment saved = projectDepartmentRepository.save(link);
+        auditLogService.log(null, AuditAction.CREATE, "project_department",
+            saved.getId(), null, saved);
+
+        return new ProjectDepartmentResponseDto(
+            saved.getId(),
+            department.getId(),
+            department.getName(),
+            department.getCode(),
+            department.isActive(),
+            saved.isLead()
+        );
+    }
+
+    @Transactional
+    public void removeDepartment(UUID projectId, UUID departmentId) {
+        ensureProjectExists(projectId);
+
+        projectDepartmentRepository.findByProjectIdAndDepartmentId(projectId, departmentId)
+            .ifPresent(link -> {
+                projectDepartmentRepository.delete(link);
+                auditLogService.log(null, AuditAction.DELETE, "project_department",
+                    link.getId(), link, null);
+            });
+    }
+
     private void validateAssignment(ProjectAssignmentCreateDto dto, Employee employee, UUID projectId) {
         if (dto.employeeId().equals(dto.supervisorId())) {
             throw new InvalidProjectAssignmentException("Supervisor cannot be the same employee");
@@ -122,5 +195,10 @@ public class ProjectService {
             throw new InvalidProjectAssignmentException(
                 "Overlapping assignment already exists for this employee and project");
         }
+    }
+
+    private void ensureProjectExists(UUID projectId) {
+        projectRepository.findById(projectId)
+            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
     }
 }

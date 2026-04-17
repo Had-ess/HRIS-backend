@@ -7,7 +7,11 @@ import com.hris.auth.dto.DepartmentDto;
 import com.hris.auth.entity.Department;
 import com.hris.auth.mapper.DepartmentMapper;
 import com.hris.auth.repository.DepartmentRepository;
+import com.hris.auth.repository.EmployeeRepository;
+import com.hris.common.exception.DepartmentDeletionNotAllowedException;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.organisation.enums.ProjectStatus;
+import com.hris.organisation.repository.ProjectDepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +25,8 @@ import java.util.UUID;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ProjectDepartmentRepository projectDepartmentRepository;
     private final DepartmentMapper departmentMapper;
     private final AuditLogService auditLogService;
 
@@ -70,5 +76,50 @@ public class DepartmentService {
         auditLogService.log(actorId, AuditAction.UPDATE, "department",
             saved.getId(), previous, saved);
         return departmentMapper.toDto(saved);
+    }
+
+    @Transactional
+    public void delete(UUID id, UUID actorId) {
+        Department department = departmentRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+
+        validateDeletion(department.getId());
+
+        departmentRepository.delete(department);
+        auditLogService.log(actorId, AuditAction.DELETE, "department",
+            department.getId(), department, null);
+    }
+
+    @Transactional
+    public DepartmentDto deactivate(UUID id, UUID actorId) {
+        Department department = departmentRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+
+        Department previous = Department.builder()
+            .id(department.getId())
+            .name(department.getName())
+            .code(department.getCode())
+            .headEmployeeId(department.getHeadEmployeeId())
+            .isActive(department.isActive())
+            .build();
+
+        department.setActive(false);
+        Department saved = departmentRepository.save(department);
+        auditLogService.log(actorId, AuditAction.UPDATE, "department",
+            saved.getId(), previous, saved);
+        return departmentMapper.toDto(saved);
+    }
+
+    private void validateDeletion(UUID departmentId) {
+        if (employeeRepository.existsByDepartmentId(departmentId)) {
+            throw new DepartmentDeletionNotAllowedException(
+                "Department cannot be deleted because employees are assigned to it");
+        }
+
+        if (projectDepartmentRepository.existsByDepartmentIdAndProjectStatus(
+                departmentId, ProjectStatus.ACTIVE)) {
+            throw new DepartmentDeletionNotAllowedException(
+                "Department cannot be deleted because it is linked to active projects");
+        }
     }
 }

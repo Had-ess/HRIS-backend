@@ -53,4 +53,19 @@ public class DepartmentController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.update(id, dto, userId)));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id, Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        departmentService.delete(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('HR_ADMIN')")
+    public ResponseEntity<ApiResponse<DepartmentDto>> deactivate(@PathVariable UUID id, Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(departmentService.deactivate(id, userId)));
+    }
 }

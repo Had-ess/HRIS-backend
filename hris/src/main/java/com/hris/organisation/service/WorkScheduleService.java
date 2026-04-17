@@ -2,6 +2,7 @@ package com.hris.organisation.service;
 
 import com.hris.organisation.entity.PublicHoliday;
 import com.hris.organisation.entity.WorkSchedule;
+import com.hris.organisation.dto.WorkScheduleDto;
 import com.hris.organisation.repository.PublicHolidayRepository;
 import com.hris.organisation.repository.WorkScheduleRepository;
 import com.hris.common.exception.EntityNotFoundException;
@@ -22,6 +23,18 @@ public class WorkScheduleService {
 
     private final WorkScheduleRepository workScheduleRepository;
     private final PublicHolidayRepository publicHolidayRepository;
+
+    @Transactional(readOnly = true)
+    public List<WorkScheduleDto> getAll() {
+        return workScheduleRepository.findAllByOrderByNameAsc().stream()
+            .map(schedule -> new WorkScheduleDto(
+                schedule.getId(),
+                schedule.getName(),
+                schedule.getWorkingDays(),
+                schedule.getHoursPerDay()
+            ))
+            .toList();
+    }
 
     @Transactional(readOnly = true)
     public int computeWorkingDays(LocalDate start, LocalDate end, UUID workScheduleId) {

@@ -11,9 +11,10 @@ import com.hris.admin.repository.AdminRequestTypeRepository;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
+import com.hris.common.exception.EntityNotFoundException;
+import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.leave.enums.UrgencyLevel;
 import com.hris.notification.service.NotificationPublisher;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -151,8 +152,8 @@ class AdminRequestServiceTest {
             when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
             assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Cannot process an admin request in status: PROCESSED");
+                .isInstanceOf(InvalidAdminRequestStateException.class)
+                .hasMessage("Admin request cannot be processed from status: PROCESSED");
         }
 
         @Test
@@ -184,10 +185,11 @@ class AdminRequestServiceTest {
             when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
             // Act
-            adminRequestService.reject(requestId, hrAdminId);
+            adminRequestService.reject(requestId, hrAdminId, "Missing document");
 
             // Assert
             assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.REJECTED);
+            assertThat(request.getRejectionReason()).isEqualTo("Missing document");
             assertThat(request.getResolvedById()).isEqualTo(hrAdminId);
             assertThat(request.getResolvedAt()).isNotNull();
 
@@ -207,9 +209,9 @@ class AdminRequestServiceTest {
 
             when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
-            assertThatThrownBy(() -> adminRequestService.reject(requestId, UUID.randomUUID()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Cannot reject an admin request in status: PROCESSED");
+            assertThatThrownBy(() -> adminRequestService.reject(requestId, UUID.randomUUID(), null))
+                .isInstanceOf(InvalidAdminRequestStateException.class)
+                .hasMessage("Admin request cannot be rejected from status: PROCESSED");
         }
     }
 
@@ -227,8 +229,8 @@ class AdminRequestServiceTest {
         when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
         assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Cannot process an admin request in status: REJECTED");
+            .isInstanceOf(InvalidAdminRequestStateException.class)
+            .hasMessage("Admin request cannot be processed from status: REJECTED");
     }
 
     @Test
@@ -244,8 +246,79 @@ class AdminRequestServiceTest {
 
         when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
-        assertThatThrownBy(() -> adminRequestService.reject(requestId, hrAdminId))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Cannot reject an admin request in status: PROCESSED");
+        assertThatThrownBy(() -> adminRequestService.reject(requestId, hrAdminId, null))
+            .isInstanceOf(InvalidAdminRequestStateException.class)
+            .hasMessage("Admin request cannot be rejected from status: PROCESSED");
+    }
+
+    @Test
+    @DisplayName("requester can cancel eligible request")
+    void requesterCanCancelEligibleRequest() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder()
+            .id(requestId)
+            .requesterId(requesterId)
+            .status(AdminRequestStatus.SUBMITTED)
+            .build();
+
+        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        adminRequestService.cancel(requestId, requesterId);
+
+        assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.CANCELLED);
+        assertThat(request.getResolvedById()).isEqualTo(requesterId);
+        assertThat(request.getResolvedAt()).isNotNull();
+        verify(adminRequestRepository).save(request);
+    }
+
+    @Test
+    @DisplayName("cannot cancel terminal request")
+    void cannotCancelTerminalRequest() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder()
+            .id(requestId)
+            .requesterId(requesterId)
+            .status(AdminRequestStatus.PROCESSED)
+            .build();
+
+        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        assertThatThrownBy(() -> adminRequestService.cancel(requestId, requesterId))
+            .isInstanceOf(InvalidAdminRequestStateException.class)
+            .hasMessage("Admin request cannot be cancelled from status: PROCESSED");
+    }
+
+    @Test
+    @DisplayName("HR admin can move request to in progress")
+    void hrAdminCanMoveRequestToInProgress() {
+        UUID requestId = UUID.randomUUID();
+        UUID hrAdminId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder()
+            .id(requestId)
+            .status(AdminRequestStatus.SUBMITTED)
+            .build();
+
+        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        adminRequestService.markInProgress(requestId, hrAdminId);
+
+        assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.IN_PROGRESS);
+        verify(adminRequestRepository).save(request);
+    }
+
+    @Test
+    @DisplayName("invalid in progress transition is rejected")
+    void invalidInProgressTransitionIsRejected() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder()
+            .id(requestId)
+            .status(AdminRequestStatus.REJECTED)
+            .build();
+
+        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        assertThatThrownBy(() -> adminRequestService.markInProgress(requestId, UUID.randomUUID()))
+            .isInstanceOf(InvalidAdminRequestStateException.class)
+            .hasMessage("Admin request can only move to IN_PROGRESS from SUBMITTED");
     }
 }
