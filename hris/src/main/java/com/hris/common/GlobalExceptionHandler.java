@@ -11,6 +11,9 @@ import com.hris.common.exception.InvalidRoleHierarchyException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.MissingDepartmentHeadException;
+import com.hris.common.exception.PermissionAlreadyAssignedException;
+import com.hris.common.exception.PermissionDeletionNotAllowedException;
+import com.hris.common.exception.RoleAlreadyAssignedToUserException;
 import com.hris.common.exception.StepAlreadyDecidedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -105,6 +108,27 @@ public class GlobalExceptionHandler {
             .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(PermissionAlreadyAssignedException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePermissionAlreadyAssigned(
+            PermissionAlreadyAssignedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RoleAlreadyAssignedToUserException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRoleAlreadyAssignedToUser(
+            RoleAlreadyAssignedToUserException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PermissionDeletionNotAllowedException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePermissionDeletionNotAllowed(
+            PermissionDeletionNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidLeavePeriodException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidLeavePeriod(
             InvalidLeavePeriodException ex) {
@@ -144,7 +168,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(ApiResponse.error(ex.getMessage()));
+            .body(ApiResponse.error(
+                ex.getMessage() == null || ex.getMessage().isBlank()
+                    ? "You do not have permission to perform this action"
+                    : ex.getMessage()));
     }
 
     @ExceptionHandler(AuthenticationException.class)

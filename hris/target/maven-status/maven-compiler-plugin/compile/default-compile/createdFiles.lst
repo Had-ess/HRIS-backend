@@ -1,4 +1,5 @@
 com\hris\auth\service\EmployeeService.class
+com\hris\auth\dto\PermissionUpdateDto.class
 com\hris\approval\service\ApprovalStepService.class
 com\hris\leave\entity\LeavePolicy$LeavePolicyBuilder.class
 com\hris\approval\mapper\ApprovalMapperImpl.class
@@ -14,6 +15,7 @@ com\hris\analytics\entity\AuditLog$AuditLogBuilder.class
 com\hris\dashboard\dto\HrDashboardDto.class
 com\hris\notification\repository\NotificationEventRepository.class
 com\hris\auth\entity\UserRole$UserRoleBuilder.class
+com\hris\auth\repository\PermissionRepository.class
 com\hris\auth\enums\ContractType.class
 com\hris\leave\mapper\LeaveMapperImpl.class
 com\hris\auth\dto\EmployeeCreateDto.class
@@ -23,16 +25,20 @@ com\hris\analytics\repository\ExportRecordRepository.class
 com\hris\auth\dto\EmployeeUpdateDto.class
 com\hris\admin\dto\AdminRequestResponseDto.class
 com\hris\auth\dto\UpdateLocaleDto.class
+com\hris\auth\service\PermissionService.class
 com\hris\admin\repository\AdminRequestRepository.class
 com\hris\leave\dto\NotificationParamsDto.class
 com\hris\auth\dto\DepartmentCreateDto.class
 com\hris\admin\entity\AdminRequestType.class
 com\hris\admin\enums\AdminRequestStatus.class
+com\hris\auth\dto\RolePermissionsUpdateDto.class
 com\hris\auth\repository\RoleRepository.class
 com\hris\common\exception\InvalidWorkflowStateException.class
+com\hris\auth\dto\PermissionResponseDto.class
 com\hris\leave\enums\LeaveTypeCode.class
 com\hris\organisation\repository\PublicHolidayRepository.class
 com\hris\common\exception\MissingDepartmentHeadException.class
+com\hris\auth\dto\PermissionCreateDto.class
 com\hris\auth\mapper\DepartmentMapperImpl.class
 com\hris\admin\entity\AdminRequest.class
 com\hris\notification\dto\NotificationResponseDto.class
@@ -43,6 +49,7 @@ com\hris\analytics\service\ScopeFilterResolver.class
 com\hris\auth\service\UserProvisioningService.class
 com\hris\organisation\controller\ProjectController.class
 com\hris\auth\entity\Permission$PermissionBuilder.class
+com\hris\common\exception\PermissionDeletionNotAllowedException.class
 com\hris\auth\entity\Department$DepartmentBuilder.class
 com\hris\HrisApplication.class
 com\hris\analytics\service\AuditLogService.class
@@ -67,6 +74,7 @@ com\hris\organisation\mapper\ProjectMapperImpl.class
 com\hris\admin\dto\CreateAdminRequestDto.class
 com\hris\auth\entity\User.class
 com\hris\leave\entity\LeaveBalance.class
+com\hris\common\exception\PermissionAlreadyAssignedException.class
 com\hris\config\RetryConfig.class
 com\hris\dashboard\dto\SupervisorDashboardDto.class
 com\hris\leave\dto\FileAttachmentDto.class
@@ -75,6 +83,7 @@ com\hris\dashboard\dto\DirectorDashboardDto.class
 com\hris\leave\entity\LeavePolicy.class
 com\hris\organisation\entity\Project.class
 com\hris\notification\entity\Notification.class
+com\hris\auth\service\UserRoleAssignmentService.class
 com\hris\leave\repository\LeaveRequestRepository.class
 com\hris\auth\entity\Employee.class
 com\hris\organisation\repository\ProjectAssignmentRepository.class
@@ -145,8 +154,10 @@ com\hris\leave\entity\LeaveBalance$LeaveBalanceBuilder.class
 com\hris\auth\controller\EmployeeController.class
 com\hris\notification\service\DeadLetterQueueHandler.class
 com\hris\admin\mapper\AdminRequestMapper.class
+com\hris\auth\dto\UserRoleAssignmentDto.class
 com\hris\common\exception\InvalidAdminRequestStateException.class
 com\hris\approval\controller\ApprovalStepController.class
+com\hris\auth\controller\PermissionController.class
 com\hris\organisation\entity\PublicHoliday$PublicHolidayBuilder.class
 com\hris\admin\entity\AdminRequest$AdminRequestBuilder.class
 com\hris\organisation\entity\ProjectAssignment.class
@@ -154,6 +165,7 @@ com\hris\auth\enums\EmployeeStatus.class
 com\hris\analytics\controller\AnalyticsController.class
 com\hris\leave\repository\LeaveBalanceRepository.class
 com\hris\leave\repository\LeaveTypeRepository.class
+com\hris\security\PermissionAuthorizationService.class
 com\hris\leave\service\FileStorageService.class
 com\hris\auth\controller\DepartmentController.class
 com\hris\common\PageResponse.class
@@ -164,6 +176,7 @@ com\hris\analytics\entity\AnalyticsDashboard.class
 com\hris\approval\enums\WorkflowStatus.class
 com\hris\admin\controller\AdminRequestTypeController.class
 com\hris\organisation\dto\ProjectAssignmentResponseDto.class
+com\hris\auth\service\RolePermissionService.class
 com\hris\dashboard\dto\LeaveRequestSummaryDto.class
 com\hris\approval\entity\ApprovalWorkflow$ApprovalWorkflowBuilder.class
 com\hris\auth\dto\EmployeeResponseDto.class
@@ -205,6 +218,7 @@ com\hris\leave\dto\LeaveRequestResponseDto.class
 com\hris\approval\entity\ApprovalWorkflow.class
 com\hris\approval\enums\ApprovalContext.class
 com\hris\leave\controller\LeaveBalanceController.class
+com\hris\common\exception\RoleAlreadyAssignedToUserException.class
 com\hris\approval\entity\ApprovalStep$ApprovalStepBuilder.class
 com\hris\auth\entity\RolePermission.class
 com\hris\common\GlobalExceptionHandler.class

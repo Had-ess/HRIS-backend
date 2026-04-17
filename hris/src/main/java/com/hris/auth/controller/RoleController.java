@@ -1,12 +1,18 @@
 package com.hris.auth.controller;
 
+import com.hris.auth.dto.PermissionResponseDto;
+import com.hris.auth.dto.RolePermissionsUpdateDto;
 import com.hris.auth.entity.Role;
+import com.hris.auth.service.RolePermissionService;
 import com.hris.auth.service.RoleService;
 import com.hris.common.ApiResponse;
+import com.hris.security.PermissionAuthorizationService;
+import com.hris.security.SecurityUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +24,8 @@ import java.util.UUID;
 public class RoleController {
 
     private final RoleService roleService;
+    private final RolePermissionService rolePermissionService;
+    private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Role>>> getAll() {
@@ -30,24 +38,54 @@ public class RoleController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR_ADMIN')")
-    public ResponseEntity<ApiResponse<Role>> create(@RequestBody Role role) {
+    public ResponseEntity<ApiResponse<Role>> create(@RequestBody Role role, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "CREATE", "HR_ADMIN");
         Role saved = roleService.create(role);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
     public ResponseEntity<ApiResponse<Role>> update(
             @PathVariable UUID id,
-            @RequestBody Role role) {
+            @RequestBody Role role,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "UPDATE", "HR_ADMIN");
         return ResponseEntity.ok(ApiResponse.ok(roleService.update(id, role)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
-    public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
+    public ResponseEntity<Void> deactivate(@PathVariable UUID id, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "DELETE", "HR_ADMIN");
         roleService.deactivate(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/permissions")
+    public ResponseEntity<ApiResponse<List<PermissionResponseDto>>> getPermissions(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "HR_ADMIN");
+        return ResponseEntity.ok(ApiResponse.ok(rolePermissionService.getPermissions(id)));
+    }
+
+    @PostMapping("/{id}/permissions")
+    public ResponseEntity<ApiResponse<List<PermissionResponseDto>>> assignPermissions(
+            @PathVariable UUID id,
+            @Valid @RequestBody RolePermissionsUpdateDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "HR_ADMIN");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(
+            rolePermissionService.assignPermissions(id, dto.permissionIds(), actorId)));
+    }
+
+    @DeleteMapping("/{id}/permissions/{permissionId}")
+    public ResponseEntity<ApiResponse<Void>> removePermission(
+            @PathVariable UUID id,
+            @PathVariable UUID permissionId,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "HR_ADMIN");
+        rolePermissionService.removePermission(id, permissionId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

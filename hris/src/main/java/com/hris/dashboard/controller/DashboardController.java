@@ -6,6 +6,7 @@ import com.hris.dashboard.dto.EmployeeDashboardDto;
 import com.hris.dashboard.dto.HrDashboardDto;
 import com.hris.dashboard.dto.SupervisorDashboardDto;
 import com.hris.dashboard.service.DashboardService;
+import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<EmployeeDashboardDto>> getMyDashboard(Authentication auth) {
@@ -38,14 +40,14 @@ public class DashboardController {
     }
 
     @GetMapping("/hr")
-    @PreAuthorize("hasRole('HR_ADMIN')")
-    public ResponseEntity<ApiResponse<HrDashboardDto>> getHrDashboard() {
+    public ResponseEntity<ApiResponse<HrDashboardDto>> getHrDashboard(Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "HR_VIEW", "HR_ADMIN");
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getHrDashboard()));
     }
 
     @GetMapping("/director")
-    @PreAuthorize("hasAnyRole('DIRECTOR', 'HR_ADMIN')")
-    public ResponseEntity<ApiResponse<DirectorDashboardDto>> getDirectorDashboard() {
+    public ResponseEntity<ApiResponse<DirectorDashboardDto>> getDirectorDashboard(Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "DIRECTOR_VIEW", "DIRECTOR", "HR_ADMIN");
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getDirectorDashboard()));
     }
 }

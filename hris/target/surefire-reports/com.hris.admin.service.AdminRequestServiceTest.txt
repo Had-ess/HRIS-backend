@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.hris.admin.service.AdminRequestServiceTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.928 s -- in com.hris.admin.service.AdminRequestServiceTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.107 s -- in com.hris.admin.service.AdminRequestServiceTest

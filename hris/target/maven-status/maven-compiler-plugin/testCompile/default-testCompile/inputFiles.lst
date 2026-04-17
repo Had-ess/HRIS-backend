@@ -2,9 +2,13 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\auth\service\DepartmentServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\dashboard\controller\DashboardControllerTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\leave\service\LeaveRequestServiceTest.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\auth\controller\DepartmentControllerTest.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\auth\service\RolePermissionServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\approval\entity\ApprovalStepTest.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\auth\service\PermissionServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\admin\service\AdminRequestServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\dashboard\service\DashboardServiceTest.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\support\TestAuthenticationFactory.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\admin\entity\AdminRequestTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\auth\service\RoleServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\organisation\controller\WorkScheduleControllerTest.java
@@ -12,5 +16,6 @@ C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\approval\service\ApprovalRouterTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\approval\service\ApprovalStepServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\organisation\service\ProjectServiceTest.java
+C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\auth\service\UserRoleAssignmentServiceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\leave\entity\LeaveBalanceTest.java
 C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris\src\test\java\com\hris\dashboard\controller\TestAuthenticationFactory.java
