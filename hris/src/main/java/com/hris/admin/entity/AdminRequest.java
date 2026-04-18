@@ -24,6 +24,7 @@ public class AdminRequest {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50) private AdminRequestStatus status;
     @Column(columnDefinition = "TEXT") private String metadata;
+    @Column(name = "rejection_reason", columnDefinition = "TEXT") private String rejectionReason;
     @Column(name = "submitted_at", nullable = false) @Builder.Default private Instant submittedAt = Instant.now();
     @Column(name = "resolved_at") private Instant resolvedAt;
     @Column(name = "resolved_by_id") private UUID resolvedById;

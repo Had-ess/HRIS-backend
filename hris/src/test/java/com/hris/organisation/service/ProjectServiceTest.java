@@ -1,19 +1,26 @@
 package com.hris.organisation.service;
 
 import com.hris.analytics.service.AuditLogService;
+import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
+import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
+import com.hris.organisation.dto.ProjectDepartmentAssignDto;
+import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.entity.ProjectDepartment;
 import com.hris.organisation.enums.ProjectRole;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.organisation.repository.ProjectDepartmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -45,6 +53,12 @@ class ProjectServiceTest {
     private ProjectAssignmentRepository projectAssignmentRepository;
 
     @Mock
+    private ProjectDepartmentRepository projectDepartmentRepository;
+
+    @Mock
+    private DepartmentRepository departmentRepository;
+
+    @Mock
     private EmployeeRepository employeeRepository;
 
     @Mock
@@ -62,12 +76,15 @@ class ProjectServiceTest {
     private Project project;
     private Employee employee;
     private Employee supervisor;
+    private UUID departmentId;
+    private Department department;
 
     @BeforeEach
     void setUp() {
         projectId = UUID.randomUUID();
         employeeId = UUID.randomUUID();
         supervisorId = UUID.randomUUID();
+        departmentId = UUID.randomUUID();
 
         project = Project.builder()
             .id(projectId)
@@ -87,6 +104,13 @@ class ProjectServiceTest {
             .contractType(ContractType.PERMANENT)
             .departmentId(UUID.randomUUID())
             .workScheduleId(UUID.randomUUID())
+            .build();
+
+        department = Department.builder()
+            .id(departmentId)
+            .name("Engineering")
+            .code("ENG")
+            .isActive(true)
             .build();
 
         supervisor = Employee.builder()
@@ -192,6 +216,84 @@ class ProjectServiceTest {
         verify(projectAssignmentRepository).countOverlappingActiveAssignments(
             employeeId, projectId, dto.startDate(), dto.endDate());
         verify(projectAssignmentRepository).save(any(ProjectAssignment.class));
+    }
+
+    @Test
+    @DisplayName("assign department to project works")
+    void assignDepartmentToProjectWorks() {
+        ProjectDepartmentAssignDto dto = new ProjectDepartmentAssignDto(departmentId, true);
+        UUID linkId = UUID.randomUUID();
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
+        when(projectDepartmentRepository.existsByProjectIdAndDepartmentId(projectId, departmentId)).thenReturn(false);
+        when(projectDepartmentRepository.save(any(ProjectDepartment.class))).thenAnswer(invocation -> {
+            ProjectDepartment link = invocation.getArgument(0);
+            link.setId(linkId);
+            return link;
+        });
+
+        ProjectDepartmentResponseDto result = projectService.assignDepartment(projectId, dto);
+
+        assertThat(result.id()).isEqualTo(linkId);
+        assertThat(result.departmentId()).isEqualTo(departmentId);
+        assertThat(result.isLead()).isTrue();
+        verify(projectDepartmentRepository).save(any(ProjectDepartment.class));
+    }
+
+    @Test
+    @DisplayName("duplicate department assignment is rejected")
+    void duplicateDepartmentAssignmentIsRejected() {
+        ProjectDepartmentAssignDto dto = new ProjectDepartmentAssignDto(departmentId, false);
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
+        when(projectDepartmentRepository.existsByProjectIdAndDepartmentId(projectId, departmentId)).thenReturn(true);
+
+        assertThatThrownBy(() -> projectService.assignDepartment(projectId, dto))
+            .isInstanceOf(DuplicateProjectDepartmentAssignmentException.class)
+            .hasMessage("Department is already assigned to this project");
+    }
+
+    @Test
+    @DisplayName("remove department from project works")
+    void removeDepartmentFromProjectWorks() {
+        ProjectDepartment link = ProjectDepartment.builder()
+            .id(UUID.randomUUID())
+            .projectId(projectId)
+            .departmentId(departmentId)
+            .isLead(false)
+            .build();
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectDepartmentRepository.findByProjectIdAndDepartmentId(projectId, departmentId))
+            .thenReturn(Optional.of(link));
+
+        projectService.removeDepartment(projectId, departmentId);
+
+        verify(projectDepartmentRepository).delete(link);
+    }
+
+    @Test
+    @DisplayName("list departments for project returns expected data")
+    void listDepartmentsForProjectReturnsExpectedData() {
+        ProjectDepartment link = ProjectDepartment.builder()
+            .id(UUID.randomUUID())
+            .projectId(projectId)
+            .departmentId(departmentId)
+            .isLead(true)
+            .build();
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectDepartmentRepository.findByProjectId(projectId)).thenReturn(List.of(link));
+        when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
+
+        List<ProjectDepartmentResponseDto> result = projectService.getDepartments(projectId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).departmentId()).isEqualTo(departmentId);
+        assertThat(result.get(0).name()).isEqualTo("Engineering");
+        assertThat(result.get(0).isLead()).isTrue();
     }
 
     private void stubProjectAndEmployees(Employee assignmentEmployee, Employee assignmentSupervisor) {

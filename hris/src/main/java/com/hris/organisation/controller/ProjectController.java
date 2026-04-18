@@ -5,16 +5,20 @@ import com.hris.common.PageResponse;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
 import com.hris.organisation.dto.ProjectCreateDto;
+import com.hris.organisation.dto.ProjectDepartmentAssignDto;
+import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.dto.ProjectResponseDto;
 import com.hris.organisation.service.ProjectService;
+import com.hris.security.PermissionAuthorizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,6 +27,7 @@ import java.util.UUID;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ProjectResponseDto>>> getAll(Pageable pageable) {
@@ -30,9 +35,10 @@ public class ProjectController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR_ADMIN')")
     public ResponseEntity<ApiResponse<ProjectResponseDto>> create(
-            @Valid @RequestBody ProjectCreateDto dto) {
+            @Valid @RequestBody ProjectCreateDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(projectService.create(dto)));
     }
@@ -43,20 +49,47 @@ public class ProjectController {
     }
 
     @PostMapping("/{id}/assignments")
-    @PreAuthorize("hasRole('HR_ADMIN')")
     public ResponseEntity<ApiResponse<ProjectAssignmentResponseDto>> assignEmployee(
             @PathVariable UUID id,
-            @Valid @RequestBody ProjectAssignmentCreateDto dto) {
+            @Valid @RequestBody ProjectAssignmentCreateDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(projectService.assignEmployee(id, dto)));
     }
 
     @DeleteMapping("/{id}/assignments/{asgId}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> removeAssignment(
             @PathVariable UUID id,
-            @PathVariable UUID asgId) {
+            @PathVariable UUID asgId,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
         projectService.removeAssignment(id, asgId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @GetMapping("/{id}/departments")
+    public ResponseEntity<ApiResponse<List<ProjectDepartmentResponseDto>>> getDepartments(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(projectService.getDepartments(id)));
+    }
+
+    @PostMapping("/{id}/departments")
+    public ResponseEntity<ApiResponse<ProjectDepartmentResponseDto>> assignDepartment(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProjectDepartmentAssignDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok(projectService.assignDepartment(id, dto)));
+    }
+
+    @DeleteMapping("/{id}/departments/{departmentId}")
+    public ResponseEntity<ApiResponse<Void>> removeDepartment(
+            @PathVariable UUID id,
+            @PathVariable UUID departmentId,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
+        projectService.removeDepartment(id, departmentId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

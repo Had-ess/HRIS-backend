@@ -13,12 +13,14 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.NotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,10 +83,8 @@ public class AdminRequestService {
         AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
-        if (!isActionable(request.getStatus())) {
-            throw new IllegalStateException(
-                "Cannot process an admin request in status: " + request.getStatus());
-        }
+        AdminRequest previous = snapshot(request);
+        ensureActionable(request, "processed");
 
         request.setStatus(AdminRequestStatus.PROCESSED);
         request.setResolvedAt(Instant.now());
@@ -92,28 +92,74 @@ public class AdminRequestService {
         adminRequestRepository.save(request);
 
         auditLogService.log(hrAdminId, AuditAction.UPDATE, "admin_request",
-            requestId, null, request);
+            requestId, previous, request);
 
         notificationPublisher.publish(buildProcessedEvent(request));
     }
 
     @Transactional
+<<<<<<< HEAD
     public void reject(UUID requestId, UUID hrAdminId) {
         AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
+=======
+    public void reject(UUID requestId, UUID hrAdminId, String reason) {
+        AdminRequest request = adminRequestRepository.findById(requestId)
+>>>>>>> finish/rbac-completion
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
-        if (!isActionable(request.getStatus())) {
-            throw new IllegalStateException(
-                "Cannot reject an admin request in status: " + request.getStatus());
-        }
+        AdminRequest previous = snapshot(request);
+        ensureActionable(request, "rejected");
 
         request.setStatus(AdminRequestStatus.REJECTED);
+        request.setRejectionReason(normalizeReason(reason));
         request.setResolvedAt(Instant.now());
         request.setResolvedById(hrAdminId);
         adminRequestRepository.save(request);
 
         auditLogService.log(hrAdminId, AuditAction.REJECT, "admin_request",
-            requestId, null, request);
+            requestId, previous, request);
+    }
+
+    @Transactional
+    public void markInProgress(UUID requestId, UUID hrAdminId) {
+        AdminRequest request = adminRequestRepository.findById(requestId)
+            .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
+
+        if (request.getStatus() != AdminRequestStatus.SUBMITTED) {
+            throw new InvalidAdminRequestStateException(
+                "Admin request can only move to IN_PROGRESS from SUBMITTED");
+        }
+
+        AdminRequest previous = snapshot(request);
+        request.setStatus(AdminRequestStatus.IN_PROGRESS);
+        adminRequestRepository.save(request);
+
+        auditLogService.log(hrAdminId, AuditAction.UPDATE, "admin_request",
+            requestId, previous, request);
+    }
+
+    @Transactional
+    public void cancel(UUID requestId, UUID requesterId) {
+        AdminRequest request = adminRequestRepository.findById(requestId)
+            .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
+
+        if (!request.getRequesterId().equals(requesterId)) {
+            throw new AccessDeniedException("You can only cancel your own admin requests");
+        }
+
+        if (!isCancellable(request.getStatus())) {
+            throw new InvalidAdminRequestStateException(
+                "Admin request cannot be cancelled from status: " + request.getStatus());
+        }
+
+        AdminRequest previous = snapshot(request);
+        request.setStatus(AdminRequestStatus.CANCELLED);
+        request.setResolvedAt(Instant.now());
+        request.setResolvedById(requesterId);
+        adminRequestRepository.save(request);
+
+        auditLogService.log(requesterId, AuditAction.UPDATE, "admin_request",
+            requestId, previous, request);
     }
 
     private NotificationEvent buildSubmittedEvent(AdminRequest request, UUID requesterId) {
@@ -165,5 +211,41 @@ public class AdminRequestService {
 
     private boolean isActionable(AdminRequestStatus status) {
         return status == AdminRequestStatus.SUBMITTED || status == AdminRequestStatus.IN_PROGRESS;
+    }
+
+    private boolean isCancellable(AdminRequestStatus status) {
+        return status == AdminRequestStatus.SUBMITTED || status == AdminRequestStatus.IN_PROGRESS;
+    }
+
+    private void ensureActionable(AdminRequest request, String targetAction) {
+        if (!isActionable(request.getStatus())) {
+            throw new InvalidAdminRequestStateException(
+                "Admin request cannot be " + targetAction + " from status: " + request.getStatus());
+        }
+    }
+
+    private String normalizeReason(String reason) {
+        if (reason == null) {
+            return null;
+        }
+        String trimmed = reason.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private AdminRequest snapshot(AdminRequest request) {
+        return AdminRequest.builder()
+            .id(request.getId())
+            .requesterId(request.getRequesterId())
+            .requestTypeId(request.getRequestTypeId())
+            .trackingNumber(request.getTrackingNumber())
+            .description(request.getDescription())
+            .urgencyLevel(request.getUrgencyLevel())
+            .status(request.getStatus())
+            .metadata(request.getMetadata())
+            .rejectionReason(request.getRejectionReason())
+            .submittedAt(request.getSubmittedAt())
+            .resolvedAt(request.getResolvedAt())
+            .resolvedById(request.getResolvedById())
+            .build();
     }
 }

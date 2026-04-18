@@ -29,11 +29,18 @@ public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID
     Page<ApprovalStep> findByApproverIdAndStatusOrderByStepOrderAsc(
         UUID approverId, StepStatus status, Pageable pageable);
 
+    List<ApprovalStep> findTop5ByApproverIdAndStatusOrderByStepOrderAsc(
+        UUID approverId, StepStatus status);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM ApprovalStep s WHERE s.id = :id")
     Optional<ApprovalStep> findByIdForUpdate(@Param("id") UUID id);
 
     long countByWorkflowIdAndStatus(UUID workflowId, StepStatus status);
+
+    long countByApproverIdAndStatus(UUID approverId, StepStatus status);
+
+    long countByStatus(StepStatus status);
 
     boolean existsByWorkflowIdAndStatus(UUID workflowId, StepStatus status);
 }

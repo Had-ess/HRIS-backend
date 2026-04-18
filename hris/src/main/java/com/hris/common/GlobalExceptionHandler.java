@@ -1,13 +1,19 @@
 package com.hris.common;
 
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.common.exception.DepartmentDeletionNotAllowedException;
+import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.FileAttachmentValidationException;
+import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.common.exception.InvalidRoleHierarchyException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.MissingDepartmentHeadException;
+import com.hris.common.exception.PermissionAlreadyAssignedException;
+import com.hris.common.exception.PermissionDeletionNotAllowedException;
+import com.hris.common.exception.RoleAlreadyAssignedToUserException;
 import com.hris.common.exception.StepAlreadyDecidedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -74,9 +80,51 @@ public class GlobalExceptionHandler {
             .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(DepartmentDeletionNotAllowedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDepartmentDeletionNotAllowed(
+            DepartmentDeletionNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateProjectDepartmentAssignmentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateProjectDepartmentAssignment(
+            DuplicateProjectDepartmentAssignmentException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidAdminRequestStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidAdminRequestState(
+            InvalidAdminRequestStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidRoleHierarchyException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidRoleHierarchy(
             InvalidRoleHierarchyException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PermissionAlreadyAssignedException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePermissionAlreadyAssigned(
+            PermissionAlreadyAssignedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(RoleAlreadyAssignedToUserException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRoleAlreadyAssignedToUser(
+            RoleAlreadyAssignedToUserException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PermissionDeletionNotAllowedException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePermissionDeletionNotAllowed(
+            PermissionDeletionNotAllowedException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
             .body(ApiResponse.error(ex.getMessage()));
     }
@@ -120,7 +168,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(ApiResponse.error(ex.getMessage()));
+            .body(ApiResponse.error(
+                ex.getMessage() == null || ex.getMessage().isBlank()
+                    ? "You do not have permission to perform this action"
+                    : ex.getMessage()));
     }
 
     @ExceptionHandler(AuthenticationException.class)
