@@ -89,12 +89,25 @@ app:
 management:
   endpoint:
     health:
+      probes:
+        enabled: true
       show-details: when-authorized
+      group:
+        liveness:
+          include: livenessState,ping
+        readiness:
+          include: readinessState,db,rabbitmq,storage
   endpoints:
     web:
       exposure:
         include: health,info,metrics
   health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    db:
+      enabled: true
     rabbitmq:
       enabled: true
 
