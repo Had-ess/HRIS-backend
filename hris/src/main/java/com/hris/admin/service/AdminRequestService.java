@@ -98,7 +98,7 @@ public class AdminRequestService {
     }
 
     @Transactional
-    public void reject(UUID requestId, UUID hrAdminId) {
+    public void reject(UUID requestId, UUID hrAdminId, String reason) {
         AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
@@ -117,7 +117,7 @@ public class AdminRequestService {
 
     @Transactional
     public void markInProgress(UUID requestId, UUID hrAdminId) {
-        AdminRequest request = adminRequestRepository.findById(requestId)
+        AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
         if (request.getStatus() != AdminRequestStatus.SUBMITTED) {
@@ -135,7 +135,7 @@ public class AdminRequestService {
 
     @Transactional
     public void cancel(UUID requestId, UUID requesterId) {
-        AdminRequest request = adminRequestRepository.findById(requestId)
+        AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
         if (!request.getRequesterId().equals(requesterId)) {

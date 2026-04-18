@@ -10,6 +10,7 @@ import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.dto.ProjectResponseDto;
 import com.hris.organisation.service.ProjectService;
 import com.hris.security.PermissionAuthorizationService;
+import com.hris.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +40,9 @@ public class ProjectController {
             @Valid @RequestBody ProjectCreateDto dto,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(projectService.create(dto)));
+            .body(ApiResponse.ok(projectService.create(dto, actorId)));
     }
 
     @GetMapping("/{id}")
@@ -54,8 +56,9 @@ public class ProjectController {
             @Valid @RequestBody ProjectAssignmentCreateDto dto,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(projectService.assignEmployee(id, dto)));
+            .body(ApiResponse.ok(projectService.assignEmployee(id, dto, actorId)));
     }
 
     @DeleteMapping("/{id}/assignments/{asgId}")
@@ -64,7 +67,8 @@ public class ProjectController {
             @PathVariable UUID asgId,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
-        projectService.removeAssignment(id, asgId);
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        projectService.removeAssignment(id, asgId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
@@ -79,8 +83,9 @@ public class ProjectController {
             @Valid @RequestBody ProjectDepartmentAssignDto dto,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(projectService.assignDepartment(id, dto)));
+            .body(ApiResponse.ok(projectService.assignDepartment(id, dto, actorId)));
     }
 
     @DeleteMapping("/{id}/departments/{departmentId}")
@@ -89,7 +94,8 @@ public class ProjectController {
             @PathVariable UUID departmentId,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "HR_ADMIN");
-        projectService.removeDepartment(id, departmentId);
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        projectService.removeDepartment(id, departmentId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

@@ -46,6 +46,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
+    private static final UUID ACTOR_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
     @Mock
     private ProjectRepository projectRepository;
 
@@ -137,7 +139,7 @@ class ProjectServiceTest {
         when(employeeRepository.findByIdForUpdate(employeeId)).thenReturn(Optional.of(employee));
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
 
-        assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto))
+        assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto, ACTOR_ID))
             .isInstanceOf(InvalidProjectAssignmentException.class)
             .hasMessage("Supervisor cannot be the same employee");
 
@@ -153,7 +155,7 @@ class ProjectServiceTest {
 
         stubProjectAndEmployees(employee, supervisor);
 
-        assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto))
+        assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto, ACTOR_ID))
             .isInstanceOf(InvalidProjectAssignmentException.class)
             .hasMessage("Assignment start date must be before or equal to end date");
 
@@ -171,7 +173,7 @@ class ProjectServiceTest {
         when(projectAssignmentRepository.countOverlappingActiveAssignments(
             employeeId, projectId, dto.startDate(), dto.endDate())).thenReturn(1L);
 
-        assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto))
+        assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto, ACTOR_ID))
             .isInstanceOf(InvalidProjectAssignmentException.class)
             .hasMessage("Overlapping assignment already exists for this employee and project");
 
@@ -207,7 +209,7 @@ class ProjectServiceTest {
                 assignment.isActive());
         });
 
-        ProjectAssignmentResponseDto response = projectService.assignEmployee(projectId, dto);
+        ProjectAssignmentResponseDto response = projectService.assignEmployee(projectId, dto, ACTOR_ID);
 
         assertThat(response.id()).isEqualTo(assignmentId);
         assertThat(response.employeeId()).isEqualTo(employeeId);
@@ -233,7 +235,7 @@ class ProjectServiceTest {
             return link;
         });
 
-        ProjectDepartmentResponseDto result = projectService.assignDepartment(projectId, dto);
+        ProjectDepartmentResponseDto result = projectService.assignDepartment(projectId, dto, ACTOR_ID);
 
         assertThat(result.id()).isEqualTo(linkId);
         assertThat(result.departmentId()).isEqualTo(departmentId);
@@ -250,7 +252,7 @@ class ProjectServiceTest {
         when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
         when(projectDepartmentRepository.existsByProjectIdAndDepartmentId(projectId, departmentId)).thenReturn(true);
 
-        assertThatThrownBy(() -> projectService.assignDepartment(projectId, dto))
+        assertThatThrownBy(() -> projectService.assignDepartment(projectId, dto, ACTOR_ID))
             .isInstanceOf(DuplicateProjectDepartmentAssignmentException.class)
             .hasMessage("Department is already assigned to this project");
     }
@@ -269,7 +271,7 @@ class ProjectServiceTest {
         when(projectDepartmentRepository.findByProjectIdAndDepartmentId(projectId, departmentId))
             .thenReturn(Optional.of(link));
 
-        projectService.removeDepartment(projectId, departmentId);
+        projectService.removeDepartment(projectId, departmentId, ACTOR_ID);
 
         verify(projectDepartmentRepository).delete(link);
     }

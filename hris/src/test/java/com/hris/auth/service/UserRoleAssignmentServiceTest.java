@@ -1,5 +1,6 @@
 package com.hris.auth.service;
 
+import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
 import com.hris.auth.entity.UserRole;
@@ -36,6 +37,9 @@ class UserRoleAssignmentServiceTest {
     @Mock
     private UserRoleRepository userRoleRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private UserRoleAssignmentService userRoleAssignmentService;
 
@@ -44,6 +48,7 @@ class UserRoleAssignmentServiceTest {
     void assignRoleToUserWorks() {
         UUID userId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
         Role role = Role.builder().id(roleId).code("HR_ADMIN").name("HR Admin").isActive(true).build();
         UserRole userRole = UserRole.builder()
             .id(UUID.randomUUID())
@@ -54,11 +59,13 @@ class UserRoleAssignmentServiceTest {
             .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).build()));
+        when(userRepository.findById(actorId)).thenReturn(Optional.of(User.builder().id(actorId).build()));
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
         when(userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)).thenReturn(false);
+        when(userRoleRepository.save(any(UserRole.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(userRoleRepository.findByUserIdAndIsActiveTrue(userId)).thenReturn(List.of(userRole));
 
-        List<Role> response = userRoleAssignmentService.assignRole(userId, roleId);
+        List<Role> response = userRoleAssignmentService.assignRole(userId, roleId, actorId);
 
         assertThat(response).hasSize(1);
         assertThat(response.getFirst().getCode()).isEqualTo("HR_ADMIN");
@@ -70,13 +77,15 @@ class UserRoleAssignmentServiceTest {
     void duplicateRoleAssignmentIsRejected() {
         UUID userId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).build()));
+        when(userRepository.findById(actorId)).thenReturn(Optional.of(User.builder().id(actorId).build()));
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(
             Role.builder().id(roleId).code("HR_ADMIN").name("HR Admin").isActive(true).build()));
         when(userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)).thenReturn(true);
 
-        assertThatThrownBy(() -> userRoleAssignmentService.assignRole(userId, roleId))
+        assertThatThrownBy(() -> userRoleAssignmentService.assignRole(userId, roleId, actorId))
             .isInstanceOf(RoleAlreadyAssignedToUserException.class)
             .hasMessage("Role is already assigned to this user");
     }
@@ -86,6 +95,7 @@ class UserRoleAssignmentServiceTest {
     void removeRoleFromUserWorks() {
         UUID userId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
         UserRole userRole = UserRole.builder()
             .id(UUID.randomUUID())
             .userId(userId)
@@ -94,11 +104,13 @@ class UserRoleAssignmentServiceTest {
             .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).build()));
+        when(userRepository.findById(actorId)).thenReturn(Optional.of(User.builder().id(actorId).build()));
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(
             Role.builder().id(roleId).code("HR_ADMIN").name("HR Admin").isActive(true).build()));
         when(userRoleRepository.findByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)).thenReturn(Optional.of(userRole));
+        when(userRoleRepository.save(any(UserRole.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        userRoleAssignmentService.removeRole(userId, roleId);
+        userRoleAssignmentService.removeRole(userId, roleId, actorId);
 
         assertThat(userRole.isActive()).isFalse();
         assertThat(userRole.getExpiresAt()).isNotNull();

@@ -51,20 +51,20 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeeResponseDto create(EmployeeCreateDto dto) {
+    public EmployeeResponseDto create(EmployeeCreateDto dto, UUID actorId) {
         Employee employee = employeeMapper.toEntity(dto);
         Employee saved = employeeRepository.save(employee);
 
         initializeLeaveBalancesForNewEmployee(saved.getId());
 
-        auditLogService.log(dto.userId(), AuditAction.CREATE, "employee",
+        auditLogService.log(actorId, AuditAction.CREATE, "employee",
             saved.getId(), null, saved);
 
         return employeeMapper.toDto(saved);
     }
 
     @Transactional
-    public EmployeeResponseDto update(UUID id, EmployeeUpdateDto dto) {
+    public EmployeeResponseDto update(UUID id, EmployeeUpdateDto dto, UUID actorId) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
@@ -104,7 +104,7 @@ public class EmployeeService {
 
         Employee saved = employeeRepository.save(employee);
 
-        auditLogService.log(employee.getUserId(), AuditAction.UPDATE, "employee",
+        auditLogService.log(actorId, AuditAction.UPDATE, "employee",
             saved.getId(), previous, saved);
 
         return employeeMapper.toDto(saved);

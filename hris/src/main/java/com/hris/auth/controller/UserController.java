@@ -55,7 +55,8 @@ public class UserController {
             @Valid @RequestBody UserRoleAssignmentDto dto,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "HR_ADMIN");
-        return ResponseEntity.ok(ApiResponse.ok(userRoleAssignmentService.assignRole(id, dto.roleId())));
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(userRoleAssignmentService.assignRole(id, dto.roleId(), actorId)));
     }
 
     @DeleteMapping("/{id}/roles/{roleId}")
@@ -64,7 +65,8 @@ public class UserController {
             @PathVariable UUID roleId,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "HR_ADMIN");
-        userRoleAssignmentService.removeRole(id, roleId);
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        userRoleAssignmentService.removeRole(id, roleId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

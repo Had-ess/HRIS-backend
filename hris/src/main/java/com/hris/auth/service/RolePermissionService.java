@@ -1,5 +1,7 @@
 package com.hris.auth.service;
 
+import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.PermissionResponseDto;
 import com.hris.auth.entity.Permission;
 import com.hris.auth.entity.Role;
@@ -28,6 +30,7 @@ public class RolePermissionService {
     private final PermissionRepository permissionRepository;
     private final RolePermissionRepository rolePermissionRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<PermissionResponseDto> getPermissions(UUID roleId) {
@@ -64,16 +67,29 @@ public class RolePermissionService {
                 .build())
             .toList();
 
-        rolePermissionRepository.saveAll(links);
+        List<RolePermission> savedLinks = rolePermissionRepository.saveAll(links);
+        savedLinks.forEach(link -> auditLogService.log(
+            grantedById,
+            AuditAction.CREATE,
+            "role_permission",
+            link.getId(),
+            null,
+            link
+        ));
         return getPermissions(roleId);
     }
 
     @Transactional
-    public void removePermission(UUID roleId, UUID permissionId) {
+    public void removePermission(UUID roleId, UUID permissionId, UUID actorId) {
         ensureRoleExists(roleId);
         ensurePermissionExists(permissionId);
+        ensureActorExists(actorId);
         rolePermissionRepository.findByRoleIdAndPermissionId(roleId, permissionId)
-            .ifPresent(rolePermissionRepository::delete);
+            .ifPresent(rolePermission -> {
+                rolePermissionRepository.delete(rolePermission);
+                auditLogService.log(actorId, AuditAction.DELETE, "role_permission",
+                    rolePermission.getId(), rolePermission, null);
+            });
     }
 
     private void ensureRoleExists(UUID roleId) {

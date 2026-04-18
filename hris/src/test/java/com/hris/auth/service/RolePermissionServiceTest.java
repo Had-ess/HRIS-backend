@@ -1,5 +1,6 @@
 package com.hris.auth.service;
 
+import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.PermissionResponseDto;
 import com.hris.auth.entity.Permission;
 import com.hris.auth.entity.Role;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +43,9 @@ class RolePermissionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AuditLogService auditLogService;
 
     @InjectMocks
     private RolePermissionService rolePermissionService;
@@ -71,6 +76,7 @@ class RolePermissionServiceTest {
         when(userRepository.findById(actorId)).thenReturn(Optional.of(User.builder().id(actorId).build()));
         when(permissionRepository.findAllById(any())).thenReturn(List.of(permission));
         when(rolePermissionRepository.existsByRoleIdAndPermissionId(roleId, permissionId)).thenReturn(false);
+        when(rolePermissionRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
         when(rolePermissionRepository.findByRoleId(roleId)).thenReturn(List.of(assigned));
 
         List<PermissionResponseDto> response = rolePermissionService.assignPermissions(
@@ -126,7 +132,10 @@ class RolePermissionServiceTest {
             Permission.builder().id(permissionId).name("ROLE_ASSIGN_PERMISSION").resource("ROLE").action("ASSIGN_PERMISSION").scope("GLOBAL").build()));
         when(rolePermissionRepository.findByRoleIdAndPermissionId(roleId, permissionId)).thenReturn(Optional.of(link));
 
-        rolePermissionService.removePermission(roleId, permissionId);
+        UUID actorId = UUID.randomUUID();
+        when(userRepository.findById(actorId)).thenReturn(Optional.of(User.builder().id(actorId).build()));
+
+        rolePermissionService.removePermission(roleId, permissionId, actorId);
 
         verify(rolePermissionRepository).delete(link);
     }

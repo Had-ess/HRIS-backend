@@ -85,7 +85,8 @@ public class RoleController {
             @PathVariable UUID permissionId,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "HR_ADMIN");
-        rolePermissionService.removePermission(id, permissionId);
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        rolePermissionService.removePermission(id, permissionId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 }

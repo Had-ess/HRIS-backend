@@ -56,7 +56,7 @@ public class ApprovalStepService {
         approvalStepRepository.save(step);
         auditLogService.log(approverId, AuditAction.APPROVE, "approval_step", step.getId(), null, step);
 
-        checkWorkflowCompletion(step.getWorkflowId());
+        checkWorkflowCompletion(step.getWorkflowId(), approverId);
     }
 
     @Transactional
@@ -79,7 +79,7 @@ public class ApprovalStepService {
         auditLogService.log(approverId, AuditAction.REJECT, "approval_step", step.getId(), null, step);
 
         closePendingSteps(step.getWorkflowId(), "Auto-closed due to workflow rejection");
-        completeWorkflow(step.getWorkflowId(), WorkflowStatus.REJECTED);
+        completeWorkflow(step.getWorkflowId(), WorkflowStatus.REJECTED, approverId);
     }
 
     @Transactional
@@ -116,9 +116,9 @@ public class ApprovalStepService {
         }
     }
 
-    private void checkWorkflowCompletion(UUID workflowId) {
+    private void checkWorkflowCompletion(UUID workflowId, UUID actorId) {
         if (isWorkflowFullyApproved(workflowId)) {
-            completeWorkflow(workflowId, WorkflowStatus.COMPLETED);
+            completeWorkflow(workflowId, WorkflowStatus.COMPLETED, actorId);
         }
     }
 
@@ -138,7 +138,7 @@ public class ApprovalStepService {
         approvalStepRepository.saveAll(pendingSteps);
     }
 
-    private void completeWorkflow(UUID workflowId, WorkflowStatus status) {
+    private void completeWorkflow(UUID workflowId, WorkflowStatus status, UUID actorId) {
         ApprovalWorkflow workflow = approvalWorkflowRepository.findByIdForUpdate(workflowId)
             .orElseThrow(() -> new EntityNotFoundException("Workflow not found"));
 
@@ -151,7 +151,7 @@ public class ApprovalStepService {
         approvalWorkflowRepository.save(workflow);
 
         if ("LEAVE".equals(workflow.getSubjectType())) {
-            leaveRequestService.handleWorkflowCompletion(workflow.getSubjectId(), status);
+            leaveRequestService.handleWorkflowCompletion(workflow.getSubjectId(), status, actorId);
         }
 
         log.info("Workflow {} completed with status: {}", workflowId, status);

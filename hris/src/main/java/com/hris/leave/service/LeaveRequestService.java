@@ -267,6 +267,11 @@ public class LeaveRequestService {
 
     @Transactional
     public void handleWorkflowCompletion(UUID leaveRequestId, WorkflowStatus workflowStatus) {
+        handleWorkflowCompletion(leaveRequestId, workflowStatus, null);
+    }
+
+    @Transactional
+    public void handleWorkflowCompletion(UUID leaveRequestId, WorkflowStatus workflowStatus, UUID actorId) {
         LeaveRequest request = leaveRequestRepository.findByIdForUpdate(leaveRequestId)
             .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
 
@@ -286,6 +291,19 @@ public class LeaveRequestService {
                 validateAndResolveBalanceYear(request.getStartDate(), request.getEndDate()))
             .orElseThrow(() -> new EntityNotFoundException("Balance not found"));
 
+        LeaveRequest previous = LeaveRequest.builder()
+            .id(request.getId())
+            .employeeId(request.getEmployeeId())
+            .leaveTypeId(request.getLeaveTypeId())
+            .startDate(request.getStartDate())
+            .endDate(request.getEndDate())
+            .workingDays(request.getWorkingDays())
+            .urgencyLevel(request.getUrgencyLevel())
+            .status(request.getStatus())
+            .comment(request.getComment())
+            .submittedAt(request.getSubmittedAt())
+            .build();
+
         if (workflowStatus == WorkflowStatus.COMPLETED) {
             request.setStatus(LeaveStatus.APPROVED);
             balance.confirmUsage(request.getWorkingDays());
@@ -303,8 +321,8 @@ public class LeaveRequestService {
         leaveRequestRepository.save(request);
         leaveBalanceRepository.save(balance);
 
-        auditLogService.log(null, AuditAction.UPDATE, "leave_request",
-            request.getId(), null, request);
+        auditLogService.log(actorId, AuditAction.UPDATE, "leave_request",
+            request.getId(), previous, request);
     }
 
     @Transactional

@@ -123,7 +123,7 @@ class ApprovalStepServiceTest {
             assertThat(workflow.getCompletedAt()).isNotNull();
 
             verify(approvalWorkflowRepository).save(workflow);
-            verify(leaveRequestService).handleWorkflowCompletion(subjectId, WorkflowStatus.COMPLETED);
+            verify(leaveRequestService).handleWorkflowCompletion(subjectId, WorkflowStatus.COMPLETED, approverId);
         }
 
         @Test
@@ -249,7 +249,7 @@ class ApprovalStepServiceTest {
             assertThat(workflow.getCompletedAt()).isNotNull();
 
             verify(approvalStepRepository).saveAll(List.of(siblingStep));
-            verify(leaveRequestService).handleWorkflowCompletion(subjectId, WorkflowStatus.REJECTED);
+            verify(leaveRequestService).handleWorkflowCompletion(subjectId, WorkflowStatus.REJECTED, approverId);
         }
 
         @Test

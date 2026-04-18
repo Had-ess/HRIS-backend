@@ -57,19 +57,21 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectResponseDto create(ProjectCreateDto dto) {
+    public ProjectResponseDto create(ProjectCreateDto dto, UUID actorId) {
         Project project = projectMapper.toEntity(dto);
         Project saved = projectRepository.save(project);
 
-        auditLogService.log(null, AuditAction.CREATE, "project",
+        auditLogService.log(actorId, AuditAction.CREATE, "project",
             saved.getId(), null, saved);
 
         return projectMapper.toDto(saved);
     }
 
     @Transactional
-    public ProjectAssignmentResponseDto assignEmployee(UUID projectId,
-                                                        ProjectAssignmentCreateDto dto) {
+    public ProjectAssignmentResponseDto assignEmployee(
+            UUID projectId,
+            ProjectAssignmentCreateDto dto,
+            UUID actorId) {
         projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found"));
         Employee employee = employeeRepository.findByIdForUpdate(dto.employeeId())
@@ -91,14 +93,14 @@ public class ProjectService {
 
         ProjectAssignment saved = projectAssignmentRepository.save(assignment);
 
-        auditLogService.log(null, AuditAction.CREATE, "project_assignment",
+        auditLogService.log(actorId, AuditAction.CREATE, "project_assignment",
             saved.getId(), null, saved);
 
         return projectMapper.toAssignmentDto(saved);
     }
 
     @Transactional
-    public void removeAssignment(UUID projectId, UUID assignmentId) {
+    public void removeAssignment(UUID projectId, UUID assignmentId, UUID actorId) {
         ProjectAssignment assignment = projectAssignmentRepository.findByIdForUpdate(assignmentId)
             .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
 
@@ -108,7 +110,7 @@ public class ProjectService {
 
         projectAssignmentRepository.delete(assignment);
 
-        auditLogService.log(null, AuditAction.DELETE, "project_assignment",
+        auditLogService.log(actorId, AuditAction.DELETE, "project_assignment",
             assignmentId, assignment, null);
     }
 
@@ -133,7 +135,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectDepartmentResponseDto assignDepartment(UUID projectId, ProjectDepartmentAssignDto dto) {
+    public ProjectDepartmentResponseDto assignDepartment(
+            UUID projectId,
+            ProjectDepartmentAssignDto dto,
+            UUID actorId) {
         ensureProjectExists(projectId);
         Department department = departmentRepository.findById(dto.departmentId())
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -150,7 +155,7 @@ public class ProjectService {
             .build();
 
         ProjectDepartment saved = projectDepartmentRepository.save(link);
-        auditLogService.log(null, AuditAction.CREATE, "project_department",
+        auditLogService.log(actorId, AuditAction.CREATE, "project_department",
             saved.getId(), null, saved);
 
         return new ProjectDepartmentResponseDto(
@@ -164,13 +169,13 @@ public class ProjectService {
     }
 
     @Transactional
-    public void removeDepartment(UUID projectId, UUID departmentId) {
+    public void removeDepartment(UUID projectId, UUID departmentId, UUID actorId) {
         ensureProjectExists(projectId);
 
         projectDepartmentRepository.findByProjectIdAndDepartmentId(projectId, departmentId)
             .ifPresent(link -> {
                 projectDepartmentRepository.delete(link);
-                auditLogService.log(null, AuditAction.DELETE, "project_department",
+                auditLogService.log(actorId, AuditAction.DELETE, "project_department",
                     link.getId(), link, null);
             });
     }

@@ -1,5 +1,7 @@
 package com.hris.auth.service;
 
+import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Role;
 import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.RoleRepository;
@@ -22,6 +24,7 @@ public class UserRoleAssignmentService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<Role> getRoles(UUID userId) {
@@ -33,9 +36,10 @@ public class UserRoleAssignmentService {
     }
 
     @Transactional
-    public List<Role> assignRole(UUID userId, UUID roleId) {
+    public List<Role> assignRole(UUID userId, UUID roleId, UUID actorId) {
         ensureUserExists(userId);
         ensureRoleExists(roleId);
+        ensureUserExists(actorId);
 
         if (userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)) {
             throw new RoleAlreadyAssignedToUserException("Role is already assigned to this user");
@@ -46,21 +50,34 @@ public class UserRoleAssignmentService {
             .roleId(roleId)
             .isActive(true)
             .build();
-        userRoleRepository.save(userRole);
+        UserRole saved = userRoleRepository.save(userRole);
+        auditLogService.log(actorId, AuditAction.CREATE, "user_role",
+            saved.getId(), null, saved);
 
         return getRoles(userId);
     }
 
     @Transactional
-    public void removeRole(UUID userId, UUID roleId) {
+    public void removeRole(UUID userId, UUID roleId, UUID actorId) {
         ensureUserExists(userId);
         ensureRoleExists(roleId);
+        ensureUserExists(actorId);
 
         userRoleRepository.findByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)
             .ifPresent(userRole -> {
+                UserRole previous = UserRole.builder()
+                    .id(userRole.getId())
+                    .userId(userRole.getUserId())
+                    .roleId(userRole.getRoleId())
+                    .isActive(userRole.isActive())
+                    .assignedAt(userRole.getAssignedAt())
+                    .expiresAt(userRole.getExpiresAt())
+                    .build();
                 userRole.setActive(false);
                 userRole.setExpiresAt(Instant.now());
-                userRoleRepository.save(userRole);
+                UserRole saved = userRoleRepository.save(userRole);
+                auditLogService.log(actorId, AuditAction.DELETE, "user_role",
+                    saved.getId(), previous, saved);
             });
     }
 

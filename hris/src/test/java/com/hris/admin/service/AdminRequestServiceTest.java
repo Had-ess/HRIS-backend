@@ -261,7 +261,7 @@ class AdminRequestServiceTest {
             .status(AdminRequestStatus.SUBMITTED)
             .build();
 
-        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         adminRequestService.cancel(requestId, requesterId);
 
@@ -281,7 +281,7 @@ class AdminRequestServiceTest {
             .status(AdminRequestStatus.PROCESSED)
             .build();
 
-        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         assertThatThrownBy(() -> adminRequestService.cancel(requestId, requesterId))
             .isInstanceOf(InvalidAdminRequestStateException.class)
@@ -298,7 +298,7 @@ class AdminRequestServiceTest {
             .status(AdminRequestStatus.SUBMITTED)
             .build();
 
-        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         adminRequestService.markInProgress(requestId, hrAdminId);
 
@@ -315,7 +315,7 @@ class AdminRequestServiceTest {
             .status(AdminRequestStatus.REJECTED)
             .build();
 
-        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         assertThatThrownBy(() -> adminRequestService.markInProgress(requestId, UUID.randomUUID()))
             .isInstanceOf(InvalidAdminRequestStateException.class)
@@ -336,7 +336,7 @@ class AdminRequestServiceTest {
         when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Cannot process an admin request in status: CANCELLED");
+            .isInstanceOf(InvalidAdminRequestStateException.class)
+            .hasMessage("Admin request cannot be processed from status: CANCELLED");
     }
 }
