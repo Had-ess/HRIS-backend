@@ -78,7 +78,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
             when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(1L);
 
             approvalStepService.approve(stepId, approverId, "Looks good");
@@ -111,7 +112,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
             when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(0L);
             when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.REJECTED)).thenReturn(0L);
 
@@ -141,7 +143,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
 
             assertThatThrownBy(() -> approvalStepService.approve(stepId, approverId, "ok"))
                 .isInstanceOf(AccessDeniedException.class)
@@ -163,7 +166,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
 
             assertThatThrownBy(() -> approvalStepService.approve(stepId, approverId, "ok"))
                 .isInstanceOf(StepAlreadyDecidedException.class);
@@ -172,7 +176,7 @@ class ApprovalStepServiceTest {
         @Test
         @DisplayName("should throw EntityNotFoundException when step not found")
         void shouldThrow_WhenStepNotFound() {
-            when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.empty());
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> approvalStepService.approve(stepId, approverId, "ok"))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -193,7 +197,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
 
             assertThatThrownBy(() -> approvalStepService.approve(stepId, approverId, "ok"))
                 .isInstanceOf(InvalidWorkflowStateException.class)
@@ -229,7 +234,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
             when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING))
                 .thenReturn(List.of(siblingStep));
 
@@ -263,7 +269,8 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
 
             assertThatThrownBy(() -> approvalStepService.reject(stepId, approverId, "no"))
                 .isInstanceOf(AccessDeniedException.class);
@@ -284,11 +291,35 @@ class ApprovalStepServiceTest {
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
-            when(approvalWorkflowRepository.findById(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
 
             assertThatThrownBy(() -> approvalStepService.reject(stepId, approverId, "no"))
                 .isInstanceOf(InvalidWorkflowStateException.class)
                 .hasMessage("Workflow is already completed or rejected");
+        }
+
+        @Test
+        @DisplayName("should throw StepAlreadyDecidedException when rejecting a decided step")
+        void shouldThrow_WhenRejectingAlreadyDecidedStep() {
+            ApprovalStep step = ApprovalStep.builder()
+                .id(stepId)
+                .workflowId(workflowId)
+                .approverId(approverId)
+                .status(StepStatus.REJECTED)
+                .build();
+            ApprovalWorkflow workflow = ApprovalWorkflow.builder()
+                .id(workflowId)
+                .status(WorkflowStatus.IN_PROGRESS)
+                .build();
+
+            when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
+            when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
+            when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
+
+            assertThatThrownBy(() -> approvalStepService.reject(stepId, approverId, "no"))
+                .isInstanceOf(StepAlreadyDecidedException.class)
+                .hasMessage("Step has already been decided: REJECTED");
         }
     }
 }

@@ -223,6 +223,17 @@ public class LeaveRequestService {
             throw new org.springframework.security.access.AccessDeniedException("Not your leave request");
         }
 
+        ApprovalWorkflow workflow = approvalWorkflowRepository
+            .findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId)
+            .orElse(null);
+
+        request = leaveRequestRepository.findByIdForUpdate(requestId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!request.getEmployeeId().equals(employee.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Not your leave request");
+        }
+
         if (request.getStatus() != LeaveStatus.PENDING && request.getStatus() != LeaveStatus.IN_APPROVAL) {
             if (request.getStatus() == LeaveStatus.APPROVED) {
                 throw new IllegalStateException("Cannot cancel an approved leave request");
@@ -243,12 +254,12 @@ public class LeaveRequestService {
         request.setStatus(LeaveStatus.CANCELLED);
         leaveRequestRepository.save(request);
 
-        approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId).ifPresent(workflow -> {
+        if (workflow != null) {
             closePendingSteps(workflow.getId(), "Auto-closed due to cancellation");
             workflow.setStatus(WorkflowStatus.REJECTED);
             workflow.setCompletedAt(Instant.now());
             approvalWorkflowRepository.save(workflow);
-        });
+        }
 
         auditLogService.log(requesterId, AuditAction.UPDATE, "leave_request",
             requestId, previousStatus, LeaveStatus.CANCELLED);
@@ -256,7 +267,7 @@ public class LeaveRequestService {
 
     @Transactional
     public void handleWorkflowCompletion(UUID leaveRequestId, WorkflowStatus workflowStatus) {
-        LeaveRequest request = leaveRequestRepository.findById(leaveRequestId)
+        LeaveRequest request = leaveRequestRepository.findByIdForUpdate(leaveRequestId)
             .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
 
         if (request.getStatus() == LeaveStatus.CANCELLED) {

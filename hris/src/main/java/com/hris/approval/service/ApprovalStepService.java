@@ -44,10 +44,9 @@ public class ApprovalStepService {
 
     @Transactional
     public void approve(UUID stepId, String comment, UUID approverId) {
-        ApprovalStep step = approvalStepRepository.findByIdForUpdate(stepId)
-            .orElseThrow(() -> new EntityNotFoundException("Approval step not found"));
-        ApprovalWorkflow workflow = approvalWorkflowRepository.findById(step.getWorkflowId())
-            .orElseThrow(() -> new EntityNotFoundException("Workflow not found"));
+        LockedApprovalContext context = loadLockedApprovalContext(stepId);
+        ApprovalStep step = context.step();
+        ApprovalWorkflow workflow = context.workflow();
 
         validateWorkflowActive(workflow);
         validateStepOwnership(step, approverId);
@@ -67,10 +66,9 @@ public class ApprovalStepService {
 
     @Transactional
     public void reject(UUID stepId, String comment, UUID approverId) {
-        ApprovalStep step = approvalStepRepository.findByIdForUpdate(stepId)
-            .orElseThrow(() -> new EntityNotFoundException("Approval step not found"));
-        ApprovalWorkflow workflow = approvalWorkflowRepository.findById(step.getWorkflowId())
-            .orElseThrow(() -> new EntityNotFoundException("Workflow not found"));
+        LockedApprovalContext context = loadLockedApprovalContext(stepId);
+        ApprovalStep step = context.step();
+        ApprovalWorkflow workflow = context.workflow();
 
         validateWorkflowActive(workflow);
         validateStepOwnership(step, approverId);
@@ -93,6 +91,16 @@ public class ApprovalStepService {
         if (!step.getApproverId().equals(approverId)) {
             throw new AccessDeniedException("You are not the assigned approver for this step");
         }
+    }
+
+    private LockedApprovalContext loadLockedApprovalContext(UUID stepId) {
+        ApprovalStep stepSnapshot = approvalStepRepository.findById(stepId)
+            .orElseThrow(() -> new EntityNotFoundException("Approval step not found"));
+        ApprovalWorkflow workflow = approvalWorkflowRepository.findByIdForUpdate(stepSnapshot.getWorkflowId())
+            .orElseThrow(() -> new EntityNotFoundException("Workflow not found"));
+        ApprovalStep step = approvalStepRepository.findByIdForUpdate(stepId)
+            .orElseThrow(() -> new EntityNotFoundException("Approval step not found"));
+        return new LockedApprovalContext(step, workflow);
     }
 
     private void validateStepPending(ApprovalStep step) {
@@ -131,7 +139,7 @@ public class ApprovalStepService {
     }
 
     private void completeWorkflow(UUID workflowId, WorkflowStatus status) {
-        ApprovalWorkflow workflow = approvalWorkflowRepository.findById(workflowId)
+        ApprovalWorkflow workflow = approvalWorkflowRepository.findByIdForUpdate(workflowId)
             .orElseThrow(() -> new EntityNotFoundException("Workflow not found"));
 
         if (workflow.isComplete()) {
@@ -147,5 +155,8 @@ public class ApprovalStepService {
         }
 
         log.info("Workflow {} completed with status: {}", workflowId, status);
+    }
+
+    private record LockedApprovalContext(ApprovalStep step, ApprovalWorkflow workflow) {
     }
 }

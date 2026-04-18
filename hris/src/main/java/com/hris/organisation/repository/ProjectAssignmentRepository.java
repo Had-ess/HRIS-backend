@@ -1,7 +1,9 @@
 package com.hris.organisation.repository;
 
 import com.hris.organisation.entity.ProjectAssignment;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,10 @@ import java.util.UUID;
 
 @Repository
 public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssignment, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT pa FROM ProjectAssignment pa WHERE pa.id = :id")
+    java.util.Optional<ProjectAssignment> findByIdForUpdate(@Param("id") UUID id);
 
     @Query("""
         SELECT pa FROM ProjectAssignment pa

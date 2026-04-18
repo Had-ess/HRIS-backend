@@ -78,7 +78,7 @@ public class AdminRequestService {
 
     @Transactional
     public void process(UUID requestId, UUID hrAdminId) {
-        AdminRequest request = adminRequestRepository.findById(requestId)
+        AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
         if (!isActionable(request.getStatus())) {
@@ -99,7 +99,7 @@ public class AdminRequestService {
 
     @Transactional
     public void reject(UUID requestId, UUID hrAdminId) {
-        AdminRequest request = adminRequestRepository.findById(requestId)
+        AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
         if (!isActionable(request.getStatus())) {

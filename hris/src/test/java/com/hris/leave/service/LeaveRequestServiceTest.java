@@ -442,10 +442,11 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2027)).thenReturn(Optional.of(balance));
-            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
                     .id(workflowId)
                     .subjectType("LEAVE")
@@ -485,6 +486,9 @@ class LeaveRequestServiceTest {
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId))
+                .thenReturn(Optional.empty());
+            when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
             assertThatThrownBy(() -> leaveRequestService.cancel(requestId, requesterId))
                 .isInstanceOf(IllegalStateException.class)
@@ -542,7 +546,7 @@ class LeaveRequestServiceTest {
                 .pendingDays(5)
                 .build();
 
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
             when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2028)).thenReturn(Optional.of(balance));
             when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
@@ -584,7 +588,7 @@ class LeaveRequestServiceTest {
                 .pendingDays(5)
                 .build();
 
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
             when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2026)).thenReturn(Optional.of(balance));
             when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
@@ -615,7 +619,7 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.CANCELLED)
                 .build();
 
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
             leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.COMPLETED);
 

@@ -110,6 +110,7 @@ class ProjectServiceTest {
             LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 31));
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(employeeRepository.findByIdForUpdate(employeeId)).thenReturn(Optional.of(employee));
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
 
         assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto))
@@ -195,7 +196,7 @@ class ProjectServiceTest {
 
     private void stubProjectAndEmployees(Employee assignmentEmployee, Employee assignmentSupervisor) {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(employeeRepository.findById(eq(employeeId))).thenReturn(Optional.of(assignmentEmployee));
+        when(employeeRepository.findByIdForUpdate(eq(employeeId))).thenReturn(Optional.of(assignmentEmployee));
         when(employeeRepository.findById(eq(supervisorId))).thenReturn(Optional.of(assignmentSupervisor));
     }
 }

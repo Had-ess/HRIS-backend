@@ -132,6 +132,7 @@ com\hris\notification\enums\NotificationEventType.class
 com\hris\notification\service\NotificationConsumer$1.class
 com\hris\analytics\entity\AbsenceImpactReport.class
 com\hris\leave\entity\LeaveBalance$LeaveBalanceBuilder.class
+com\hris\approval\service\ApprovalStepService$LockedApprovalContext.class
 com\hris\auth\controller\EmployeeController.class
 com\hris\notification\service\DeadLetterQueueHandler.class
 com\hris\admin\mapper\AdminRequestMapper.class

@@ -121,7 +121,7 @@ class AdminRequestServiceTest {
 
             User hrAdmin = User.builder().id(hrAdminId).build();
 
-            when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
             when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
             when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
@@ -148,7 +148,7 @@ class AdminRequestServiceTest {
                 .status(AdminRequestStatus.PROCESSED)
                 .build();
 
-            when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
             assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
                 .isInstanceOf(IllegalStateException.class)
@@ -159,7 +159,7 @@ class AdminRequestServiceTest {
         @DisplayName("should throw EntityNotFoundException when request not found")
         void shouldThrow_WhenNotFound() {
             UUID requestId = UUID.randomUUID();
-            when(adminRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> adminRequestService.process(requestId, UUID.randomUUID()))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -181,7 +181,7 @@ class AdminRequestServiceTest {
                 .status(AdminRequestStatus.SUBMITTED)
                 .build();
 
-            when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
             // Act
             adminRequestService.reject(requestId, hrAdminId);
@@ -205,7 +205,7 @@ class AdminRequestServiceTest {
                 .status(AdminRequestStatus.PROCESSED)
                 .build();
 
-            when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
             assertThatThrownBy(() -> adminRequestService.reject(requestId, UUID.randomUUID()))
                 .isInstanceOf(IllegalStateException.class)
@@ -224,7 +224,7 @@ class AdminRequestServiceTest {
             .status(AdminRequestStatus.REJECTED)
             .build();
 
-        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
             .isInstanceOf(IllegalStateException.class)
@@ -242,10 +242,28 @@ class AdminRequestServiceTest {
             .status(AdminRequestStatus.PROCESSED)
             .build();
 
-        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
         assertThatThrownBy(() -> adminRequestService.reject(requestId, hrAdminId))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Cannot reject an admin request in status: PROCESSED");
+    }
+
+    @Test
+    @DisplayName("should not process a cancelled request")
+    void shouldNotProcessCancelledRequest() {
+        UUID requestId = UUID.randomUUID();
+        UUID hrAdminId = UUID.randomUUID();
+
+        AdminRequest request = AdminRequest.builder()
+            .id(requestId)
+            .status(AdminRequestStatus.CANCELLED)
+            .build();
+
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
+
+        assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Cannot process an admin request in status: CANCELLED");
     }
 }

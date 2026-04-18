@@ -62,7 +62,7 @@ public class ProjectService {
                                                         ProjectAssignmentCreateDto dto) {
         projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found"));
-        Employee employee = employeeRepository.findById(dto.employeeId())
+        Employee employee = employeeRepository.findByIdForUpdate(dto.employeeId())
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         employeeRepository.findById(dto.supervisorId())
             .orElseThrow(() -> new EntityNotFoundException("Supervisor not found"));
@@ -89,7 +89,7 @@ public class ProjectService {
 
     @Transactional
     public void removeAssignment(UUID projectId, UUID assignmentId) {
-        ProjectAssignment assignment = projectAssignmentRepository.findById(assignmentId)
+        ProjectAssignment assignment = projectAssignmentRepository.findByIdForUpdate(assignmentId)
             .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
 
         if (!assignment.getProjectId().equals(projectId)) {
