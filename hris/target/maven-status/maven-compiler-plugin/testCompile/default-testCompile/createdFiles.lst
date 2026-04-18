@@ -6,6 +6,7 @@ com\hris\notification\service\NotificationConsumerTest.class
 com\hris\approval\service\ApprovalRouterTest.class
 com\hris\approval\service\ApprovalRouterTest$ResolveStepsTests.class
 com\hris\leave\entity\LeaveBalanceTest.class
+com\hris\leave\service\FileStorageServiceTest.class
 com\hris\admin\service\AdminRequestServiceTest$ProcessTests.class
 com\hris\admin\service\AdminRequestServiceTest$CreateTests.class
 com\hris\approval\entity\ApprovalStepTest.class

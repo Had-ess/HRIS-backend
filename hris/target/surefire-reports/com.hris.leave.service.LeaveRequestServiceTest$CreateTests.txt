@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.hris.leave.service.LeaveRequestServiceTest$CreateTests
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.162 s -- in com.hris.leave.service.LeaveRequestServiceTest$CreateTests
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 s -- in com.hris.leave.service.LeaveRequestServiceTest$CreateTests

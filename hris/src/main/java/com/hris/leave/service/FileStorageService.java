@@ -73,8 +73,14 @@ public class FileStorageService {
     }
 
     public InputStream retrieve(String objectKey) {
-        Path filePath = resolveSafePath(objectKey);
-        if (!Files.isRegularFile(filePath)) {
+        Path filePath;
+        try {
+            filePath = resolveSafePath(objectKey);
+        } catch (IllegalArgumentException e) {
+            throw new EntityNotFoundException("Attachment file not found");
+        }
+
+        if (!Files.isRegularFile(filePath) || !Files.isReadable(filePath)) {
             throw new EntityNotFoundException("Attachment file not found");
         }
         try {

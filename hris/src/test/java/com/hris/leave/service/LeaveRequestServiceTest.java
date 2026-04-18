@@ -710,6 +710,11 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.IN_APPROVAL)
                 .build();
             byte[] payload = new byte[(10 * 1024 * 1024) + 1];
+            payload[0] = 0x25;
+            payload[1] = 0x50;
+            payload[2] = 0x44;
+            payload[3] = 0x46;
+            payload[4] = 0x2D;
             MultipartFile file = new MockMultipartFile(
                 "file", "scan.pdf", "application/pdf", payload);
 
@@ -719,6 +724,28 @@ class LeaveRequestServiceTest {
             assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
                 .isInstanceOf(FileAttachmentValidationException.class)
                 .hasMessage("Attachment exceeds the maximum allowed size of 10 MB");
+        }
+
+        @Test
+        @DisplayName("should reject disguised attachment when bytes do not match allowed content")
+        void shouldThrow_WhenAttachmentContentDoesNotMatchAllowedType() {
+            UUID requestId = UUID.randomUUID();
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(employeeId)
+                .status(LeaveStatus.PENDING)
+                .build();
+            MultipartFile file = new MockMultipartFile(
+                "file", "scan.pdf", "application/pdf", "not-a-real-pdf".getBytes());
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+
+            assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
+                .isInstanceOf(FileAttachmentValidationException.class)
+                .hasMessage("Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+
+            verify(fileStorageService, never()).store(any(MultipartFile.class), eq(requestId));
         }
 
         @Test
@@ -834,6 +861,41 @@ class LeaveRequestServiceTest {
             assertThat(result.fileName()).isEqualTo("medical_note.pdf");
             assertThat(result.mimeType()).isEqualTo("application/pdf");
             assertThat(result.resource()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("should deny attachment access to approver whose step is no longer pending")
+        void shouldDenyAttachmentAccessForFormerApprover() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+            UUID workflowId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(UUID.randomUUID())
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
+                .thenReturn(Optional.of(ApprovalWorkflow.builder()
+                    .id(workflowId)
+                    .subjectType("LEAVE")
+                    .subjectId(requestId)
+                    .build()));
+            when(approvalStepRepository.findByWorkflowId(workflowId)).thenReturn(List.of(
+                ApprovalStep.builder()
+                    .id(UUID.randomUUID())
+                    .workflowId(workflowId)
+                    .approverId(requesterId)
+                    .status(StepStatus.APPROVED)
+                    .build()
+            ));
+
+            assertThatThrownBy(() -> leaveRequestService.downloadAttachment(requestId, attachmentId, requesterId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("You are not allowed to access attachments for this leave request");
         }
     }
 }

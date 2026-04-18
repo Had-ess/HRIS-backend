@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.hris.auth.service.RoleServiceTest" time="0.083" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.hris.leave.service.FileStorageServiceTest" time="0.025" tests="2" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -10,8 +10,10 @@
     <property name="user.variant" value=""/>
     <property name="java.vendor.url" value="https://java.oracle.com/"/>
     <property name="user.timezone" value="Africa/Tunis"/>
+    <property name="org.jboss.logging.provider" value="slf4j"/>
     <property name="os.name" value="Windows 11"/>
     <property name="java.vm.specification.version" value="21"/>
+    <property name="APPLICATION_NAME" value="hris-backend"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-21\bin"/>
@@ -22,6 +24,7 @@
     <property name="user.home" value="C:\Users\Youssef"/>
     <property name="user.language" value="en"/>
     <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="reactor.schedulers.defaultBoundedElasticOnVirtualThreads" value="true"/>
     <property name="java.version.date" value="2025-10-21"/>
     <property name="java.home" value="C:\Program Files\Java\jdk-21"/>
     <property name="file.separator" value="\"/>
@@ -30,6 +33,8 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="FILE_LOG_CHARSET" value="UTF-8"/>
+    <property name="java.awt.headless" value="true"/>
     <property name="surefire.real.class.path" value="C:\Users\Youssef\AppData\Local\Temp\surefire6891060452522135424\surefirebooter-20260418143233674_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
@@ -48,7 +53,9 @@
     <property name="user.dir" value="C:\Users\Youssef\.gemini\antigravity\scratch\pfe\backend\hris"/>
     <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="PID" value="10780"/>
     <property name="sun.os.patch.level" value=""/>
+    <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
     <property name="native.encoding" value="Cp1252"/>
     <property name="java.library.path" value="C:\Program Files\Java\jdk-21\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;c:\Users\Youssef\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\Youssef\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Program Files\Microsoft VS Code;C:\Python314\Scripts\;C:\Python314\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\oraclexe\app\oracle\product\11.2.0\server\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\ProgramData\chocolatey\bin;C:\Program Files (x86)\oh-my-posh\bin;C:\Program Files\CodeBlocks\MinGW\bin;C:\Program Files\Microsoft VS Code\bin;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Process Lasso\;C:\Program Files (x86)\cloudflared\;C:\Program Files\nodejs\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk-21\bin;C:\Program Files\apache-maven-3.9.14\bin;C:\Users\Youssef\AppData\Local\Microsoft\WindowsApps;C:\Users\Youssef\AppData\Local\Programs\oh-my-posh\bin;C:\MinGW\bin;C:\Users\Youssef\.dotnet\tools;C:\Program Files\JetBrains\IntelliJ IDEA 2024.2.3\bin;C:\Users\Youssef\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\Youssef\AppData\Local\Programs\Antigravity\bin;C:\Users\Youssef\AppData\Roaming\npm;C:\Users\Youssef\AppData\Local\Programs\Microsoft VS Code Insiders\bin;."/>
     <property name="java.vm.info" value="mixed mode, sharing"/>
@@ -57,8 +64,14 @@
     <property name="java.vm.version" value="21.0.9+7-LTS-338"/>
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
+    <property name="LOGGED_APPLICATION_NAME" value="[hris-backend] "/>
   </properties>
-  <testcase name="rejectsCycleAcrossMultipleRoles" classname="com.hris.auth.service.RoleServiceTest" time="0.073"/>
-  <testcase name="rejectsSelfParent" classname="com.hris.auth.service.RoleServiceTest" time="0.004"/>
-  <testcase name="allowsValidParentAssignment" classname="com.hris.auth.service.RoleServiceTest" time="0.003"/>
+  <testcase name="shouldRetrieveStoredAttachment_WhenPathIsValid" classname="com.hris.leave.service.FileStorageServiceTest" time="0.018">
+    <system-out><![CDATA[2026-04-18T14:32:43.596+01:00  INFO 10780 --- [hris-backend] [           main] c.hris.leave.service.FileStorageService  : File storage root initialized: C:\Users\Youssef\AppData\Local\Temp\junit-16624930289681631147
+]]></system-out>
+  </testcase>
+  <testcase name="shouldFailSafely_WhenAttachmentPathIsInvalid" classname="com.hris.leave.service.FileStorageServiceTest" time="0.004">
+    <system-out><![CDATA[2026-04-18T14:32:43.609+01:00  INFO 10780 --- [hris-backend] [           main] c.hris.leave.service.FileStorageService  : File storage root initialized: C:\Users\Youssef\AppData\Local\Temp\junit-4898084045653091765
+]]></system-out>
+  </testcase>
 </testsuite>
