@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +43,10 @@ public class AdminRequestService {
 
     @Transactional
     public AdminRequest create(CreateAdminRequestDto dto, UUID requesterId) {
+        AdminRequestType requestType = adminRequestTypeRepository.findById(dto.requestTypeId())
+            .filter(AdminRequestType::isActive)
+            .orElseThrow(() -> new EntityNotFoundException("Admin request type not found or inactive"));
+
         String trackingNumber = AdminRequest.generateTrackingNumber();
 
         AdminRequest request = AdminRequest.builder()
@@ -60,7 +65,7 @@ public class AdminRequestService {
         auditLogService.log(requesterId, AuditAction.CREATE, "admin_request",
             saved.getId(), null, saved);
 
-        notificationPublisher.publish(buildSubmittedEvent(saved, requesterId));
+        notificationPublisher.publish(buildSubmittedEvent(saved, requesterId, requestType));
 
         return saved;
     }
@@ -113,6 +118,8 @@ public class AdminRequestService {
 
         auditLogService.log(hrAdminId, AuditAction.REJECT, "admin_request",
             requestId, previous, request);
+
+        notificationPublisher.publish(buildRejectedEvent(request));
     }
 
     @Transactional
@@ -157,9 +164,11 @@ public class AdminRequestService {
             requestId, previous, request);
     }
 
-    private NotificationEvent buildSubmittedEvent(AdminRequest request, UUID requesterId) {
+    private NotificationEvent buildSubmittedEvent(
+            AdminRequest request,
+            UUID requesterId,
+            AdminRequestType type) {
         User user = userRepository.findById(requesterId).orElseThrow();
-        AdminRequestType type = adminRequestTypeRepository.findById(request.getRequestTypeId()).orElseThrow();
 
         String paramsJson = serializeMap(Map.of(
             "requesterName", user.getFirstName() + " " + user.getLastName(),
@@ -178,6 +187,27 @@ public class AdminRequestService {
             .params(paramsJson)
             .locale("fr")
             .routingKey("admin.submitted")
+            .publishedAt(Instant.now())
+            .build();
+    }
+
+    private NotificationEvent buildRejectedEvent(AdminRequest request) {
+        User user = userRepository.findById(request.getRequesterId()).orElseThrow();
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("trackingNumber", request.getTrackingNumber() == null ? "" : request.getTrackingNumber());
+        params.put("rejectionReason", request.getRejectionReason() == null ? "" : request.getRejectionReason());
+
+        String paramsJson = serializeMap(params);
+
+        return NotificationEvent.builder()
+            .eventType(NotificationEventType.ADMIN_REQUEST_REJECTED)
+            .targetUserId(user.getId())
+            .titleKey("admin.rejected.title")
+            .bodyKey("admin.rejected.body")
+            .params(paramsJson)
+            .locale(user.getLocalePreference())
+            .routingKey("admin.rejected")
             .publishedAt(Instant.now())
             .build();
     }

@@ -14,6 +14,8 @@ import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.leave.enums.UrgencyLevel;
+import com.hris.notification.entity.NotificationEvent;
+import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.NotificationPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -75,6 +77,7 @@ class AdminRequestServiceTest {
             AdminRequestType type = new AdminRequestType();
             type.setId(requestTypeId);
             type.setName("Salary Certificate");
+            type.setActive(true);
 
             when(adminRequestRepository.save(any(AdminRequest.class)))
                 .thenAnswer(inv -> {
@@ -100,6 +103,28 @@ class AdminRequestServiceTest {
             verify(adminRequestRepository).save(any(AdminRequest.class));
             verify(auditLogService).log(eq(requesterId), any(), eq("admin_request"), any(), any(), any());
             verify(notificationPublisher).publish(any());
+        }
+
+        @Test
+        @DisplayName("should reject inactive admin request type")
+        void shouldRejectInactiveRequestType() {
+            CreateAdminRequestDto dto = new CreateAdminRequestDto(
+                requestTypeId, "Need salary certificate", UrgencyLevel.NORMAL, null
+            );
+
+            AdminRequestType type = new AdminRequestType();
+            type.setId(requestTypeId);
+            type.setName("Salary Certificate");
+            type.setActive(false);
+
+            when(adminRequestTypeRepository.findById(requestTypeId)).thenReturn(Optional.of(type));
+
+            assertThatThrownBy(() -> adminRequestService.create(dto, requesterId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Admin request type not found or inactive");
+
+            verify(adminRequestRepository, never()).save(any(AdminRequest.class));
+            verify(notificationPublisher, never()).publish(any());
         }
     }
 
@@ -173,16 +198,19 @@ class AdminRequestServiceTest {
 
         @Test
         @DisplayName("should reject an admin request")
-        void shouldRejectRequest() {
+        void shouldRejectRequest() throws Exception {
             UUID requestId = UUID.randomUUID();
             UUID hrAdminId = UUID.randomUUID();
 
             AdminRequest request = AdminRequest.builder()
                 .id(requestId)
+                .requesterId(requesterId)
                 .status(AdminRequestStatus.SUBMITTED)
                 .build();
 
             when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
+            when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
+            when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
             // Act
             adminRequestService.reject(requestId, hrAdminId, "Missing document");
@@ -195,6 +223,11 @@ class AdminRequestServiceTest {
 
             verify(adminRequestRepository).save(request);
             verify(auditLogService).log(eq(hrAdminId), any(), eq("admin_request"), eq(requestId), any(), any());
+            verify(notificationPublisher).publish(argThat(event ->
+                event.getEventType() == NotificationEventType.ADMIN_REQUEST_REJECTED
+                    && requesterId.equals(event.getTargetUserId())
+                    && "admin.rejected.title".equals(event.getTitleKey())
+            ));
         }
 
         @Test
