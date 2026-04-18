@@ -98,13 +98,8 @@ public class AdminRequestService {
     }
 
     @Transactional
-<<<<<<< HEAD
     public void reject(UUID requestId, UUID hrAdminId) {
         AdminRequest request = adminRequestRepository.findByIdForUpdate(requestId)
-=======
-    public void reject(UUID requestId, UUID hrAdminId, String reason) {
-        AdminRequest request = adminRequestRepository.findById(requestId)
->>>>>>> finish/rbac-completion
             .orElseThrow(() -> new EntityNotFoundException("Admin request not found"));
 
         AdminRequest previous = snapshot(request);
