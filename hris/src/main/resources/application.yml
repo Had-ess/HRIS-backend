@@ -96,7 +96,7 @@ management:
         liveness:
           include: livenessState,ping
         readiness:
-          include: readinessState,db,rabbitmq,storage
+          include: readinessState,db,rabbit,storage
   endpoints:
     web:
       exposure:

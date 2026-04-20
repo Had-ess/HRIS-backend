@@ -3,3 +3,4 @@ hris/src.zip
 hris/hris.zip
 *.log
 *.class
+.idea/
