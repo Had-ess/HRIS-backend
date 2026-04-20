@@ -87,6 +87,7 @@ class AdminRequestServiceTest {
                 });
             when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
             when(adminRequestTypeRepository.findById(requestTypeId)).thenReturn(Optional.of(type));
+            when(userRepository.findByRole("ADMINISTRATION")).thenReturn(List.of());
             when(userRepository.findByRole("HR_ADMIN")).thenReturn(List.of(requesterUser));
             when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 

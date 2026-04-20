@@ -29,7 +29,7 @@ public class AnalyticsController {
     private final AuditLogService auditLogService;
 
     @GetMapping("/leave-metrics")
-    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'HR_ADMIN', 'DIRECTOR')")
+    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<List<LeaveMetrics>>> getLeaveMetrics(
             @RequestParam String period, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
@@ -38,13 +38,13 @@ public class AnalyticsController {
     }
 
     @GetMapping("/audit-logs")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.ok(auditLogService.getAll(pageable)));
     }
 
     @GetMapping("/audit-logs/by-resource")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<Page<AuditLog>>> getByResource(
             @RequestParam String resource, Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.ok(auditLogService.getByResource(resource, pageable)));

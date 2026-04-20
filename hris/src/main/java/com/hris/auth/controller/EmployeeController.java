@@ -26,13 +26,13 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<PageResponse<EmployeeResponseDto>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(employeeService.getAll(pageable))));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<EmployeeResponseDto>> create(
             @Valid @RequestBody EmployeeCreateDto dto,
             Authentication authentication) {
@@ -47,7 +47,7 @@ public class EmployeeController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<EmployeeResponseDto>> update(
             @PathVariable UUID id,
             @Valid @RequestBody EmployeeUpdateDto dto,

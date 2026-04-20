@@ -26,14 +26,14 @@ public class LeaveTypeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<LeaveType>> create(@RequestBody LeaveType leaveType) {
         LeaveType saved = leaveTypeRepository.save(leaveType);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<LeaveType>> update(
             @PathVariable UUID id,
             @RequestBody LeaveType leaveType) {
@@ -48,7 +48,7 @@ public class LeaveTypeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
         LeaveType existing = leaveTypeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));

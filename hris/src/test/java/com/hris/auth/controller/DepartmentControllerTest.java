@@ -115,4 +115,30 @@ class DepartmentControllerTest {
         assertThat(response.getBody().data().name()).isEqualTo("HR");
         verify(departmentService).create(any(DepartmentCreateDto.class), eq(userId));
     }
+
+    @Test
+    @DisplayName("administration fallback role can manage departments without explicit permission")
+    void administrationFallbackRoleCanManageDepartments() {
+        UUID userId = UUID.randomUUID();
+        DepartmentDto responseDto = new DepartmentDto(UUID.randomUUID(), "Finance", "FIN", null, true);
+
+        when(departmentService.create(any(DepartmentCreateDto.class), eq(userId))).thenReturn(responseDto);
+
+        PermissionAuthorizationService authorizationService = new PermissionAuthorizationService(
+            userRoleRepository,
+            rolePermissionRepository,
+            permissionRepository
+        );
+        DepartmentController controller = new DepartmentController(departmentService, authorizationService);
+
+        ResponseEntity<ApiResponse<DepartmentDto>> response = controller.create(
+            new DepartmentCreateDto("Finance", "FIN", null, true),
+            TestAuthenticationFactory.jwtAuthentication(userId, "ADMINISTRATION")
+        );
+
+        assertThat(response.getStatusCode().value()).isEqualTo(201);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data().code()).isEqualTo("FIN");
+        verify(departmentService).create(any(DepartmentCreateDto.class), eq(userId));
+    }
 }

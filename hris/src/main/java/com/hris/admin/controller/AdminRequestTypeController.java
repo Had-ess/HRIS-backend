@@ -24,17 +24,17 @@ public class AdminRequestTypeController {
     public ResponseEntity<ApiResponse<List<AdminRequestTypeDto>>> getAll() {
         return ResponseEntity.ok(ApiResponse.ok(repository.findAll().stream().map(mapper::toTypeDto).collect(Collectors.toList())));
     }
-    @PostMapping @PreAuthorize("hasRole('HR_ADMIN')")
+    @PostMapping @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<AdminRequestTypeDto>> create(@RequestBody AdminRequestType type) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(mapper.toTypeDto(repository.save(type))));
     }
-    @PatchMapping("/{id}") @PreAuthorize("hasRole('HR_ADMIN')")
+    @PatchMapping("/{id}") @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<AdminRequestTypeDto>> update(@PathVariable UUID id, @RequestBody AdminRequestType type) {
         AdminRequestType existing = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Type not found"));
         existing.setName(type.getName()); existing.setCode(type.getCode()); existing.setActive(type.isActive());
         return ResponseEntity.ok(ApiResponse.ok(mapper.toTypeDto(repository.save(existing))));
     }
-    @DeleteMapping("/{id}") @PreAuthorize("hasRole('HR_ADMIN')")
+    @DeleteMapping("/{id}") @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
         AdminRequestType existing = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Type not found"));
         existing.setActive(false); repository.save(existing);

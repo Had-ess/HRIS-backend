@@ -27,7 +27,7 @@ public class LeaveBalanceController {
     }
 
     @GetMapping("/employee/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getForEmployee(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getForEmployee(id)));
     }

@@ -33,7 +33,7 @@ public class DashboardController {
     }
 
     @GetMapping("/supervisor")
-    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<SupervisorDashboardDto>> getSupervisorDashboard(Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getSupervisorDashboard(userId)));
@@ -41,13 +41,13 @@ public class DashboardController {
 
     @GetMapping("/hr")
     public ResponseEntity<ApiResponse<HrDashboardDto>> getHrDashboard(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "HR_VIEW", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "HR_VIEW", "HR_ADMIN", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getHrDashboard()));
     }
 
     @GetMapping("/director")
     public ResponseEntity<ApiResponse<DirectorDashboardDto>> getDirectorDashboard(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "DIRECTOR_VIEW", "DIRECTOR", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "DIRECTOR_VIEW", "DIRECTOR", "HR_ADMIN", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getDirectorDashboard()));
     }
 }

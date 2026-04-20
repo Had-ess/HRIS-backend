@@ -39,7 +39,7 @@ public class DepartmentController {
     @PostMapping
     public ResponseEntity<ApiResponse<DepartmentDto>> create(
             @Valid @RequestBody DepartmentCreateDto dto, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "CREATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "CREATE", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(departmentService.create(dto, userId)));
@@ -50,14 +50,14 @@ public class DepartmentController {
             @PathVariable UUID id,
             @Valid @RequestBody DepartmentCreateDto dto,
             Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "UPDATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "UPDATE", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.update(id, dto, userId)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "DELETE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "DELETE", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         departmentService.delete(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
@@ -65,7 +65,7 @@ public class DepartmentController {
 
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<ApiResponse<DepartmentDto>> deactivate(@PathVariable UUID id, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "DEACTIVATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "DEACTIVATE", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.deactivate(id, userId)));
     }

@@ -176,7 +176,8 @@ public class AdminRequestService {
             "requestType", type.getName()
         ));
 
-        List<User> hrAdmins = userRepository.findByRole("HR_ADMIN");
+        List<User> administrationUsers = userRepository.findByRole("ADMINISTRATION");
+        List<User> hrAdmins = administrationUsers.isEmpty() ? userRepository.findByRole("HR_ADMIN") : administrationUsers;
         UUID targetUserId = hrAdmins.isEmpty() ? requesterId : hrAdmins.get(0).getId();
 
         return NotificationEvent.builder()

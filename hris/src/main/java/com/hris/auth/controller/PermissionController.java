@@ -33,7 +33,7 @@ public class PermissionController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<PermissionResponseDto>>> getAll(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PERMISSION", "READ", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "PERMISSION", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(permissionService.getAll()));
     }
 
@@ -41,7 +41,7 @@ public class PermissionController {
     public ResponseEntity<ApiResponse<PermissionResponseDto>> getById(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PERMISSION", "READ", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "PERMISSION", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(permissionService.getById(id)));
     }
 
@@ -49,7 +49,7 @@ public class PermissionController {
     public ResponseEntity<ApiResponse<PermissionResponseDto>> create(
             @Valid @RequestBody PermissionCreateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PERMISSION", "CREATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "PERMISSION", "CREATE", "ADMINISTRATION");
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(permissionService.create(dto)));
     }
@@ -59,13 +59,13 @@ public class PermissionController {
             @PathVariable UUID id,
             @Valid @RequestBody PermissionUpdateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PERMISSION", "UPDATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "PERMISSION", "UPDATE", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(permissionService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id, Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PERMISSION", "DELETE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "PERMISSION", "DELETE", "ADMINISTRATION");
         permissionService.delete(id);
         return ResponseEntity.noContent().build();
     }

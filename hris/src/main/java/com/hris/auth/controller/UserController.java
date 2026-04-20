@@ -45,7 +45,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<Role>>> getUserRoles(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "USER", "READ", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "USER", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(userRoleAssignmentService.getRoles(id)));
     }
 
@@ -54,7 +54,7 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserRoleAssignmentDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "ADMINISTRATION");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(userRoleAssignmentService.assignRole(id, dto.roleId(), actorId)));
     }
@@ -64,7 +64,7 @@ public class UserController {
             @PathVariable UUID id,
             @PathVariable UUID roleId,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "ADMINISTRATION");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         userRoleAssignmentService.removeRole(id, roleId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));

@@ -51,14 +51,14 @@ public class AdminRequestController {
     public ResponseEntity<ApiResponse<PageResponse<AdminRequestResponseDto>>> getIncoming(
             Pageable pageable,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN", "ADMINISTRATION");
         Page<AdminRequest> page = adminRequestService.getIncoming(pageable);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(adminRequestMapper::toDto))));
     }
 
     @PatchMapping("/{id}/process")
     public ResponseEntity<ApiResponse<Void>> process(@PathVariable UUID id, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         adminRequestService.process(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
@@ -66,7 +66,7 @@ public class AdminRequestController {
 
     @PatchMapping("/{id}/in-progress")
     public ResponseEntity<ApiResponse<Void>> markInProgress(@PathVariable UUID id, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         adminRequestService.markInProgress(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
@@ -77,7 +77,7 @@ public class AdminRequestController {
             @PathVariable UUID id,
             @RequestBody(required = false) AdminRequestRejectDto dto,
             Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "REJECT", "HR_ADMIN");
+        permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "REJECT", "HR_ADMIN", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         adminRequestService.reject(id, userId, dto != null ? dto.reason() : null);
         return ResponseEntity.ok(ApiResponse.ok(null));

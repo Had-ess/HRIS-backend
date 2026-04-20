@@ -39,7 +39,7 @@ public class RoleController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Role>> create(@RequestBody Role role, Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ROLE", "CREATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ROLE", "CREATE", "ADMINISTRATION");
         Role saved = roleService.create(role);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
     }
@@ -49,13 +49,13 @@ public class RoleController {
             @PathVariable UUID id,
             @RequestBody Role role,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ROLE", "UPDATE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ROLE", "UPDATE", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(roleService.update(id, role)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id, Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ROLE", "DELETE", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ROLE", "DELETE", "ADMINISTRATION");
         roleService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
@@ -64,7 +64,7 @@ public class RoleController {
     public ResponseEntity<ApiResponse<List<PermissionResponseDto>>> getPermissions(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(rolePermissionService.getPermissions(id)));
     }
 
@@ -73,7 +73,7 @@ public class RoleController {
             @PathVariable UUID id,
             @Valid @RequestBody RolePermissionsUpdateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "ADMINISTRATION");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(
             rolePermissionService.assignPermissions(id, dto.permissionIds(), actorId)));
@@ -84,7 +84,7 @@ public class RoleController {
             @PathVariable UUID id,
             @PathVariable UUID permissionId,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "HR_ADMIN");
+        permissionAuthorizationService.authorize(authentication, "ROLE", "ASSIGN_PERMISSION", "ADMINISTRATION");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         rolePermissionService.removePermission(id, permissionId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));

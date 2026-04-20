@@ -25,7 +25,7 @@ public class ScopeFilterResolver {
     public ScopeFilter resolve(UUID userId) {
         List<UserRole> roles = userRoleRepository.findByUserIdAndIsActiveTrue(userId);
 
-        if (hasRole(roles, "HR_ADMIN") || hasRole(roles, "DIRECTOR")) {
+        if (hasRole(roles, "ADMINISTRATION") || hasRole(roles, "HR_ADMIN") || hasRole(roles, "DIRECTOR")) {
             return new ScopeFilter(ScopeType.ALL, null);
         }
 

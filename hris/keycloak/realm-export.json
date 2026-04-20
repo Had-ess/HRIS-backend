@@ -12,6 +12,12 @@
   "roles": {
     "realm": [
       {
+        "name": "ADMINISTRATION",
+        "description": "Administration role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
         "name": "EMPLOYEE",
         "description": "Standard employee role",
         "composite": false,
@@ -77,6 +83,24 @@
     }
   ],
   "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@hris.local",
+      "firstName": "Admin",
+      "lastName": "Office",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "administration",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMINISTRATION"
+      ]
+    },
     {
       "username": "ahmed",
       "enabled": true,

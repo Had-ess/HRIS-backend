@@ -112,6 +112,29 @@ class DashboardControllerTest {
     }
 
     @Test
+    @DisplayName("administration fallback role can access director dashboard")
+    void administrationFallbackRoleCanAccessDirectorDashboard() {
+        UUID userId = UUID.randomUUID();
+        DashboardController controller = new DashboardController(
+            dashboardService,
+            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+        );
+        when(dashboardService.getDirectorDashboard()).thenReturn(
+            new DirectorDashboardDto(11L, 4L, 3L, 2L,
+                new LeaveMetricsSummaryDto("2026-04", 10, 8, 1, 1.5), 5L)
+        );
+
+        ResponseEntity<ApiResponse<DirectorDashboardDto>> response = controller.getDirectorDashboard(
+            TestAuthenticationFactory.jwtAuthentication(userId, "ADMINISTRATION")
+        );
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data().totalEmployees()).isEqualTo(11L);
+        verify(dashboardService).getDirectorDashboard();
+    }
+
+    @Test
     @DisplayName("employee dashboard endpoint returns wrapped payload")
     void employeeDashboardEndpointReturnsWrappedPayload() {
         UUID userId = UUID.randomUUID();
