@@ -87,31 +87,108 @@
       "username": "admin",
       "enabled": true,
       "emailVerified": true,
-      "email": "admin@hris.local",
-      "firstName": "Admin",
-      "lastName": "Office",
+      "email": "admin@demo.hris.local",
+      "firstName": "Nadia",
+      "lastName": "Ben Salem",
       "credentials": [
         {
           "type": "password",
-          "value": "administration",
+          "value": "Admin123!",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "ADMINISTRATION"
+        "ADMINISTRATION",
+        "EMPLOYEE"
       ]
     },
     {
-      "username": "ahmed",
+      "username": "hr.admin",
       "enabled": true,
       "emailVerified": true,
-      "email": "ahmed@hris.local",
-      "firstName": "Ahmed",
-      "lastName": "Benali",
+      "email": "hr.admin@demo.hris.local",
+      "firstName": "Sami",
+      "lastName": "Khadhraoui",
       "credentials": [
         {
           "type": "password",
-          "value": "employee",
+          "value": "HrAdmin123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "HR_ADMIN",
+        "EMPLOYEE"
+      ]
+    },
+    {
+      "username": "director",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "director@demo.hris.local",
+      "firstName": "Leila",
+      "lastName": "Mansour",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Director123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DIRECTOR",
+        "EMPLOYEE"
+      ]
+    },
+    {
+      "username": "eng.manager",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "manager.engineering@demo.hris.local",
+      "firstName": "Karim",
+      "lastName": "Jlassi",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Manager123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DEPT_MANAGER",
+        "EMPLOYEE"
+      ]
+    },
+    {
+      "username": "ops.supervisor",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "supervisor.operations@demo.hris.local",
+      "firstName": "Amine",
+      "lastName": "Zouari",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Supervisor123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PROJECT_SUPERVISOR",
+        "EMPLOYEE"
+      ]
+    },
+    {
+      "username": "developer",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "developer@demo.hris.local",
+      "firstName": "Yasmine",
+      "lastName": "Trabelsi",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Employee123!",
           "temporary": false
         }
       ],
@@ -120,75 +197,75 @@
       ]
     },
     {
-      "username": "sara",
+      "username": "analyst",
       "enabled": true,
       "emailVerified": true,
-      "email": "sara@hris.local",
-      "firstName": "Sara",
-      "lastName": "Idrissi",
+      "email": "analyst@demo.hris.local",
+      "firstName": "Walid",
+      "lastName": "Mrad",
       "credentials": [
         {
           "type": "password",
-          "value": "dept_manager",
+          "value": "Employee123!",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "DEPT_MANAGER"
+        "EMPLOYEE"
       ]
     },
     {
-      "username": "nour",
+      "username": "product",
       "enabled": true,
       "emailVerified": true,
-      "email": "nour@hris.local",
-      "firstName": "Nour",
-      "lastName": "Elhadi",
+      "email": "product@demo.hris.local",
+      "firstName": "Rim",
+      "lastName": "Ayedi",
       "credentials": [
         {
           "type": "password",
-          "value": "project_supervisor",
+          "value": "Employee123!",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "PROJECT_SUPERVISOR"
+        "EMPLOYEE"
       ]
     },
     {
-      "username": "rania",
+      "username": "office",
       "enabled": true,
       "emailVerified": true,
-      "email": "rania@hris.local",
-      "firstName": "Rania",
-      "lastName": "Mansouri",
+      "email": "office@demo.hris.local",
+      "firstName": "Hedi",
+      "lastName": "Gharbi",
       "credentials": [
         {
           "type": "password",
-          "value": "hr_admin",
+          "value": "Employee123!",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "HR_ADMIN"
+        "EMPLOYEE"
       ]
     },
     {
-      "username": "karim",
-      "enabled": true,
+      "username": "former.employee",
+      "enabled": false,
       "emailVerified": true,
-      "email": "karim@hris.local",
-      "firstName": "Karim",
-      "lastName": "Tazi",
+      "email": "former.employee@demo.hris.local",
+      "firstName": "Mouna",
+      "lastName": "Bouazizi",
       "credentials": [
         {
           "type": "password",
-          "value": "director",
+          "value": "Employee123!",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "DIRECTOR"
+        "EMPLOYEE"
       ]
     }
   ]

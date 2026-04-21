@@ -21,6 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserProvisioningService {
 
+    private static final String SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX = "KC_REPLACE_";
+
     private final UserRepository userRepository;
 
     /**
@@ -37,28 +39,22 @@ public class UserProvisioningService {
         Optional<User> existing = userRepository.findByKeycloakId(keycloakId);
 
         if (existing.isPresent()) {
-            User user = existing.get();
-            // Update last login
-            user.setLastLogin(Instant.now());
-            // Sync profile if changed
-            boolean changed = false;
-            if (email != null && !email.equals(user.getEmail())) {
-                user.setEmail(email);
-                changed = true;
+            return syncAndReturn(existing.get(), keycloakId, email, firstName, lastName);
+        }
+
+        if (email != null && !email.isBlank()) {
+            Optional<User> existingByEmail = userRepository.findByEmail(email);
+            if (existingByEmail.isPresent()) {
+                User user = existingByEmail.get();
+
+                if (!canAdoptKeycloakIdentity(user, keycloakId)) {
+                    throw new IllegalStateException(
+                        "Existing user email is already linked to a different Keycloak identity");
+                }
+
+                log.info("Aligning seeded/local user {} with Keycloak subject {}", email, keycloakId);
+                return syncAndReturn(user, keycloakId, email, firstName, lastName);
             }
-            if (firstName != null && !firstName.equals(user.getFirstName())) {
-                user.setFirstName(firstName);
-                changed = true;
-            }
-            if (lastName != null && !lastName.equals(user.getLastName())) {
-                user.setLastName(lastName);
-                changed = true;
-            }
-            if (changed) {
-                log.debug("Synced profile for user: {}", email);
-            }
-            userRepository.save(user);
-            return user.getId();
         }
 
         // Create new user (JIT provisioning)
@@ -75,5 +71,47 @@ public class UserProvisioningService {
         User saved = userRepository.save(newUser);
         log.info("JIT provisioned new user: {} (keycloakId: {})", saved.getEmail(), keycloakId);
         return saved.getId();
+    }
+
+    private UUID syncAndReturn(
+            User user,
+            String keycloakId,
+            String email,
+            String firstName,
+            String lastName) {
+        user.setLastLogin(Instant.now());
+
+        boolean changed = false;
+        if (keycloakId != null && !keycloakId.equals(user.getKeycloakId())) {
+            user.setKeycloakId(keycloakId);
+            changed = true;
+        }
+        if (email != null && !email.equals(user.getEmail())) {
+            user.setEmail(email);
+            changed = true;
+        }
+        if (firstName != null && !firstName.equals(user.getFirstName())) {
+            user.setFirstName(firstName);
+            changed = true;
+        }
+        if (lastName != null && !lastName.equals(user.getLastName())) {
+            user.setLastName(lastName);
+            changed = true;
+        }
+
+        if (changed) {
+            log.debug("Synced profile for user: {}", user.getEmail());
+        }
+
+        userRepository.save(user);
+        return user.getId();
+    }
+
+    private boolean canAdoptKeycloakIdentity(User user, String keycloakId) {
+        String existingKeycloakId = user.getKeycloakId();
+        return existingKeycloakId == null
+            || existingKeycloakId.isBlank()
+            || existingKeycloakId.equals(keycloakId)
+            || existingKeycloakId.startsWith(SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX);
     }
 }

@@ -31,10 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserProvisioningService userProvisioningService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -44,26 +44,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 UUID localUserId = userProvisioningService.resolveUserId(originalJwt);
 
-                // Build a new JWT with local_user_id claim
                 Map<String, Object> claims = new HashMap<>(originalJwt.getClaims());
                 claims.put("local_user_id", localUserId.toString());
 
                 Jwt enrichedJwt = Jwt.withTokenValue(originalJwt.getTokenValue())
-                    .headers(h -> h.putAll(originalJwt.getHeaders()))
-                    .claims(c -> c.putAll(claims))
+                    .headers(headers -> headers.putAll(originalJwt.getHeaders()))
+                    .claims(jwtClaims -> jwtClaims.putAll(claims))
                     .build();
 
                 JwtAuthenticationToken enrichedAuth = new JwtAuthenticationToken(
-                    enrichedJwt, jwtAuth.getAuthorities(), localUserId.toString());
+                    enrichedJwt,
+                    jwtAuth.getAuthorities(),
+                    localUserId.toString()
+                );
 
                 SecurityContextHolder.getContext().setAuthentication(enrichedAuth);
+            } catch (IllegalStateException e) {
+                SecurityContextHolder.clearContext();
+                log.warn("Rejecting request after JWT user provisioning conflict", e);
+                response.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+                return;
             } catch (Exception e) {
                 SecurityContextHolder.clearContext();
-                log.warn("Rejecting request after JWT user provisioning failed", e);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Authentication provisioning failed");
+                log.error("Rejecting request after unexpected JWT user provisioning failure", e);
+                response.sendError(
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Authentication provisioning failed"
+                );
                 return;
-                // Don't block request — let security handle it downstream
             }
         }
 
@@ -72,7 +80,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Skip public/health endpoints
         String path = request.getRequestURI();
         return path.startsWith("/actuator") || path.equals("/");
     }
