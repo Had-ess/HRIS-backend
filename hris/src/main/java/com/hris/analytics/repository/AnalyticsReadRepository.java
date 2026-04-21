@@ -56,11 +56,23 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
         WHERE lr.submittedAt >= :from
           AND lr.submittedAt < :to
           AND (:departmentId IS NULL OR e.departmentId = :departmentId)
+          AND (
+            :applyProjectScope = false OR EXISTS (
+                SELECT 1 FROM ProjectAssignment pa
+                WHERE pa.employeeId = e.id
+                  AND pa.projectId IN :projectIds
+                  AND pa.isActive = true
+                  AND pa.startDate <= lr.endDate
+                  AND (pa.endDate IS NULL OR pa.endDate >= lr.startDate)
+            )
+          )
         """)
     LeaveMetricsCountsView getLeaveMetricsCounts(
         @Param("from") Instant from,
         @Param("to") Instant to,
         @Param("departmentId") UUID departmentId,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds,
         @Param("approvedStatus") LeaveStatus approvedStatus,
         @Param("rejectedStatus") LeaveStatus rejectedStatus
     );
@@ -77,11 +89,23 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
           AND lr.status IN :completedStatuses
           AND aw.completedAt IS NOT NULL
           AND (:departmentId IS NULL OR e.departmentId = :departmentId)
+          AND (
+            :applyProjectScope = false OR EXISTS (
+                SELECT 1 FROM ProjectAssignment pa
+                WHERE pa.employeeId = e.id
+                  AND pa.projectId IN :projectIds
+                  AND pa.isActive = true
+                  AND pa.startDate <= lr.endDate
+                  AND (pa.endDate IS NULL OR pa.endDate >= lr.startDate)
+            )
+          )
         """)
     List<LeaveProcessingWindowView> findCompletedLeaveProcessingWindows(
         @Param("from") Instant from,
         @Param("to") Instant to,
         @Param("departmentId") UUID departmentId,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds,
         @Param("completedStatuses") Collection<LeaveStatus> completedStatuses
     );
 
@@ -93,11 +117,24 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
             COALESCE(SUM(CASE WHEN e.status = :terminatedStatus THEN 1 ELSE 0 END), 0) AS departures
         FROM Employee e
         WHERE (:departmentId IS NULL OR e.departmentId = :departmentId)
+          AND (
+            :applyProjectScope = false OR EXISTS (
+                SELECT 1 FROM ProjectAssignment pa
+                WHERE pa.employeeId = e.id
+                  AND pa.projectId IN :projectIds
+                  AND pa.isActive = true
+                  AND pa.startDate <= :today
+                  AND (pa.endDate IS NULL OR pa.endDate >= :today)
+            )
+          )
         """)
     HeadcountMetricsView getHeadcountMetrics(
         @Param("departmentId") UUID departmentId,
         @Param("monthStart") LocalDate monthStart,
         @Param("nextMonthStart") LocalDate nextMonthStart,
+        @Param("today") LocalDate today,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds,
         @Param("activeStatus") EmployeeStatus activeStatus,
         @Param("terminatedStatus") EmployeeStatus terminatedStatus
     );
@@ -115,12 +152,15 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
            AND (pa.endDate IS NULL OR pa.endDate >= :today)
         LEFT JOIN Employee e ON e.id = pa.employeeId
         WHERE (:departmentId IS NULL OR e.departmentId = :departmentId OR pa.id IS NULL)
+          AND (:applyProjectScope = false OR p.id IN :projectIds)
         GROUP BY p.id, p.name
         ORDER BY p.name ASC
         """)
     List<ProjectTeamSizeView> findProjectTeamSizes(
         @Param("today") LocalDate today,
-        @Param("departmentId") UUID departmentId
+        @Param("departmentId") UUID departmentId,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds
     );
 
     @Query("""
@@ -143,12 +183,15 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
            AND lr.startDate <= COALESCE(pa.endDate, lr.endDate)
            AND lr.endDate >= pa.startDate
         WHERE (:departmentId IS NULL OR e.departmentId = :departmentId)
+          AND (:applyProjectScope = false OR p.id IN :projectIds)
         GROUP BY p.id, p.name
         ORDER BY p.name ASC
         """)
     List<ProjectAbsenceImpactView> findProjectAbsenceImpact(
         @Param("today") LocalDate today,
         @Param("departmentId") UUID departmentId,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds,
         @Param("approvedStatus") LeaveStatus approvedStatus
     );
 }

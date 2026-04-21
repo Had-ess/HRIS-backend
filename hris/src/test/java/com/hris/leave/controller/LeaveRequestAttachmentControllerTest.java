@@ -2,6 +2,7 @@ package com.hris.leave.controller;
 
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.mapper.LeaveMapper;
+import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.security.JwtAuthenticationFilter;
@@ -50,6 +51,8 @@ class LeaveRequestAttachmentControllerTest {
     private LeaveRequestService leaveRequestService;
     @MockBean
     private LeaveMapper leaveMapper;
+    @MockBean
+    private LeaveTypeRepository leaveTypeRepository;
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean

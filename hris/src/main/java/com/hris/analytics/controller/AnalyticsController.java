@@ -31,7 +31,7 @@ public class AnalyticsController {
     private final AuditLogService auditLogService;
 
     @GetMapping("/leave-metrics")
-    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
+    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<LeaveMetricsDto>> getLeaveMetrics(Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         ScopeFilter scope = scopeFilterResolver.resolve(userId);
@@ -39,7 +39,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/headcount")
-    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
+    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<HeadcountMetricsDto>> getHeadcountMetrics(Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         ScopeFilter scope = scopeFilterResolver.resolve(userId);
@@ -47,7 +47,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/absence-impact")
-    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
+    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<List<AbsenceImpactDto>>> getAbsenceImpact(Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         ScopeFilter scope = scopeFilterResolver.resolve(userId);

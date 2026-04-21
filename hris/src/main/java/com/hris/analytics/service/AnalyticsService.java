@@ -33,6 +33,13 @@ public class AnalyticsService {
     @Transactional(readOnly = true)
     public LeaveMetricsDto getLeaveMetrics(ScopeFilter scope) {
         UUID departmentId = toDepartmentScope(scope);
+        boolean applyProjectScope = scope.type() == ScopeType.PROJECT;
+        List<UUID> projectIds = toProjectScope(scope);
+
+        if (applyProjectScope && projectIds.isEmpty()) {
+            return new LeaveMetricsDto(0, 0, 0, 0.0);
+        }
+
         YearMonth currentMonth = YearMonth.now();
         Instant from = currentMonth.atDay(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC);
         Instant to = currentMonth.plusMonths(1).atDay(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC);
@@ -41,6 +48,8 @@ public class AnalyticsService {
             from,
             to,
             departmentId,
+            applyProjectScope,
+            projectIds,
             LeaveStatus.APPROVED,
             LeaveStatus.REJECTED
         );
@@ -50,6 +59,8 @@ public class AnalyticsService {
                 from,
                 to,
                 departmentId,
+                applyProjectScope,
+                projectIds,
                 EnumSet.of(LeaveStatus.APPROVED, LeaveStatus.REJECTED)
             );
 
@@ -69,14 +80,25 @@ public class AnalyticsService {
     @Transactional(readOnly = true)
     public HeadcountMetricsDto getHeadcountMetrics(ScopeFilter scope) {
         UUID departmentId = toDepartmentScope(scope);
+        boolean applyProjectScope = scope.type() == ScopeType.PROJECT;
+        List<UUID> projectIds = toProjectScope(scope);
+
+        if (applyProjectScope && projectIds.isEmpty()) {
+            return new HeadcountMetricsDto(0, 0, 0, 0);
+        }
+
         YearMonth currentMonth = YearMonth.now();
         LocalDate monthStart = currentMonth.atDay(1);
         LocalDate nextMonthStart = currentMonth.plusMonths(1).atDay(1);
+        LocalDate today = LocalDate.now();
 
         AnalyticsReadRepository.HeadcountMetricsView view = analyticsReadRepository.getHeadcountMetrics(
             departmentId,
             monthStart,
             nextMonthStart,
+            today,
+            applyProjectScope,
+            projectIds,
             EmployeeStatus.ACTIVE,
             EmployeeStatus.TERMINATED
         );
@@ -93,16 +115,23 @@ public class AnalyticsService {
     public List<AbsenceImpactDto> getAbsenceImpact(ScopeFilter scope) {
         UUID departmentId = toDepartmentScope(scope);
         LocalDate today = LocalDate.now();
+        boolean applyProjectScope = scope.type() == ScopeType.PROJECT;
+        List<UUID> projectIds = toProjectScope(scope);
+
+        if (applyProjectScope && projectIds.isEmpty()) {
+            return List.of();
+        }
 
         Map<UUID, AnalyticsReadRepository.ProjectAbsenceImpactView> impactByProject =
-            analyticsReadRepository.findProjectAbsenceImpact(today, departmentId, LeaveStatus.APPROVED)
+            analyticsReadRepository.findProjectAbsenceImpact(
+                    today, departmentId, applyProjectScope, projectIds, LeaveStatus.APPROVED)
                 .stream()
                 .collect(Collectors.toMap(
                     AnalyticsReadRepository.ProjectAbsenceImpactView::getProjectId,
                     Function.identity()
                 ));
 
-        return analyticsReadRepository.findProjectTeamSizes(today, departmentId).stream()
+        return analyticsReadRepository.findProjectTeamSizes(today, departmentId, applyProjectScope, projectIds).stream()
             .map(team -> {
                 AnalyticsReadRepository.ProjectAbsenceImpactView impact = impactByProject.get(team.getProjectId());
                 long totalAbsenceDays = impact != null ? impact.getTotalAbsenceDays() : 0L;
@@ -126,6 +155,10 @@ public class AnalyticsService {
 
     private UUID toDepartmentScope(ScopeFilter scope) {
         return scope.type() == ScopeType.DEPARTMENT ? scope.entityId() : null;
+    }
+
+    private List<UUID> toProjectScope(ScopeFilter scope) {
+        return scope.type() == ScopeType.PROJECT ? scope.entityIds() : List.of();
     }
 
     private long computeDays(Instant submittedAt, Instant completedAt) {

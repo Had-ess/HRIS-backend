@@ -9,8 +9,12 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface LeaveMapper {
+    @Mapping(target = "leaveTypeCode", ignore = true)
+    @Mapping(target = "leaveTypeName", ignore = true)
     LeaveRequestResponseDto toDto(LeaveRequest request);
 
+    @Mapping(target = "leaveTypeCode", ignore = true)
+    @Mapping(target = "leaveTypeName", ignore = true)
     @Mapping(target = "availableDays", expression = "java(balance.getAvailableDays())")
     LeaveBalanceDto toBalanceDto(LeaveBalance balance);
 }

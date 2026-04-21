@@ -7,10 +7,11 @@ import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.dto.LeaveBalanceDto;
 import com.hris.leave.entity.LeaveBalance;
+import com.hris.leave.entity.LeaveType;
 import com.hris.leave.entity.LeavePolicy;
-import com.hris.leave.mapper.LeaveMapper;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
+import com.hris.leave.repository.LeaveTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Slf4j
 @Service
@@ -32,7 +34,7 @@ public class LeaveBalanceService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeavePolicyRepository leavePolicyRepository;
     private final EmployeeRepository employeeRepository;
-    private final LeaveMapper leaveMapper;
+    private final LeaveTypeRepository leaveTypeRepository;
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
@@ -40,20 +42,14 @@ public class LeaveBalanceService {
         Employee employee = employeeRepository.findByUserId(userId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        return leaveBalanceRepository.findByEmployeeIdAndYear(
-                employee.getId(), LocalDate.now().getYear())
-            .stream()
-            .map(leaveMapper::toBalanceDto)
-            .collect(Collectors.toList());
+        return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(
+            employee.getId(), LocalDate.now().getYear()));
     }
 
     @Transactional(readOnly = true)
     public List<LeaveBalanceDto> getForEmployee(UUID employeeId) {
-        return leaveBalanceRepository.findByEmployeeIdAndYear(
-                employeeId, LocalDate.now().getYear())
-            .stream()
-            .map(leaveMapper::toBalanceDto)
-            .collect(Collectors.toList());
+        return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(
+            employeeId, LocalDate.now().getYear()));
     }
 
     @Scheduled(cron = "0 0 3 1 1 *") // January 1st at 3 AM
@@ -97,5 +93,34 @@ public class LeaveBalanceService {
         log.info("Rolled over {} leave balances to year {}", previousBalances.size(), currentYear);
         auditLogService.log(null, AuditAction.CREATE, "leave_balance_rollover",
             null, null, Map.of("year", currentYear, "count", previousBalances.size()));
+    }
+
+    private List<LeaveBalanceDto> toBalanceDtos(List<LeaveBalance> balances) {
+        Map<UUID, LeaveType> leaveTypesById = leaveTypeRepository.findAllById(
+                balances.stream()
+                    .map(LeaveBalance::getLeaveTypeId)
+                    .collect(Collectors.toSet()))
+            .stream()
+            .collect(Collectors.toMap(LeaveType::getId, Function.identity()));
+
+        return balances.stream()
+            .map(balance -> toBalanceDto(balance, leaveTypesById.get(balance.getLeaveTypeId())))
+            .collect(Collectors.toList());
+    }
+
+    private LeaveBalanceDto toBalanceDto(LeaveBalance balance, LeaveType leaveType) {
+        return new LeaveBalanceDto(
+            balance.getId(),
+            balance.getEmployeeId(),
+            balance.getLeaveTypeId(),
+            leaveType != null ? leaveType.getCode() : null,
+            leaveType != null ? leaveType.getName() : null,
+            balance.getYear(),
+            balance.getTotalDays(),
+            balance.getUsedDays(),
+            balance.getPendingDays(),
+            balance.getCarryOverDays(),
+            balance.getAvailableDays()
+        );
     }
 }

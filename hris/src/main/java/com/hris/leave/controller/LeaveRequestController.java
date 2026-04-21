@@ -5,9 +5,10 @@ import com.hris.common.PageResponse;
 import com.hris.leave.dto.CreateLeaveRequestDto;
 import com.hris.leave.dto.FileAttachmentDto;
 import com.hris.leave.dto.LeaveRequestResponseDto;
+import com.hris.leave.entity.LeaveType;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.enums.LeaveStatus;
-import com.hris.leave.mapper.LeaveMapper;
+import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.security.SecurityUtils;
@@ -27,7 +28,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/leave-requests")
@@ -35,7 +40,7 @@ import java.util.UUID;
 public class LeaveRequestController {
 
     private final LeaveRequestService leaveRequestService;
-    private final LeaveMapper leaveMapper;
+    private final LeaveTypeRepository leaveTypeRepository;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -44,7 +49,7 @@ public class LeaveRequestController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(leaveMapper.toDto(request)));
+            .body(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()))));
     }
 
     @GetMapping
@@ -54,7 +59,16 @@ public class LeaveRequestController {
             Pageable pageable, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         Page<LeaveRequest> page = leaveRequestService.getMyRequests(userId, status, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(leaveMapper::toDto))));
+        Map<UUID, LeaveType> leaveTypesById = leaveTypeRepository.findAllById(
+                page.getContent().stream()
+                    .map(LeaveRequest::getLeaveTypeId)
+                    .collect(Collectors.toSet()))
+            .stream()
+            .collect(Collectors.toMap(LeaveType::getId, Function.identity()));
+
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
+            page.map(request -> toDto(request, leaveTypesById.get(request.getLeaveTypeId())))
+        )));
     }
 
     @GetMapping("/{id}")
@@ -63,7 +77,7 @@ public class LeaveRequestController {
             @PathVariable UUID id, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.getById(id, userId);
-        return ResponseEntity.ok(ApiResponse.ok(leaveMapper.toDto(request)));
+        return ResponseEntity.ok(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()))));
     }
 
     @DeleteMapping("/{id}")
@@ -134,5 +148,26 @@ public class LeaveRequestController {
         } catch (IllegalArgumentException e) {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
+    }
+
+    private LeaveType findLeaveType(UUID leaveTypeId) {
+        return leaveTypeRepository.findById(leaveTypeId).orElse(null);
+    }
+
+    private LeaveRequestResponseDto toDto(LeaveRequest request, LeaveType leaveType) {
+        return new LeaveRequestResponseDto(
+            request.getId(),
+            request.getEmployeeId(),
+            request.getLeaveTypeId(),
+            leaveType != null ? leaveType.getCode() : null,
+            leaveType != null ? leaveType.getName() : null,
+            request.getStartDate(),
+            request.getEndDate(),
+            request.getWorkingDays(),
+            request.getUrgencyLevel(),
+            request.getStatus(),
+            request.getComment(),
+            request.getSubmittedAt()
+        );
     }
 }

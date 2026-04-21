@@ -1,5 +1,6 @@
 package com.hris.approval.controller;
 
+import com.hris.approval.dto.ApprovalCommentDto;
 import com.hris.approval.dto.ApprovalDecisionDto;
 import com.hris.approval.dto.ApprovalStepResponseDto;
 import com.hris.approval.entity.ApprovalStep;
@@ -39,10 +40,10 @@ public class ApprovalStepController {
     @PatchMapping("/{id}/approve")
     public ResponseEntity<ApiResponse<Void>> approve(
             @PathVariable UUID id,
-            @Valid @RequestBody ApprovalDecisionDto dto,
+            @RequestBody(required = false) ApprovalCommentDto dto,
             Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
-        approvalStepService.approve(id, dto.comment(), userId);
+        approvalStepService.approve(id, dto != null ? dto.comment() : null, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 

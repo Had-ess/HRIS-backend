@@ -5,8 +5,9 @@ import com.hris.admin.entity.AdminRequestType;
 import com.hris.admin.enums.AdminRequestStatus;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.admin.repository.AdminRequestTypeRepository;
-import com.hris.analytics.entity.LeaveMetrics;
-import com.hris.analytics.repository.LeaveMetricsRepository;
+import com.hris.analytics.dto.LeaveMetricsDto;
+import com.hris.analytics.enums.ScopeType;
+import com.hris.analytics.service.AnalyticsService;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
 import com.hris.approval.enums.StepStatus;
@@ -15,6 +16,7 @@ import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.common.ScopeFilter;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.dashboard.dto.AdminRequestSummaryDto;
 import com.hris.dashboard.dto.ApprovalSummaryDto;
@@ -40,7 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,7 @@ public class DashboardService {
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final DepartmentRepository departmentRepository;
     private final ProjectRepository projectRepository;
-    private final LeaveMetricsRepository leaveMetricsRepository;
+    private final AnalyticsService analyticsService;
 
     @Transactional(readOnly = true)
     public EmployeeDashboardDto getEmployeeDashboard(UUID userId) {
@@ -128,15 +129,21 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
-        String currentPeriod = YearMonth.now().toString();
-        List<LeaveMetrics> metrics = leaveMetricsRepository.findByPeriod(currentPeriod);
+        LeaveMetricsDto liveLeaveMetrics = analyticsService.getLeaveMetrics(
+            new ScopeFilter(ScopeType.ALL, null, List.of()));
 
         return new DirectorDashboardDto(
             employeeRepository.count(),
             departmentRepository.count(),
             projectRepository.countByStatus(ProjectStatus.ACTIVE),
             approvalStepRepository.countByStatus(StepStatus.PENDING),
-            summarizeLeaveMetrics(currentPeriod, metrics),
+            new LeaveMetricsSummaryDto(
+                "LIVE",
+                Math.toIntExact(liveLeaveMetrics.totalRequests()),
+                Math.toIntExact(liveLeaveMetrics.approvedCount()),
+                Math.toIntExact(liveLeaveMetrics.rejectedCount()),
+                liveLeaveMetrics.averageProcessingDays()
+            ),
             adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES)
         );
     }
@@ -220,27 +227,5 @@ public class DashboardService {
                 );
             })
             .toList();
-    }
-
-    private LeaveMetricsSummaryDto summarizeLeaveMetrics(String period, List<LeaveMetrics> metrics) {
-        if (metrics.isEmpty()) {
-            return new LeaveMetricsSummaryDto(period, 0, 0, 0, 0.0);
-        }
-
-        int totalRequests = metrics.stream().mapToInt(LeaveMetrics::getTotalRequests).sum();
-        int approvedCount = metrics.stream().mapToInt(LeaveMetrics::getApprovedCount).sum();
-        int rejectedCount = metrics.stream().mapToInt(LeaveMetrics::getRejectedCount).sum();
-        double avgProcessingDays = metrics.stream()
-            .mapToDouble(LeaveMetrics::getAvgProcessingDays)
-            .average()
-            .orElse(0.0);
-
-        return new LeaveMetricsSummaryDto(
-            period,
-            totalRequests,
-            approvedCount,
-            rejectedCount,
-            avgProcessingDays
-        );
     }
 }
