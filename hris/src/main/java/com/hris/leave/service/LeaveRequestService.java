@@ -487,7 +487,7 @@ public class LeaveRequestService {
     }
 
     private boolean canAccessLeaveRequest(LeaveRequest request, UUID requesterId) {
-        if (isHrAdmin(requesterId)) {
+        if (hasLeaveOversightAccess(requesterId)) {
             return true;
         }
 
@@ -508,10 +508,11 @@ public class LeaveRequestService {
             .orElse(false);
     }
 
-    private boolean isHrAdmin(UUID userId) {
+    private boolean hasLeaveOversightAccess(UUID userId) {
         return userRoleRepository.findByUserIdAndIsActiveTrue(userId).stream()
             .anyMatch(userRole -> userRole.getRole() != null
-                && "HR_ADMIN".equals(userRole.getRole().getCode()));
+                && ("HR_ADMIN".equals(userRole.getRole().getCode())
+                    || "ADMINISTRATION".equals(userRole.getRole().getCode())));
     }
 
     private int validateAndResolveBalanceYear(LocalDate startDate, LocalDate endDate) {

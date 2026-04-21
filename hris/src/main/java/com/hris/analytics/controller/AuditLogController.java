@@ -4,6 +4,8 @@ import com.hris.analytics.dto.AuditLogDto;
 import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.auth.entity.User;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class AuditLogController {
 
     private final AuditLogService auditLogService;
+    private final UserRepository userRepository;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
@@ -45,6 +48,7 @@ public class AuditLogController {
         return new AuditLogDto(
             auditLog.getId(),
             auditLog.getActorId(),
+            resolveActorName(auditLog.getActorId()),
             auditLog.getAction(),
             auditLog.getResource(),
             auditLog.getResourceId(),
@@ -53,5 +57,20 @@ public class AuditLogController {
             auditLog.getIpAddress(),
             auditLog.getTimestamp()
         );
+    }
+
+    private String resolveActorName(UUID actorId) {
+        if (actorId == null) {
+            return null;
+        }
+
+        return userRepository.findById(actorId)
+            .map(this::toDisplayName)
+            .orElse(null);
+    }
+
+    private String toDisplayName(User user) {
+        String fullName = (user.getFirstName() + " " + user.getLastName()).trim();
+        return fullName.isBlank() ? user.getEmail() : fullName;
     }
 }

@@ -7,6 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AdminRequestMapper {
+    @Mapping(target = "requesterName", ignore = true)
     AdminRequestResponseDto toDto(AdminRequest request);
 
     @Mapping(target = "isActive", source = "active")

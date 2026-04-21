@@ -8,6 +8,7 @@ import java.util.UUID;
 public record AuditLogDto(
     UUID id,
     UUID actorId,
+    String actorName,
     AuditAction action,
     String resource,
     UUID resourceId,

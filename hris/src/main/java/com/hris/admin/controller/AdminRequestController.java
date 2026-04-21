@@ -6,6 +6,8 @@ import com.hris.admin.dto.CreateAdminRequestDto;
 import com.hris.admin.entity.AdminRequest;
 import com.hris.admin.mapper.AdminRequestMapper;
 import com.hris.admin.service.AdminRequestService;
+import com.hris.auth.entity.User;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import com.hris.security.PermissionAuthorizationService;
@@ -29,6 +31,7 @@ public class AdminRequestController {
     private final AdminRequestService adminRequestService;
     private final AdminRequestMapper adminRequestMapper;
     private final PermissionAuthorizationService permissionAuthorizationService;
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<ApiResponse<AdminRequestResponseDto>> create(
@@ -36,7 +39,7 @@ public class AdminRequestController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         AdminRequest request = adminRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(adminRequestMapper.toDto(request)));
+            .body(ApiResponse.ok(toDto(request)));
     }
 
     @GetMapping
@@ -44,7 +47,7 @@ public class AdminRequestController {
             Pageable pageable, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         Page<AdminRequest> page = adminRequestService.getMyRequests(userId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(adminRequestMapper::toDto))));
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(this::toDto))));
     }
 
     @GetMapping("/incoming")
@@ -53,7 +56,7 @@ public class AdminRequestController {
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ADMIN_REQUEST", "PROCESS", "HR_ADMIN", "ADMINISTRATION");
         Page<AdminRequest> page = adminRequestService.getIncoming(pageable);
-        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(adminRequestMapper::toDto))));
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(this::toDto))));
     }
 
     @PatchMapping("/{id}/process")
@@ -88,5 +91,35 @@ public class AdminRequestController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         adminRequestService.cancel(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    private AdminRequestResponseDto toDto(AdminRequest request) {
+        AdminRequestResponseDto dto = adminRequestMapper.toDto(request);
+        return new AdminRequestResponseDto(
+            dto.id(),
+            dto.requesterId(),
+            resolveUserName(dto.requesterId()),
+            dto.requestTypeId(),
+            dto.trackingNumber(),
+            dto.description(),
+            dto.urgencyLevel(),
+            dto.status(),
+            dto.metadata(),
+            dto.rejectionReason(),
+            dto.submittedAt(),
+            dto.resolvedAt(),
+            dto.resolvedById()
+        );
+    }
+
+    private String resolveUserName(UUID userId) {
+        return userRepository.findById(userId)
+            .map(this::toDisplayName)
+            .orElse(null);
+    }
+
+    private String toDisplayName(User user) {
+        String fullName = (user.getFirstName() + " " + user.getLastName()).trim();
+        return fullName.isBlank() ? user.getEmail() : fullName;
     }
 }
