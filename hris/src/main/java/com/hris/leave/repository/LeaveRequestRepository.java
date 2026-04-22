@@ -37,4 +37,19 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
         @Param("departmentId") UUID departmentId,
         @Param("status") LeaveStatus status,
         @Param("startDate") LocalDate startDate);
+
+    @Query("""
+        SELECT COUNT(DISTINCT lr.id) FROM LeaveRequest lr
+        JOIN ProjectAssignment pa ON pa.employeeId = lr.employeeId
+        WHERE pa.supervisorId = :supervisorId
+          AND pa.isActive = true
+          AND pa.startDate <= lr.endDate
+          AND (pa.endDate IS NULL OR pa.endDate >= lr.startDate)
+          AND lr.status = :status
+          AND lr.startDate >= :startDate
+        """)
+    long countUpcomingSupervisorRequests(
+        @Param("supervisorId") UUID supervisorEmployeeId,
+        @Param("status") LeaveStatus status,
+        @Param("startDate") LocalDate startDate);
 }

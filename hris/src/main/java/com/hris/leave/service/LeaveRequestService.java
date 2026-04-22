@@ -521,7 +521,7 @@ public class LeaveRequestService {
     }
 
     private boolean hasLeaveOversightAccess(UUID userId) {
-        return userRoleRepository.findByUserIdAndIsActiveTrue(userId).stream()
+        return userRoleRepository.findEffectiveByUserId(userId, Instant.now()).stream()
             .anyMatch(userRole -> userRole.getRole() != null
                 && ("HR_ADMIN".equals(userRole.getRole().getCode())
                     || "ADMINISTRATION".equals(userRole.getRole().getCode())));

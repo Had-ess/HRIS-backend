@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class ScopeFilterResolver {
 
     @Transactional(readOnly = true)
     public ScopeFilter resolve(UUID userId) {
-        List<UserRole> roles = userRoleRepository.findByUserIdAndIsActiveTrue(userId);
+        List<UserRole> roles = userRoleRepository.findEffectiveByUserId(userId, Instant.now());
 
         if (hasRole(roles, "ADMINISTRATION") || hasRole(roles, "HR_ADMIN") || hasRole(roles, "DIRECTOR")) {
             return new ScopeFilter(ScopeType.ALL, null, List.of());

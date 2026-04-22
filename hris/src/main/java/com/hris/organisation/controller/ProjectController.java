@@ -36,7 +36,8 @@ public class ProjectController {
             Authentication authentication) {
         permissionAuthorizationService.authorize(
             authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
-        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(projectService.getAll(pageable))));
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(projectService.getAll(actorId, pageable))));
     }
 
     @PostMapping
@@ -55,7 +56,8 @@ public class ProjectController {
             Authentication authentication) {
         permissionAuthorizationService.authorize(
             authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
-        return ResponseEntity.ok(ApiResponse.ok(projectService.getById(id)));
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(projectService.getById(id, actorId)));
     }
 
     @PostMapping("/{id}/assignments")
@@ -86,7 +88,8 @@ public class ProjectController {
             Authentication authentication) {
         permissionAuthorizationService.authorize(
             authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
-        return ResponseEntity.ok(ApiResponse.ok(projectService.getDepartments(id)));
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(projectService.getDepartments(id, actorId)));
     }
 
     @PostMapping("/{id}/departments")

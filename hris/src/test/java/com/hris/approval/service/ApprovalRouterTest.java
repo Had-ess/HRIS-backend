@@ -5,6 +5,8 @@ import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.User;
+import com.hris.auth.repository.UserRepository;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.exception.MissingDepartmentHeadException;
@@ -45,6 +47,9 @@ class ApprovalRouterTest {
     @Mock
     private ApprovalStepRepository approvalStepRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     private ApprovalRouter approvalRouter;
     private UUID requesterId;
     private UUID workflowId;
@@ -57,6 +62,7 @@ class ApprovalRouterTest {
             departmentRepository,
             projectAssignmentRepository,
             approvalStepRepository,
+            userRepository,
             new ObjectMapper()
         );
         requesterId = UUID.randomUUID();
@@ -143,11 +149,48 @@ class ApprovalRouterTest {
                 .thenReturn(List.of());
             when(departmentRepository.findDepartmentHead(departmentId))
                 .thenReturn(Optional.empty());
+            when(userRepository.findByRole("ADMINISTRATION")).thenReturn(List.of());
+            when(userRepository.findByRole("DIRECTOR")).thenReturn(List.of());
+            when(userRepository.findByRole("HR_ADMIN")).thenReturn(List.of());
 
             assertThatThrownBy(() -> approvalRouter.resolveSteps(
                 requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
                 .isInstanceOf(MissingDepartmentHeadException.class)
                 .hasMessage("No department head defined for fallback approval");
+        }
+
+        @Test
+        @DisplayName("should exclude requester user from administration fallback approver selection")
+        void shouldExcludeRequesterUser_WhenUsingAdministrationFallback() {
+            UUID requesterUserId = UUID.randomUUID();
+            UUID fallbackAdminUserId = UUID.randomUUID();
+
+            when(employeeRepository.findById(requesterId)).thenReturn(Optional.of(Employee.builder()
+                .id(requesterId)
+                .userId(requesterUserId)
+                .departmentId(departmentId)
+                .build()));
+            when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
+                requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+                .thenReturn(List.of());
+            when(departmentRepository.findDepartmentHead(departmentId))
+                .thenReturn(Optional.of(Employee.builder()
+                    .id(requesterId)
+                    .userId(requesterUserId)
+                    .departmentId(departmentId)
+                    .build()));
+            when(approvalStepRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.findByRole("ADMINISTRATION")).thenReturn(List.of(
+                User.builder().id(requesterUserId).isActive(true).build(),
+                User.builder().id(fallbackAdminUserId).isActive(true).build()
+            ));
+
+            List<ApprovalStep> steps = approvalRouter.resolveSteps(
+                requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
+
+            assertThat(steps).hasSize(1);
+            assertThat(steps.get(0).getApproverId()).isEqualTo(fallbackAdminUserId);
+            assertThat(steps.get(0).getContext()).isEqualTo(ApprovalContext.DEPARTMENT);
         }
     }
 }

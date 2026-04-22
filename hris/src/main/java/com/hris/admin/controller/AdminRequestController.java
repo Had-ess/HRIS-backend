@@ -78,11 +78,11 @@ public class AdminRequestController {
     @PatchMapping("/{id}/reject")
     public ResponseEntity<ApiResponse<Void>> reject(
             @PathVariable UUID id,
-            @RequestBody(required = false) AdminRequestRejectDto dto,
+            @Valid @RequestBody AdminRequestRejectDto dto,
             Authentication auth) {
         permissionAuthorizationService.authorize(auth, "ADMIN_REQUEST", "REJECT", "HR_ADMIN", "ADMINISTRATION");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
-        adminRequestService.reject(id, userId, dto != null ? dto.reason() : null);
+        adminRequestService.reject(id, userId, dto.reason());
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 

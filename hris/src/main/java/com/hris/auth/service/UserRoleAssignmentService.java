@@ -29,7 +29,7 @@ public class UserRoleAssignmentService {
     @Transactional(readOnly = true)
     public List<Role> getRoles(UUID userId) {
         ensureUserExists(userId);
-        return userRoleRepository.findByUserIdAndIsActiveTrue(userId).stream()
+        return userRoleRepository.findEffectiveByUserId(userId, Instant.now()).stream()
             .map(UserRole::getRole)
             .filter(role -> role != null)
             .toList();

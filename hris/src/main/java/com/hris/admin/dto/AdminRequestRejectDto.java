@@ -1,4 +1,9 @@
 package com.hris.admin.dto;
 
-public record AdminRequestRejectDto(String reason) {
+import jakarta.validation.constraints.NotBlank;
+
+public record AdminRequestRejectDto(
+    @NotBlank(message = "reason must not be blank")
+    String reason
+) {
 }

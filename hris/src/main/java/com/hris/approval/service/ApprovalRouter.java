@@ -51,7 +51,7 @@ public class ApprovalRouter {
 
         List<ApprovalStep> steps = !activeAssignments.isEmpty()
             ? buildProjectSupervisorSteps(activeAssignments, requesterId, workflowId)
-            : buildDepartmentHeadFallbackStep(employee, requesterId, workflowId);
+            : buildDepartmentHeadFallbackStep(employee, workflowId);
 
         if (steps.isEmpty()) {
             throw new InvalidWorkflowStateException("No approvers could be resolved for this workflow");
@@ -90,18 +90,17 @@ public class ApprovalRouter {
     }
 
     private List<ApprovalStep> buildDepartmentHeadFallbackStep(Employee employee,
-                                                               UUID requesterId,
                                                                UUID workflowId) {
         if (employee.getDepartmentId() == null) {
-            return List.of(buildAdministrationFallbackStep(workflowId, requesterId, Map.of(
+            return List.of(buildAdministrationFallbackStep(workflowId, employee.getUserId(), Map.of(
                 "role", "ADMINISTRATION_FALLBACK"
             )));
         }
 
         Employee headEmployee = departmentRepository.findDepartmentHead(employee.getDepartmentId()).orElse(null);
 
-        if (headEmployee == null || headEmployee.getId().equals(requesterId)) {
-            return List.of(buildAdministrationFallbackStep(workflowId, requesterId, Map.of(
+        if (headEmployee == null || headEmployee.getId().equals(employee.getId())) {
+            return List.of(buildAdministrationFallbackStep(workflowId, employee.getUserId(), Map.of(
                 "departmentId", employee.getDepartmentId().toString(),
                 "role", "ADMINISTRATION_FALLBACK"
             )));

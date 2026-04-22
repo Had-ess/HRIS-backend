@@ -190,6 +190,13 @@ ON CONFLICT (role_id, permission_id) DO UPDATE
 SET granted_at = EXCLUDED.granted_at,
     granted_by_id = EXCLUDED.granted_by_id;
 
+DELETE FROM role_permissions rp
+USING roles r, permissions p
+WHERE rp.role_id = r.id
+  AND rp.permission_id = p.id
+  AND r.code = 'HR_ADMIN'
+  AND p.name = 'DASHBOARD_DIRECTOR_VIEW';
+
 INSERT INTO role_permissions (id, role_id, permission_id, granted_at, granted_by_id)
 SELECT
     gen_random_uuid(),
@@ -200,7 +207,6 @@ SELECT
 FROM roles r
 JOIN permissions p ON p.name IN (
     'DASHBOARD_HR_VIEW',
-    'DASHBOARD_DIRECTOR_VIEW',
     'ADMIN_REQUEST_PROCESS',
     'ADMIN_REQUEST_REJECT'
 )

@@ -115,6 +115,7 @@ class DashboardControllerTest {
     @DisplayName("administration fallback role can access director dashboard")
     void administrationFallbackRoleCanAccessDirectorDashboard() {
         UUID userId = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
         DashboardController controller = new DashboardController(
             dashboardService,
             new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
@@ -123,6 +124,15 @@ class DashboardControllerTest {
             new DirectorDashboardDto(11L, 4L, 3L, 2L,
                 new LeaveMetricsSummaryDto("2026-04", 10, 8, 1, 1.5), 5L)
         );
+        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(
+            UserRole.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .roleId(roleId)
+                .role(Role.builder().id(roleId).code("ADMINISTRATION").name("Administration").isActive(true).build())
+                .isActive(true)
+                .build()
+        ));
 
         ResponseEntity<ApiResponse<DirectorDashboardDto>> response = controller.getDirectorDashboard(
             TestAuthenticationFactory.jwtAuthentication(userId, "ADMINISTRATION")
@@ -132,6 +142,31 @@ class DashboardControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().data().totalEmployees()).isEqualTo(11L);
         verify(dashboardService).getDirectorDashboard();
+    }
+
+    @Test
+    @DisplayName("HR admin cannot access director dashboard")
+    void hrAdminCannotAccessDirectorDashboard() {
+        UUID userId = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
+        DashboardController controller = new DashboardController(
+            dashboardService,
+            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+        );
+        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(
+            UserRole.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .roleId(roleId)
+                .role(Role.builder().id(roleId).code("HR_ADMIN").name("HR Admin").isActive(true).build())
+                .isActive(true)
+                .build()
+        ));
+
+        assertThatThrownBy(() -> controller.getDirectorDashboard(
+            TestAuthenticationFactory.jwtAuthentication(userId, "HR_ADMIN")
+        ))
+            .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test

@@ -14,8 +14,10 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.ScopeFilter;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.dashboard.dto.AdminRequestSummaryDto;
@@ -36,11 +38,13 @@ import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.repository.NotificationRepository;
 import com.hris.organisation.enums.ProjectStatus;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +73,8 @@ public class DashboardService {
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final DepartmentRepository departmentRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final UserRoleRepository userRoleRepository;
     private final AnalyticsService analyticsService;
 
     @Transactional(readOnly = true)
@@ -96,15 +102,24 @@ public class DashboardService {
         List<ApprovalStep> pendingSteps =
             approvalStepRepository.findTop5ByApproverIdAndStatusOrderByStepOrderAsc(
                 userId, StepStatus.PENDING);
+        Employee employee = employeeRepository.findByUserId(userId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        LocalDate today = LocalDate.now();
+        List<UserRole> effectiveRoles = userRoleRepository.findEffectiveByUserId(userId, Instant.now());
 
-        long teamMembersCount = employeeRepository.findByUserId(userId)
-            .map(employee -> employeeRepository.countByDepartmentId(employee.getDepartmentId()))
-            .orElse(0L);
+        long teamMembersCount;
+        long upcomingTeamAbsencesCount;
 
-        long upcomingTeamAbsencesCount = employeeRepository.findByUserId(userId)
-            .map(employee -> leaveRequestRepository.countUpcomingDepartmentRequests(
-                employee.getDepartmentId(), LeaveStatus.APPROVED, LocalDate.now()))
-            .orElse(0L);
+        if (hasRole(effectiveRoles, "PROJECT_SUPERVISOR") && !hasRole(effectiveRoles, "DEPT_MANAGER")) {
+            teamMembersCount = projectAssignmentRepository.countActiveDistinctEmployeesBySupervisorId(
+                employee.getId(), today);
+            upcomingTeamAbsencesCount = leaveRequestRepository.countUpcomingSupervisorRequests(
+                employee.getId(), LeaveStatus.APPROVED, today);
+        } else {
+            teamMembersCount = employeeRepository.countByDepartmentId(employee.getDepartmentId());
+            upcomingTeamAbsencesCount = leaveRequestRepository.countUpcomingDepartmentRequests(
+                employee.getDepartmentId(), LeaveStatus.APPROVED, today);
+        }
 
         return new SupervisorDashboardDto(
             approvalStepRepository.countByApproverIdAndStatus(userId, StepStatus.PENDING),
@@ -112,6 +127,11 @@ public class DashboardService {
             teamMembersCount,
             upcomingTeamAbsencesCount
         );
+    }
+
+    private boolean hasRole(List<UserRole> roles, String roleCode) {
+        return roles.stream().anyMatch(userRole ->
+            userRole.getRole() != null && roleCode.equals(userRole.getRole().getCode()));
     }
 
     @Transactional(readOnly = true)

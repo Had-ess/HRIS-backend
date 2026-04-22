@@ -3,10 +3,13 @@ package com.hris.organisation.service;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.Role;
+import com.hris.auth.entity.UserRole;
 import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
@@ -62,6 +65,9 @@ class ProjectServiceTest {
 
     @Mock
     private EmployeeRepository employeeRepository;
+
+    @Mock
+    private UserRoleRepository userRoleRepository;
 
     @Mock
     private ProjectMapper projectMapper;
@@ -285,12 +291,17 @@ class ProjectServiceTest {
             .departmentId(departmentId)
             .isLead(true)
             .build();
+        UserRole administrationRole = UserRole.builder()
+            .role(Role.builder().code("ADMINISTRATION").isActive(true).build())
+            .build();
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(projectDepartmentRepository.findByProjectId(projectId)).thenReturn(List.of(link));
         when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
+        when(userRoleRepository.findEffectiveByUserId(eq(ACTOR_ID), any()))
+            .thenReturn(List.of(administrationRole));
 
-        List<ProjectDepartmentResponseDto> result = projectService.getDepartments(projectId);
+        List<ProjectDepartmentResponseDto> result = projectService.getDepartments(projectId, ACTOR_ID);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).departmentId()).isEqualTo(departmentId);

@@ -119,7 +119,7 @@ server:
 
 logging:
   level:
-    com.hris: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.springframework.security: INFO
-    org.springframework.retry: DEBUG
+    com.hris: ${LOG_LEVEL_APP:INFO}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
+    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:INFO}
+    org.springframework.retry: ${LOG_LEVEL_SPRING_RETRY:INFO}

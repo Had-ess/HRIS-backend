@@ -1,5 +1,6 @@
 package com.hris.security;
 
+import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.service.UserProvisioningService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -14,9 +17,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * JIT provisioning filter. Runs after Spring Security's JWT validation.
@@ -29,6 +35,7 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserProvisioningService userProvisioningService;
+    private final UserRoleRepository userRoleRepository;
 
     @Override
     protected void doFilterInternal(
@@ -43,6 +50,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 UUID localUserId = userProvisioningService.resolveUserId(originalJwt);
+                Collection<GrantedAuthority> localAuthorities = userRoleRepository
+                    .findEffectiveByUserId(localUserId, Instant.now())
+                    .stream()
+                    .map(userRole -> userRole.getRole())
+                    .filter(role -> role != null && role.isActive())
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getCode().toUpperCase()))
+                    .collect(Collectors.toSet());
 
                 Map<String, Object> claims = new HashMap<>(originalJwt.getClaims());
                 claims.put("local_user_id", localUserId.toString());
@@ -54,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 JwtAuthenticationToken enrichedAuth = new JwtAuthenticationToken(
                     enrichedJwt,
-                    jwtAuth.getAuthorities(),
+                    localAuthorities,
                     localUserId.toString()
                 );
 

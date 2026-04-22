@@ -9,7 +9,6 @@ import com.hris.auth.repository.RolePermissionRepository;
 import com.hris.auth.repository.UserRoleRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -99,13 +98,6 @@ public class PermissionAuthorizationService {
         Set<String> expectedAuthorities = List.of(fallbackRoles).stream()
             .map(role -> "ROLE_" + normalize(role))
             .collect(Collectors.toSet());
-
-        boolean hasTokenRole = authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .anyMatch(expectedAuthorities::contains);
-        if (hasTokenRole) {
-            return true;
-        }
 
         try {
             UUID userId = SecurityUtils.getCurrentUserId(authentication);

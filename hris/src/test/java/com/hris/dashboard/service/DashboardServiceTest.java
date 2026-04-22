@@ -15,8 +15,13 @@ import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.Role;
+import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRoleRepository;
+import com.hris.analytics.dto.LeaveMetricsDto;
+import com.hris.analytics.service.AnalyticsService;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.dashboard.dto.DirectorDashboardDto;
 import com.hris.dashboard.dto.EmployeeDashboardDto;
@@ -32,6 +37,7 @@ import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.repository.NotificationRepository;
 import com.hris.organisation.enums.ProjectStatus;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,7 +74,9 @@ class DashboardServiceTest {
     @Mock private ApprovalWorkflowRepository approvalWorkflowRepository;
     @Mock private DepartmentRepository departmentRepository;
     @Mock private ProjectRepository projectRepository;
-    @Mock private LeaveMetricsRepository leaveMetricsRepository;
+    @Mock private ProjectAssignmentRepository projectAssignmentRepository;
+    @Mock private UserRoleRepository userRoleRepository;
+    @Mock private AnalyticsService analyticsService;
 
     @InjectMocks
     private DashboardService dashboardService;
@@ -185,6 +193,11 @@ class DashboardServiceTest {
         when(approvalWorkflowRepository.findAllById(any()))
             .thenReturn(List.of(workflow));
         when(employeeRepository.findByUserId(userId)).thenReturn(Optional.of(employee));
+        when(userRoleRepository.findEffectiveByUserId(any(), any())).thenReturn(List.of(
+            UserRole.builder()
+                .role(Role.builder().code("DEPT_MANAGER").build())
+                .build()
+        ));
         when(employeeRepository.countByDepartmentId(departmentId)).thenReturn(7L);
         when(leaveRequestRepository.countUpcomingDepartmentRequests(
             departmentId, LeaveStatus.APPROVED, LocalDate.now())).thenReturn(2L);
@@ -196,6 +209,47 @@ class DashboardServiceTest {
         assertThat(result.recentPendingApprovals().get(0).subjectType()).isEqualTo("LEAVE");
         assertThat(result.teamMembersCount()).isEqualTo(7L);
         assertThat(result.upcomingTeamAbsencesCount()).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("project supervisor dashboard uses supervised project scope")
+    void projectSupervisorDashboardUsesSupervisedProjectScope() {
+        ApprovalStep approvalStep = ApprovalStep.builder()
+            .id(UUID.randomUUID())
+            .workflowId(UUID.randomUUID())
+            .context(ApprovalContext.PROJECT)
+            .stepOrder(1)
+            .status(StepStatus.PENDING)
+            .build();
+        ApprovalWorkflow workflow = ApprovalWorkflow.builder()
+            .id(approvalStep.getWorkflowId())
+            .subjectType("LEAVE")
+            .subjectId(UUID.randomUUID())
+            .createdAt(Instant.now())
+            .build();
+
+        when(approvalStepRepository.countByApproverIdAndStatus(userId, StepStatus.PENDING)).thenReturn(2L);
+        when(approvalStepRepository.findTop5ByApproverIdAndStatusOrderByStepOrderAsc(userId, StepStatus.PENDING))
+            .thenReturn(List.of(approvalStep));
+        when(approvalWorkflowRepository.findAllById(any()))
+            .thenReturn(List.of(workflow));
+        when(employeeRepository.findByUserId(userId)).thenReturn(Optional.of(employee));
+        when(userRoleRepository.findEffectiveByUserId(any(), any())).thenReturn(List.of(
+            UserRole.builder()
+                .role(Role.builder().code("PROJECT_SUPERVISOR").build())
+                .build()
+        ));
+        when(projectAssignmentRepository.countActiveDistinctEmployeesBySupervisorId(employeeId, LocalDate.now()))
+            .thenReturn(5L);
+        when(leaveRequestRepository.countUpcomingSupervisorRequests(
+            employeeId, LeaveStatus.APPROVED, LocalDate.now())).thenReturn(3L);
+
+        SupervisorDashboardDto result = dashboardService.getSupervisorDashboard(userId);
+
+        assertThat(result.pendingApprovalsCount()).isEqualTo(2L);
+        assertThat(result.recentPendingApprovals()).hasSize(1);
+        assertThat(result.teamMembersCount()).isEqualTo(5L);
+        assertThat(result.upcomingTeamAbsencesCount()).isEqualTo(3L);
     }
 
     @Test
@@ -232,32 +286,15 @@ class DashboardServiceTest {
     @Test
     @DisplayName("director dashboard returns aggregate counts")
     void directorDashboardReturnsAggregateCounts() {
-        String currentPeriod = YearMonth.now().toString();
-
         when(employeeRepository.count()).thenReturn(90L);
         when(departmentRepository.count()).thenReturn(8L);
         when(projectRepository.countByStatus(ProjectStatus.ACTIVE)).thenReturn(12L);
         when(approvalStepRepository.countByStatus(StepStatus.PENDING)).thenReturn(4L);
         when(adminRequestRepository.countByStatusIn(List.of(
             AdminRequestStatus.SUBMITTED, AdminRequestStatus.IN_PROGRESS))).thenReturn(3L);
-        when(leaveMetricsRepository.findByPeriod(currentPeriod)).thenReturn(List.of(
-            LeaveMetrics.builder()
-                .period(currentPeriod)
-                .departmentId(UUID.randomUUID())
-                .totalRequests(10)
-                .approvedCount(7)
-                .rejectedCount(1)
-                .avgProcessingDays(2.5)
-                .build(),
-            LeaveMetrics.builder()
-                .period(currentPeriod)
-                .departmentId(UUID.randomUUID())
-                .totalRequests(5)
-                .approvedCount(4)
-                .rejectedCount(0)
-                .avgProcessingDays(3.5)
-                .build()
-        ));
+        when(analyticsService.getLeaveMetrics(any())).thenReturn(
+            new LeaveMetricsDto(15L, 11L, 1L, 3.0)
+        );
 
         DirectorDashboardDto result = dashboardService.getDirectorDashboard();
 
@@ -266,7 +303,7 @@ class DashboardServiceTest {
         assertThat(result.activeProjectsCount()).isEqualTo(12L);
         assertThat(result.pendingApprovalsCount()).isEqualTo(4L);
         assertThat(result.pendingAdminRequestsCount()).isEqualTo(3L);
-        assertThat(result.currentPeriodLeaveMetrics().period()).isEqualTo(currentPeriod);
+        assertThat(result.currentPeriodLeaveMetrics().period()).isEqualTo("LIVE");
         assertThat(result.currentPeriodLeaveMetrics().totalRequests()).isEqualTo(15);
         assertThat(result.currentPeriodLeaveMetrics().approvedCount()).isEqualTo(11);
         assertThat(result.currentPeriodLeaveMetrics().rejectedCount()).isEqualTo(1);
