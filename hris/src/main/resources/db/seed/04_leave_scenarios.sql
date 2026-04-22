@@ -104,6 +104,29 @@ SET total_days = EXCLUDED.total_days,
     carry_over_days = EXCLUDED.carry_over_days,
     version = EXCLUDED.version;
 
+-- Backfill default current-year balances for other active seeded employees so demo users can submit leave requests.
+INSERT INTO leave_balances (id, employee_id, leave_type_id, year, total_days, used_days, pending_days, carry_over_days, version)
+SELECT
+    gen_random_uuid(),
+    e.id,
+    policy.leave_type_id,
+    EXTRACT(YEAR FROM CURRENT_DATE)::int,
+    policy.max_days_per_year,
+    0,
+    0,
+    0,
+    0
+FROM employees e
+JOIN LATERAL (
+    SELECT lp.leave_type_id, lp.max_days_per_year
+    FROM leave_policies lp
+    WHERE lp.contract_type = e.contract_type
+      AND lp.min_seniority_years <= EXTRACT(YEAR FROM age(CURRENT_DATE, e.hire_date))::int
+    ORDER BY lp.leave_type_id, lp.min_seniority_years DESC
+) policy ON TRUE
+WHERE e.status = 'ACTIVE'
+ON CONFLICT (employee_id, leave_type_id, year) DO NOTHING;
+
 INSERT INTO leave_requests (id, employee_id, leave_type_id, start_date, end_date, working_days, urgency_level, status, comment, submitted_at, version)
 SELECT
     '88888888-8888-8888-8888-888888880001',

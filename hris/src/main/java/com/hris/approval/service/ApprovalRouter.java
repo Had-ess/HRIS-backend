@@ -7,8 +7,10 @@ import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.User;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.MissingDepartmentHeadException;
@@ -35,6 +37,7 @@ public class ApprovalRouter {
     private final DepartmentRepository departmentRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final ApprovalStepRepository approvalStepRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     public List<ApprovalStep> resolveSteps(UUID requesterId, UUID workflowId,
@@ -90,15 +93,18 @@ public class ApprovalRouter {
                                                                UUID requesterId,
                                                                UUID workflowId) {
         if (employee.getDepartmentId() == null) {
-            throw new MissingDepartmentHeadException("No department head defined for fallback approval");
+            return List.of(buildAdministrationFallbackStep(workflowId, requesterId, Map.of(
+                "role", "ADMINISTRATION_FALLBACK"
+            )));
         }
 
-        Employee headEmployee = departmentRepository.findDepartmentHead(employee.getDepartmentId())
-            .orElseThrow(() -> new MissingDepartmentHeadException(
-                "No department head defined for fallback approval"));
+        Employee headEmployee = departmentRepository.findDepartmentHead(employee.getDepartmentId()).orElse(null);
 
-        if (headEmployee.getId().equals(requesterId)) {
-            throw new MissingDepartmentHeadException("No department head defined for fallback approval");
+        if (headEmployee == null || headEmployee.getId().equals(requesterId)) {
+            return List.of(buildAdministrationFallbackStep(workflowId, requesterId, Map.of(
+                "departmentId", employee.getDepartmentId().toString(),
+                "role", "ADMINISTRATION_FALLBACK"
+            )));
         }
 
         return List.of(buildStep(workflowId, headEmployee.getUserId(), 1,
@@ -107,6 +113,24 @@ public class ApprovalRouter {
                 "departmentId", employee.getDepartmentId().toString(),
                 "role", "DEPT_HEAD"
             )));
+    }
+
+    private ApprovalStep buildAdministrationFallbackStep(UUID workflowId,
+                                                         UUID requesterId,
+                                                         Map<String, String> snapshot) {
+        User approver = findFallbackApprover(requesterId, "ADMINISTRATION")
+            .or(() -> findFallbackApprover(requesterId, "HR_ADMIN"))
+            .orElseThrow(() -> new MissingDepartmentHeadException(
+                "No department head defined for fallback approval"));
+
+        return buildStep(workflowId, approver.getId(), 1, ApprovalContext.DEPARTMENT, snapshot);
+    }
+
+    private java.util.Optional<User> findFallbackApprover(UUID requesterId, String roleCode) {
+        return userRepository.findByRole(roleCode).stream()
+            .filter(User::isActive)
+            .filter(user -> !user.getId().equals(requesterId))
+            .findFirst();
     }
 
     private ApprovalStep buildStep(UUID workflowId, UUID approverId, int order,
