@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * GAP-B-11/12 FIXED:
@@ -76,7 +75,7 @@ public class NotificationConsumer {
 
         } catch (Exception e) {
             log.error("Failed to process notification event: {}", event.getEventType(), e);
-            // Don't rethrow — dead-letter the message instead of crashing
+            throw new IllegalStateException("Failed to process notification event " + event.getEventType(), e);
         }
     }
 

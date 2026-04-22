@@ -25,15 +25,21 @@ public class DepartmentController {
     private final DepartmentService departmentService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<DepartmentDto>>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(
-            PageResponse.of(departmentService.getAll(pageable))));
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<DepartmentDto>> getById(
+            @PathVariable UUID id,
+            Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ", "HR_ADMIN", "ADMINISTRATION");
+        return ResponseEntity.ok(ApiResponse.ok(departmentService.getById(id)));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<DepartmentDto>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.ok(departmentService.getById(id)));
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<DepartmentDto>>> getAll(
+            Pageable pageable,
+            Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ", "HR_ADMIN", "ADMINISTRATION");
+        return ResponseEntity.ok(ApiResponse.ok(
+            PageResponse.of(departmentService.getAll(pageable))));
     }
 
     @PostMapping

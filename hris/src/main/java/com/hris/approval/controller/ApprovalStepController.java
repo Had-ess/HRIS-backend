@@ -4,8 +4,9 @@ import com.hris.approval.dto.ApprovalCommentDto;
 import com.hris.approval.dto.ApprovalDecisionDto;
 import com.hris.approval.dto.ApprovalStepResponseDto;
 import com.hris.approval.entity.ApprovalStep;
-import com.hris.approval.mapper.ApprovalMapper;
 import com.hris.approval.service.ApprovalStepService;
+import com.hris.auth.entity.User;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import com.hris.security.SecurityUtils;
@@ -27,14 +28,14 @@ import java.util.UUID;
 public class ApprovalStepController {
 
     private final ApprovalStepService approvalStepService;
-    private final ApprovalMapper approvalMapper;
+    private final UserRepository userRepository;
 
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<PageResponse<ApprovalStepResponseDto>>> getMyPending(
             Pageable pageable, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         Page<ApprovalStep> steps = approvalStepService.getPendingForApprover(userId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(steps.map(approvalMapper::toStepDto))));
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(steps.map(this::toStepDto))));
     }
 
     @PatchMapping("/{id}/approve")
@@ -55,5 +56,31 @@ public class ApprovalStepController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         approvalStepService.reject(id, dto.comment(), userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    private ApprovalStepResponseDto toStepDto(ApprovalStep step) {
+        return new ApprovalStepResponseDto(
+            step.getId(),
+            step.getWorkflowId(),
+            step.getApproverId(),
+            resolveApproverName(step.getApproverId()),
+            step.getStepOrder(),
+            step.getStatus(),
+            step.getContext(),
+            step.getRoutingSnapshot(),
+            step.getComment(),
+            step.getDecidedAt()
+        );
+    }
+
+    private String resolveApproverName(UUID approverId) {
+        return userRepository.findById(approverId)
+            .map(this::toDisplayName)
+            .orElse(null);
+    }
+
+    private String toDisplayName(User user) {
+        String fullName = (user.getFirstName() + " " + user.getLastName()).trim();
+        return fullName.isBlank() ? user.getEmail() : fullName;
     }
 }

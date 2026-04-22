@@ -31,7 +31,11 @@ public class ProjectController {
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<ProjectResponseDto>>> getAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponse<ProjectResponseDto>>> getAll(
+            Pageable pageable,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(
+            authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(projectService.getAll(pageable))));
     }
 
@@ -46,7 +50,11 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProjectResponseDto>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<ProjectResponseDto>> getById(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(
+            authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
         return ResponseEntity.ok(ApiResponse.ok(projectService.getById(id)));
     }
 
@@ -73,7 +81,11 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}/departments")
-    public ResponseEntity<ApiResponse<List<ProjectDepartmentResponseDto>>> getDepartments(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<List<ProjectDepartmentResponseDto>>> getDepartments(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(
+            authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
         return ResponseEntity.ok(ApiResponse.ok(projectService.getDepartments(id)));
     }
 

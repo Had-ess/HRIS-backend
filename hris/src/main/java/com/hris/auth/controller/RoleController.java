@@ -28,12 +28,16 @@ public class RoleController {
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Role>>> getAll() {
+    public ResponseEntity<ApiResponse<List<Role>>> getAll(Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(roleService.getAll()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Role>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Role>> getById(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(roleService.getById(id)));
     }
 

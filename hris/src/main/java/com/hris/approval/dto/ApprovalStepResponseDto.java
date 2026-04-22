@@ -10,9 +10,11 @@ public record ApprovalStepResponseDto(
     UUID id,
     UUID workflowId,
     UUID approverId,
+    String approverName,
     int stepOrder,
     StepStatus status,
     ApprovalContext context,
+    String routingSnapshot,
     String comment,
     Instant decidedAt
 ) {}

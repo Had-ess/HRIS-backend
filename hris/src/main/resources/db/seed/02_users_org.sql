@@ -6,6 +6,18 @@
 
 BEGIN;
 
+DELETE FROM departments d
+WHERE d.code NOT IN ('ADMIN', 'HR', 'ENG', 'OPS', 'PRD')
+  AND NOT EXISTS (
+      SELECT 1 FROM employees e WHERE e.department_id = d.id
+  )
+  AND NOT EXISTS (
+      SELECT 1 FROM user_roles ur WHERE ur.department_id = d.id
+  )
+  AND NOT EXISTS (
+      SELECT 1 FROM project_departments pd WHERE pd.department_id = d.id
+  );
+
 INSERT INTO users (id, keycloak_id, email, first_name, last_name, locale_preference, is_active, created_at, last_login)
 VALUES
     ('33333333-3333-3333-3333-333333333301', 'KC_REPLACE_ADMINISTRATION', 'admin@demo.hris.local', 'Nadia', 'Ben Salem', 'fr', TRUE, NOW() - INTERVAL '180 days', NOW() - INTERVAL '2 hours'),

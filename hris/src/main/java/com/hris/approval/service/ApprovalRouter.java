@@ -119,6 +119,7 @@ public class ApprovalRouter {
                                                          UUID requesterId,
                                                          Map<String, String> snapshot) {
         User approver = findFallbackApprover(requesterId, "ADMINISTRATION")
+            .or(() -> findFallbackApprover(requesterId, "DIRECTOR"))
             .or(() -> findFallbackApprover(requesterId, "HR_ADMIN"))
             .orElseThrow(() -> new MissingDepartmentHeadException(
                 "No department head defined for fallback approval"));
