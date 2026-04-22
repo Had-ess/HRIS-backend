@@ -1,7 +1,12 @@
 package com.hris.auth.service;
 
+import com.hris.analytics.service.AuditLogService;
+import com.hris.auth.dto.RoleCreateDto;
+import com.hris.auth.dto.RoleResponseDto;
+import com.hris.auth.dto.RoleUpdateDto;
 import com.hris.auth.entity.Role;
 import com.hris.auth.repository.RoleRepository;
+import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.InvalidRoleHierarchyException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +32,12 @@ class RoleServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private UserRoleRepository userRoleRepository;
+
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private RoleService roleService;
 
@@ -49,7 +60,9 @@ class RoleServiceTest {
 
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> roleService.update(roleId, update))
+        assertThatThrownBy(() -> roleService.update(roleId, new RoleUpdateDto(
+            update.getCode(), update.getName(), update.isActive(), update.getParentId()
+        ), UUID.randomUUID()))
             .isInstanceOf(InvalidRoleHierarchyException.class)
             .hasMessage("Role cannot be its own parent");
     }
@@ -75,7 +88,9 @@ class RoleServiceTest {
         when(roleRepository.findById(any(UUID.class))).thenAnswer(invocation ->
             Optional.ofNullable(roles.get(invocation.getArgument(0))));
 
-        assertThatThrownBy(() -> roleService.update(roleAId, update))
+        assertThatThrownBy(() -> roleService.update(roleAId, new RoleUpdateDto(
+            update.getCode(), update.getName(), update.isActive(), update.getParentId()
+        ), UUID.randomUUID()))
             .isInstanceOf(InvalidRoleHierarchyException.class)
             .hasMessage("Role hierarchy cycle detected");
     }
@@ -109,9 +124,46 @@ class RoleServiceTest {
         when(roleRepository.findById(eq(parentId))).thenReturn(Optional.of(parent));
         when(roleRepository.save(any(Role.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Role saved = roleService.update(childId, update);
+        when(userRoleRepository.countEffectiveByRoleId(eq(childId), any())).thenReturn(0L);
 
-        assertThat(saved.getParentId()).isEqualTo(parentId);
+        RoleResponseDto saved = roleService.update(childId, new RoleUpdateDto(
+            update.getCode(), update.getName(), update.isActive(), update.getParentId()
+        ), UUID.randomUUID());
+
+        assertThat(saved.parentId()).isEqualTo(parentId);
         verify(roleRepository).save(child);
+    }
+
+    @Test
+    @DisplayName("rejects duplicate role code on create")
+    void rejectsDuplicateRoleCodeOnCreate() {
+        when(roleRepository.existsByCodeIgnoreCase("HR_ADMIN")).thenReturn(true);
+
+        assertThatThrownBy(() -> roleService.create(
+            new RoleCreateDto("hr_admin", "HR Admin", true, null),
+            UUID.randomUUID()
+        ))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Role code must be unique");
+    }
+
+    @Test
+    @DisplayName("rejects deactivation when role is still assigned")
+    void rejectsDeactivationWhenAssigned() {
+        UUID roleId = UUID.randomUUID();
+        Role existing = Role.builder()
+            .id(roleId)
+            .code("CUSTOM_ROLE")
+            .name("Custom Role")
+            .isSystemRole(false)
+            .isActive(true)
+            .build();
+
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(existing));
+        when(userRoleRepository.existsEffectiveByRoleId(eq(roleId), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> roleService.deactivate(roleId, UUID.randomUUID()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Role cannot be deactivated because it is still assigned to users");
     }
 }

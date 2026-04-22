@@ -86,6 +86,13 @@ app:
     attachments-root: ${APP_STORAGE_ATTACHMENTS_ROOT:./storage/attachments}
     exports-root: ${APP_STORAGE_EXPORTS_ROOT:./storage/exports}
 
+keycloak:
+  admin:
+    server-url: ${KEYCLOAK_ADMIN_SERVER_URL:http://localhost:8180}
+    realm: ${KEYCLOAK_ADMIN_REALM:hris}
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+
 management:
   endpoint:
     health:

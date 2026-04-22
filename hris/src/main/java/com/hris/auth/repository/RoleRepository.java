@@ -8,11 +8,22 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, UUID> {
 
     Optional<Role> findByCode(String code);
+
+    List<Role> findAllByOrderByNameAsc();
+
+    boolean existsByCodeIgnoreCase(String code);
+
+    boolean existsByCodeIgnoreCaseAndIdNot(String code, UUID id);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 
     @Query(value = """
         WITH RECURSIVE role_tree AS (

@@ -1,8 +1,10 @@
 package com.hris.auth.controller;
 
 import com.hris.auth.dto.PermissionResponseDto;
+import com.hris.auth.dto.RoleCreateDto;
+import com.hris.auth.dto.RoleResponseDto;
+import com.hris.auth.dto.RoleUpdateDto;
 import com.hris.auth.dto.RolePermissionsUpdateDto;
-import com.hris.auth.entity.Role;
 import com.hris.auth.service.RolePermissionService;
 import com.hris.auth.service.RoleService;
 import com.hris.common.ApiResponse;
@@ -28,13 +30,13 @@ public class RoleController {
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Role>>> getAll(Authentication authentication) {
+    public ResponseEntity<ApiResponse<List<RoleResponseDto>>> getAll(Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "ADMINISTRATION");
         return ResponseEntity.ok(ApiResponse.ok(roleService.getAll()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Role>> getById(
+    public ResponseEntity<ApiResponse<RoleResponseDto>> getById(
             @PathVariable UUID id,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ROLE", "READ", "ADMINISTRATION");
@@ -42,25 +44,30 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Role>> create(@RequestBody Role role, Authentication authentication) {
+    public ResponseEntity<ApiResponse<RoleResponseDto>> create(
+            @Valid @RequestBody RoleCreateDto dto,
+            Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ROLE", "CREATE", "ADMINISTRATION");
-        Role saved = roleService.create(role);
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        RoleResponseDto saved = roleService.create(dto, actorId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Role>> update(
+    public ResponseEntity<ApiResponse<RoleResponseDto>> update(
             @PathVariable UUID id,
-            @RequestBody Role role,
+            @Valid @RequestBody RoleUpdateDto dto,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ROLE", "UPDATE", "ADMINISTRATION");
-        return ResponseEntity.ok(ApiResponse.ok(roleService.update(id, role)));
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(roleService.update(id, dto, actorId)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id, Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ROLE", "DELETE", "ADMINISTRATION");
-        roleService.deactivate(id);
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        roleService.deactivate(id, actorId);
         return ResponseEntity.noContent().build();
     }
 

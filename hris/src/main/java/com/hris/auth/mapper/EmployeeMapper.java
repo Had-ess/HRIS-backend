@@ -1,6 +1,5 @@
 package com.hris.auth.mapper;
 
-import com.hris.auth.dto.EmployeeCreateDto;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.entity.Employee;
 import org.mapstruct.Mapper;
@@ -14,6 +13,4 @@ public interface EmployeeMapper {
     @Mapping(target = "workScheduleId", source = "workScheduleId")
     @Mapping(target = "user", source = "user")
     EmployeeResponseDto toDto(Employee employee);
-
-    Employee toEntity(EmployeeCreateDto dto);
 }

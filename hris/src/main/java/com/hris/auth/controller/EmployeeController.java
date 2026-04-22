@@ -3,6 +3,7 @@ package com.hris.auth.controller;
 import com.hris.auth.dto.EmployeeCreateDto;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
+import com.hris.auth.service.EmployeeOnboardingService;
 import com.hris.auth.service.EmployeeService;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final EmployeeOnboardingService employeeOnboardingService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
@@ -32,13 +34,13 @@ public class EmployeeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
+    @PreAuthorize("hasRole('ADMINISTRATION')")
     public ResponseEntity<ApiResponse<EmployeeResponseDto>> create(
             @Valid @RequestBody EmployeeCreateDto dto,
             Authentication authentication) {
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(employeeService.create(dto, actorId)));
+            .body(ApiResponse.ok(employeeOnboardingService.onboard(dto, actorId)));
     }
 
     @GetMapping("/{id}")

@@ -2,7 +2,6 @@ package com.hris.auth.service;
 
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
-import com.hris.auth.dto.EmployeeCreateDto;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
 import com.hris.auth.entity.Employee;
@@ -48,19 +47,6 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         return employeeMapper.toDto(employee);
-    }
-
-    @Transactional
-    public EmployeeResponseDto create(EmployeeCreateDto dto, UUID actorId) {
-        Employee employee = employeeMapper.toEntity(dto);
-        Employee saved = employeeRepository.save(employee);
-
-        initializeLeaveBalancesForNewEmployee(saved.getId());
-
-        auditLogService.log(actorId, AuditAction.CREATE, "employee",
-            saved.getId(), null, saved);
-
-        return employeeMapper.toDto(saved);
     }
 
     @Transactional
