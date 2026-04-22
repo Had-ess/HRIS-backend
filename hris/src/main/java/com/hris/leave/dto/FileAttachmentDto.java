@@ -8,6 +8,5 @@ public record FileAttachmentDto(
     UUID requestId,
     String fileName,
     String mimeType,
-    String storagePath,
     Instant uploadedAt
 ) {}

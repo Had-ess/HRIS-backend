@@ -211,6 +211,18 @@ public class LeaveRequestService {
         return request;
     }
 
+    @Transactional(readOnly = true)
+    public boolean canUploadAttachment(LeaveRequest request, UUID requesterId) {
+        Employee employee = employeeRepository.findByUserId(requesterId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        if (!request.getEmployeeId().equals(employee.getId())) {
+            return false;
+        }
+
+        return request.getStatus() == LeaveStatus.PENDING || request.getStatus() == LeaveStatus.IN_APPROVAL;
+    }
+
     @Transactional
     public void cancel(UUID requestId, UUID requesterId) {
         LeaveRequest request = leaveRequestRepository.findById(requestId)
@@ -330,15 +342,15 @@ public class LeaveRequestService {
         LeaveRequest request = leaveRequestRepository.findById(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
 
-        Employee employee = employeeRepository.findByUserId(uploaderId)
-            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        if (!canUploadAttachment(request, uploaderId)) {
+            Employee employee = employeeRepository.findByUserId(uploaderId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        if (!request.getEmployeeId().equals(employee.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException(
-                "You are not allowed to upload attachments for this leave request");
-        }
+            if (!request.getEmployeeId().equals(employee.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                    "You are not allowed to upload attachments for this leave request");
+            }
 
-        if (request.getStatus() != LeaveStatus.PENDING && request.getStatus() != LeaveStatus.IN_APPROVAL) {
             throw new InvalidWorkflowStateException(
                 "Attachments can only be uploaded for leave requests that are pending approval");
         }

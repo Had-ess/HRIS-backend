@@ -10,5 +10,5 @@ public record LeaveRequestResponseDto(
     UUID id, UUID employeeId, UUID leaveTypeId, String leaveTypeCode, String leaveTypeName,
     LocalDate startDate, LocalDate endDate, int workingDays,
     UrgencyLevel urgencyLevel, LeaveStatus status,
-    String comment, Instant submittedAt
+    String comment, Instant submittedAt, boolean canUploadAttachment
 ) {}

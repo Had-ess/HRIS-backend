@@ -49,7 +49,7 @@ public class LeaveRequestController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()))));
+            .body(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()), userId)));
     }
 
     @GetMapping
@@ -67,7 +67,7 @@ public class LeaveRequestController {
             .collect(Collectors.toMap(LeaveType::getId, Function.identity()));
 
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
-            page.map(request -> toDto(request, leaveTypesById.get(request.getLeaveTypeId())))
+            page.map(request -> toDto(request, leaveTypesById.get(request.getLeaveTypeId()), userId))
         )));
     }
 
@@ -77,7 +77,7 @@ public class LeaveRequestController {
             @PathVariable UUID id, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.getById(id, userId);
-        return ResponseEntity.ok(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()))));
+        return ResponseEntity.ok(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()), userId)));
     }
 
     @DeleteMapping("/{id}")
@@ -101,7 +101,6 @@ public class LeaveRequestController {
             attachment.getRequestId(),
             attachment.getFileName(),
             attachment.getMimeType(),
-            attachment.getStoragePath(),
             attachment.getUploadedAt()
         )));
     }
@@ -118,7 +117,6 @@ public class LeaveRequestController {
                 attachment.getRequestId(),
                 attachment.getFileName(),
                 attachment.getMimeType(),
-                attachment.getStoragePath(),
                 attachment.getUploadedAt()
             ))
             .toList();
@@ -154,7 +152,7 @@ public class LeaveRequestController {
         return leaveTypeRepository.findById(leaveTypeId).orElse(null);
     }
 
-    private LeaveRequestResponseDto toDto(LeaveRequest request, LeaveType leaveType) {
+    private LeaveRequestResponseDto toDto(LeaveRequest request, LeaveType leaveType, UUID requesterId) {
         return new LeaveRequestResponseDto(
             request.getId(),
             request.getEmployeeId(),
@@ -167,7 +165,8 @@ public class LeaveRequestController {
             request.getUrgencyLevel(),
             request.getStatus(),
             request.getComment(),
-            request.getSubmittedAt()
+            request.getSubmittedAt(),
+            leaveRequestService.canUploadAttachment(request, requesterId)
         );
     }
 }
