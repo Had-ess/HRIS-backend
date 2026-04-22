@@ -1,4 +1,5 @@
 hris/target/
+hris/.m2repo/
 hris/src.zip
 hris/hris.zip
 *.log
