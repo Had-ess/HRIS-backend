@@ -10,6 +10,7 @@ import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.common.exception.InvalidRoleHierarchyException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidWorkflowStateException;
+import com.hris.common.exception.KeycloakProvisioningException;
 import com.hris.common.exception.MissingDepartmentHeadException;
 import com.hris.common.exception.PermissionAlreadyAssignedException;
 import com.hris.common.exception.PermissionDeletionNotAllowedException;
@@ -159,6 +160,21 @@ public class GlobalExceptionHandler {
             .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(KeycloakProvisioningException.class)
+    public ResponseEntity<ApiResponse<Void>> handleKeycloakProvisioning(
+            KeycloakProvisioningException ex) {
+        log.error(
+            "Keycloak provisioning failure during {}. responseStatus={}, keycloakStatus={}, keycloakBody={}",
+            ex.getOperation(),
+            ex.getResponseStatus(),
+            ex.getKeycloakStatus(),
+            summarize(ex.getKeycloakResponseBody()),
+            ex
+        );
+        return ResponseEntity.status(ex.getResponseStatus())
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -185,5 +201,12 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ApiResponse.error("An unexpected error occurred. Please contact support."));
+    }
+
+    private String summarize(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.length() <= 500 ? value : value.substring(0, 500);
     }
 }

@@ -9,10 +9,11 @@ import com.hris.auth.entity.User;
 import com.hris.auth.repository.RoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.common.exception.KeycloakProvisioningException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountProvisioningService {
 
     private final UserRepository userRepository;
@@ -51,22 +53,15 @@ public class AccountProvisioningService {
             throw new IllegalStateException("Only active roles can be assigned");
         }
 
-        String keycloakUserId;
-        try {
-            keycloakUserId = keycloakAdminClient.createUser(new KeycloakAdminUserCreateRequest(
-                normalizedUsername,
-                normalizedEmail,
-                firstName,
-                lastName,
-                request.password(),
-                request.temporaryPassword(),
-                roles.stream().map(Role::getCode).toList()
-            ));
-        } catch (HttpClientErrorException.Conflict ex) {
-            throw new IllegalStateException("A Keycloak user with this username or email already exists");
-        } catch (RuntimeException ex) {
-            throw new IllegalStateException("Failed to create user in Keycloak", ex);
-        }
+        String keycloakUserId = keycloakAdminClient.createUser(new KeycloakAdminUserCreateRequest(
+            normalizedUsername,
+            normalizedEmail,
+            firstName,
+            lastName,
+            request.password(),
+            request.temporaryPassword(),
+            roles.stream().map(Role::getCode).toList()
+        ));
 
         try {
             User saved = userRepository.save(User.builder()
@@ -93,8 +88,10 @@ public class AccountProvisioningService {
     public void rollbackExternalAccount(String keycloakUserId) {
         try {
             keycloakAdminClient.deleteUser(keycloakUserId);
-        } catch (RuntimeException ignored) {
-            // Keep the original failure as the user-facing error.
+        } catch (KeycloakProvisioningException ex) {
+            log.warn("Failed to rollback Keycloak user {} after onboarding failure", keycloakUserId, ex);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to rollback Keycloak user {} after onboarding failure", keycloakUserId, ex);
         }
     }
 
