@@ -1,5 +1,6 @@
 package com.hris.organisation.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
@@ -9,16 +10,21 @@ import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
+import com.hris.organisation.dto.ProjectAssignmentViewDto;
 import com.hris.organisation.dto.ProjectDepartmentAssignDto;
 import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.entity.ProjectDepartment;
+import com.hris.notification.entity.NotificationEvent;
+import com.hris.notification.enums.NotificationEventType;
+import com.hris.notification.service.NotificationPublisher;
 import com.hris.organisation.enums.ProjectRole;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.mapper.ProjectMapper;
@@ -42,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,10 +77,19 @@ class ProjectServiceTest {
     private UserRoleRepository userRoleRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private ProjectMapper projectMapper;
 
     @Mock
     private AuditLogService auditLogService;
+
+    @Mock
+    private NotificationPublisher notificationPublisher;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ProjectService projectService;
@@ -202,6 +218,24 @@ class ProjectServiceTest {
             assignment.setId(assignmentId);
             return assignment;
         });
+        when(userRepository.findById(employee.getUserId())).thenReturn(Optional.of(
+            com.hris.auth.entity.User.builder()
+                .id(employee.getUserId())
+                .firstName("Employee")
+                .lastName("One")
+                .email("employee.one@demo.hris.local")
+                .localePreference("en")
+                .build()
+        ));
+        when(userRepository.findById(supervisor.getUserId())).thenReturn(Optional.of(
+            com.hris.auth.entity.User.builder()
+                .id(supervisor.getUserId())
+                .firstName("Supervisor")
+                .lastName("One")
+                .email("supervisor.one@demo.hris.local")
+                .localePreference("en")
+                .build()
+        ));
         when(projectMapper.toAssignmentDto(any(ProjectAssignment.class))).thenAnswer(invocation -> {
             ProjectAssignment assignment = invocation.getArgument(0);
             return new ProjectAssignmentResponseDto(
@@ -224,6 +258,10 @@ class ProjectServiceTest {
         verify(projectAssignmentRepository).countOverlappingActiveAssignments(
             employeeId, projectId, dto.startDate(), dto.endDate());
         verify(projectAssignmentRepository).save(any(ProjectAssignment.class));
+        verify(notificationPublisher).publish(argThat(event ->
+            event.getEventType() == NotificationEventType.PROJECT_ASSIGNED
+                && event.getTargetUserId().equals(employee.getUserId())
+        ));
     }
 
     @Test
@@ -309,6 +347,86 @@ class ProjectServiceTest {
         assertThat(result.get(0).isLead()).isTrue();
     }
 
+    @Test
+    @DisplayName("lists active project assignments for scoped readers")
+    void listsActiveAssignmentsForScopedReaders() {
+        UserRole administrationRole = UserRole.builder()
+            .role(Role.builder().code("ADMINISTRATION").isActive(true).build())
+            .build();
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(userRoleRepository.findEffectiveByUserId(eq(ACTOR_ID), any()))
+            .thenReturn(List.of(administrationRole));
+        when(projectAssignmentRepository.findActiveViewsByProjectId(projectId)).thenReturn(List.of(
+            new ProjectAssignmentViewDto(
+                UUID.randomUUID(),
+                employeeId,
+                employee.getUserId(),
+                employee.getEmployeeCode(),
+                "Employee One",
+                projectId,
+                supervisorId,
+                supervisor.getUserId(),
+                supervisor.getEmployeeCode(),
+                "Supervisor One",
+                ProjectRole.MANAGER,
+                LocalDate.of(2026, 1, 1),
+                null,
+                true
+            )
+        ));
+
+        List<ProjectAssignmentViewDto> result = projectService.getAssignments(projectId, ACTOR_ID);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).employeeName()).isEqualTo("Employee One");
+        assertThat(result.get(0).supervisorName()).isEqualTo("Supervisor One");
+    }
+
+    @Test
+    @DisplayName("project supervisors can still read projects they participate in")
+    void projectSupervisorsCanReadParticipatingProjects() {
+        UUID viewerUserId = UUID.randomUUID();
+        UUID viewerEmployeeId = UUID.randomUUID();
+        UserRole supervisorRole = UserRole.builder()
+            .role(Role.builder().code("PROJECT_SUPERVISOR").isActive(true).build())
+            .build();
+
+        when(userRoleRepository.findEffectiveByUserId(eq(viewerUserId), any()))
+            .thenReturn(List.of(supervisorRole));
+        when(employeeRepository.findByUserId(viewerUserId)).thenReturn(Optional.of(
+            Employee.builder()
+                .id(viewerEmployeeId)
+                .userId(viewerUserId)
+                .employeeCode("SUP-02")
+                .status(EmployeeStatus.ACTIVE)
+                .contractType(ContractType.PERMANENT)
+                .departmentId(UUID.randomUUID())
+                .workScheduleId(UUID.randomUUID())
+                .hireDate(LocalDate.of(2024, 1, 1))
+                .jobTitle("Supervisor")
+                .build()
+        ));
+        when(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(viewerEmployeeId, LocalDate.now()))
+            .thenReturn(List.of(projectId));
+        when(projectAssignmentRepository.findActiveProjectIdsBySupervisorId(viewerEmployeeId, LocalDate.now()))
+            .thenReturn(List.of());
+        when(projectRepository.findByIdIn(eq(List.of(projectId)), org.mockito.ArgumentMatchers.any()))
+            .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(project)));
+        when(projectMapper.toDto(project)).thenReturn(new com.hris.organisation.dto.ProjectResponseDto(
+            projectId,
+            project.getName(),
+            project.getCode(),
+            project.getStatus(),
+            project.getStartDate(),
+            project.getEndDate()
+        ));
+
+        var page = projectService.getAll(viewerUserId, org.springframework.data.domain.PageRequest.of(0, 20));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).id()).isEqualTo(projectId);
+    }
     private void stubProjectAndEmployees(Employee assignmentEmployee, Employee assignmentSupervisor) {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(employeeRepository.findByIdForUpdate(eq(employeeId))).thenReturn(Optional.of(assignmentEmployee));

@@ -4,6 +4,7 @@ import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
+import com.hris.organisation.dto.ProjectAssignmentViewDto;
 import com.hris.organisation.dto.ProjectCreateDto;
 import com.hris.organisation.dto.ProjectDepartmentAssignDto;
 import com.hris.organisation.dto.ProjectDepartmentResponseDto;
@@ -54,6 +55,34 @@ public class ProjectController {
             Authentication authentication) {
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(projectService.getById(id, actorId)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProjectResponseDto>> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProjectCreateDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(projectService.update(id, dto, actorId)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deactivate(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        projectService.deactivate(id, actorId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @GetMapping("/{id}/assignments")
+    public ResponseEntity<ApiResponse<List<ProjectAssignmentViewDto>>> getAssignments(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(projectService.getAssignments(id, actorId)));
     }
 
     @PostMapping("/{id}/assignments")

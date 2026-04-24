@@ -13,6 +13,7 @@ public class Notification {
     @Column(name = "user_id", nullable = false) private UUID userId;
     @Column(nullable = false, length = 500) private String title;
     @Column(nullable = false, columnDefinition = "TEXT") private String body;
+    @Column(name = "link_path", length = 500) private String linkPath;
     @Column(name = "is_read", nullable = false) @Builder.Default private boolean isRead = false;
     @Column(name = "created_at", nullable = false) @Builder.Default private Instant createdAt = Instant.now();
 

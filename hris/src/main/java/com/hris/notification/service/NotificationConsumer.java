@@ -66,6 +66,7 @@ public class NotificationConsumer {
                 .userId(user.getId())
                 .title(title)
                 .body(body)
+                .linkPath(extractLinkPath(event))
                 .isRead(false)
                 .createdAt(Instant.now())
                 .build();
@@ -115,6 +116,9 @@ public class NotificationConsumer {
             case ADMIN_REQUEST_PROCESSED -> new Object[]{
                 map.getOrDefault("trackingNumber", "")
             };
+            case PROJECT_ASSIGNED -> new Object[] {
+                map.getOrDefault("projectName", "")
+            };
             default -> new Object[]{
                 map.getOrDefault("employeeName", ""),
                 map.getOrDefault("startDate", ""),
@@ -122,5 +126,23 @@ public class NotificationConsumer {
                 map.getOrDefault("workingDays", "")
             };
         };
+    }
+
+    private String extractLinkPath(NotificationEvent event) {
+        String paramsJson = event.getParams();
+        if (paramsJson == null || paramsJson.isBlank()) {
+            return null;
+        }
+        try {
+            Map<String, Object> map = objectMapper.readValue(paramsJson,
+                new TypeReference<Map<String, Object>>() {});
+            Object value = map.get("targetPath");
+            if (value instanceof String path && !path.isBlank()) {
+                return path;
+            }
+        } catch (Exception ex) {
+            log.debug("Notification event does not expose a link path for {}", event.getEventType(), ex);
+        }
+        return null;
     }
 }

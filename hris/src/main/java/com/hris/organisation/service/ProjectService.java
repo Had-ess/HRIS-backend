@@ -1,19 +1,24 @@
 package com.hris.organisation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.User;
 import com.hris.auth.entity.UserRole;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
+import com.hris.organisation.dto.ProjectAssignmentViewDto;
 import com.hris.organisation.dto.ProjectCreateDto;
 import com.hris.organisation.dto.ProjectDepartmentAssignDto;
 import com.hris.organisation.dto.ProjectDepartmentResponseDto;
@@ -25,17 +30,25 @@ import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
+import com.hris.notification.entity.NotificationEvent;
+import com.hris.notification.enums.NotificationEventType;
+import com.hris.notification.service.NotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,17 +60,18 @@ public class ProjectService {
     private final ProjectDepartmentRepository projectDepartmentRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final ProjectMapper projectMapper;
     private final AuditLogService auditLogService;
+    private final NotificationPublisher notificationPublisher;
+    private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
     public Page<ProjectResponseDto> getAll(UUID userId, Pageable pageable) {
         ProjectReadScope scope = resolveReadScope(userId);
         return switch (scope.type()) {
             case ALL -> projectRepository.findAll(pageable).map(projectMapper::toDto);
-            case DEPARTMENT -> projectRepository.findByDepartmentId(scope.departmentId(), pageable)
-                .map(projectMapper::toDto);
             case PROJECT -> scope.projectIds().isEmpty()
                 ? Page.empty(pageable)
                 : projectRepository.findByIdIn(scope.projectIds(), pageable).map(projectMapper::toDto);
@@ -72,7 +86,10 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponseDto create(ProjectCreateDto dto, UUID actorId) {
+        validateProject(dto, null);
         Project project = projectMapper.toEntity(dto);
+        project.setName(dto.name().trim());
+        project.setCode(dto.code().trim());
         Project saved = projectRepository.save(project);
 
         auditLogService.log(actorId, AuditAction.CREATE, "project",
@@ -82,15 +99,52 @@ public class ProjectService {
     }
 
     @Transactional
+    public ProjectResponseDto update(UUID projectId, ProjectCreateDto dto, UUID actorId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        Project previous = snapshot(project);
+
+        validateProject(dto, projectId);
+
+        project.setName(dto.name().trim());
+        project.setCode(dto.code().trim());
+        project.setStatus(dto.status());
+        project.setStartDate(dto.startDate());
+        project.setEndDate(dto.endDate());
+
+        Project saved = projectRepository.save(project);
+        auditLogService.log(actorId, AuditAction.UPDATE, "project",
+            saved.getId(), previous, saved);
+
+        return projectMapper.toDto(saved);
+    }
+
+    @Transactional
+    public void deactivate(UUID projectId, UUID actorId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        Project previous = snapshot(project);
+
+        project.setStatus(com.hris.organisation.enums.ProjectStatus.CANCELLED);
+        if (project.getEndDate() == null || project.getEndDate().isAfter(LocalDate.now())) {
+            project.setEndDate(LocalDate.now());
+        }
+
+        projectRepository.save(project);
+        auditLogService.log(actorId, AuditAction.UPDATE, "project",
+            project.getId(), previous, project);
+    }
+
+    @Transactional
     public ProjectAssignmentResponseDto assignEmployee(
             UUID projectId,
             ProjectAssignmentCreateDto dto,
             UUID actorId) {
-        projectRepository.findById(projectId)
+        Project project = projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found"));
         Employee employee = employeeRepository.findByIdForUpdate(dto.employeeId())
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        employeeRepository.findById(dto.supervisorId())
+        Employee supervisor = employeeRepository.findById(dto.supervisorId())
             .orElseThrow(() -> new EntityNotFoundException("Supervisor not found"));
 
         validateAssignment(dto, employee, projectId);
@@ -110,6 +164,8 @@ public class ProjectService {
         auditLogService.log(actorId, AuditAction.CREATE, "project_assignment",
             saved.getId(), null, saved);
 
+        scheduleAssignmentNotification(project, employee, supervisor);
+
         return projectMapper.toAssignmentDto(saved);
     }
 
@@ -122,10 +178,23 @@ public class ProjectService {
             throw new IllegalStateException("Assignment does not belong to this project");
         }
 
-        projectAssignmentRepository.delete(assignment);
+        ProjectAssignment previous = snapshot(assignment);
+        assignment.setActive(false);
+        if (assignment.getEndDate() == null || assignment.getEndDate().isAfter(LocalDate.now())) {
+            assignment.setEndDate(LocalDate.now());
+        }
+        projectAssignmentRepository.save(assignment);
 
-        auditLogService.log(actorId, AuditAction.DELETE, "project_assignment",
-            assignmentId, assignment, null);
+        auditLogService.log(actorId, AuditAction.UPDATE, "project_assignment",
+            assignmentId, previous, assignment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectAssignmentViewDto> getAssignments(UUID projectId, UUID userId) {
+        getScopedProject(projectId, userId);
+        return projectAssignmentRepository.findActiveViewsByProjectId(projectId).stream()
+            .map(this::normalizeAssignmentView)
+            .toList();
     }
 
     @Transactional(readOnly = true)
@@ -216,6 +285,19 @@ public class ProjectService {
         }
     }
 
+    private void validateProject(ProjectCreateDto dto, UUID currentProjectId) {
+        if (dto.endDate() != null && dto.startDate().isAfter(dto.endDate())) {
+            throw new IllegalArgumentException(
+                "Project start date must be before or equal to end date");
+        }
+
+        projectRepository.findByCode(dto.code().trim())
+            .filter(existing -> currentProjectId == null || !existing.getId().equals(currentProjectId))
+            .ifPresent(existing -> {
+                throw new IllegalStateException("Project code must be unique");
+            });
+    }
+
     private void ensureProjectExists(UUID projectId) {
         projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found"));
@@ -227,8 +309,6 @@ public class ProjectService {
         return switch (scope.type()) {
             case ALL -> projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
-            case DEPARTMENT -> projectRepository.findScopedByDepartmentId(projectId, scope.departmentId())
-                .orElseThrow(() -> new AccessDeniedException("You are not allowed to access this project"));
             case PROJECT -> {
                 if (scope.projectIds().isEmpty()) {
                     throw new AccessDeniedException("You are not allowed to access this project");
@@ -248,31 +328,129 @@ public class ProjectService {
             return ProjectReadScope.all();
         }
 
+        LinkedHashSet<UUID> projectIds = new LinkedHashSet<>();
+        Employee employee = employeeRepository.findByUserId(userId).orElse(null);
+
         if (hasRole(effectiveRoles, "DEPT_MANAGER")) {
-            UUID departmentId = effectiveRoles.stream()
+            Optional<UUID> departmentId = effectiveRoles.stream()
                 .filter(userRole -> userRole.getRole() != null && "DEPT_MANAGER".equals(userRole.getRole().getCode()))
                 .map(UserRole::getDepartmentId)
                 .filter(id -> id != null)
-                .findFirst()
-                .orElseGet(() -> employeeRepository.findByUserId(userId)
-                    .map(Employee::getDepartmentId)
-                    .orElseThrow(() -> new EntityNotFoundException("Employee not found")));
-            return ProjectReadScope.department(departmentId);
+                .findFirst();
+            if (departmentId.isEmpty() && employee != null) {
+                departmentId = Optional.ofNullable(employee.getDepartmentId());
+            }
+            if (departmentId.isPresent()) {
+                projectIds.addAll(projectDepartmentRepository.findProjectIdsByDepartmentId(departmentId.get()));
+            }
         }
 
-        if (hasRole(effectiveRoles, "PROJECT_SUPERVISOR")) {
-            Employee employee = employeeRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-            List<UUID> projectIds = projectAssignmentRepository.findActiveProjectIdsBySupervisorId(
-                employee.getId(), LocalDate.now());
-            return ProjectReadScope.projects(projectIds);
+        if (employee != null) {
+            projectIds.addAll(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(
+                employee.getId(), LocalDate.now()));
+
+            if (hasRole(effectiveRoles, "PROJECT_SUPERVISOR")) {
+                projectIds.addAll(projectAssignmentRepository.findActiveProjectIdsBySupervisorId(
+                    employee.getId(), LocalDate.now()));
+            }
         }
 
-        Employee employee = employeeRepository.findByUserId(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        List<UUID> projectIds = projectAssignmentRepository.findActiveProjectIdsByEmployeeId(
-            employee.getId(), LocalDate.now());
-        return ProjectReadScope.projects(projectIds);
+        return ProjectReadScope.projects(List.copyOf(projectIds));
+    }
+
+    private Project snapshot(Project project) {
+        return Project.builder()
+            .id(project.getId())
+            .name(project.getName())
+            .code(project.getCode())
+            .status(project.getStatus())
+            .startDate(project.getStartDate())
+            .endDate(project.getEndDate())
+            .build();
+    }
+
+    private ProjectAssignment snapshot(ProjectAssignment assignment) {
+        return ProjectAssignment.builder()
+            .id(assignment.getId())
+            .employeeId(assignment.getEmployeeId())
+            .projectId(assignment.getProjectId())
+            .supervisorId(assignment.getSupervisorId())
+            .assignmentRole(assignment.getAssignmentRole())
+            .startDate(assignment.getStartDate())
+            .endDate(assignment.getEndDate())
+            .isActive(assignment.isActive())
+            .build();
+    }
+
+    private void scheduleAssignmentNotification(Project project, Employee employee, Employee supervisor) {
+        NotificationEvent event = buildAssignmentNotification(project, employee, supervisor);
+        if (TransactionSynchronizationManager.isSynchronizationActive()
+            && TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    notificationPublisher.publish(event);
+                }
+            });
+            return;
+        }
+        notificationPublisher.publish(event);
+    }
+
+    private NotificationEvent buildAssignmentNotification(Project project, Employee employee, Employee supervisor) {
+        User user = userRepository.findById(employee.getUserId())
+            .orElseThrow(() -> new EntityNotFoundException("Assigned user not found"));
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("projectName", project.getName());
+        params.put("projectCode", project.getCode());
+        params.put("supervisorName", resolveEmployeeName(supervisor));
+        params.put("targetPath", "/projects/" + project.getId());
+
+        return NotificationEvent.builder()
+            .eventType(NotificationEventType.PROJECT_ASSIGNED)
+            .targetUserId(user.getId())
+            .titleKey("project.assigned.title")
+            .bodyKey("project.assigned.body")
+            .params(serializeMap(params))
+            .locale(user.getLocalePreference())
+            .routingKey("admin.project.assigned")
+            .publishedAt(Instant.now())
+            .build();
+    }
+
+    private String serializeMap(Map<String, String> map) {
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("Failed to serialize project notification params", ex);
+        }
+    }
+
+    private String resolveEmployeeName(Employee employee) {
+        return userRepository.findById(employee.getUserId())
+            .map(user -> (user.getFirstName() + " " + user.getLastName()).trim())
+            .filter(name -> !name.isBlank())
+            .orElse(employee.getEmployeeCode());
+    }
+
+    private ProjectAssignmentViewDto normalizeAssignmentView(ProjectAssignmentViewDto dto) {
+        return new ProjectAssignmentViewDto(
+            dto.id(),
+            dto.employeeId(),
+            dto.employeeUserId(),
+            dto.employeeCode(),
+            dto.employeeName() == null ? dto.employeeCode() : dto.employeeName().trim(),
+            dto.projectId(),
+            dto.supervisorId(),
+            dto.supervisorUserId(),
+            dto.supervisorCode(),
+            dto.supervisorName() == null ? dto.supervisorCode() : dto.supervisorName().trim(),
+            dto.assignmentRole(),
+            dto.startDate(),
+            dto.endDate(),
+            dto.isActive()
+        );
     }
 
     private boolean hasRole(List<UserRole> roles, String roleCode) {
@@ -280,23 +458,18 @@ public class ProjectService {
             userRole.getRole() != null && roleCode.equals(userRole.getRole().getCode()));
     }
 
-    private record ProjectReadScope(ProjectReadScopeType type, UUID departmentId, List<UUID> projectIds) {
+    private record ProjectReadScope(ProjectReadScopeType type, List<UUID> projectIds) {
         static ProjectReadScope all() {
-            return new ProjectReadScope(ProjectReadScopeType.ALL, null, List.of());
-        }
-
-        static ProjectReadScope department(UUID departmentId) {
-            return new ProjectReadScope(ProjectReadScopeType.DEPARTMENT, departmentId, List.of());
+            return new ProjectReadScope(ProjectReadScopeType.ALL, List.of());
         }
 
         static ProjectReadScope projects(List<UUID> projectIds) {
-            return new ProjectReadScope(ProjectReadScopeType.PROJECT, null, List.copyOf(projectIds));
+            return new ProjectReadScope(ProjectReadScopeType.PROJECT, List.copyOf(projectIds));
         }
     }
 
     private enum ProjectReadScopeType {
         ALL,
-        DEPARTMENT,
         PROJECT
     }
 }

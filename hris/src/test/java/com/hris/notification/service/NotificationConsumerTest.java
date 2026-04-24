@@ -89,5 +89,51 @@ class NotificationConsumerTest {
         assertThat(notification.getTitle()).isEqualTo("New administrative request");
         assertThat(notification.getBody()).isEqualTo("Ali Ben|AR-20260415-00001|Salary Certificate");
         assertThat(notification.getUserId()).isEqualTo(userId);
+        assertThat(notification.getLinkPath()).isNull();
+    }
+
+    @Test
+    @DisplayName("should persist project assignment notification link path")
+    void shouldPersistProjectAssignmentNotificationLinkPath() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        NotificationConsumer notificationConsumer = new NotificationConsumer(
+            notificationRepository, userRepository, messageSource, objectMapper);
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+            .id(userId)
+            .email("employee@hris.local")
+            .firstName("Project")
+            .lastName("Member")
+            .localePreference("en")
+            .build();
+
+        NotificationEvent event = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.PROJECT_ASSIGNED)
+            .targetUserId(userId)
+            .titleKey("project.assigned.title")
+            .bodyKey("project.assigned.body")
+            .params(objectMapper.writeValueAsString(Map.of(
+                "projectName", "Atlas",
+                "targetPath", "/projects/123"
+            )))
+            .locale("en")
+            .routingKey("admin.project.assigned")
+            .publishedAt(Instant.now())
+            .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(messageSource.getMessage(eq("project.assigned.title"), any(Object[].class), any(Locale.class)))
+            .thenReturn("Project assignment");
+        when(messageSource.getMessage(eq("project.assigned.body"), any(Object[].class), any(Locale.class)))
+            .thenReturn("You have been assigned to Atlas");
+
+        notificationConsumer.onAdminEvent(event);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        Notification notification = captor.getValue();
+        assertThat(notification.getLinkPath()).isEqualTo("/projects/123");
     }
 }

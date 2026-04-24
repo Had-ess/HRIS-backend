@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -18,7 +19,7 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT pa FROM ProjectAssignment pa WHERE pa.id = :id")
-    java.util.Optional<ProjectAssignment> findByIdForUpdate(@Param("id") UUID id);
+    Optional<ProjectAssignment> findByIdForUpdate(@Param("id") UUID id);
 
     @Query("""
         SELECT pa FROM ProjectAssignment pa
@@ -39,6 +40,38 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
     List<ProjectAssignment> findByEmployeeIdAndIsActiveTrue(UUID employeeId);
 
     List<ProjectAssignment> findByProjectId(UUID projectId);
+
+    boolean existsByProjectIdAndIsActiveTrue(UUID projectId);
+
+    @Query("""
+        select new com.hris.organisation.dto.ProjectAssignmentViewDto(
+            pa.id,
+            e.id,
+            e.userId,
+            e.employeeCode,
+            concat(coalesce(u.firstName, ''), ' ', coalesce(u.lastName, '')),
+            pa.projectId,
+            s.id,
+            s.userId,
+            s.employeeCode,
+            concat(coalesce(su.firstName, ''), ' ', coalesce(su.lastName, '')),
+            pa.assignmentRole,
+            pa.startDate,
+            pa.endDate,
+            pa.isActive
+        )
+        from ProjectAssignment pa
+        join Employee e on e.id = pa.employeeId
+        join User u on u.id = e.userId
+        join Employee s on s.id = pa.supervisorId
+        join User su on su.id = s.userId
+        where pa.projectId = :projectId
+          and pa.isActive = true
+        order by pa.startDate desc, u.firstName asc, u.lastName asc
+        """)
+    List<com.hris.organisation.dto.ProjectAssignmentViewDto> findActiveViewsByProjectId(
+        @Param("projectId") UUID projectId
+    );
 
     @Query("""
         SELECT DISTINCT pa.projectId
