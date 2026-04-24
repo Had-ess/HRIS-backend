@@ -30,7 +30,7 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
         long getTotalEmployees();
         long getActiveEmployees();
         long getNewHires();
-        long getDepartures();
+        long getTerminatedEmployees();
     }
 
     interface ProjectTeamSizeView {
@@ -114,7 +114,7 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
             COUNT(e) AS totalEmployees,
             COALESCE(SUM(CASE WHEN e.status = :activeStatus THEN 1 ELSE 0 END), 0) AS activeEmployees,
             COALESCE(SUM(CASE WHEN e.hireDate >= :monthStart AND e.hireDate < :nextMonthStart THEN 1 ELSE 0 END), 0) AS newHires,
-            COALESCE(SUM(CASE WHEN e.status = :terminatedStatus THEN 1 ELSE 0 END), 0) AS departures
+            COALESCE(SUM(CASE WHEN e.status = :terminatedStatus THEN 1 ELSE 0 END), 0) AS terminatedEmployees
         FROM Employee e
         WHERE (:departmentId IS NULL OR e.departmentId = :departmentId)
           AND (

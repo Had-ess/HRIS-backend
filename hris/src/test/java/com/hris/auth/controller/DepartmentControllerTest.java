@@ -120,9 +120,25 @@ class DepartmentControllerTest {
     @DisplayName("administration fallback role can manage departments without explicit permission")
     void administrationFallbackRoleCanManageDepartments() {
         UUID userId = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
         DepartmentDto responseDto = new DepartmentDto(UUID.randomUUID(), "Finance", "FIN", null, true);
+        Role administrationRole = Role.builder()
+            .id(roleId)
+            .code("ADMINISTRATION")
+            .name("Administration")
+            .isActive(true)
+            .build();
+        UserRole administrationAssignment = UserRole.builder()
+            .id(UUID.randomUUID())
+            .userId(userId)
+            .roleId(roleId)
+            .role(administrationRole)
+            .isActive(true)
+            .build();
 
         when(departmentService.create(any(DepartmentCreateDto.class), eq(userId))).thenReturn(responseDto);
+        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
+            .thenReturn(List.of(administrationAssignment));
 
         PermissionAuthorizationService authorizationService = new PermissionAuthorizationService(
             userRoleRepository,

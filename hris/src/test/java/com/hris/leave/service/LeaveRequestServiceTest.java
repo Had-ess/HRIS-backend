@@ -45,6 +45,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -644,7 +645,7 @@ class LeaveRequestServiceTest {
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
 
             LeaveRequest result = leaveRequestService.getById(requestId, requesterId);
 
@@ -671,7 +672,7 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
 
             assertThatThrownBy(() -> leaveRequestService.getById(requestId, requesterId))
@@ -809,7 +810,7 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.empty());
@@ -840,7 +841,7 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
@@ -880,7 +881,7 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findByUserIdAndIsActiveTrue(requesterId)).thenReturn(List.of());
+            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()

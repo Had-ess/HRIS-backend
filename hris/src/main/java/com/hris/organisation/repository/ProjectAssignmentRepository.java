@@ -43,6 +43,18 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
     @Query("""
         SELECT DISTINCT pa.projectId
         FROM ProjectAssignment pa
+        WHERE pa.employeeId = :employeeId
+          AND pa.isActive = true
+          AND pa.startDate <= :today
+          AND (pa.endDate IS NULL OR pa.endDate >= :today)
+        """)
+    List<UUID> findActiveProjectIdsByEmployeeId(
+        @Param("employeeId") UUID employeeId,
+        @Param("today") LocalDate today);
+
+    @Query("""
+        SELECT DISTINCT pa.projectId
+        FROM ProjectAssignment pa
         WHERE pa.supervisorId = :supervisorId
           AND pa.isActive = true
           AND pa.startDate <= :today

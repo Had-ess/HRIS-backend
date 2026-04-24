@@ -107,7 +107,7 @@ public class AnalyticsService {
             view.getTotalEmployees(),
             view.getActiveEmployees(),
             view.getNewHires(),
-            view.getDepartures()
+            view.getTerminatedEmployees()
         );
     }
 

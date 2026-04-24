@@ -268,7 +268,11 @@ public class ProjectService {
             return ProjectReadScope.projects(projectIds);
         }
 
-        throw new AccessDeniedException("You are not allowed to access projects");
+        Employee employee = employeeRepository.findByUserId(userId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        List<UUID> projectIds = projectAssignmentRepository.findActiveProjectIdsByEmployeeId(
+            employee.getId(), LocalDate.now());
+        return ProjectReadScope.projects(projectIds);
     }
 
     private boolean hasRole(List<UserRole> roles, String roleCode) {

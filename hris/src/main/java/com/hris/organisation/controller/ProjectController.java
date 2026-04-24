@@ -34,8 +34,6 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<PageResponse<ProjectResponseDto>>> getAll(
             Pageable pageable,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(
-            authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(projectService.getAll(actorId, pageable))));
     }
@@ -54,8 +52,6 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<ProjectResponseDto>> getById(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(
-            authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(projectService.getById(id, actorId)));
     }
@@ -86,8 +82,6 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<List<ProjectDepartmentResponseDto>>> getDepartments(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(
-            authentication, "PROJECT", "READ", "HR_ADMIN", "ADMINISTRATION", "PROJECT_SUPERVISOR", "DEPT_MANAGER");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(projectService.getDepartments(id, actorId)));
     }

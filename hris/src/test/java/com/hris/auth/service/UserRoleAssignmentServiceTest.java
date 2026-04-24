@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,7 +65,7 @@ class UserRoleAssignmentServiceTest {
         when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
         when(userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)).thenReturn(false);
         when(userRoleRepository.save(any(UserRole.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(userRoleRepository.findByUserIdAndIsActiveTrue(userId)).thenReturn(List.of(userRole));
+        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(userRole));
 
         List<Role> response = userRoleAssignmentService.assignRole(userId, roleId, actorId);
 

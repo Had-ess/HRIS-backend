@@ -4,5 +4,5 @@ public record HeadcountMetricsDto(
     long totalEmployees,
     long activeEmployees,
     long newHires,
-    long departures
+    long terminatedEmployees
 ) {}
