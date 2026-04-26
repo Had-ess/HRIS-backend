@@ -150,7 +150,9 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
         LeaveMetricsDto liveLeaveMetrics = analyticsService.getLeaveMetrics(
-            new ScopeFilter(ScopeType.ALL, null, List.of()));
+            new ScopeFilter(ScopeType.ALL, null, List.of()),
+            null,
+            null);
 
         return new DirectorDashboardDto(
             employeeRepository.count(),

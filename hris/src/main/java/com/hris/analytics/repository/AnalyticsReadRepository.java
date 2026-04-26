@@ -46,6 +46,21 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
         long getAffectedEmployeesCount();
     }
 
+    interface LeaveTypeDistributionView {
+        String getLeaveTypeCode();
+        String getLeaveTypeName();
+        long getRequestCount();
+        long getTotalDays();
+    }
+
+    interface LeaveTrendView {
+        Integer getYear();
+        Integer getMonth();
+        long getTotalRequests();
+        long getApprovedCount();
+        long getRejectedCount();
+    }
+
     @Query("""
         SELECT
             COUNT(lr) AS totalRequests,
@@ -193,5 +208,73 @@ public interface AnalyticsReadRepository extends Repository<com.hris.leave.entit
         @Param("applyProjectScope") boolean applyProjectScope,
         @Param("projectIds") Collection<UUID> projectIds,
         @Param("approvedStatus") LeaveStatus approvedStatus
+    );
+
+    @Query("""
+        SELECT
+            lt.code AS leaveTypeCode,
+            lt.name AS leaveTypeName,
+            COUNT(lr) AS requestCount,
+            COALESCE(SUM(lr.workingDays), 0) AS totalDays
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        JOIN LeaveType lt ON lt.id = lr.leaveTypeId
+        WHERE lr.submittedAt >= :from
+          AND lr.submittedAt < :to
+          AND (:departmentId IS NULL OR e.departmentId = :departmentId)
+          AND (
+            :applyProjectScope = false OR EXISTS (
+                SELECT 1 FROM ProjectAssignment pa
+                WHERE pa.employeeId = e.id
+                  AND pa.projectId IN :projectIds
+                  AND pa.isActive = true
+                  AND pa.startDate <= lr.endDate
+                  AND (pa.endDate IS NULL OR pa.endDate >= lr.startDate)
+            )
+          )
+        GROUP BY lt.code, lt.name
+        ORDER BY COUNT(lr) DESC, lt.name ASC
+        """)
+    List<LeaveTypeDistributionView> getLeaveTypeDistribution(
+        @Param("from") Instant from,
+        @Param("to") Instant to,
+        @Param("departmentId") UUID departmentId,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds
+    );
+
+    @Query(value = """
+        SELECT
+            EXTRACT(YEAR FROM lr.submitted_at) AS year,
+            EXTRACT(MONTH FROM lr.submitted_at) AS month,
+            COUNT(*) AS totalRequests,
+            COALESCE(SUM(CASE WHEN lr.status = CAST(:approvedStatus AS text) THEN 1 ELSE 0 END), 0) AS approvedCount,
+            COALESCE(SUM(CASE WHEN lr.status = CAST(:rejectedStatus AS text) THEN 1 ELSE 0 END), 0) AS rejectedCount
+        FROM leave_requests lr
+        JOIN employees e ON e.id = lr.employee_id
+        WHERE lr.submitted_at >= :from
+          AND lr.submitted_at < :to
+          AND (:departmentId IS NULL OR e.department_id = :departmentId)
+          AND (
+            :applyProjectScope = false OR EXISTS (
+                SELECT 1 FROM project_assignments pa
+                WHERE pa.employee_id = e.id
+                  AND pa.project_id IN (:projectIds)
+                  AND pa.is_active = true
+                  AND pa.start_date <= lr.end_date
+                  AND (pa.end_date IS NULL OR pa.end_date >= lr.start_date)
+            )
+          )
+        GROUP BY EXTRACT(YEAR FROM lr.submitted_at), EXTRACT(MONTH FROM lr.submitted_at)
+        ORDER BY year ASC, month ASC
+        """, nativeQuery = true)
+    List<LeaveTrendView> getLeaveTrend(
+        @Param("from") Instant from,
+        @Param("to") Instant to,
+        @Param("departmentId") UUID departmentId,
+        @Param("applyProjectScope") boolean applyProjectScope,
+        @Param("projectIds") Collection<UUID> projectIds,
+        @Param("approvedStatus") String approvedStatus,
+        @Param("rejectedStatus") String rejectedStatus
     );
 }

@@ -92,6 +92,33 @@ public class KeycloakAdminClient {
         deleteUser(accessToken, userId);
     }
 
+    public void updateUserProfile(String userId, String email, String firstName, String lastName) {
+        String accessToken = obtainAccessToken();
+        Map<String, Object> currentUser = getUserRepresentation(accessToken, userId);
+        currentUser.put("email", email);
+        currentUser.put("firstName", firstName);
+        currentUser.put("lastName", lastName);
+
+        try {
+            restClient.put()
+                .uri(serverUrl + "/admin/realms/" + realm + "/users/" + userId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(currentUser)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
+                    throw mapOperationFailure(
+                        "update user profile",
+                        clientResponse.getStatusCode(),
+                        readBody(clientResponse)
+                    );
+                })
+                .toBodilessEntity();
+        } catch (ResourceAccessException ex) {
+            throw unavailable("update user profile", "Keycloak is unavailable. Please retry later.", ex);
+        }
+    }
+
     private void deleteUser(String accessToken, String userId) {
         restClient.delete()
             .uri(serverUrl + "/admin/realms/" + realm + "/users/" + userId)
@@ -105,6 +132,38 @@ public class KeycloakAdminClient {
                 );
             })
             .toBodilessEntity();
+    }
+
+    private Map<String, Object> getUserRepresentation(String accessToken, String userId) {
+        try {
+            String response = restClient.get()
+                .uri(serverUrl + "/admin/realms/" + realm + "/users/" + userId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
+                    throw mapOperationFailure(
+                        "get user profile",
+                        clientResponse.getStatusCode(),
+                        readBody(clientResponse)
+                    );
+                })
+                .body(String.class);
+
+            return objectMapper.readValue(response, MAP_TYPE);
+        } catch (KeycloakProvisioningException ex) {
+            throw ex;
+        } catch (ResourceAccessException ex) {
+            throw unavailable("get user profile", "Keycloak is unavailable. Please retry later.", ex);
+        } catch (IOException ex) {
+            throw new KeycloakProvisioningException(
+                HttpStatus.BAD_GATEWAY,
+                "Keycloak returned an invalid user profile response.",
+                "get user profile",
+                HttpStatus.OK,
+                null,
+                ex
+            );
+        }
     }
 
     private void setPassword(String accessToken, String userId, String password, boolean temporary) {

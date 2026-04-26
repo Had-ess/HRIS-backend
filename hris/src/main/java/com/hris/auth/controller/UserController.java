@@ -1,6 +1,7 @@
 package com.hris.auth.controller;
 
 import com.hris.auth.dto.UserRoleAssignmentDto;
+import com.hris.auth.dto.UpdateCurrentUserDto;
 import com.hris.auth.dto.UpdateLocaleDto;
 import com.hris.auth.dto.UserResponseDto;
 import com.hris.auth.entity.Role;
@@ -31,6 +32,14 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDto>> getCurrentUser(Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(userService.getCurrentUser(userId)));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponseDto>> updateCurrentUser(
+            Authentication auth,
+            @Valid @RequestBody UpdateCurrentUserDto dto) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(userService.updateCurrentUser(userId, dto)));
     }
 
     @PatchMapping("/me/locale")
