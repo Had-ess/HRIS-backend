@@ -114,7 +114,7 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
         WHERE pa.employeeId = :employeeId
           AND pa.projectId = :projectId
           AND pa.isActive = true
-          AND (:endDate IS NULL OR pa.startDate <= :endDate)
+          AND pa.startDate <= :endDate
           AND (pa.endDate IS NULL OR pa.endDate >= :startDate)
         """)
     long countOverlappingActiveAssignments(
@@ -122,4 +122,16 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
         @Param("projectId") UUID projectId,
         @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        SELECT COUNT(pa) FROM ProjectAssignment pa
+        WHERE pa.employeeId = :employeeId
+          AND pa.projectId = :projectId
+          AND pa.isActive = true
+          AND (pa.endDate IS NULL OR pa.endDate >= :startDate)
+        """)
+    long countOverlappingActiveAssignmentsOpenEnded(
+        @Param("employeeId") UUID employeeId,
+        @Param("projectId") UUID projectId,
+        @Param("startDate") LocalDate startDate);
 }

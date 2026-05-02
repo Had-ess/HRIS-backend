@@ -72,12 +72,8 @@ public class UserService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        String previousLocale = user.getLocalePreference();
         user.setLocalePreference(dto.locale());
         User saved = userRepository.save(user);
-
-        auditLogService.log(userId, AuditAction.UPDATE, "user", userId,
-            previousLocale, dto.locale());
 
         return toDto(saved);
     }

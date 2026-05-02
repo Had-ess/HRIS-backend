@@ -292,7 +292,7 @@ class DashboardServiceTest {
         when(approvalStepRepository.countByStatus(StepStatus.PENDING)).thenReturn(4L);
         when(adminRequestRepository.countByStatusIn(List.of(
             AdminRequestStatus.SUBMITTED, AdminRequestStatus.IN_PROGRESS))).thenReturn(3L);
-        when(analyticsService.getLeaveMetrics(any())).thenReturn(
+        when(analyticsService.getLeaveMetrics(any(), any(), any())).thenReturn(
             new LeaveMetricsDto(15L, 11L, 1L, 3.0)
         );
 

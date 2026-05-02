@@ -414,16 +414,48 @@ public class LeaveRequestService {
         );
     }
 
+    @Transactional
+    public void deleteAttachment(UUID requestId, UUID attachmentId, UUID requesterId) {
+        LeaveRequest request = leaveRequestRepository.findById(requestId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!canUploadAttachment(request, requesterId)) {
+            Employee employee = employeeRepository.findByUserId(requesterId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+            if (!request.getEmployeeId().equals(employee.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                    "You are not allowed to remove attachments for this leave request");
+            }
+
+            throw new InvalidWorkflowStateException(
+                "Attachments can only be removed for leave requests that are pending approval");
+        }
+
+        FileAttachment attachment = fileAttachmentRepository.findById(attachmentId)
+            .orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
+
+        if (!attachment.getRequestId().equals(requestId)) {
+            throw new EntityNotFoundException("Attachment not found");
+        }
+
+        fileAttachmentRepository.delete(attachment);
+        fileStorageService.delete(attachment.getStoragePath());
+        auditLogService.log(requesterId, AuditAction.DELETE, "file_attachment",
+            attachment.getId(), attachment, null);
+    }
+
     private NotificationEvent buildSubmittedEvent(LeaveRequest request,ApprovalStep step,Employee employee) {
         User requester = userRepository.findById(employee.getUserId()).orElseThrow();
         User approver = userRepository.findById(step.getApproverId()).orElseThrow();
 
-        String paramsJson = serializeParams(List.of(
-            requester.getFirstName() + " " + requester.getLastName(),
-            request.getStartDate().toString(),
-            request.getEndDate().toString(),
-            request.getWorkingDays()
-        ));
+        Map<String, Object> params = new java.util.LinkedHashMap<>();
+        params.put("employeeName", requester.getFirstName() + " " + requester.getLastName());
+        params.put("startDate", request.getStartDate().toString());
+        params.put("endDate", request.getEndDate().toString());
+        params.put("workingDays", request.getWorkingDays());
+        params.put("linkPath", "/approvals");
+        String paramsJson = serializeParams(params);
 
         return NotificationEvent.builder()
             .eventType(NotificationEventType.LEAVE_SUBMITTED)
@@ -439,12 +471,14 @@ public class LeaveRequestService {
 
     private NotificationEvent buildApprovedEvent(LeaveRequest request, Employee employee) {
         User user = userRepository.findById(employee.getUserId()).orElseThrow();
-        String paramsJson = serializeParams(List.of(
-            user.getFirstName() + " " + user.getLastName(),
-            request.getStartDate().toString(),
-            request.getEndDate().toString(),
-            request.getWorkingDays()
-        ));
+
+        Map<String, Object> params = new java.util.LinkedHashMap<>();
+        params.put("employeeName", user.getFirstName() + " " + user.getLastName());
+        params.put("startDate", request.getStartDate().toString());
+        params.put("endDate", request.getEndDate().toString());
+        params.put("workingDays", request.getWorkingDays());
+        params.put("linkPath", "/leave/" + request.getId());
+        String paramsJson = serializeParams(params);
 
         return NotificationEvent.builder()
             .eventType(NotificationEventType.LEAVE_APPROVED)
@@ -460,12 +494,14 @@ public class LeaveRequestService {
 
     private NotificationEvent buildRejectedEvent(LeaveRequest request, Employee employee) {
         User user = userRepository.findById(employee.getUserId()).orElseThrow();
-        String paramsJson = serializeParams(List.of(
-            user.getFirstName() + " " + user.getLastName(),
-            request.getStartDate().toString(),
-            request.getEndDate().toString(),
-            request.getWorkingDays()
-        ));
+
+        Map<String, Object> params = new java.util.LinkedHashMap<>();
+        params.put("employeeName", user.getFirstName() + " " + user.getLastName());
+        params.put("startDate", request.getStartDate().toString());
+        params.put("endDate", request.getEndDate().toString());
+        params.put("workingDays", request.getWorkingDays());
+        params.put("linkPath", "/leave/" + request.getId());
+        String paramsJson = serializeParams(params);
 
         return NotificationEvent.builder()
             .eventType(NotificationEventType.LEAVE_REJECTED)
@@ -479,7 +515,7 @@ public class LeaveRequestService {
             .build();
     }
 
-    private String serializeParams(List<?> params) {
+    private String serializeParams(Map<String, Object> params) {
         try {
             return objectMapper.writeValueAsString(params);
         } catch (JsonProcessingException e) {
@@ -503,20 +539,20 @@ public class LeaveRequestService {
             return true;
         }
 
-        Employee employee = employeeRepository.findByUserId(requesterId)
-            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        return request.getEmployeeId().equals(employee.getId());
+        return employeeRepository.findByUserId(requesterId)
+            .map(employee -> request.getEmployeeId().equals(employee.getId()))
+            .orElse(false)
+            || isPendingApproverForLeaveRequest(request.getId(), requesterId);
     }
 
     private boolean canAccessLeaveAttachments(LeaveRequest request, UUID requesterId) {
-        if (canAccessLeaveRequest(request, requesterId)) {
-            return true;
-        }
+        return canAccessLeaveRequest(request, requesterId);
+    }
 
-        return approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", request.getId())
-            .map(workflow -> approvalStepRepository.findByWorkflowId(workflow.getId()).stream()
-                .anyMatch(step -> requesterId.equals(step.getApproverId())
-                    && step.getStatus() == StepStatus.PENDING))
+    private boolean isPendingApproverForLeaveRequest(UUID requestId, UUID requesterId) {
+        return approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId)
+            .map(workflow -> approvalStepRepository.findByWorkflowIdAndStatus(workflow.getId(), StepStatus.PENDING).stream()
+                .anyMatch(step -> requesterId.equals(step.getApproverId())))
             .orElse(false);
     }
 

@@ -11,6 +11,7 @@ import org.mapstruct.Mapping;
 public interface LeaveMapper {
     @Mapping(target = "leaveTypeCode", ignore = true)
     @Mapping(target = "leaveTypeName", ignore = true)
+    @Mapping(target = "approvalSteps", ignore = true)
     LeaveRequestResponseDto toDto(LeaveRequest request);
 
     @Mapping(target = "leaveTypeCode", ignore = true)

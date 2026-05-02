@@ -679,6 +679,39 @@ class LeaveRequestServiceTest {
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("You are not allowed to access this leave request");
         }
+
+        @Test
+        @DisplayName("should allow pending approver to read leave request")
+        void shouldAllowPendingApproverToReadLeaveRequest() {
+            UUID requestId = UUID.randomUUID();
+            UUID workflowId = UUID.randomUUID();
+            UUID approverUserId = UUID.randomUUID();
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(UUID.randomUUID())
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(userRoleRepository.findEffectiveByUserId(eq(approverUserId), any(Instant.class))).thenReturn(List.of());
+            when(employeeRepository.findByUserId(approverUserId)).thenReturn(Optional.empty());
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
+                .thenReturn(Optional.of(ApprovalWorkflow.builder()
+                    .id(workflowId)
+                    .subjectType("LEAVE")
+                    .subjectId(requestId)
+                    .build()));
+            when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING))
+                .thenReturn(List.of(ApprovalStep.builder()
+                    .id(UUID.randomUUID())
+                    .workflowId(workflowId)
+                    .approverId(approverUserId)
+                    .status(StepStatus.PENDING)
+                    .build()));
+
+            LeaveRequest result = leaveRequestService.getById(requestId, approverUserId);
+
+            assertThat(result.getId()).isEqualTo(requestId);
+        }
     }
 
     @Nested
@@ -849,7 +882,7 @@ class LeaveRequestServiceTest {
                     .subjectType("LEAVE")
                     .subjectId(requestId)
                     .build()));
-            when(approvalStepRepository.findByWorkflowId(workflowId)).thenReturn(List.of(
+            when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(List.of(
                 ApprovalStep.builder()
                     .id(UUID.randomUUID())
                     .workflowId(workflowId)
@@ -889,18 +922,113 @@ class LeaveRequestServiceTest {
                     .subjectType("LEAVE")
                     .subjectId(requestId)
                     .build()));
-            when(approvalStepRepository.findByWorkflowId(workflowId)).thenReturn(List.of(
-                ApprovalStep.builder()
-                    .id(UUID.randomUUID())
-                    .workflowId(workflowId)
-                    .approverId(requesterId)
-                    .status(StepStatus.APPROVED)
-                    .build()
-            ));
+            when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING))
+                .thenReturn(List.of());
 
             assertThatThrownBy(() -> leaveRequestService.downloadAttachment(requestId, attachmentId, requesterId))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("You are not allowed to access attachments for this leave request");
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteAttachment()")
+    class DeleteAttachmentTests {
+
+        @Test
+        @DisplayName("should allow owner to remove attachment while request is pending approval")
+        void shouldAllowOwnerToRemoveAttachment() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(employeeId)
+                .status(LeaveStatus.IN_APPROVAL)
+                .build();
+            FileAttachment attachment = FileAttachment.builder()
+                .id(attachmentId)
+                .requestId(requestId)
+                .fileName("wrong-file.pdf")
+                .mimeType("application/pdf")
+                .storagePath(requestId + "/wrong-file.pdf")
+                .uploadedById(requesterId)
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(fileAttachmentRepository.findById(attachmentId)).thenReturn(Optional.of(attachment));
+
+            leaveRequestService.deleteAttachment(requestId, attachmentId, requesterId);
+
+            verify(fileAttachmentRepository).delete(attachment);
+            verify(fileStorageService).delete(attachment.getStoragePath());
+        }
+
+        @Test
+        @DisplayName("should reject delete for non-owner")
+        void shouldRejectDeleteWhenRequesterIsNotOwner() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(UUID.randomUUID())
+                .status(LeaveStatus.PENDING)
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+
+            assertThatThrownBy(() -> leaveRequestService.deleteAttachment(requestId, attachmentId, requesterId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("You are not allowed to remove attachments for this leave request");
+        }
+
+        @Test
+        @DisplayName("should reject delete when request is already completed")
+        void shouldRejectDeleteWhenRequestIsCompleted() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(employeeId)
+                .status(LeaveStatus.APPROVED)
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+
+            assertThatThrownBy(() -> leaveRequestService.deleteAttachment(requestId, attachmentId, requesterId))
+                .isInstanceOf(InvalidWorkflowStateException.class)
+                .hasMessage("Attachments can only be removed for leave requests that are pending approval");
+        }
+
+        @Test
+        @DisplayName("should reject delete when attachment does not belong to leave request")
+        void shouldRejectDeleteWhenAttachmentDoesNotBelongToRequest() {
+            UUID requestId = UUID.randomUUID();
+            UUID attachmentId = UUID.randomUUID();
+
+            LeaveRequest request = LeaveRequest.builder()
+                .id(requestId)
+                .employeeId(employeeId)
+                .status(LeaveStatus.PENDING)
+                .build();
+            FileAttachment attachment = FileAttachment.builder()
+                .id(attachmentId)
+                .requestId(UUID.randomUUID())
+                .storagePath("other/file.pdf")
+                .build();
+
+            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(fileAttachmentRepository.findById(attachmentId)).thenReturn(Optional.of(attachment));
+
+            assertThatThrownBy(() -> leaveRequestService.deleteAttachment(requestId, attachmentId, requesterId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Attachment not found");
         }
     }
 }

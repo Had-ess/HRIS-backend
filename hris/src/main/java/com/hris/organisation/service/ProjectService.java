@@ -263,6 +263,7 @@ public class ProjectService {
             });
     }
 
+
     private void validateAssignment(ProjectAssignmentCreateDto dto, Employee employee, UUID projectId) {
         if (dto.employeeId().equals(dto.supervisorId())) {
             throw new InvalidProjectAssignmentException("Supervisor cannot be the same employee");
@@ -277,8 +278,11 @@ public class ProjectService {
             throw new InvalidProjectAssignmentException("Assignment cannot be created for inactive employee");
         }
 
-        long overlappingAssignments = projectAssignmentRepository.countOverlappingActiveAssignments(
-            dto.employeeId(), projectId, dto.startDate(), dto.endDate());
+        long overlappingAssignments = dto.endDate() != null
+            ? projectAssignmentRepository.countOverlappingActiveAssignments(
+                dto.employeeId(), projectId, dto.startDate(), dto.endDate())
+            : projectAssignmentRepository.countOverlappingActiveAssignmentsOpenEnded(
+                dto.employeeId(), projectId, dto.startDate());
         if (overlappingAssignments > 0) {
             throw new InvalidProjectAssignmentException(
                 "Overlapping assignment already exists for this employee and project");

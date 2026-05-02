@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class NotificationController {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
@@ -34,15 +36,18 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page.map(notificationMapper::toDto))));
     }
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<ApiResponse<Long>> getUnreadCount(Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(notificationRepository.countByUserIdAndIsReadFalse(userId)));
+    }
+
     @PatchMapping("/{id}/read")
     @Transactional
     public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable UUID id, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
-        Notification n = notificationRepository.findById(id)
+        Notification n = notificationRepository.findByIdAndUserId(id, userId)
             .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
-        if (!n.getUserId().equals(userId)) {
-            throw new org.springframework.security.access.AccessDeniedException("Notification does not belong to current user");
-        }
         n.markAsRead();
         notificationRepository.save(n);
         return ResponseEntity.ok(ApiResponse.ok(null));

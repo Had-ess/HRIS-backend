@@ -1,5 +1,7 @@
 package com.hris.leave.controller;
 
+import com.hris.approval.dto.ApprovalStepResponseDto;
+import com.hris.approval.service.ApprovalViewService;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import com.hris.leave.dto.CreateLeaveRequestDto;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 public class LeaveRequestController {
 
     private final LeaveRequestService leaveRequestService;
+    private final ApprovalViewService approvalViewService;
     private final LeaveTypeRepository leaveTypeRepository;
 
     @PostMapping
@@ -49,7 +52,12 @@ public class LeaveRequestController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()), userId)));
+            .body(ApiResponse.ok(toDto(
+                request,
+                findLeaveType(request.getLeaveTypeId()),
+                userId,
+                approvalViewService.getStepsForSubject("LEAVE", request.getId())
+            )));
     }
 
     @GetMapping
@@ -65,9 +73,18 @@ public class LeaveRequestController {
                     .collect(Collectors.toSet()))
             .stream()
             .collect(Collectors.toMap(LeaveType::getId, Function.identity()));
+        Map<UUID, List<ApprovalStepResponseDto>> approvalStepsByRequestId = approvalViewService
+            .getStepsForSubjects("LEAVE", page.getContent().stream()
+                .map(LeaveRequest::getId)
+                .toList());
 
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
-            page.map(request -> toDto(request, leaveTypesById.get(request.getLeaveTypeId()), userId))
+            page.map(request -> toDto(
+                request,
+                leaveTypesById.get(request.getLeaveTypeId()),
+                userId,
+                approvalStepsByRequestId.getOrDefault(request.getId(), List.of())
+            ))
         )));
     }
 
@@ -77,7 +94,12 @@ public class LeaveRequestController {
             @PathVariable UUID id, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.getById(id, userId);
-        return ResponseEntity.ok(ApiResponse.ok(toDto(request, findLeaveType(request.getLeaveTypeId()), userId)));
+        return ResponseEntity.ok(ApiResponse.ok(toDto(
+            request,
+            findLeaveType(request.getLeaveTypeId()),
+            userId,
+            approvalViewService.getStepsForSubject("LEAVE", request.getId())
+        )));
     }
 
     @DeleteMapping("/{id}")
@@ -140,6 +162,17 @@ public class LeaveRequestController {
             .body(download.resource());
     }
 
+    @DeleteMapping("/{id}/attachments/{attachmentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> deleteAttachment(
+            @PathVariable UUID id,
+            @PathVariable UUID attachmentId,
+            Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        leaveRequestService.deleteAttachment(id, attachmentId, userId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     private MediaType resolveMediaType(String mimeType) {
         try {
             return MediaType.parseMediaType(mimeType);
@@ -152,7 +185,11 @@ public class LeaveRequestController {
         return leaveTypeRepository.findById(leaveTypeId).orElse(null);
     }
 
-    private LeaveRequestResponseDto toDto(LeaveRequest request, LeaveType leaveType, UUID requesterId) {
+    private LeaveRequestResponseDto toDto(
+            LeaveRequest request,
+            LeaveType leaveType,
+            UUID requesterId,
+            List<ApprovalStepResponseDto> approvalSteps) {
         return new LeaveRequestResponseDto(
             request.getId(),
             request.getEmployeeId(),
@@ -166,7 +203,8 @@ public class LeaveRequestController {
             request.getStatus(),
             request.getComment(),
             request.getSubmittedAt(),
-            leaveRequestService.canUploadAttachment(request, requesterId)
+            leaveRequestService.canUploadAttachment(request, requesterId),
+            approvalSteps
         );
     }
 }

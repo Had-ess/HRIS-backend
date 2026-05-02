@@ -22,6 +22,8 @@ public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID
 
     List<ApprovalStep> findByWorkflowIdOrderByStepOrder(UUID workflowId);
 
+    List<ApprovalStep> findByWorkflowIdInOrderByWorkflowIdAscStepOrderAsc(List<UUID> workflowIds);
+
     List<ApprovalStep> findByWorkflowIdAndStatus(UUID workflowId, StepStatus status);
 
     List<ApprovalStep> findByApproverIdAndStatus(UUID approverId, StepStatus status);

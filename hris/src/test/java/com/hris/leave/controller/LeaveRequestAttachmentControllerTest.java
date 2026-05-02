@@ -1,5 +1,6 @@
 package com.hris.leave.controller;
 
+import com.hris.approval.service.ApprovalViewService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.mapper.LeaveMapper;
 import com.hris.leave.repository.LeaveTypeRepository;
@@ -31,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -51,6 +53,8 @@ class LeaveRequestAttachmentControllerTest {
     private LeaveRequestService leaveRequestService;
     @MockBean
     private LeaveMapper leaveMapper;
+    @MockBean
+    private ApprovalViewService approvalViewService;
     @MockBean
     private LeaveTypeRepository leaveTypeRepository;
     @MockBean
@@ -95,6 +99,23 @@ class LeaveRequestAttachmentControllerTest {
                 .with(user(USER_ID.toString()).roles("EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"medical_note.pdf\""));
+    }
+
+    @Test
+    void deleteAttachmentReturnsForbiddenWhenServiceDeniesAccess() throws Exception {
+        doThrow(new AccessDeniedException("You are not allowed to remove attachments for this leave request"))
+            .when(leaveRequestService).deleteAttachment(REQUEST_ID, ATTACHMENT_ID, USER_ID);
+
+        mockMvc.perform(delete("/api/leave-requests/{id}/attachments/{attachmentId}", REQUEST_ID, ATTACHMENT_ID)
+                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteAttachmentReturnsOkWhenAuthorized() throws Exception {
+        mockMvc.perform(delete("/api/leave-requests/{id}/attachments/{attachmentId}", REQUEST_ID, ATTACHMENT_ID)
+                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+            .andExpect(status().isOk());
     }
 
     @TestConfiguration

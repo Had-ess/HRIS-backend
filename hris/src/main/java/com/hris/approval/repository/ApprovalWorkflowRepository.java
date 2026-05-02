@@ -23,6 +23,8 @@ public interface ApprovalWorkflowRepository extends JpaRepository<ApprovalWorkfl
     // GAP-B-26: Find workflow by subject type and subject ID
     Optional<ApprovalWorkflow> findBySubjectTypeAndSubjectId(String subjectType, UUID subjectId);
 
+    List<ApprovalWorkflow> findBySubjectTypeAndSubjectIdIn(String subjectType, List<UUID> subjectIds);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         SELECT w FROM ApprovalWorkflow w

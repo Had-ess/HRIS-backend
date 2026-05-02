@@ -9,6 +9,8 @@ import java.util.UUID;
 public record ApprovalStepResponseDto(
     UUID id,
     UUID workflowId,
+    String subjectType,
+    UUID subjectId,
     UUID approverId,
     String approverName,
     int stepOrder,

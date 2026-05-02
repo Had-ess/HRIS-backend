@@ -170,11 +170,12 @@ public class AdminRequestService {
             AdminRequestType type) {
         User user = userRepository.findById(requesterId).orElseThrow();
 
-        String paramsJson = serializeMap(Map.of(
-            "requesterName", user.getFirstName() + " " + user.getLastName(),
-            "trackingNumber", request.getTrackingNumber(),
-            "requestType", type.getName()
-        ));
+        Map<String, String> paramsMap = new LinkedHashMap<>();
+        paramsMap.put("requesterName", user.getFirstName() + " " + user.getLastName());
+        paramsMap.put("trackingNumber", request.getTrackingNumber());
+        paramsMap.put("requestType", type.getName());
+        paramsMap.put("linkPath", "/requests/inbox");
+        String paramsJson = serializeMap(paramsMap);
 
         List<User> administrationUsers = userRepository.findByRole("ADMINISTRATION");
         List<User> hrAdmins = administrationUsers.isEmpty() ? userRepository.findByRole("HR_ADMIN") : administrationUsers;
@@ -198,6 +199,7 @@ public class AdminRequestService {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("trackingNumber", request.getTrackingNumber() == null ? "" : request.getTrackingNumber());
         params.put("rejectionReason", request.getRejectionReason() == null ? "" : request.getRejectionReason());
+        params.put("linkPath", "/requests");
 
         String paramsJson = serializeMap(params);
 
@@ -216,7 +218,10 @@ public class AdminRequestService {
     private NotificationEvent buildProcessedEvent(AdminRequest request) {
         User user = userRepository.findById(request.getRequesterId()).orElseThrow();
 
-        String paramsJson = serializeMap(Map.of("trackingNumber", request.getTrackingNumber()));
+        Map<String, String> paramsMap = new LinkedHashMap<>();
+        paramsMap.put("trackingNumber", request.getTrackingNumber());
+        paramsMap.put("linkPath", "/requests");
+        String paramsJson = serializeMap(paramsMap);
 
         return NotificationEvent.builder()
             .eventType(NotificationEventType.ADMIN_REQUEST_PROCESSED)

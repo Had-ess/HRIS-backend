@@ -22,8 +22,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -135,5 +137,84 @@ class NotificationConsumerTest {
 
         Notification notification = captor.getValue();
         assertThat(notification.getLinkPath()).isEqualTo("/projects/123");
+    }
+
+    @Test
+    @DisplayName("should render rejected admin request notification parameters in correct order")
+    void shouldRenderRejectedAdminRequestNotificationParamsInCorrectOrder() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        NotificationConsumer notificationConsumer = new NotificationConsumer(
+            notificationRepository, userRepository, messageSource, objectMapper);
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+            .id(userId)
+            .email("employee@hris.local")
+            .firstName("Admin")
+            .lastName("Requester")
+            .localePreference("fr")
+            .build();
+
+        NotificationEvent event = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.ADMIN_REQUEST_REJECTED)
+            .targetUserId(userId)
+            .titleKey("admin.rejected.title")
+            .bodyKey("admin.rejected.body")
+            .params(objectMapper.writeValueAsString(Map.of(
+                "trackingNumber", "AR-20260428-00042",
+                "rejectionReason", "Missing attachment"
+            )))
+            .locale("en")
+            .routingKey("admin.rejected")
+            .publishedAt(Instant.now())
+            .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(messageSource.getMessage(eq("admin.rejected.title"), any(Object[].class), any(Locale.class)))
+            .thenReturn("Demande refusee");
+        when(messageSource.getMessage(eq("admin.rejected.body"), any(Object[].class), any(Locale.class)))
+            .thenAnswer(invocation -> {
+                Object[] args = invocation.getArgument(1, Object[].class);
+                return args[0] + "|" + args[1];
+            });
+
+        notificationConsumer.onAdminEvent(event);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        Notification notification = captor.getValue();
+        assertThat(notification.getTitle()).isEqualTo("Demande refusee");
+        assertThat(notification.getBody()).isEqualTo("AR-20260428-00042|Missing attachment");
+    }
+
+    @Test
+    @DisplayName("should fail when target user is missing so the message can reach the DLQ")
+    void shouldFailWhenTargetUserMissing() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        NotificationConsumer notificationConsumer = new NotificationConsumer(
+            notificationRepository, userRepository, messageSource, objectMapper);
+        UUID userId = UUID.randomUUID();
+
+        NotificationEvent event = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.LEAVE_SUBMITTED)
+            .targetUserId(userId)
+            .titleKey("leave.submitted.title")
+            .bodyKey("leave.submitted.body")
+            .params("[\"Ali Ben\",\"2026-05-01\",\"2026-05-03\",2]")
+            .locale("fr")
+            .routingKey("leave.submitted")
+            .publishedAt(Instant.now())
+            .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> notificationConsumer.onLeaveEvent(event))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Failed to process notification event LEAVE_SUBMITTED")
+            .hasRootCauseMessage("Target user not found for notification event LEAVE_SUBMITTED");
+
+        verify(notificationRepository, never()).save(any(Notification.class));
     }
 }

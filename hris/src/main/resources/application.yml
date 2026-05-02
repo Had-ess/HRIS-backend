@@ -44,6 +44,8 @@ spring:
     username: ${RABBITMQ_USER:hris_user}
     password: ${RABBITMQ_PASS:hris_pass}
     virtual-host: ${RABBITMQ_VHOST:hris_vhost}
+    publisher-confirm-type: correlated
+    publisher-returns: true
     listener:
       simple:
         retry:
@@ -127,6 +129,8 @@ server:
 logging:
   level:
     com.hris: ${LOG_LEVEL_APP:INFO}
+    com.hris.notification: DEBUG
     org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
     org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:INFO}
     org.springframework.retry: ${LOG_LEVEL_SPRING_RETRY:INFO}
+    org.springframework.amqp: DEBUG

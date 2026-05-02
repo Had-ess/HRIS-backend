@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -129,5 +130,6 @@ class UserServiceTest {
         UserResponseDto response = userService.updateLocale(userId, new UpdateLocaleDto("en"));
 
         assertThat(response.localePreference()).isEqualTo("en");
+        verify(auditLogService, never()).log(eq(userId), any(), eq("user"), eq(userId), any(), any());
     }
 }

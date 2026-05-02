@@ -11,6 +11,8 @@ import com.hris.common.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +39,7 @@ public class AuditLogController {
             @RequestParam(required = false) UUID actorId,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to,
-            Pageable pageable
+            @PageableDefault(sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<AuditLogDto> page = auditLogService.search(resource, action, actorId, from, to, pageable)
             .map(this::toDto);

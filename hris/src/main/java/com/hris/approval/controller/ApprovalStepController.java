@@ -4,6 +4,8 @@ import com.hris.approval.dto.ApprovalCommentDto;
 import com.hris.approval.dto.ApprovalDecisionDto;
 import com.hris.approval.dto.ApprovalStepResponseDto;
 import com.hris.approval.entity.ApprovalStep;
+import com.hris.approval.entity.ApprovalWorkflow;
+import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.approval.service.ApprovalStepService;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
@@ -28,6 +30,7 @@ import java.util.UUID;
 public class ApprovalStepController {
 
     private final ApprovalStepService approvalStepService;
+    private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final UserRepository userRepository;
 
     @GetMapping("/pending")
@@ -59,9 +62,13 @@ public class ApprovalStepController {
     }
 
     private ApprovalStepResponseDto toStepDto(ApprovalStep step) {
+        ApprovalWorkflow workflow = approvalWorkflowRepository.findById(step.getWorkflowId()).orElse(null);
+
         return new ApprovalStepResponseDto(
             step.getId(),
             step.getWorkflowId(),
+            workflow != null ? workflow.getSubjectType() : null,
+            workflow != null ? workflow.getSubjectId() : null,
             step.getApproverId(),
             resolveApproverName(step.getApproverId()),
             step.getStepOrder(),
