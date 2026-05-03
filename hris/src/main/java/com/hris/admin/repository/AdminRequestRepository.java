@@ -30,4 +30,8 @@ public interface AdminRequestRepository extends JpaRepository<AdminRequest, UUID
     long countByStatusIn(List<AdminRequestStatus> statuses);
 
     List<AdminRequest> findTop5ByStatusInOrderBySubmittedAtDesc(List<AdminRequestStatus> statuses);
+
+    boolean existsByRequesterId(UUID requesterId);
+
+    boolean existsByResolvedById(UUID resolvedById);
 }

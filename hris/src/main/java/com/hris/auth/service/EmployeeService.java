@@ -5,7 +5,9 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
+import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.entity.LeaveType;
@@ -14,6 +16,8 @@ import com.hris.leave.entity.LeavePolicy;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.leave.repository.LeaveRequestRepository;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +39,10 @@ public class EmployeeService {
     private final LeaveTypeRepository leaveTypeRepository;
     private final LeavePolicyRepository leavePolicyRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
+    private final LeaveRequestRepository leaveRequestRepository;
+    private final DepartmentRepository departmentRepository;
+    private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final AdminUserService adminUserService;
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
@@ -94,6 +102,33 @@ public class EmployeeService {
             saved.getId(), previous, saved);
 
         return employeeMapper.toDto(saved);
+    }
+
+    @Transactional
+    public void delete(UUID id, UUID actorId) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        if (employee.getStatus() != EmployeeStatus.TERMINATED) {
+            throw new IllegalStateException("Only terminated employees can be deleted");
+        }
+        if (departmentRepository.existsByHeadEmployeeId(employee.getId())) {
+            throw new IllegalStateException("Employee cannot be deleted because they are assigned as a department head");
+        }
+        if (projectAssignmentRepository.existsByEmployeeId(employee.getId())
+            || projectAssignmentRepository.existsBySupervisorId(employee.getId())) {
+            throw new IllegalStateException("Employee cannot be deleted because they are referenced by project assignments");
+        }
+        if (leaveRequestRepository.existsByEmployeeId(employee.getId())) {
+            throw new IllegalStateException("Employee cannot be deleted because they have leave requests");
+        }
+
+        leaveBalanceRepository.deleteByEmployeeId(employee.getId());
+        employeeRepository.delete(employee);
+        employeeRepository.flush();
+        adminUserService.delete(employee.getUserId(), actorId);
+        auditLogService.log(actorId, AuditAction.DELETE, "employee",
+            employee.getId(), employee, null);
     }
 
     @Transactional

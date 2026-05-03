@@ -9,4 +9,5 @@ import java.util.UUID;
 @Repository
 public interface FileAttachmentRepository extends JpaRepository<FileAttachment, UUID> {
     List<FileAttachment> findByRequestId(UUID requestId);
+    boolean existsByUploadedById(UUID uploadedById);
 }

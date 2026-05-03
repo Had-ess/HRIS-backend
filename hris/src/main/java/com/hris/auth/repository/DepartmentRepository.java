@@ -15,6 +15,8 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
     Optional<Department> findByCode(String code);
 
+    boolean existsByHeadEmployeeId(UUID headEmployeeId);
+
     @Query("SELECT d.headEmployee FROM Department d WHERE d.id = :deptId")
     Optional<Employee> findDepartmentHead(@Param("deptId") UUID departmentId);
 }

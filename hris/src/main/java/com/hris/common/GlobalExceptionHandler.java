@@ -3,6 +3,7 @@ package com.hris.common;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.DepartmentDeletionNotAllowedException;
 import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
+import com.hris.common.exception.EmailDeliveryException;
 import com.hris.common.exception.FileAttachmentValidationException;
 import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.common.exception.InvalidLeavePeriodException;
@@ -172,6 +173,13 @@ public class GlobalExceptionHandler {
             ex
         );
         return ResponseEntity.status(ex.getResponseStatus())
+            .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(EmailDeliveryException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEmailDelivery(EmailDeliveryException ex) {
+        log.error("Onboarding email delivery failed", ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(ApiResponse.error(ex.getMessage()));
     }
 

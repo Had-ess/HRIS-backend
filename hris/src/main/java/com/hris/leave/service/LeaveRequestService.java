@@ -193,9 +193,10 @@ public class LeaveRequestService {
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
         if (status != null) {
-            return leaveRequestRepository.findByEmployeeIdAndStatus(employee.getId(), status, pageable);
+            return leaveRequestRepository.findByEmployeeIdAndStatusOrderBySubmittedAtDesc(
+                employee.getId(), status, pageable);
         }
-        return leaveRequestRepository.findByEmployeeId(employee.getId(), pageable);
+        return leaveRequestRepository.findByEmployeeIdOrderBySubmittedAtDesc(employee.getId(), pageable);
     }
 
     @Transactional(readOnly = true)

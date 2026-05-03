@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface NotificationEventRepository extends JpaRepository<NotificationEvent, UUID> {
+    boolean existsByTargetUserId(UUID targetUserId);
+    void deleteByTargetUserId(UUID targetUserId);
 }

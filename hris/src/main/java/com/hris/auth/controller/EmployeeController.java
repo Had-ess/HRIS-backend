@@ -58,4 +58,14 @@ public class EmployeeController {
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(employeeService.update(id, dto, actorId)));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMINISTRATION')")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        employeeService.delete(id, actorId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
 }

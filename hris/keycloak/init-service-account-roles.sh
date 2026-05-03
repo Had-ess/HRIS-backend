@@ -15,15 +15,13 @@ cleanup() {
 
 trap cleanup INT TERM
 
-until curl -sf "$server_url/realms/master/.well-known/openid-configuration" >/dev/null; do
-  sleep 2
-done
-
-/opt/keycloak/bin/kcadm.sh config credentials \
+until /opt/keycloak/bin/kcadm.sh config credentials \
   --server "$server_url" \
   --realm master \
   --user "$admin_user" \
-  --password "$admin_password" >/dev/null
+  --password "$admin_password" >/dev/null 2>&1; do
+  sleep 2
+done
 
 until /opt/keycloak/bin/kcadm.sh get clients -r "$realm" -q clientId=hris-backend --fields id --format csv --noquotes | grep -q .; do
   sleep 2
@@ -33,7 +31,7 @@ until /opt/keycloak/bin/kcadm.sh get users -r "$realm" -q username=service-accou
   sleep 2
 done
 
-for role in manage-users view-users query-users view-realm; do
+for role in manage-users view-users query-users view-realm manage-realm; do
   /opt/keycloak/bin/kcadm.sh add-roles \
     -r "$realm" \
     --uusername service-account-hris-backend \

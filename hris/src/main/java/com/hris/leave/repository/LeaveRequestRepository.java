@@ -21,10 +21,11 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
     @Query("SELECT lr FROM LeaveRequest lr WHERE lr.id = :id")
     java.util.Optional<LeaveRequest> findByIdForUpdate(@Param("id") UUID id);
 
-    Page<LeaveRequest> findByEmployeeId(UUID employeeId, Pageable pageable);
-    Page<LeaveRequest> findByEmployeeIdAndStatus(UUID employeeId, LeaveStatus status, Pageable pageable);
+    Page<LeaveRequest> findByEmployeeIdOrderBySubmittedAtDesc(UUID employeeId, Pageable pageable);
+    Page<LeaveRequest> findByEmployeeIdAndStatusOrderBySubmittedAtDesc(UUID employeeId, LeaveStatus status, Pageable pageable);
     List<LeaveRequest> findByEmployeeId(UUID employeeId);
     List<LeaveRequest> findTop5ByEmployeeIdOrderBySubmittedAtDesc(UUID employeeId);
+    boolean existsByEmployeeId(UUID employeeId);
 
     @Query("""
         SELECT COUNT(lr) FROM LeaveRequest lr

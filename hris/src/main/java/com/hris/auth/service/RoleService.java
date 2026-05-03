@@ -37,6 +37,11 @@ public class RoleService {
     }
 
     @Transactional(readOnly = true)
+    public List<RoleResponseDto> toResponses(List<Role> roles) {
+        return toDtos(roles);
+    }
+
+    @Transactional(readOnly = true)
     public RoleResponseDto getById(UUID id) {
         return toDto(getEntityById(id), roleRepository.findAllByOrderByNameAsc().stream()
             .collect(Collectors.toMap(Role::getId, Function.identity())));

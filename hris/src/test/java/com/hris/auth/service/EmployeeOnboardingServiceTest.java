@@ -10,6 +10,7 @@ import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.common.exception.EmailDeliveryException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,7 @@ class EmployeeOnboardingServiceTest {
     @Mock private EmployeeMapper employeeMapper;
     @Mock private EmployeeService employeeService;
     @Mock private AccountProvisioningService accountProvisioningService;
+    @Mock private EmployeeOnboardingEmailService employeeOnboardingEmailService;
     @Mock private AuditLogService auditLogService;
 
     @InjectMocks private EmployeeOnboardingService employeeOnboardingService;
@@ -108,6 +110,13 @@ class EmployeeOnboardingServiceTest {
 
         assertThat(result.userId()).isEqualTo(userId);
         verify(employeeService).initializeLeaveBalancesForNewEmployee(savedEmployee.getId());
+        verify(employeeOnboardingEmailService).sendCredentials(
+            dto.email(),
+            dto.firstName(),
+            dto.username(),
+            dto.password(),
+            true
+        );
     }
 
     @Test
@@ -152,5 +161,63 @@ class EmployeeOnboardingServiceTest {
             .hasMessage("Employee save failed");
 
         verify(accountProvisioningService).rollbackExternalAccount("kc-user-rollback");
+    }
+
+    @Test
+    @DisplayName("rolls back external account when onboarding email fails")
+    void rollsBackExternalAccountWhenOnboardingEmailFails() {
+        UUID actorId = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
+
+        EmployeeCreateDto dto = new EmployeeCreateDto(
+            "yasmine.dev",
+            "yasmine@demo.hris.local",
+            "Yasmine",
+            "Developer",
+            "Temp123!",
+            true,
+            List.of(roleId),
+            "EMP-900",
+            LocalDate.of(2026, 4, 22),
+            "Software Engineer",
+            EmployeeStatus.ACTIVE,
+            ContractType.PERMANENT,
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        );
+
+        User provisionedUser = User.builder()
+            .id(UUID.randomUUID())
+            .keycloakId("kc-user-email-failure")
+            .email(dto.email())
+            .firstName(dto.firstName())
+            .lastName(dto.lastName())
+            .isActive(true)
+            .build();
+
+        Employee savedEmployee = Employee.builder()
+            .id(UUID.randomUUID())
+            .userId(provisionedUser.getId())
+            .employeeCode(dto.employeeCode())
+            .hireDate(dto.hireDate())
+            .jobTitle(dto.jobTitle())
+            .status(dto.status())
+            .contractType(dto.contractType())
+            .departmentId(dto.departmentId())
+            .workScheduleId(dto.workScheduleId())
+            .build();
+
+        when(employeeRepository.findByEmployeeCode("EMP-900")).thenReturn(Optional.empty());
+        when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(provisionedUser);
+        when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
+        doThrow(new EmailDeliveryException("Employee account could not be created because the onboarding email could not be sent.", null))
+            .when(employeeOnboardingEmailService)
+            .sendCredentials(dto.email(), dto.firstName(), dto.username(), dto.password(), true);
+
+        assertThatThrownBy(() -> employeeOnboardingService.onboard(dto, actorId))
+            .isInstanceOf(EmailDeliveryException.class)
+            .hasMessage("Employee account could not be created because the onboarding email could not be sent.");
+
+        verify(accountProvisioningService).rollbackExternalAccount("kc-user-email-failure");
     }
 }

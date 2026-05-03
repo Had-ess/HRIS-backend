@@ -8,6 +8,13 @@
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "en",
+    "fr"
+  ],
+  "defaultLocale": "en",
+  "loginTheme": "hr-theme",
   "bruteForceProtected": true,
   "roles": {
     "realm": [

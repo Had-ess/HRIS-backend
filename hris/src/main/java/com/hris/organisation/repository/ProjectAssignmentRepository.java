@@ -39,6 +39,10 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
 
     List<ProjectAssignment> findByEmployeeIdAndIsActiveTrue(UUID employeeId);
 
+    boolean existsByEmployeeId(UUID employeeId);
+
+    boolean existsBySupervisorId(UUID supervisorId);
+
     List<ProjectAssignment> findByProjectId(UUID projectId);
 
     boolean existsByProjectIdAndIsActiveTrue(UUID projectId);

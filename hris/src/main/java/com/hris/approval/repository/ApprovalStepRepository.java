@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @Repository
 public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID> {
+    boolean existsByApproverId(UUID approverId);
 
     List<ApprovalStep> findByWorkflowId(UUID workflowId);
 

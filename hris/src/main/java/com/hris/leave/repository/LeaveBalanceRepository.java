@@ -13,6 +13,8 @@ import java.util.UUID;
 public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID> {
     Optional<LeaveBalance> findByEmployeeIdAndLeaveTypeIdAndYear(UUID employeeId, UUID leaveTypeId, int year);
     List<LeaveBalance> findByEmployeeIdAndYear(UUID employeeId, int year);
+    boolean existsByEmployeeId(UUID employeeId);
+    void deleteByEmployeeId(UUID employeeId);
     @Query("SELECT lb FROM LeaveBalance lb WHERE lb.year = :year")
     List<LeaveBalance> findAllByYear(@Param("year") int year);
 }

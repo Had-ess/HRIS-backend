@@ -4,8 +4,9 @@ import com.hris.auth.dto.UserRoleAssignmentDto;
 import com.hris.auth.dto.UpdateCurrentUserDto;
 import com.hris.auth.dto.UpdateLocaleDto;
 import com.hris.auth.dto.UserResponseDto;
-import com.hris.auth.entity.Role;
+import com.hris.auth.dto.RoleResponseDto;
 import com.hris.auth.service.UserRoleAssignmentService;
+import com.hris.auth.service.RoleService;
 import com.hris.auth.service.UserService;
 import com.hris.common.ApiResponse;
 import com.hris.security.PermissionAuthorizationService;
@@ -26,6 +27,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserRoleAssignmentService userRoleAssignmentService;
+    private final RoleService roleService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping("/me")
@@ -51,21 +53,22 @@ public class UserController {
     }
 
     @GetMapping("/{id}/roles")
-    public ResponseEntity<ApiResponse<List<Role>>> getUserRoles(
+    public ResponseEntity<ApiResponse<List<RoleResponseDto>>> getUserRoles(
             @PathVariable UUID id,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "USER", "READ", "ADMINISTRATION");
-        return ResponseEntity.ok(ApiResponse.ok(userRoleAssignmentService.getRoles(id)));
+        return ResponseEntity.ok(ApiResponse.ok(roleService.toResponses(userRoleAssignmentService.getRoles(id))));
     }
 
     @PostMapping("/{id}/roles")
-    public ResponseEntity<ApiResponse<List<Role>>> assignRole(
+    public ResponseEntity<ApiResponse<List<RoleResponseDto>>> assignRole(
             @PathVariable UUID id,
             @Valid @RequestBody UserRoleAssignmentDto dto,
             Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "USER", "ASSIGN_ROLE", "ADMINISTRATION");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
-        return ResponseEntity.ok(ApiResponse.ok(userRoleAssignmentService.assignRole(id, dto.roleId(), actorId)));
+        return ResponseEntity.ok(ApiResponse.ok(
+            roleService.toResponses(userRoleAssignmentService.assignRole(id, dto.roleId(), actorId))));
     }
 
     @DeleteMapping("/{id}/roles/{roleId}")

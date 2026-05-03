@@ -23,6 +23,7 @@ public class EmployeeOnboardingService {
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
     private final AccountProvisioningService accountProvisioningService;
+    private final EmployeeOnboardingEmailService employeeOnboardingEmailService;
     private final AuditLogService auditLogService;
 
     @Transactional
@@ -55,6 +56,13 @@ public class EmployeeOnboardingService {
 
             employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
             auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
+            employeeOnboardingEmailService.sendCredentials(
+                dto.email().trim(),
+                dto.firstName().trim(),
+                dto.username().trim(),
+                dto.password(),
+                dto.temporaryPassword() != null && dto.temporaryPassword()
+            );
             return employeeMapper.toDto(saved);
         } catch (RuntimeException ex) {
             accountProvisioningService.rollbackExternalAccount(user.getKeycloakId());

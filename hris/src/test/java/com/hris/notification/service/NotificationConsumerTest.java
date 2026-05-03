@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
@@ -82,7 +84,7 @@ class NotificationConsumerTest {
                 return args[0] + "|" + args[1] + "|" + args[2];
             });
 
-        notificationConsumer.onAdminEvent(event);
+        notificationConsumer.onAdminEvent(toMessage(objectMapper, event));
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(notificationRepository).save(captor.capture());
@@ -130,7 +132,7 @@ class NotificationConsumerTest {
         when(messageSource.getMessage(eq("project.assigned.body"), any(Object[].class), any(Locale.class)))
             .thenReturn("You have been assigned to Atlas");
 
-        notificationConsumer.onAdminEvent(event);
+        notificationConsumer.onAdminEvent(toMessage(objectMapper, event));
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(notificationRepository).save(captor.capture());
@@ -178,7 +180,7 @@ class NotificationConsumerTest {
                 return args[0] + "|" + args[1];
             });
 
-        notificationConsumer.onAdminEvent(event);
+        notificationConsumer.onAdminEvent(toMessage(objectMapper, event));
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(notificationRepository).save(captor.capture());
@@ -210,11 +212,15 @@ class NotificationConsumerTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> notificationConsumer.onLeaveEvent(event))
+        assertThatThrownBy(() -> notificationConsumer.onLeaveEvent(toMessage(objectMapper, event)))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Failed to process notification event LEAVE_SUBMITTED")
             .hasRootCauseMessage("Target user not found for notification event LEAVE_SUBMITTED");
 
         verify(notificationRepository, never()).save(any(Notification.class));
+    }
+
+    private Message toMessage(ObjectMapper objectMapper, NotificationEvent event) throws Exception {
+        return new Message(objectMapper.writeValueAsBytes(event), new MessageProperties());
     }
 }
