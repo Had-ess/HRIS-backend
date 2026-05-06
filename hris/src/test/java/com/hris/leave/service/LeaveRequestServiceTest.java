@@ -15,23 +15,20 @@ import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
-import com.hris.common.exception.FileAttachmentValidationException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.dto.CreateLeaveRequestDto;
 import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.entity.LeaveBalance;
-import com.hris.leave.entity.FileAttachment;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.enums.LeaveStatus;
 import com.hris.leave.enums.UrgencyLevel;
-import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.organisation.service.WorkScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,8 +53,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,13 +66,12 @@ class LeaveRequestServiceTest {
     @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
     @Mock private UserRoleRepository userRoleRepository;
-    @Mock private FileAttachmentRepository fileAttachmentRepository;
     @Mock private ApprovalStepRepository approvalStepRepository;
     @Mock private ApprovalWorkflowRepository approvalWorkflowRepository;
     @Mock private ApprovalRouter approvalRouter;
     @Mock private WorkScheduleService workScheduleService;
-    @Mock private FileStorageService fileStorageService;
-    @Mock private NotificationPublisher notificationPublisher;
+    @Mock private LeaveAttachmentService leaveAttachmentService;
+    @Mock private TransactionalNotificationPublisher notificationPublisher;
     @Mock private AuditLogService auditLogService;
     @Mock private ObjectMapper objectMapper;
     @Mock private LeaveTypeRepository leaveTypeRepository;
@@ -118,11 +111,6 @@ class LeaveRequestServiceTest {
             .name("Annual Leave")
             .requiresJustification(false)
             .build();
-
-        lenient().when(fileStorageService.sanitizeFilename(anyString())).thenAnswer(invocation -> {
-            String filename = invocation.getArgument(0);
-            return filename == null ? "unknown" : filename.replaceAll("[^a-zA-Z0-9._-]", "_");
-        });
     }
 
     @Nested
@@ -384,7 +372,7 @@ class LeaveRequestServiceTest {
                 .isInstanceOf(InvalidWorkflowStateException.class)
                 .hasMessage("No approvers could be resolved for this leave request");
 
-            verify(notificationPublisher, never()).publish(any());
+            verify(notificationPublisher, never()).publishAfterCommit(any());
         }
 
         @Test
@@ -562,7 +550,7 @@ class LeaveRequestServiceTest {
 
             verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2028);
-            verify(notificationPublisher).publish(any());
+            verify(notificationPublisher).publishAfterCommit(any());
         }
 
         @Test
@@ -602,7 +590,7 @@ class LeaveRequestServiceTest {
             assertThat(balance.getPendingDays()).isEqualTo(0);
             assertThat(balance.getUsedDays()).isEqualTo(0);
 
-            verify(notificationPublisher).publish(any());
+            verify(notificationPublisher).publishAfterCommit(any());
         }
 
         @Test
@@ -626,7 +614,7 @@ class LeaveRequestServiceTest {
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.CANCELLED);
             verify(leaveBalanceRepository, never()).findByEmployeeIdAndLeaveTypeIdAndYear(any(), any(), anyInt());
-            verify(notificationPublisher, never()).publish(any());
+            verify(notificationPublisher, never()).publishAfterCommit(any());
         }
     }
 
@@ -719,71 +707,33 @@ class LeaveRequestServiceTest {
     class UploadAttachmentTests {
 
         @Test
-        @DisplayName("should reject unsupported MIME type")
-        void shouldThrow_WhenMimeTypeUnsupported() {
-            UUID requestId = UUID.randomUUID();
-            LeaveRequest request = LeaveRequest.builder()
-                .id(requestId)
-                .employeeId(employeeId)
-                .status(LeaveStatus.PENDING)
-                .build();
-            MultipartFile file = new MockMultipartFile(
-                "file", "note.txt", "text/plain", "hello".getBytes());
-
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-
-            assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
-                .isInstanceOf(FileAttachmentValidationException.class)
-                .hasMessage("Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
-        }
-
-        @Test
-        @DisplayName("should reject oversized attachment")
-        void shouldThrow_WhenFileTooLarge() {
+        @DisplayName("should delegate upload when owner and status are valid")
+        void shouldDelegateUploadWhenOwnerAndStatusAreValid() {
             UUID requestId = UUID.randomUUID();
             LeaveRequest request = LeaveRequest.builder()
                 .id(requestId)
                 .employeeId(employeeId)
                 .status(LeaveStatus.IN_APPROVAL)
                 .build();
-            byte[] payload = new byte[(10 * 1024 * 1024) + 1];
-            payload[0] = 0x25;
-            payload[1] = 0x50;
-            payload[2] = 0x44;
-            payload[3] = 0x46;
-            payload[4] = 0x2D;
             MultipartFile file = new MockMultipartFile(
-                "file", "scan.pdf", "application/pdf", payload);
-
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-
-            assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
-                .isInstanceOf(FileAttachmentValidationException.class)
-                .hasMessage("Attachment exceeds the maximum allowed size of 10 MB");
-        }
-
-        @Test
-        @DisplayName("should reject disguised attachment when bytes do not match allowed content")
-        void shouldThrow_WhenAttachmentContentDoesNotMatchAllowedType() {
-            UUID requestId = UUID.randomUUID();
-            LeaveRequest request = LeaveRequest.builder()
-                .id(requestId)
-                .employeeId(employeeId)
-                .status(LeaveStatus.PENDING)
+                "file", "scan.pdf", "application/pdf", "pdf".getBytes());
+            var savedAttachment = com.hris.leave.entity.FileAttachment.builder()
+                .id(UUID.randomUUID())
+                .requestId(requestId)
+                .fileName("scan.pdf")
+                .mimeType("application/pdf")
+                .storagePath(requestId + "/scan.pdf")
+                .uploadedById(requesterId)
                 .build();
-            MultipartFile file = new MockMultipartFile(
-                "file", "scan.pdf", "application/pdf", "not-a-real-pdf".getBytes());
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(leaveAttachmentService.upload(requestId, file, requesterId)).thenReturn(savedAttachment);
 
-            assertThatThrownBy(() -> leaveRequestService.uploadAttachment(requestId, file, requesterId))
-                .isInstanceOf(FileAttachmentValidationException.class)
-                .hasMessage("Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+            var result = leaveRequestService.uploadAttachment(requestId, file, requesterId);
 
-            verify(fileStorageService, never()).store(any(MultipartFile.class), eq(requestId));
+            assertThat(result.getId()).isEqualTo(savedAttachment.getId());
+            verify(leaveAttachmentService).upload(requestId, file, requesterId);
         }
 
         @Test
@@ -864,14 +814,6 @@ class LeaveRequestServiceTest {
                 .id(requestId)
                 .employeeId(UUID.randomUUID())
                 .build();
-            FileAttachment attachment = FileAttachment.builder()
-                .id(attachmentId)
-                .requestId(requestId)
-                .fileName("medical_note.pdf")
-                .mimeType("application/pdf")
-                .storagePath(requestId + "/stored.pdf")
-                .uploadedById(UUID.randomUUID())
-                .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
@@ -890,15 +832,22 @@ class LeaveRequestServiceTest {
                     .status(StepStatus.PENDING)
                     .build()
             ));
-            when(fileAttachmentRepository.findById(attachmentId)).thenReturn(Optional.of(attachment));
-            when(fileStorageService.retrieve(attachment.getStoragePath()))
-                .thenReturn(new ByteArrayInputStream("pdf".getBytes()));
+            when(leaveAttachmentService.download(requestId, attachmentId)).thenReturn(
+                new AttachmentDownload(
+                    "medical_note.pdf",
+                    "application/pdf",
+                    new org.springframework.core.io.InputStreamResource(
+                        new java.io.ByteArrayInputStream("pdf".getBytes())
+                    )
+                )
+            );
 
             AttachmentDownload result = leaveRequestService.downloadAttachment(requestId, attachmentId, requesterId);
 
             assertThat(result.fileName()).isEqualTo("medical_note.pdf");
             assertThat(result.mimeType()).isEqualTo("application/pdf");
             assertThat(result.resource()).isNotNull();
+            verify(leaveAttachmentService).download(requestId, attachmentId);
         }
 
         @Test
@@ -946,23 +895,13 @@ class LeaveRequestServiceTest {
                 .employeeId(employeeId)
                 .status(LeaveStatus.IN_APPROVAL)
                 .build();
-            FileAttachment attachment = FileAttachment.builder()
-                .id(attachmentId)
-                .requestId(requestId)
-                .fileName("wrong-file.pdf")
-                .mimeType("application/pdf")
-                .storagePath(requestId + "/wrong-file.pdf")
-                .uploadedById(requesterId)
-                .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-            when(fileAttachmentRepository.findById(attachmentId)).thenReturn(Optional.of(attachment));
 
             leaveRequestService.deleteAttachment(requestId, attachmentId, requesterId);
 
-            verify(fileAttachmentRepository).delete(attachment);
-            verify(fileStorageService).delete(attachment.getStoragePath());
+            verify(leaveAttachmentService).delete(requestId, attachmentId, requesterId);
         }
 
         @Test
@@ -1005,30 +944,5 @@ class LeaveRequestServiceTest {
                 .hasMessage("Attachments can only be removed for leave requests that are pending approval");
         }
 
-        @Test
-        @DisplayName("should reject delete when attachment does not belong to leave request")
-        void shouldRejectDeleteWhenAttachmentDoesNotBelongToRequest() {
-            UUID requestId = UUID.randomUUID();
-            UUID attachmentId = UUID.randomUUID();
-
-            LeaveRequest request = LeaveRequest.builder()
-                .id(requestId)
-                .employeeId(employeeId)
-                .status(LeaveStatus.PENDING)
-                .build();
-            FileAttachment attachment = FileAttachment.builder()
-                .id(attachmentId)
-                .requestId(UUID.randomUUID())
-                .storagePath("other/file.pdf")
-                .build();
-
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-            when(fileAttachmentRepository.findById(attachmentId)).thenReturn(Optional.of(attachment));
-
-            assertThatThrownBy(() -> leaveRequestService.deleteAttachment(requestId, attachmentId, requesterId))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Attachment not found");
-        }
     }
 }

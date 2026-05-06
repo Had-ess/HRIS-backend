@@ -16,7 +16,7 @@ import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +37,7 @@ public class AdminRequestService {
     private final AdminRequestRepository adminRequestRepository;
     private final AdminRequestTypeRepository adminRequestTypeRepository;
     private final UserRepository userRepository;
-    private final NotificationPublisher notificationPublisher;
+    private final TransactionalNotificationPublisher notificationPublisher;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
 
@@ -65,7 +65,7 @@ public class AdminRequestService {
         auditLogService.log(requesterId, AuditAction.CREATE, "admin_request",
             saved.getId(), null, saved);
 
-        notificationPublisher.publish(buildSubmittedEvent(saved, requesterId, requestType));
+        notificationPublisher.publishAfterCommit(buildSubmittedEvent(saved, requesterId, requestType));
 
         return saved;
     }
@@ -99,7 +99,7 @@ public class AdminRequestService {
         auditLogService.log(hrAdminId, AuditAction.UPDATE, "admin_request",
             requestId, previous, request);
 
-        notificationPublisher.publish(buildProcessedEvent(request));
+        notificationPublisher.publishAfterCommit(buildProcessedEvent(request));
     }
 
     @Transactional
@@ -119,7 +119,7 @@ public class AdminRequestService {
         auditLogService.log(hrAdminId, AuditAction.REJECT, "admin_request",
             requestId, previous, request);
 
-        notificationPublisher.publish(buildRejectedEvent(request));
+        notificationPublisher.publishAfterCommit(buildRejectedEvent(request));
     }
 
     @Transactional

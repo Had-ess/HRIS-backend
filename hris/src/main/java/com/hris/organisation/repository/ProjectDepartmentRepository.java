@@ -20,6 +20,8 @@ public interface ProjectDepartmentRepository extends JpaRepository<ProjectDepart
 
     boolean existsByProjectIdAndDepartmentId(UUID projectId, UUID departmentId);
 
+    long countByDepartmentId(UUID departmentId);
+
     @Query("""
         select distinct pd.projectId
         from ProjectDepartment pd

@@ -1,15 +1,11 @@
 package com.hris.analytics.controller;
 
 import com.hris.analytics.dto.AuditLogDto;
-import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.enums.AuditAction;
-import com.hris.analytics.service.AuditLogService;
-import com.hris.auth.entity.User;
-import com.hris.auth.repository.UserRepository;
+import com.hris.analytics.service.AuditLogQueryService;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -28,8 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuditLogController {
 
-    private final AuditLogService auditLogService;
-    private final UserRepository userRepository;
+    private final AuditLogQueryService auditLogQueryService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
@@ -41,38 +36,7 @@ public class AuditLogController {
             @RequestParam(required = false) LocalDate to,
             @PageableDefault(sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<AuditLogDto> page = auditLogService.search(resource, action, actorId, from, to, pageable)
-            .map(this::toDto);
+        var page = auditLogQueryService.search(resource, action, actorId, from, to, pageable);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(page)));
-    }
-
-    private AuditLogDto toDto(AuditLog auditLog) {
-        return new AuditLogDto(
-            auditLog.getId(),
-            auditLog.getActorId(),
-            resolveActorName(auditLog.getActorId()),
-            auditLog.getAction(),
-            auditLog.getResource(),
-            auditLog.getResourceId(),
-            auditLog.getPreviousState(),
-            auditLog.getNewState(),
-            auditLog.getIpAddress(),
-            auditLog.getTimestamp()
-        );
-    }
-
-    private String resolveActorName(UUID actorId) {
-        if (actorId == null) {
-            return null;
-        }
-
-        return userRepository.findById(actorId)
-            .map(this::toDisplayName)
-            .orElse(null);
-    }
-
-    private String toDisplayName(User user) {
-        String fullName = (user.getFirstName() + " " + user.getLastName()).trim();
-        return fullName.isBlank() ? user.getEmail() : fullName;
     }
 }

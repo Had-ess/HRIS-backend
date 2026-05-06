@@ -9,6 +9,7 @@ import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.common.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,10 @@ public class EmployeeOnboardingService {
         if (employeeRepository.findByEmployeeCode(dto.employeeCode().trim()).isPresent()) {
             throw new IllegalStateException("Employee code must be unique");
         }
+        if (dto.supervisorEmployeeId() != null
+            && employeeRepository.findById(dto.supervisorEmployeeId()).isEmpty()) {
+            throw new EntityNotFoundException("Supervisor employee not found");
+        }
 
         User user = accountProvisioningService.provision(new AccountProvisioningRequest(
             dto.username(),
@@ -51,6 +56,7 @@ public class EmployeeOnboardingService {
                 .status(dto.status())
                 .contractType(dto.contractType())
                 .departmentId(dto.departmentId())
+                .supervisorEmployeeId(dto.supervisorEmployeeId())
                 .workScheduleId(dto.workScheduleId())
                 .build());
 

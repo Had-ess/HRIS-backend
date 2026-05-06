@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,4 +53,11 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
         @Param("projectId") UUID projectId,
         @Param("departmentId") UUID departmentId
     );
+
+    @Query("""
+        select p.id
+        from Project p
+        where p.projectManagerEmployeeId = :employeeId
+        """)
+    List<UUID> findProjectIdsByProjectManagerEmployeeId(@Param("employeeId") UUID employeeId);
 }

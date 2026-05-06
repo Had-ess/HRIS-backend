@@ -1,9 +1,11 @@
 package com.hris.leave.controller;
 
 import com.hris.common.ApiResponse;
-import com.hris.common.exception.EntityNotFoundException;
-import com.hris.leave.entity.LeaveType;
-import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.leave.dto.LeaveTypeCreateDto;
+import com.hris.leave.dto.LeaveTypeDto;
+import com.hris.leave.dto.LeaveTypeUpdateDto;
+import com.hris.leave.service.LeaveTypeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,42 +20,33 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LeaveTypeController {
 
-    private final LeaveTypeRepository leaveTypeRepository;
+    private final LeaveTypeService leaveTypeService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<LeaveType>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(leaveTypeRepository.findByIsActiveTrue()));
+    public ResponseEntity<ApiResponse<List<LeaveTypeDto>>> getAll() {
+        return ResponseEntity.ok(ApiResponse.ok(leaveTypeService.getAllActive()));
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
-    public ResponseEntity<ApiResponse<LeaveType>> create(@RequestBody LeaveType leaveType) {
-        LeaveType saved = leaveTypeRepository.save(leaveType);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
+    public ResponseEntity<ApiResponse<LeaveTypeDto>> create(
+            @Valid @RequestBody LeaveTypeCreateDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok(leaveTypeService.create(dto)));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
-    public ResponseEntity<ApiResponse<LeaveType>> update(
+    public ResponseEntity<ApiResponse<LeaveTypeDto>> update(
             @PathVariable UUID id,
-            @RequestBody LeaveType leaveType) {
-        LeaveType existing = leaveTypeRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
-        existing.setName(leaveType.getName());
-        existing.setCode(leaveType.getCode());
-        existing.setPaid(leaveType.isPaid());
-        existing.setRequiresJustification(leaveType.isRequiresJustification());
-        existing.setActive(leaveType.isActive());
-        return ResponseEntity.ok(ApiResponse.ok(leaveTypeRepository.save(existing)));
+            @Valid @RequestBody LeaveTypeUpdateDto dto) {
+        return ResponseEntity.ok(ApiResponse.ok(leaveTypeService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
-        LeaveType existing = leaveTypeRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
-        existing.setActive(false);
-        leaveTypeRepository.save(existing);
+        leaveTypeService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

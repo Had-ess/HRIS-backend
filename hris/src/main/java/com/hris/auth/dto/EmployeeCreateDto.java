@@ -26,5 +26,40 @@ public record EmployeeCreateDto(
     @NotNull EmployeeStatus status,
     @NotNull ContractType contractType,
     @NotNull UUID departmentId,
+    UUID supervisorEmployeeId,
     @NotNull UUID workScheduleId
-) {}
+) {
+    public EmployeeCreateDto(
+            String username,
+            String email,
+            String firstName,
+            String lastName,
+            String password,
+            Boolean temporaryPassword,
+            List<UUID> roleIds,
+            String employeeCode,
+            LocalDate hireDate,
+            String jobTitle,
+            EmployeeStatus status,
+            ContractType contractType,
+            UUID departmentId,
+            UUID workScheduleId) {
+        this(
+            username,
+            email,
+            firstName,
+            lastName,
+            password,
+            temporaryPassword,
+            roleIds,
+            employeeCode,
+            hireDate,
+            jobTitle,
+            status,
+            contractType,
+            departmentId,
+            null,
+            workScheduleId
+        );
+    }
+}

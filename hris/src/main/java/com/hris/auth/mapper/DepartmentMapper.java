@@ -3,11 +3,24 @@ package com.hris.auth.mapper;
 import com.hris.auth.dto.DepartmentDto;
 import com.hris.auth.entity.Department;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface DepartmentMapper {
 
-    @Mapping(target = "isActive", source = "active")
-    DepartmentDto toDto(Department department);
+    default DepartmentDto toDto(Department department) {
+        if (department == null) {
+            return null;
+        }
+
+        return new DepartmentDto(
+            department.getId(),
+            department.getName(),
+            department.getCode(),
+            department.getHeadEmployeeId(),
+            department.isActive(),
+            0L,
+            0L,
+            0L
+        );
+    }
 }

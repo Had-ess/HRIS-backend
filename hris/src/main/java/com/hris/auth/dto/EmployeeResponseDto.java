@@ -16,6 +16,33 @@ public record EmployeeResponseDto(
     EmployeeStatus status,
     ContractType contractType,
     UUID departmentId,
+    UUID supervisorEmployeeId,
     UUID workScheduleId,
     UserResponseDto user
-) {}
+) {
+    public EmployeeResponseDto(
+            UUID id,
+            UUID userId,
+            String employeeCode,
+            LocalDate hireDate,
+            String jobTitle,
+            EmployeeStatus status,
+            ContractType contractType,
+            UUID departmentId,
+            UUID workScheduleId,
+            UserResponseDto user) {
+        this(
+            id,
+            userId,
+            employeeCode,
+            hireDate,
+            jobTitle,
+            status,
+            contractType,
+            departmentId,
+            null,
+            workScheduleId,
+            user
+        );
+    }
+}

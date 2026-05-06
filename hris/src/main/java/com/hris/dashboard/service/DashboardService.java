@@ -14,10 +14,8 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.auth.entity.Employee;
-import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.ScopeFilter;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.dashboard.dto.AdminRequestSummaryDto;
@@ -40,11 +38,11 @@ import com.hris.notification.repository.NotificationRepository;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
+import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +72,7 @@ public class DashboardService {
     private final DepartmentRepository departmentRepository;
     private final ProjectRepository projectRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
-    private final UserRoleRepository userRoleRepository;
+    private final AccessScopeService accessScopeService;
     private final AnalyticsService analyticsService;
 
     @Transactional(readOnly = true)
@@ -102,15 +100,15 @@ public class DashboardService {
         List<ApprovalStep> pendingSteps =
             approvalStepRepository.findTop5ByApproverIdAndStatusOrderByStepOrderAsc(
                 userId, StepStatus.PENDING);
-        Employee employee = employeeRepository.findByUserId(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        Employee employee = accessScopeService.getEmployeeOrThrow(userId);
         LocalDate today = LocalDate.now();
-        List<UserRole> effectiveRoles = userRoleRepository.findEffectiveByUserId(userId, Instant.now());
+        List<com.hris.auth.entity.UserRole> effectiveRoles = accessScopeService.getEffectiveRoles(userId);
 
         long teamMembersCount;
         long upcomingTeamAbsencesCount;
 
-        if (hasRole(effectiveRoles, "PROJECT_SUPERVISOR") && !hasRole(effectiveRoles, "DEPT_MANAGER")) {
+        if (accessScopeService.hasAnyRole(effectiveRoles, "PROJECT_SUPERVISOR")
+            && !accessScopeService.hasAnyRole(effectiveRoles, "DEPT_MANAGER")) {
             teamMembersCount = projectAssignmentRepository.countActiveDistinctEmployeesBySupervisorId(
                 employee.getId(), today);
             upcomingTeamAbsencesCount = leaveRequestRepository.countUpcomingSupervisorRequests(
@@ -127,11 +125,6 @@ public class DashboardService {
             teamMembersCount,
             upcomingTeamAbsencesCount
         );
-    }
-
-    private boolean hasRole(List<UserRole> roles, String roleCode) {
-        return roles.stream().anyMatch(userRole ->
-            userRole.getRole() != null && roleCode.equals(userRole.getRole().getCode()));
     }
 
     @Transactional(readOnly = true)

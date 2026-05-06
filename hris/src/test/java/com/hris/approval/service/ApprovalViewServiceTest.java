@@ -8,8 +8,7 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.enums.WorkflowStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
-import com.hris.auth.entity.User;
-import com.hris.auth.repository.UserRepository;
+import com.hris.auth.service.UserDisplayNameService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ class ApprovalViewServiceTest {
     private ApprovalStepRepository approvalStepRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserDisplayNameService userDisplayNameService;
 
     @Test
     @DisplayName("getStepsForSubject resolves approver names and preserves approval metadata")
@@ -66,20 +65,15 @@ class ApprovalViewServiceTest {
         ApprovalViewService service = new ApprovalViewService(
             approvalWorkflowRepository,
             approvalStepRepository,
-            userRepository
+            userDisplayNameService
         );
 
         when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", subjectId))
             .thenReturn(Optional.of(workflow));
         when(approvalStepRepository.findByWorkflowIdOrderByStepOrder(workflowId))
             .thenReturn(List.of(step));
-        when(userRepository.findAllById(any()))
-            .thenReturn(List.of(User.builder()
-                .id(approverId)
-                .firstName("Jane")
-                .lastName("Supervisor")
-                .email("jane@hris.local")
-                .build()));
+        when(userDisplayNameService.resolveDisplayNames(any()))
+            .thenReturn(Map.of(approverId, "Jane Supervisor"));
 
         List<ApprovalStepResponseDto> result = service.getStepsForSubject("LEAVE", subjectId);
 
@@ -99,7 +93,7 @@ class ApprovalViewServiceTest {
         ApprovalViewService service = new ApprovalViewService(
             approvalWorkflowRepository,
             approvalStepRepository,
-            userRepository
+            userDisplayNameService
         );
 
         when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", subjectId))
@@ -137,20 +131,20 @@ class ApprovalViewServiceTest {
         ApprovalViewService service = new ApprovalViewService(
             approvalWorkflowRepository,
             approvalStepRepository,
-            userRepository
+            userDisplayNameService
         );
 
         when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdIn("LEAVE", List.of(subjectId)))
             .thenReturn(List.of(workflow));
         when(approvalStepRepository.findByWorkflowIdInOrderByWorkflowIdAscStepOrderAsc(List.of(workflowId)))
             .thenReturn(List.of(step));
-        when(userRepository.findAllById(any())).thenReturn(List.of());
+        when(userDisplayNameService.resolveDisplayNames(any())).thenReturn(Map.of());
 
         Map<UUID, List<ApprovalStepResponseDto>> result = service.getStepsForSubjects("LEAVE", List.of(subjectId));
 
         assertThat(result).containsKey(subjectId);
         assertThat(result.get(subjectId)).hasSize(1);
         assertThat(result.get(subjectId).getFirst().approverName()).isEqualTo("Unavailable approver");
-        verify(userRepository).findAllById(any());
+        verify(userDisplayNameService).resolveDisplayNames(any());
     }
 }

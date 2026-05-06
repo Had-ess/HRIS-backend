@@ -39,6 +39,7 @@ import com.hris.notification.repository.NotificationRepository;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
+import com.hris.security.service.AccessScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ class DashboardServiceTest {
     @Mock private DepartmentRepository departmentRepository;
     @Mock private ProjectRepository projectRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
-    @Mock private UserRoleRepository userRoleRepository;
+    @Mock private AccessScopeService accessScopeService;
     @Mock private AnalyticsService analyticsService;
 
     @InjectMocks
@@ -192,12 +193,14 @@ class DashboardServiceTest {
             .thenReturn(List.of(approvalStep));
         when(approvalWorkflowRepository.findAllById(any()))
             .thenReturn(List.of(workflow));
-        when(employeeRepository.findByUserId(userId)).thenReturn(Optional.of(employee));
-        when(userRoleRepository.findEffectiveByUserId(any(), any())).thenReturn(List.of(
+        List<UserRole> roles = List.of(
             UserRole.builder()
                 .role(Role.builder().code("DEPT_MANAGER").build())
                 .build()
-        ));
+        );
+        when(accessScopeService.getEmployeeOrThrow(userId)).thenReturn(employee);
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(roles);
+        when(accessScopeService.hasAnyRole(roles, "PROJECT_SUPERVISOR")).thenReturn(false);
         when(employeeRepository.countByDepartmentId(departmentId)).thenReturn(7L);
         when(leaveRequestRepository.countUpcomingDepartmentRequests(
             departmentId, LeaveStatus.APPROVED, LocalDate.now())).thenReturn(2L);
@@ -233,12 +236,15 @@ class DashboardServiceTest {
             .thenReturn(List.of(approvalStep));
         when(approvalWorkflowRepository.findAllById(any()))
             .thenReturn(List.of(workflow));
-        when(employeeRepository.findByUserId(userId)).thenReturn(Optional.of(employee));
-        when(userRoleRepository.findEffectiveByUserId(any(), any())).thenReturn(List.of(
+        List<UserRole> roles = List.of(
             UserRole.builder()
                 .role(Role.builder().code("PROJECT_SUPERVISOR").build())
                 .build()
-        ));
+        );
+        when(accessScopeService.getEmployeeOrThrow(userId)).thenReturn(employee);
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(roles);
+        when(accessScopeService.hasAnyRole(roles, "PROJECT_SUPERVISOR")).thenReturn(true);
+        when(accessScopeService.hasAnyRole(roles, "DEPT_MANAGER")).thenReturn(false);
         when(projectAssignmentRepository.countActiveDistinctEmployeesBySupervisorId(employeeId, LocalDate.now()))
             .thenReturn(5L);
         when(leaveRequestRepository.countUpcomingSupervisorRequests(

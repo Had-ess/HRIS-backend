@@ -11,13 +11,18 @@ import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.exception.DepartmentDeletionNotAllowedException;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.organisation.enums.ProjectStatus;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
+import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,19 +32,36 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final ProjectDepartmentRepository projectDepartmentRepository;
+    private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final AccessScopeService accessScopeService;
     private final DepartmentMapper departmentMapper;
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
-    public Page<DepartmentDto> getAll(Pageable pageable) {
-        return departmentRepository.findAll(pageable).map(departmentMapper::toDto);
+    public Page<DepartmentDto> getAll(UUID userId, Pageable pageable) {
+        DepartmentReadScope scope = resolveReadScope(userId);
+
+        return switch (scope.type()) {
+            case ALL -> departmentRepository.findAll(pageable).map(this::toDto);
+            case DEPARTMENT -> {
+                if (scope.departmentId() == null) {
+                    yield Page.empty(pageable);
+                }
+                yield departmentRepository.findAllByIdIn(List.of(scope.departmentId()), pageable).map(this::toDto);
+            }
+        };
     }
 
     @Transactional(readOnly = true)
-    public DepartmentDto getById(UUID id) {
+    public DepartmentDto getById(UUID id, UUID userId) {
+        DepartmentReadScope scope = resolveReadScope(userId);
+        if (scope.type() == DepartmentReadScopeType.DEPARTMENT && !id.equals(scope.departmentId())) {
+            throw new AccessDeniedException("You are not allowed to access this department");
+        }
+
         Department dept = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
-        return departmentMapper.toDto(dept);
+        return toDto(dept);
     }
 
     @Transactional
@@ -54,7 +76,7 @@ public class DepartmentService {
         Department saved = departmentRepository.save(dept);
         auditLogService.log(actorId, AuditAction.CREATE, "department",
             saved.getId(), null, saved);
-        return departmentMapper.toDto(saved);
+        return toDto(saved);
     }
 
     @Transactional
@@ -75,7 +97,7 @@ public class DepartmentService {
         Department saved = departmentRepository.save(dept);
         auditLogService.log(actorId, AuditAction.UPDATE, "department",
             saved.getId(), previous, saved);
-        return departmentMapper.toDto(saved);
+        return toDto(saved);
     }
 
     @Transactional
@@ -107,7 +129,7 @@ public class DepartmentService {
         Department saved = departmentRepository.save(department);
         auditLogService.log(actorId, AuditAction.UPDATE, "department",
             saved.getId(), previous, saved);
-        return departmentMapper.toDto(saved);
+        return toDto(saved);
     }
 
     private void validateDeletion(UUID departmentId) {
@@ -121,5 +143,57 @@ public class DepartmentService {
             throw new DepartmentDeletionNotAllowedException(
                 "Department cannot be deleted because it is linked to active projects");
         }
+    }
+
+    private DepartmentDto toDto(Department department) {
+        DepartmentDto base = departmentMapper.toDto(department);
+        if (base == null) {
+            return null;
+        }
+
+        return new DepartmentDto(
+            base.id(),
+            base.name(),
+            base.code(),
+            base.headEmployeeId(),
+            base.isActive(),
+            employeeRepository.countByDepartmentId(base.id()),
+            projectDepartmentRepository.countByDepartmentId(base.id()),
+            projectAssignmentRepository.countActiveByDepartmentId(base.id(), LocalDate.now())
+        );
+    }
+
+    private DepartmentReadScope resolveReadScope(UUID userId) {
+        var effectiveRoles = accessScopeService.getEffectiveRoles(userId);
+
+        if (accessScopeService.hasAdministrationOrHrVisibility(effectiveRoles)) {
+            return DepartmentReadScope.all();
+        }
+
+        if (!accessScopeService.hasAnyRole(effectiveRoles, "DEPT_MANAGER")) {
+            return DepartmentReadScope.all();
+        }
+
+        return DepartmentReadScope.department(
+            accessScopeService.resolveDepartmentManagerDepartmentId(
+                effectiveRoles,
+                accessScopeService.findEmployee(userId).orElse(null)
+            ).orElse(null)
+        );
+    }
+
+    private record DepartmentReadScope(DepartmentReadScopeType type, UUID departmentId) {
+        static DepartmentReadScope all() {
+            return new DepartmentReadScope(DepartmentReadScopeType.ALL, null);
+        }
+
+        static DepartmentReadScope department(UUID departmentId) {
+            return new DepartmentReadScope(DepartmentReadScopeType.DEPARTMENT, departmentId);
+        }
+    }
+
+    private enum DepartmentReadScopeType {
+        ALL,
+        DEPARTMENT
     }
 }

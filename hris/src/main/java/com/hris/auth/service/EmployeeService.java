@@ -71,6 +71,7 @@ public class EmployeeService {
             .status(employee.getStatus())
             .contractType(employee.getContractType())
             .departmentId(employee.getDepartmentId())
+            .supervisorEmployeeId(employee.getSupervisorEmployeeId())
             .workScheduleId(employee.getWorkScheduleId())
             .build();
 
@@ -91,6 +92,10 @@ public class EmployeeService {
         }
         if (dto.departmentId() != null) {
             employee.setDepartmentId(dto.departmentId());
+        }
+        if (dto.supervisorEmployeeId() != null) {
+            validateSupervisor(employee.getId(), dto.supervisorEmployeeId());
+            employee.setSupervisorEmployeeId(dto.supervisorEmployeeId());
         }
         if (dto.workScheduleId() != null) {
             employee.setWorkScheduleId(dto.workScheduleId());
@@ -114,6 +119,9 @@ public class EmployeeService {
         }
         if (departmentRepository.existsByHeadEmployeeId(employee.getId())) {
             throw new IllegalStateException("Employee cannot be deleted because they are assigned as a department head");
+        }
+        if (employeeRepository.existsBySupervisorEmployeeId(employee.getId())) {
+            throw new IllegalStateException("Employee cannot be deleted because they supervise other employees");
         }
         if (projectAssignmentRepository.existsByEmployeeId(employee.getId())
             || projectAssignmentRepository.existsBySupervisorId(employee.getId())) {
@@ -161,5 +169,14 @@ public class EmployeeService {
 
         auditLogService.log(employee.getUserId(), AuditAction.CREATE,
             "leave_balance_initialization", employeeId, null, null);
+    }
+
+    private void validateSupervisor(UUID employeeId, UUID supervisorEmployeeId) {
+        if (employeeId.equals(supervisorEmployeeId)) {
+            throw new IllegalArgumentException("Employee cannot supervise themselves");
+        }
+        if (employeeRepository.findById(supervisorEmployeeId).isEmpty()) {
+            throw new EntityNotFoundException("Supervisor employee not found");
+        }
     }
 }

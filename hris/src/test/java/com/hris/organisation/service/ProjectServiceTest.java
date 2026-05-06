@@ -10,6 +10,7 @@ import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.RoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
@@ -17,20 +18,25 @@ import com.hris.common.exception.InvalidProjectAssignmentException;
 import com.hris.organisation.dto.ProjectAssignmentCreateDto;
 import com.hris.organisation.dto.ProjectAssignmentResponseDto;
 import com.hris.organisation.dto.ProjectAssignmentViewDto;
+import com.hris.organisation.dto.ProjectTeamCreateDto;
+import com.hris.organisation.dto.ProjectTeamResponseDto;
 import com.hris.organisation.dto.ProjectDepartmentAssignDto;
 import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.entity.ProjectDepartment;
+import com.hris.organisation.entity.ProjectTeam;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.organisation.enums.ProjectRole;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
+import com.hris.organisation.repository.ProjectTeamRepository;
+import com.hris.security.service.AccessScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,6 +74,9 @@ class ProjectServiceTest {
     private ProjectDepartmentRepository projectDepartmentRepository;
 
     @Mock
+    private ProjectTeamRepository projectTeamRepository;
+
+    @Mock
     private DepartmentRepository departmentRepository;
 
     @Mock
@@ -75,6 +84,12 @@ class ProjectServiceTest {
 
     @Mock
     private UserRoleRepository userRoleRepository;
+
+    @Mock
+    private AccessScopeService accessScopeService;
+
+    @Mock
+    private RoleRepository roleRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -86,7 +101,7 @@ class ProjectServiceTest {
     private AuditLogService auditLogService;
 
     @Mock
-    private NotificationPublisher notificationPublisher;
+    private TransactionalNotificationPublisher notificationPublisher;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -100,7 +115,9 @@ class ProjectServiceTest {
     private Project project;
     private Employee employee;
     private Employee supervisor;
+    private Employee teammate;
     private UUID departmentId;
+    private UUID secondDepartmentId;
     private Department department;
 
     @BeforeEach
@@ -109,6 +126,7 @@ class ProjectServiceTest {
         employeeId = UUID.randomUUID();
         supervisorId = UUID.randomUUID();
         departmentId = UUID.randomUUID();
+        secondDepartmentId = UUID.randomUUID();
 
         project = Project.builder()
             .id(projectId)
@@ -126,7 +144,7 @@ class ProjectServiceTest {
             .jobTitle("Engineer")
             .status(EmployeeStatus.ACTIVE)
             .contractType(ContractType.PERMANENT)
-            .departmentId(UUID.randomUUID())
+            .departmentId(secondDepartmentId)
             .workScheduleId(UUID.randomUUID())
             .build();
 
@@ -146,6 +164,18 @@ class ProjectServiceTest {
             .status(EmployeeStatus.ACTIVE)
             .contractType(ContractType.PERMANENT)
             .departmentId(UUID.randomUUID())
+            .workScheduleId(UUID.randomUUID())
+            .build();
+
+        teammate = Employee.builder()
+            .id(UUID.randomUUID())
+            .userId(UUID.randomUUID())
+            .employeeCode("EMP-02")
+            .hireDate(LocalDate.of(2024, 2, 1))
+            .jobTitle("Analyst")
+            .status(EmployeeStatus.ACTIVE)
+            .contractType(ContractType.PERMANENT)
+            .departmentId(departmentId)
             .workScheduleId(UUID.randomUUID())
             .build();
     }
@@ -192,8 +222,8 @@ class ProjectServiceTest {
             LocalDate.of(2026, 7, 1), null);
 
         stubProjectAndEmployees(employee, supervisor);
-        when(projectAssignmentRepository.countOverlappingActiveAssignments(
-            employeeId, projectId, dto.startDate(), dto.endDate())).thenReturn(1L);
+        when(projectAssignmentRepository.countOverlappingActiveAssignmentsOpenEnded(
+            employeeId, projectId, dto.startDate())).thenReturn(1L);
 
         assertThatThrownBy(() -> projectService.assignEmployee(projectId, dto, ACTOR_ID))
             .isInstanceOf(InvalidProjectAssignmentException.class)
@@ -242,6 +272,7 @@ class ProjectServiceTest {
                 assignment.getId(),
                 assignment.getEmployeeId(),
                 assignment.getProjectId(),
+                assignment.getTeamId(),
                 assignment.getSupervisorId(),
                 assignment.getAssignmentRole(),
                 assignment.getStartDate(),
@@ -258,7 +289,7 @@ class ProjectServiceTest {
         verify(projectAssignmentRepository).countOverlappingActiveAssignments(
             employeeId, projectId, dto.startDate(), dto.endDate());
         verify(projectAssignmentRepository).save(any(ProjectAssignment.class));
-        verify(notificationPublisher).publish(argThat(event ->
+        verify(notificationPublisher).publishAfterCommit(argThat(event ->
             event.getEventType() == NotificationEventType.PROJECT_ASSIGNED
                 && event.getTargetUserId().equals(employee.getUserId())
         ));
@@ -336,8 +367,8 @@ class ProjectServiceTest {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(projectDepartmentRepository.findByProjectId(projectId)).thenReturn(List.of(link));
         when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
-        when(userRoleRepository.findEffectiveByUserId(eq(ACTOR_ID), any()))
-            .thenReturn(List.of(administrationRole));
+        when(accessScopeService.getEffectiveRoles(ACTOR_ID)).thenReturn(List.of(administrationRole));
+        when(accessScopeService.hasAdministrationOrHrVisibility(List.of(administrationRole))).thenReturn(true);
 
         List<ProjectDepartmentResponseDto> result = projectService.getDepartments(projectId, ACTOR_ID);
 
@@ -355,8 +386,8 @@ class ProjectServiceTest {
             .build();
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        when(userRoleRepository.findEffectiveByUserId(eq(ACTOR_ID), any()))
-            .thenReturn(List.of(administrationRole));
+        when(accessScopeService.getEffectiveRoles(ACTOR_ID)).thenReturn(List.of(administrationRole));
+        when(accessScopeService.hasAdministrationOrHrVisibility(List.of(administrationRole))).thenReturn(true);
         when(projectAssignmentRepository.findActiveViewsByProjectId(projectId)).thenReturn(List.of(
             new ProjectAssignmentViewDto(
                 UUID.randomUUID(),
@@ -365,6 +396,8 @@ class ProjectServiceTest {
                 employee.getEmployeeCode(),
                 "Employee One",
                 projectId,
+                null,
+                null,
                 supervisorId,
                 supervisor.getUserId(),
                 supervisor.getEmployeeCode(),
@@ -391,42 +424,237 @@ class ProjectServiceTest {
         UserRole supervisorRole = UserRole.builder()
             .role(Role.builder().code("PROJECT_SUPERVISOR").isActive(true).build())
             .build();
+        Employee viewerEmployee = Employee.builder()
+            .id(viewerEmployeeId)
+            .userId(viewerUserId)
+            .employeeCode("SUP-02")
+            .status(EmployeeStatus.ACTIVE)
+            .contractType(ContractType.PERMANENT)
+            .departmentId(UUID.randomUUID())
+            .workScheduleId(UUID.randomUUID())
+            .hireDate(LocalDate.of(2024, 1, 1))
+            .jobTitle("Supervisor")
+            .build();
 
-        when(userRoleRepository.findEffectiveByUserId(eq(viewerUserId), any()))
-            .thenReturn(List.of(supervisorRole));
-        when(employeeRepository.findByUserId(viewerUserId)).thenReturn(Optional.of(
-            Employee.builder()
-                .id(viewerEmployeeId)
-                .userId(viewerUserId)
-                .employeeCode("SUP-02")
-                .status(EmployeeStatus.ACTIVE)
-                .contractType(ContractType.PERMANENT)
-                .departmentId(UUID.randomUUID())
-                .workScheduleId(UUID.randomUUID())
-                .hireDate(LocalDate.of(2024, 1, 1))
-                .jobTitle("Supervisor")
-                .build()
-        ));
+        when(accessScopeService.getEffectiveRoles(viewerUserId)).thenReturn(List.of(supervisorRole));
+        when(accessScopeService.hasAdministrationOrHrVisibility(List.of(supervisorRole))).thenReturn(false);
+        when(accessScopeService.findEmployee(viewerUserId)).thenReturn(Optional.of(viewerEmployee));
+        when(accessScopeService.resolveDepartmentManagerDepartmentId(List.of(supervisorRole), viewerEmployee))
+            .thenReturn(Optional.empty());
+        when(accessScopeService.hasAnyRole(List.of(supervisorRole), "PROJECT_SUPERVISOR")).thenReturn(true);
         when(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(viewerEmployeeId, LocalDate.now()))
             .thenReturn(List.of(projectId));
         when(projectAssignmentRepository.findActiveProjectIdsBySupervisorId(viewerEmployeeId, LocalDate.now()))
             .thenReturn(List.of());
+        when(projectRepository.findProjectIdsByProjectManagerEmployeeId(viewerEmployeeId)).thenReturn(List.of());
         when(projectRepository.findByIdIn(eq(List.of(projectId)), org.mockito.ArgumentMatchers.any()))
             .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(project)));
-        when(projectMapper.toDto(project)).thenReturn(new com.hris.organisation.dto.ProjectResponseDto(
-            projectId,
-            project.getName(),
-            project.getCode(),
-            project.getStatus(),
-            project.getStartDate(),
-            project.getEndDate()
-        ));
 
         var page = projectService.getAll(viewerUserId, org.springframework.data.domain.PageRequest.of(0, 20));
 
         assertThat(page.getContent()).hasSize(1);
         assertThat(page.getContent().get(0).id()).isEqualTo(projectId);
     }
+
+    @Test
+    @DisplayName("create team creates team and member assignments")
+    void createTeamCreatesTeamAndMemberAssignments() {
+        UUID teamId = UUID.randomUUID();
+        UUID memberOneId = employeeId;
+        UUID memberTwoId = teammate.getId();
+        ProjectDepartment linkedDepartment = ProjectDepartment.builder()
+            .projectId(projectId)
+            .departmentId(departmentId)
+            .build();
+        ProjectDepartment linkedSecondDepartment = ProjectDepartment.builder()
+            .projectId(projectId)
+            .departmentId(secondDepartmentId)
+            .build();
+        ProjectTeamCreateDto dto = new ProjectTeamCreateDto(
+            "Backend Squad",
+            departmentId,
+            supervisorId,
+            List.of(memberOneId, memberTwoId),
+            LocalDate.of(2026, 9, 1),
+            null
+        );
+        Role projectSupervisorRole = Role.builder()
+            .id(UUID.randomUUID())
+            .code("PROJECT_SUPERVISOR")
+            .isActive(true)
+            .build();
+
+        supervisor.setDepartmentId(departmentId);
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectDepartmentRepository.existsByProjectIdAndDepartmentId(projectId, departmentId)).thenReturn(true);
+        when(projectDepartmentRepository.findByProjectId(projectId))
+            .thenReturn(List.of(linkedDepartment, linkedSecondDepartment));
+        when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
+        when(employeeRepository.findById(supervisorId)).thenReturn(Optional.of(supervisor));
+        when(employeeRepository.findAllById(dto.employeeIds())).thenReturn(List.of(employee, teammate));
+        when(projectTeamRepository.save(any(ProjectTeam.class))).thenAnswer(invocation -> {
+            ProjectTeam team = invocation.getArgument(0);
+            team.setId(teamId);
+            return team;
+        });
+        when(projectAssignmentRepository.countOverlappingActiveAssignmentsOpenEnded(supervisorId, projectId, dto.startDate()))
+            .thenReturn(0L);
+        when(projectAssignmentRepository.countOverlappingActiveAssignmentsOpenEnded(memberOneId, projectId, dto.startDate()))
+            .thenReturn(0L);
+        when(projectAssignmentRepository.countOverlappingActiveAssignmentsOpenEnded(memberTwoId, projectId, dto.startDate()))
+            .thenReturn(0L);
+        when(projectAssignmentRepository.save(any(ProjectAssignment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectAssignmentRepository.countByTeamIdAndIsActiveTrue(teamId)).thenReturn(3L);
+        when(userRepository.findById(employee.getUserId())).thenReturn(Optional.of(
+            com.hris.auth.entity.User.builder()
+                .id(employee.getUserId())
+                .firstName("Employee")
+                .lastName("One")
+                .localePreference("en")
+                .build()
+        ));
+        when(userRepository.findById(teammate.getUserId())).thenReturn(Optional.of(
+            com.hris.auth.entity.User.builder()
+                .id(teammate.getUserId())
+                .firstName("Employee")
+                .lastName("Two")
+                .localePreference("en")
+                .build()
+        ));
+        when(userRepository.findById(supervisor.getUserId())).thenReturn(Optional.of(
+            com.hris.auth.entity.User.builder()
+                .id(supervisor.getUserId())
+                .firstName("Supervisor")
+                .lastName("One")
+                .localePreference("en")
+                .build()
+        ));
+        when(roleRepository.findByCode("PROJECT_SUPERVISOR")).thenReturn(Optional.of(projectSupervisorRole));
+        when(userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(supervisor.getUserId(), projectSupervisorRole.getId()))
+            .thenReturn(false);
+        when(userRoleRepository.save(any(UserRole.class))).thenAnswer(invocation -> {
+            UserRole userRole = invocation.getArgument(0);
+            userRole.setId(UUID.randomUUID());
+            return userRole;
+        });
+
+        ProjectTeamResponseDto result = projectService.createTeam(projectId, dto, ACTOR_ID);
+
+        assertThat(result.id()).isEqualTo(teamId);
+        assertThat(result.memberCount()).isEqualTo(3L);
+        verify(projectAssignmentRepository).save(argThat(assignment ->
+            assignment.getTeamId().equals(teamId)
+                && assignment.getSupervisorId().equals(supervisorId)
+                && assignment.getEmployeeId().equals(supervisorId)
+                && assignment.getAssignmentRole() == ProjectRole.MANAGER
+        ));
+        verify(projectAssignmentRepository).save(argThat(assignment ->
+            assignment.getTeamId().equals(teamId)
+                && assignment.getSupervisorId().equals(supervisorId)
+                && assignment.getEmployeeId().equals(memberOneId)
+                && assignment.getAssignmentRole() == ProjectRole.MEMBER
+        ));
+        verify(projectAssignmentRepository).save(argThat(assignment ->
+            assignment.getTeamId().equals(teamId)
+                && assignment.getSupervisorId().equals(supervisorId)
+                && assignment.getEmployeeId().equals(memberTwoId)
+                && assignment.getAssignmentRole() == ProjectRole.MEMBER
+        ));
+        verify(userRoleRepository).save(argThat(userRole ->
+            userRole.getUserId().equals(supervisor.getUserId())
+                && userRole.getRoleId().equals(projectSupervisorRole.getId())
+        ));
+    }
+
+    @Test
+    @DisplayName("project supervisors can read projects through teams they supervise")
+    void projectSupervisorsCanReadProjectsThroughTeamsTheySupervise() {
+        UUID viewerUserId = UUID.randomUUID();
+        UUID viewerEmployeeId = UUID.randomUUID();
+        UserRole supervisorRole = UserRole.builder()
+            .role(Role.builder().code("PROJECT_SUPERVISOR").isActive(true).build())
+            .build();
+        Employee viewerEmployee = Employee.builder()
+            .id(viewerEmployeeId)
+            .userId(viewerUserId)
+            .employeeCode("SUP-02")
+            .status(EmployeeStatus.ACTIVE)
+            .contractType(ContractType.PERMANENT)
+            .departmentId(UUID.randomUUID())
+            .workScheduleId(UUID.randomUUID())
+            .hireDate(LocalDate.of(2024, 1, 1))
+            .jobTitle("Supervisor")
+            .build();
+
+        when(accessScopeService.getEffectiveRoles(viewerUserId)).thenReturn(List.of(supervisorRole));
+        when(accessScopeService.hasAdministrationOrHrVisibility(List.of(supervisorRole))).thenReturn(false);
+        when(accessScopeService.findEmployee(viewerUserId)).thenReturn(Optional.of(viewerEmployee));
+        when(accessScopeService.resolveDepartmentManagerDepartmentId(List.of(supervisorRole), viewerEmployee))
+            .thenReturn(Optional.empty());
+        when(accessScopeService.hasAnyRole(List.of(supervisorRole), "PROJECT_SUPERVISOR")).thenReturn(true);
+        when(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(viewerEmployeeId, LocalDate.now()))
+            .thenReturn(List.of());
+        when(projectAssignmentRepository.findActiveProjectIdsBySupervisorId(viewerEmployeeId, LocalDate.now()))
+            .thenReturn(List.of());
+        when(projectRepository.findProjectIdsByProjectManagerEmployeeId(viewerEmployeeId)).thenReturn(List.of());
+        when(projectTeamRepository.findProjectIdsBySupervisorEmployeeId(viewerEmployeeId))
+            .thenReturn(List.of(projectId));
+        when(projectRepository.findByIdIn(eq(List.of(projectId)), org.mockito.ArgumentMatchers.any()))
+            .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(project)));
+
+        var page = projectService.getAll(viewerUserId, org.springframework.data.domain.PageRequest.of(0, 20));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).id()).isEqualTo(projectId);
+    }
+
+    @Test
+    @DisplayName("project managers can read projects they manage")
+    void projectManagersCanReadManagedProjects() {
+        UUID viewerUserId = UUID.randomUUID();
+        UUID viewerEmployeeId = UUID.randomUUID();
+        project.setProjectManagerEmployeeId(viewerEmployeeId);
+        Employee viewerEmployee = Employee.builder()
+            .id(viewerEmployeeId)
+            .userId(viewerUserId)
+            .employeeCode("PM-01")
+            .status(EmployeeStatus.ACTIVE)
+            .contractType(ContractType.PERMANENT)
+            .departmentId(UUID.randomUUID())
+            .workScheduleId(UUID.randomUUID())
+            .hireDate(LocalDate.of(2024, 1, 1))
+            .jobTitle("Project Manager")
+            .build();
+
+        when(accessScopeService.getEffectiveRoles(viewerUserId)).thenReturn(List.of());
+        when(accessScopeService.hasAdministrationOrHrVisibility(List.of())).thenReturn(false);
+        when(accessScopeService.findEmployee(viewerUserId)).thenReturn(Optional.of(viewerEmployee));
+        when(accessScopeService.resolveDepartmentManagerDepartmentId(List.of(), viewerEmployee))
+            .thenReturn(Optional.empty());
+        when(accessScopeService.hasAnyRole(List.of(), "PROJECT_SUPERVISOR")).thenReturn(false);
+        when(projectRepository.findProjectIdsByProjectManagerEmployeeId(viewerEmployeeId)).thenReturn(List.of(projectId));
+        when(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(viewerEmployeeId, LocalDate.now()))
+            .thenReturn(List.of());
+        when(projectRepository.findByIdIn(eq(List.of(projectId)), org.mockito.ArgumentMatchers.any()))
+            .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(project)));
+        when(employeeRepository.findById(viewerEmployeeId)).thenReturn(Optional.of(viewerEmployee));
+        when(userRepository.findById(viewerUserId)).thenReturn(Optional.of(
+            com.hris.auth.entity.User.builder()
+                .id(viewerUserId)
+                .firstName("Project")
+                .lastName("Manager")
+                .localePreference("en")
+                .build()
+        ));
+
+        var page = projectService.getAll(viewerUserId, org.springframework.data.domain.PageRequest.of(0, 20));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).projectManagerEmployeeId()).isEqualTo(viewerEmployeeId);
+        assertThat(page.getContent().get(0).projectManagerName()).isEqualTo("Project Manager");
+    }
+
     private void stubProjectAndEmployees(Employee assignmentEmployee, Employee assignmentSupervisor) {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
         when(employeeRepository.findByIdForUpdate(eq(employeeId))).thenReturn(Optional.of(assignmentEmployee));

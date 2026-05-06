@@ -16,7 +16,7 @@ import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.leave.enums.UrgencyLevel;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +41,7 @@ class AdminRequestServiceTest {
     @Mock private AdminRequestRepository adminRequestRepository;
     @Mock private AdminRequestTypeRepository adminRequestTypeRepository;
     @Mock private UserRepository userRepository;
-    @Mock private NotificationPublisher notificationPublisher;
+    @Mock private TransactionalNotificationPublisher notificationPublisher;
     @Mock private AuditLogService auditLogService;
     @Mock private ObjectMapper objectMapper;
 
@@ -103,7 +103,7 @@ class AdminRequestServiceTest {
 
             verify(adminRequestRepository).save(any(AdminRequest.class));
             verify(auditLogService).log(eq(requesterId), any(), eq("admin_request"), any(), any(), any());
-            verify(notificationPublisher).publish(any());
+            verify(notificationPublisher).publishAfterCommit(any());
         }
 
         @Test
@@ -125,7 +125,7 @@ class AdminRequestServiceTest {
                 .hasMessage("Admin request type not found or inactive");
 
             verify(adminRequestRepository, never()).save(any(AdminRequest.class));
-            verify(notificationPublisher, never()).publish(any());
+            verify(notificationPublisher, never()).publishAfterCommit(any());
         }
     }
 
@@ -161,7 +161,7 @@ class AdminRequestServiceTest {
             assertThat(request.getResolvedAt()).isNotNull();
 
             verify(adminRequestRepository).save(request);
-            verify(notificationPublisher).publish(any());
+            verify(notificationPublisher).publishAfterCommit(any());
         }
 
         @Test
@@ -224,7 +224,7 @@ class AdminRequestServiceTest {
 
             verify(adminRequestRepository).save(request);
             verify(auditLogService).log(eq(hrAdminId), any(), eq("admin_request"), eq(requestId), any(), any());
-            verify(notificationPublisher).publish(argThat(event ->
+            verify(notificationPublisher).publishAfterCommit(argThat(event ->
                 event.getEventType() == NotificationEventType.ADMIN_REQUEST_REJECTED
                     && requesterId.equals(event.getTargetUserId())
                     && "admin.rejected.title".equals(event.getTitleKey())

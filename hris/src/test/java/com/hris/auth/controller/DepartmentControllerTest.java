@@ -8,21 +8,23 @@ import com.hris.auth.entity.RolePermission;
 import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.PermissionRepository;
 import com.hris.auth.repository.RolePermissionRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.service.DepartmentService;
 import com.hris.common.ApiResponse;
+import com.hris.common.PageResponse;
 import com.hris.security.PermissionAuthorizationService;
+import com.hris.security.service.AccessScopeService;
 import com.hris.support.TestAuthenticationFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,19 +42,19 @@ class DepartmentControllerTest {
     private DepartmentService departmentService;
 
     @Mock
-    private UserRoleRepository userRoleRepository;
-
-    @Mock
     private RolePermissionRepository rolePermissionRepository;
 
     @Mock
     private PermissionRepository permissionRepository;
 
+    @Mock
+    private AccessScopeService accessScopeService;
+
     @Test
     @DisplayName("protected endpoint is denied without required permission")
     void protectedEndpointDeniedWithoutRequiredPermission() {
         PermissionAuthorizationService authorizationService = new PermissionAuthorizationService(
-            userRoleRepository,
+            accessScopeService,
             rolePermissionRepository,
             permissionRepository
         );
@@ -89,9 +91,9 @@ class DepartmentControllerTest {
             .scope("GLOBAL")
             .isActive(true)
             .build();
-        DepartmentDto responseDto = new DepartmentDto(UUID.randomUUID(), "HR", "HR", null, true);
+        DepartmentDto responseDto = new DepartmentDto(UUID.randomUUID(), "HR", "HR", null, true, 0L, 0L, 0L);
 
-        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(userRole));
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(List.of(userRole));
         when(rolePermissionRepository.findByRoleIdIn(List.of(roleId))).thenReturn(List.of(
             RolePermission.builder().id(UUID.randomUUID()).roleId(roleId).permissionId(permissionId).build()
         ));
@@ -99,7 +101,7 @@ class DepartmentControllerTest {
         when(departmentService.create(any(DepartmentCreateDto.class), eq(userId))).thenReturn(responseDto);
 
         PermissionAuthorizationService authorizationService = new PermissionAuthorizationService(
-            userRoleRepository,
+            accessScopeService,
             rolePermissionRepository,
             permissionRepository
         );
@@ -121,7 +123,7 @@ class DepartmentControllerTest {
     void administrationFallbackRoleCanManageDepartments() {
         UUID userId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
-        DepartmentDto responseDto = new DepartmentDto(UUID.randomUUID(), "Finance", "FIN", null, true);
+        DepartmentDto responseDto = new DepartmentDto(UUID.randomUUID(), "Finance", "FIN", null, true, 0L, 0L, 0L);
         Role administrationRole = Role.builder()
             .id(roleId)
             .code("ADMINISTRATION")
@@ -137,11 +139,10 @@ class DepartmentControllerTest {
             .build();
 
         when(departmentService.create(any(DepartmentCreateDto.class), eq(userId))).thenReturn(responseDto);
-        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
-            .thenReturn(List.of(administrationAssignment));
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(List.of(administrationAssignment));
 
         PermissionAuthorizationService authorizationService = new PermissionAuthorizationService(
-            userRoleRepository,
+            accessScopeService,
             rolePermissionRepository,
             permissionRepository
         );
@@ -156,5 +157,58 @@ class DepartmentControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().data().code()).isEqualTo("FIN");
         verify(departmentService).create(any(DepartmentCreateDto.class), eq(userId));
+    }
+
+    @Test
+    @DisplayName("department manager fallback role can read scoped departments")
+    void departmentManagerFallbackRoleCanReadScopedDepartments() {
+        UUID userId = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
+        Role managerRole = Role.builder()
+            .id(roleId)
+            .code("DEPT_MANAGER")
+            .name("Department Manager")
+            .isActive(true)
+            .build();
+        UserRole managerAssignment = UserRole.builder()
+            .id(UUID.randomUUID())
+            .userId(userId)
+            .roleId(roleId)
+            .role(managerRole)
+            .isActive(true)
+            .build();
+        DepartmentDto responseDto = new DepartmentDto(
+            UUID.randomUUID(),
+            "Engineering",
+            "ENG",
+            null,
+            true,
+            7L,
+            3L,
+            11L
+        );
+        PageRequest pageable = PageRequest.of(0, 20);
+
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(List.of(managerAssignment));
+        when(departmentService.getAll(eq(userId), eq(pageable)))
+            .thenReturn(new PageImpl<>(List.of(responseDto), pageable, 1));
+
+        PermissionAuthorizationService authorizationService = new PermissionAuthorizationService(
+            accessScopeService,
+            rolePermissionRepository,
+            permissionRepository
+        );
+        DepartmentController controller = new DepartmentController(departmentService, authorizationService);
+
+        ResponseEntity<ApiResponse<PageResponse<DepartmentDto>>> response = controller.getAll(
+            pageable,
+            TestAuthenticationFactory.jwtAuthentication(userId, "DEPT_MANAGER")
+        );
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data().content()).hasSize(1);
+        assertThat(response.getBody().data().content().get(0).employeeCount()).isEqualTo(7L);
+        verify(departmentService).getAll(eq(userId), eq(pageable));
     }
 }

@@ -9,6 +9,8 @@ import com.hris.organisation.dto.ProjectCreateDto;
 import com.hris.organisation.dto.ProjectDepartmentAssignDto;
 import com.hris.organisation.dto.ProjectDepartmentResponseDto;
 import com.hris.organisation.dto.ProjectResponseDto;
+import com.hris.organisation.dto.ProjectTeamCreateDto;
+import com.hris.organisation.dto.ProjectTeamResponseDto;
 import com.hris.organisation.service.ProjectService;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
@@ -83,6 +85,25 @@ public class ProjectController {
             Authentication authentication) {
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(projectService.getAssignments(id, actorId)));
+    }
+
+    @GetMapping("/{id}/teams")
+    public ResponseEntity<ApiResponse<List<ProjectTeamResponseDto>>> getTeams(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(projectService.getTeams(id, actorId)));
+    }
+
+    @PostMapping("/{id}/teams")
+    public ResponseEntity<ApiResponse<ProjectTeamResponseDto>> createTeam(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProjectTeamCreateDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok(projectService.createTeam(id, dto, actorId)));
     }
 
     @PostMapping("/{id}/assignments")

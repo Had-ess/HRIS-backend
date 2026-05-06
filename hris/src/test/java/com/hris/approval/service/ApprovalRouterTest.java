@@ -1,34 +1,27 @@
 package com.hris.approval.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.enums.ApprovalContext;
+import com.hris.approval.enums.StepStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
-import com.hris.auth.entity.Employee;
-import com.hris.auth.entity.User;
-import com.hris.auth.repository.UserRepository;
-import com.hris.auth.repository.DepartmentRepository;
-import com.hris.auth.repository.EmployeeRepository;
-import com.hris.common.exception.MissingDepartmentHeadException;
-import com.hris.organisation.entity.ProjectAssignment;
-import com.hris.organisation.enums.ProjectRole;
-import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.common.exception.InvalidWorkflowStateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,161 +29,93 @@ import static org.mockito.Mockito.when;
 class ApprovalRouterTest {
 
     @Mock
-    private EmployeeRepository employeeRepository;
-
-    @Mock
-    private DepartmentRepository departmentRepository;
-
-    @Mock
-    private ProjectAssignmentRepository projectAssignmentRepository;
+    private ApprovalRouteResolver approvalRouteResolver;
 
     @Mock
     private ApprovalStepRepository approvalStepRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private ApprovalStepFactory approvalStepFactory;
 
     private ApprovalRouter approvalRouter;
     private UUID requesterId;
     private UUID workflowId;
-    private UUID departmentId;
 
     @BeforeEach
     void setUp() {
         approvalRouter = new ApprovalRouter(
-            employeeRepository,
-            departmentRepository,
-            projectAssignmentRepository,
-            approvalStepRepository,
-            userRepository,
-            new ObjectMapper()
+            approvalRouteResolver,
+            approvalStepFactory,
+            approvalStepRepository
         );
         requesterId = UUID.randomUUID();
         workflowId = UUID.randomUUID();
-        departmentId = UUID.randomUUID();
-
-        when(employeeRepository.findById(requesterId)).thenReturn(Optional.of(Employee.builder()
-            .id(requesterId)
-            .userId(UUID.randomUUID())
-            .departmentId(departmentId)
-            .build()));
     }
 
-    @Nested
-    @DisplayName("resolveSteps()")
-    class ResolveStepsTests {
+    @Test
+    @DisplayName("resolveSteps persists ordered approval steps from the route plan")
+    void resolveStepsPersistsOrderedApprovalStepsFromTheRoutePlan() {
+        UUID approverA = UUID.randomUUID();
+        UUID approverB = UUID.randomUUID();
+        Map<String, String> snapshotA = new LinkedHashMap<>();
+        snapshotA.put("projectId", UUID.randomUUID().toString());
+        snapshotA.put("role", "TEAM_LEADER");
+        Map<String, String> snapshotB = new LinkedHashMap<>();
+        snapshotB.put("departmentId", UUID.randomUUID().toString());
+        snapshotB.put("role", "DEPT_HEAD");
 
-        @Test
-        @DisplayName("should route only to distinct project supervisors when assignments exist")
-        void shouldRouteOnlyToSupervisors_WhenAssignmentsExist() {
-            UUID supervisorId = UUID.randomUUID();
-            UUID supervisorUserId = UUID.randomUUID();
-            ProjectAssignment assignmentA = ProjectAssignment.builder()
-                .employeeId(requesterId)
-                .projectId(UUID.randomUUID())
-                .supervisorId(supervisorId)
-                .assignmentRole(ProjectRole.MEMBER)
-                .startDate(LocalDate.of(2026, 4, 1))
-                .build();
-            ProjectAssignment assignmentB = ProjectAssignment.builder()
-                .employeeId(requesterId)
-                .projectId(UUID.randomUUID())
-                .supervisorId(supervisorId)
-                .assignmentRole(ProjectRole.MANAGER)
-                .startDate(LocalDate.of(2026, 4, 1))
-                .build();
+        when(approvalRouteResolver.resolveRoutePlan(
+            requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .thenReturn(new ApprovalRouteResolver.ApprovalRoutePlan(List.of(
+                new ApprovalRouteResolver.ApprovalRouteStep(approverA, 1, ApprovalContext.PROJECT, snapshotA),
+                new ApprovalRouteResolver.ApprovalRouteStep(approverB, 2, ApprovalContext.DEPARTMENT, snapshotB)
+            )));
+        when(approvalStepFactory.buildSteps(workflowId, new ApprovalRouteResolver.ApprovalRoutePlan(List.of(
+            new ApprovalRouteResolver.ApprovalRouteStep(approverA, 1, ApprovalContext.PROJECT, snapshotA),
+            new ApprovalRouteResolver.ApprovalRouteStep(approverB, 2, ApprovalContext.DEPARTMENT, snapshotB)
+        )))).thenReturn(List.of(
+            ApprovalStep.builder()
+                .workflowId(workflowId)
+                .approverId(approverA)
+                .stepOrder(1)
+                .status(StepStatus.PENDING)
+                .context(ApprovalContext.PROJECT)
+                .routingSnapshot("{\"projectId\":\"" + snapshotA.get("projectId") + "\",\"role\":\"TEAM_LEADER\"}")
+                .build(),
+            ApprovalStep.builder()
+                .workflowId(workflowId)
+                .approverId(approverB)
+                .stepOrder(2)
+                .status(StepStatus.PENDING)
+                .context(ApprovalContext.DEPARTMENT)
+                .routingSnapshot("{\"departmentId\":\"" + snapshotB.get("departmentId") + "\",\"role\":\"DEPT_HEAD\"}")
+                .build()
+        ));
+        when(approvalStepRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
-                requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
-                .thenReturn(List.of(assignmentA, assignmentB));
-            when(approvalStepRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-            when(employeeRepository.findById(supervisorId)).thenReturn(Optional.of(Employee.builder()
-                .id(supervisorId)
-                .userId(supervisorUserId)
-                .build()));
+        List<ApprovalStep> steps = approvalRouter.resolveSteps(
+            requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
 
-            List<ApprovalStep> steps = approvalRouter.resolveSteps(
-                requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
+        assertThat(steps).hasSize(2);
+        assertThat(steps).extracting(ApprovalStep::getWorkflowId).containsOnly(workflowId);
+        assertThat(steps).extracting(ApprovalStep::getApproverId).containsExactly(approverA, approverB);
+        assertThat(steps).extracting(ApprovalStep::getStepOrder).containsExactly(1, 2);
+        assertThat(steps).extracting(ApprovalStep::getStatus).containsOnly(StepStatus.PENDING);
+        assertThat(steps.getFirst().getRoutingSnapshot()).contains("TEAM_LEADER");
+        assertThat(steps.get(1).getRoutingSnapshot()).contains("DEPT_HEAD");
+        verify(approvalStepRepository).saveAll(steps);
+    }
 
-            assertThat(steps).hasSize(1);
-            assertThat(steps.get(0).getApproverId()).isEqualTo(supervisorUserId);
-            assertThat(steps.get(0).getContext()).isEqualTo(ApprovalContext.PROJECT);
-        }
+    @Test
+    @DisplayName("resolveSteps preserves invalid empty route semantics")
+    void resolveStepsPreservesInvalidEmptyRouteSemantics() {
+        when(approvalRouteResolver.resolveRoutePlan(
+            requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .thenReturn(new ApprovalRouteResolver.ApprovalRoutePlan(List.of()));
 
-        @Test
-        @DisplayName("should route only to department head when no assignments exist")
-        void shouldRouteOnlyToDepartmentHead_WhenNoAssignmentsExist() {
-            UUID headEmployeeId = UUID.randomUUID();
-            UUID headUserId = UUID.randomUUID();
-
-            when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
-                requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
-                .thenReturn(List.of());
-            when(approvalStepRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-            when(departmentRepository.findDepartmentHead(departmentId))
-                .thenReturn(Optional.of(Employee.builder()
-                    .id(headEmployeeId)
-                    .userId(headUserId)
-                    .build()));
-
-            List<ApprovalStep> steps = approvalRouter.resolveSteps(
-                requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
-
-            assertThat(steps).hasSize(1);
-            assertThat(steps.get(0).getApproverId()).isEqualTo(headUserId);
-            assertThat(steps.get(0).getContext()).isEqualTo(ApprovalContext.DEPARTMENT);
-        }
-
-        @Test
-        @DisplayName("should throw when fallback department head is missing")
-        void shouldThrow_WhenDepartmentHeadMissing() {
-            when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
-                requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
-                .thenReturn(List.of());
-            when(departmentRepository.findDepartmentHead(departmentId))
-                .thenReturn(Optional.empty());
-            when(userRepository.findByRole("ADMINISTRATION")).thenReturn(List.of());
-            when(userRepository.findByRole("DIRECTOR")).thenReturn(List.of());
-            when(userRepository.findByRole("HR_ADMIN")).thenReturn(List.of());
-
-            assertThatThrownBy(() -> approvalRouter.resolveSteps(
-                requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
-                .isInstanceOf(MissingDepartmentHeadException.class)
-                .hasMessage("No department head defined for fallback approval");
-        }
-
-        @Test
-        @DisplayName("should exclude requester user from administration fallback approver selection")
-        void shouldExcludeRequesterUser_WhenUsingAdministrationFallback() {
-            UUID requesterUserId = UUID.randomUUID();
-            UUID fallbackAdminUserId = UUID.randomUUID();
-
-            when(employeeRepository.findById(requesterId)).thenReturn(Optional.of(Employee.builder()
-                .id(requesterId)
-                .userId(requesterUserId)
-                .departmentId(departmentId)
-                .build()));
-            when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
-                requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
-                .thenReturn(List.of());
-            when(departmentRepository.findDepartmentHead(departmentId))
-                .thenReturn(Optional.of(Employee.builder()
-                    .id(requesterId)
-                    .userId(requesterUserId)
-                    .departmentId(departmentId)
-                    .build()));
-            when(approvalStepRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-            when(userRepository.findByRole("ADMINISTRATION")).thenReturn(List.of(
-                User.builder().id(requesterUserId).isActive(true).build(),
-                User.builder().id(fallbackAdminUserId).isActive(true).build()
-            ));
-
-            List<ApprovalStep> steps = approvalRouter.resolveSteps(
-                requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
-
-            assertThat(steps).hasSize(1);
-            assertThat(steps.get(0).getApproverId()).isEqualTo(fallbackAdminUserId);
-            assertThat(steps.get(0).getContext()).isEqualTo(ApprovalContext.DEPARTMENT);
-        }
+        assertThatThrownBy(() -> approvalRouter.resolveSteps(
+            requesterId, workflowId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .isInstanceOf(InvalidWorkflowStateException.class)
+            .hasMessage("No approvers could be resolved for this workflow");
     }
 }

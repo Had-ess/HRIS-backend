@@ -13,5 +13,26 @@ public record EmployeeUpdateDto(
     EmployeeStatus status,
     ContractType contractType,
     UUID departmentId,
+    UUID supervisorEmployeeId,
     UUID workScheduleId
-) {}
+) {
+    public EmployeeUpdateDto(
+            String employeeCode,
+            LocalDate hireDate,
+            String jobTitle,
+            EmployeeStatus status,
+            ContractType contractType,
+            UUID departmentId,
+            UUID workScheduleId) {
+        this(
+            employeeCode,
+            hireDate,
+            jobTitle,
+            status,
+            contractType,
+            departmentId,
+            null,
+            workScheduleId
+        );
+    }
+}

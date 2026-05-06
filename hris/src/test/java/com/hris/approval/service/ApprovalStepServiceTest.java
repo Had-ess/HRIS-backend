@@ -10,13 +10,11 @@ import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.StepAlreadyDecidedException;
-import com.hris.leave.service.LeaveRequestService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
@@ -40,10 +38,9 @@ class ApprovalStepServiceTest {
 
     @Mock private ApprovalStepRepository approvalStepRepository;
     @Mock private ApprovalWorkflowRepository approvalWorkflowRepository;
-    @Mock private LeaveRequestService leaveRequestService;
     @Mock private AuditLogService auditLogService;
+    @Mock private WorkflowCompletionHandler workflowCompletionHandler;
 
-    @InjectMocks
     private ApprovalStepService approvalStepService;
 
     private UUID approverId;
@@ -57,6 +54,12 @@ class ApprovalStepServiceTest {
         stepId = UUID.randomUUID();
         workflowId = UUID.randomUUID();
         subjectId = UUID.randomUUID();
+        approvalStepService = new ApprovalStepService(
+            approvalStepRepository,
+            approvalWorkflowRepository,
+            auditLogService,
+            List.of(workflowCompletionHandler)
+        );
     }
 
     @Nested
@@ -116,6 +119,7 @@ class ApprovalStepServiceTest {
             when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
             when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(0L);
             when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.REJECTED)).thenReturn(0L);
+            when(workflowCompletionHandler.supports("LEAVE")).thenReturn(true);
 
             approvalStepService.approve(stepId, approverId, "Approved");
 
@@ -123,7 +127,7 @@ class ApprovalStepServiceTest {
             assertThat(workflow.getCompletedAt()).isNotNull();
 
             verify(approvalWorkflowRepository).save(workflow);
-            verify(leaveRequestService).handleWorkflowCompletion(subjectId, WorkflowStatus.COMPLETED, approverId);
+            verify(workflowCompletionHandler).handleCompletion(subjectId, WorkflowStatus.COMPLETED, approverId);
         }
 
         @Test
@@ -238,6 +242,7 @@ class ApprovalStepServiceTest {
             when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
             when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING))
                 .thenReturn(List.of(siblingStep));
+            when(workflowCompletionHandler.supports("LEAVE")).thenReturn(true);
 
             approvalStepService.reject(stepId, approverId, "Not justified");
 
@@ -249,7 +254,7 @@ class ApprovalStepServiceTest {
             assertThat(workflow.getCompletedAt()).isNotNull();
 
             verify(approvalStepRepository).saveAll(List.of(siblingStep));
-            verify(leaveRequestService).handleWorkflowCompletion(subjectId, WorkflowStatus.REJECTED, approverId);
+            verify(workflowCompletionHandler).handleCompletion(subjectId, WorkflowStatus.REJECTED, approverId);
         }
 
         @Test

@@ -1,17 +1,14 @@
 package com.hris.security;
 
 import com.hris.auth.entity.Permission;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.RolePermission;
-import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.PermissionRepository;
 import com.hris.auth.repository.RolePermissionRepository;
-import com.hris.auth.repository.UserRoleRepository;
+import com.hris.security.service.AccessScopeService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -21,15 +18,15 @@ import java.util.stream.Collectors;
 @Service
 public class PermissionAuthorizationService {
 
-    private final UserRoleRepository userRoleRepository;
+    private final AccessScopeService accessScopeService;
     private final RolePermissionRepository rolePermissionRepository;
     private final PermissionRepository permissionRepository;
 
     public PermissionAuthorizationService(
-            UserRoleRepository userRoleRepository,
+            AccessScopeService accessScopeService,
             RolePermissionRepository rolePermissionRepository,
             PermissionRepository permissionRepository) {
-        this.userRoleRepository = userRoleRepository;
+        this.accessScopeService = accessScopeService;
         this.rolePermissionRepository = rolePermissionRepository;
         this.permissionRepository = permissionRepository;
     }
@@ -46,17 +43,12 @@ public class PermissionAuthorizationService {
             return false;
         }
 
-        List<UserRole> effectiveRoles = userRoleRepository.findEffectiveByUserId(userId, Instant.now()).stream()
-            .filter(userRole -> userRole.getRole() != null && userRole.getRole().isActive())
+        List<UUID> roleIds = accessScopeService.getEffectiveRoles(userId).stream()
+            .map(com.hris.auth.entity.UserRole::getRoleId)
             .toList();
-
-        if (effectiveRoles.isEmpty()) {
+        if (roleIds.isEmpty()) {
             return false;
         }
-
-        List<UUID> roleIds = effectiveRoles.stream()
-            .map(UserRole::getRoleId)
-            .toList();
 
         List<RolePermission> rolePermissions = rolePermissionRepository.findByRoleIdIn(roleIds);
         if (rolePermissions.isEmpty()) {
@@ -101,11 +93,10 @@ public class PermissionAuthorizationService {
 
         try {
             UUID userId = SecurityUtils.getCurrentUserId(authentication);
-            return userRoleRepository.findEffectiveByUserId(userId, Instant.now()).stream()
-                .map(UserRole::getRole)
-                .filter(role -> role != null && role.isActive())
-                .map(Role::getCode)
-                .map(this::normalize)
+            return accessScopeService.getEffectiveRoles(userId).stream()
+                .map(com.hris.auth.entity.UserRole::getRole)
+                .filter(role -> role != null && role.getCode() != null)
+                .map(role -> normalize(role.getCode()))
                 .anyMatch(roleCode -> expectedAuthorities.contains("ROLE_" + roleCode));
         } catch (IllegalStateException ex) {
             return false;

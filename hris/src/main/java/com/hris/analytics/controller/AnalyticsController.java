@@ -1,19 +1,19 @@
 package com.hris.analytics.controller;
 
 import com.hris.analytics.dto.AbsenceImpactDto;
+import com.hris.analytics.dto.AuditLogDto;
 import com.hris.analytics.dto.HeadcountMetricsDto;
 import com.hris.analytics.dto.LeaveMetricsDto;
 import com.hris.analytics.dto.LeaveTrendPointDto;
 import com.hris.analytics.dto.LeaveTypeDistributionDto;
-import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.service.AnalyticsService;
-import com.hris.analytics.service.AuditLogService;
+import com.hris.analytics.service.AuditLogQueryService;
 import com.hris.analytics.service.ScopeFilterResolver;
 import com.hris.common.ApiResponse;
+import com.hris.common.PageResponse;
 import com.hris.common.ScopeFilter;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +31,7 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
     private final ScopeFilterResolver scopeFilterResolver;
-    private final AuditLogService auditLogService;
+    private final AuditLogQueryService auditLogQueryService;
 
     @GetMapping("/leave-metrics")
     @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN', 'DIRECTOR', 'ADMINISTRATION')")
@@ -87,14 +87,15 @@ public class AnalyticsController {
 
     @GetMapping("/audit-logs")
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
-    public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(auditLogService.getAll(pageable)));
+    public ResponseEntity<ApiResponse<PageResponse<AuditLogDto>>> getAuditLogs(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(auditLogQueryService.getAll(pageable))));
     }
 
     @GetMapping("/audit-logs/by-resource")
     @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
-    public ResponseEntity<ApiResponse<Page<AuditLog>>> getByResource(
+    public ResponseEntity<ApiResponse<PageResponse<AuditLogDto>>> getByResource(
             @RequestParam String resource, Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(auditLogService.getByResource(resource, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
+            auditLogQueryService.getByResource(resource, pageable))));
     }
 }

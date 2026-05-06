@@ -35,16 +35,18 @@ public class NotificationConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_LEAVE)
     public void onLeaveEvent(org.springframework.amqp.core.Message message) {
-        log.info(">>> RAW leave message body: {}", new String(message.getBody()));
-        log.info(">>> RAW leave message headers: {}", message.getMessageProperties().getHeaders());
+        log.debug("Received leave notification message id={}, routingKey={}",
+            message.getMessageProperties().getMessageId(),
+            message.getMessageProperties().getReceivedRoutingKey());
         NotificationEvent event = deserializeMessage(message);
         processEvent(event);
     }
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_ADMIN)
     public void onAdminEvent(org.springframework.amqp.core.Message message) {
-        log.info(">>> RAW admin message body: {}", new String(message.getBody()));
-        log.info(">>> RAW admin message headers: {}", message.getMessageProperties().getHeaders());
+        log.debug("Received admin notification message id={}, routingKey={}",
+            message.getMessageProperties().getMessageId(),
+            message.getMessageProperties().getReceivedRoutingKey());
         NotificationEvent event = deserializeMessage(message);
         processEvent(event);
     }
@@ -53,15 +55,15 @@ public class NotificationConsumer {
         try {
             return objectMapper.readValue(message.getBody(), NotificationEvent.class);
         } catch (Exception e) {
-            log.error(">>> DESERIALIZATION FAILED: {}", e.getMessage(), e);
+            log.error("Failed to deserialize notification message: {}", e.getMessage(), e);
             throw new IllegalStateException("Failed to deserialize notification event", e);
         }
     }
 
     private void processEvent(NotificationEvent event) {
         try {
-            log.info(">>> Processing event: type={}, titleKey={}, bodyKey={}, params={}",
-                event.getEventType(), event.getTitleKey(), event.getBodyKey(), event.getParams());
+            log.debug("Processing notification event type={}, targetUserId={}",
+                event.getEventType(), event.getTargetUserId());
 
             User user = userRepository.findById(event.getTargetUserId())
                 .orElse(null);
@@ -72,14 +74,16 @@ public class NotificationConsumer {
                 );
             }
 
-            log.info(">>> Found target user: {} ({})", user.getEmail(), user.getId());
+            log.debug("Found target user for notification event type={}, userId={}",
+                event.getEventType(), user.getId());
 
             // GAP-B-11: Use user's locale preference, not event's locale
             Locale locale = Locale.forLanguageTag(
                 user.getLocalePreference() != null ? user.getLocalePreference() : "fr");
 
             Object[] paramsArray = deserializeParams(event);
-            log.info(">>> Deserialized params: {}", java.util.Arrays.toString(paramsArray));
+            log.debug("Deserialized {} notification params for event type={}",
+                paramsArray.length, event.getEventType());
 
             String title;
             String body;
@@ -87,16 +91,15 @@ public class NotificationConsumer {
                 title = messageSource.getMessage(event.getTitleKey(), paramsArray, locale);
                 body = messageSource.getMessage(event.getBodyKey(), paramsArray, locale);
             } catch (Exception msgEx) {
-                log.error(">>> MessageSource FAILED for keys [{}, {}], locale={}, exception={}: {}",
+                log.warn("MessageSource failed for notification keys [{}, {}], locale={}, exception={}: {}",
                     event.getTitleKey(), event.getBodyKey(), locale, msgEx.getClass().getName(), msgEx.getMessage());
                 // Use raw keys as fallback so notification is still created
                 title = event.getTitleKey();
                 body = event.getBodyKey();
             }
-            log.info(">>> Resolved title='{}', body='{}'", title, body);
 
             String linkPath = extractLinkPath(event);
-            log.info(">>> Extracted linkPath='{}'", linkPath);
+            log.debug("Resolved link path for event type={}: {}", event.getEventType(), linkPath);
 
             Notification notification = Notification.builder()
                 .userId(user.getId())
@@ -108,7 +111,7 @@ public class NotificationConsumer {
                 .build();
 
             notificationRepository.save(notification);
-            log.info(">>> Notification SAVED for user: {}", user.getEmail());
+            log.info("Notification saved for userId={} from event type={}", user.getId(), event.getEventType());
 
         } catch (Exception e) {
             log.error("Failed to process notification event: {}", event.getEventType(), e);
@@ -135,7 +138,7 @@ public class NotificationConsumer {
                     new TypeReference<List<Object>>() {});
                 return list.toArray();
             } catch (Exception ex) {
-                log.warn("Failed to deserialize notification params: {}", paramsJson);
+                log.warn("Failed to deserialize notification params for event type={}", event.getEventType());
                 return new Object[]{paramsJson};
             }
         }

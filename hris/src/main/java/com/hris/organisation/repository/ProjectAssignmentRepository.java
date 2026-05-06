@@ -39,6 +39,8 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
 
     List<ProjectAssignment> findByEmployeeIdAndIsActiveTrue(UUID employeeId);
 
+    long countByTeamIdAndIsActiveTrue(UUID teamId);
+
     boolean existsByEmployeeId(UUID employeeId);
 
     boolean existsBySupervisorId(UUID supervisorId);
@@ -55,6 +57,8 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
             e.employeeCode,
             concat(coalesce(u.firstName, ''), ' ', coalesce(u.lastName, '')),
             pa.projectId,
+            pa.teamId,
+            pt.name,
             s.id,
             s.userId,
             s.employeeCode,
@@ -67,6 +71,7 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
         from ProjectAssignment pa
         join Employee e on e.id = pa.employeeId
         join User u on u.id = e.userId
+        left join ProjectTeam pt on pt.id = pa.teamId
         join Employee s on s.id = pa.supervisorId
         join User su on su.id = s.userId
         where pa.projectId = :projectId
@@ -111,6 +116,22 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
         """)
     long countActiveDistinctEmployeesBySupervisorId(
         @Param("supervisorId") UUID supervisorId,
+        @Param("today") LocalDate today);
+
+    @Query("""
+        SELECT COUNT(pa)
+        FROM ProjectAssignment pa
+        WHERE pa.projectId IN (
+            SELECT pd.projectId
+            FROM ProjectDepartment pd
+            WHERE pd.departmentId = :departmentId
+        )
+          AND pa.isActive = true
+          AND pa.startDate <= :today
+          AND (pa.endDate IS NULL OR pa.endDate >= :today)
+        """)
+    long countActiveByDepartmentId(
+        @Param("departmentId") UUID departmentId,
         @Param("today") LocalDate today);
 
     @Query("""

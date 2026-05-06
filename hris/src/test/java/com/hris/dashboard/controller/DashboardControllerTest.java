@@ -14,6 +14,7 @@ import com.hris.dashboard.dto.HrDashboardDto;
 import com.hris.dashboard.dto.LeaveMetricsSummaryDto;
 import com.hris.dashboard.service.DashboardService;
 import com.hris.security.PermissionAuthorizationService;
+import com.hris.security.service.AccessScopeService;
 import com.hris.support.TestAuthenticationFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,12 +42,15 @@ class DashboardControllerTest {
     @Mock
     private DashboardService dashboardService;
 
+    @Mock
+    private AccessScopeService accessScopeService;
+
     @Test
     @DisplayName("HR dashboard endpoint is denied without required permission")
     void hrDashboardEndpointDeniedWithoutRequiredPermission() {
         DashboardController controller = new DashboardController(
             dashboardService,
-            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+            new PermissionAuthorizationService(accessScopeService, rolePermissionRepository, permissionRepository)
         );
 
         assertThatThrownBy(() -> controller.getHrDashboard(
@@ -69,7 +73,7 @@ class DashboardControllerTest {
         UUID userId = UUID.randomUUID();
         DashboardController controller = new DashboardController(
             dashboardService,
-            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+            new PermissionAuthorizationService(accessScopeService, rolePermissionRepository, permissionRepository)
         );
         when(dashboardService.getHrDashboard()).thenReturn(
             new HrDashboardDto(3L, 4L, 5L, 2L, List.of())
@@ -93,7 +97,7 @@ class DashboardControllerTest {
         UUID userId = UUID.randomUUID();
         DashboardController controller = new DashboardController(
             dashboardService,
-            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+            new PermissionAuthorizationService(accessScopeService, rolePermissionRepository, permissionRepository)
         );
         when(dashboardService.getDirectorDashboard()).thenReturn(
             new DirectorDashboardDto(9L, 3L, 2L, 1L,
@@ -118,13 +122,13 @@ class DashboardControllerTest {
         UUID roleId = UUID.randomUUID();
         DashboardController controller = new DashboardController(
             dashboardService,
-            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+            new PermissionAuthorizationService(accessScopeService, rolePermissionRepository, permissionRepository)
         );
         when(dashboardService.getDirectorDashboard()).thenReturn(
             new DirectorDashboardDto(11L, 4L, 3L, 2L,
                 new LeaveMetricsSummaryDto("2026-04", 10, 8, 1, 1.5), 5L)
         );
-        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(List.of(
             UserRole.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
@@ -151,9 +155,9 @@ class DashboardControllerTest {
         UUID roleId = UUID.randomUUID();
         DashboardController controller = new DashboardController(
             dashboardService,
-            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+            new PermissionAuthorizationService(accessScopeService, rolePermissionRepository, permissionRepository)
         );
-        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(List.of(
             UserRole.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
@@ -175,7 +179,7 @@ class DashboardControllerTest {
         UUID userId = UUID.randomUUID();
         DashboardController controller = new DashboardController(
             dashboardService,
-            new PermissionAuthorizationService(userRoleRepository, rolePermissionRepository, permissionRepository)
+            new PermissionAuthorizationService(accessScopeService, rolePermissionRepository, permissionRepository)
         );
         when(dashboardService.getEmployeeDashboard(userId)).thenReturn(
             new EmployeeDashboardDto(2L, List.of(), List.of(), List.of())
@@ -210,7 +214,7 @@ class DashboardControllerTest {
             .isActive(true)
             .build();
 
-        when(userRoleRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(userRole));
+        when(accessScopeService.getEffectiveRoles(userId)).thenReturn(List.of(userRole));
         when(rolePermissionRepository.findByRoleIdIn(List.of(roleId))).thenReturn(List.of(
             RolePermission.builder().id(UUID.randomUUID()).roleId(roleId).permissionId(permissionId).build()
         ));

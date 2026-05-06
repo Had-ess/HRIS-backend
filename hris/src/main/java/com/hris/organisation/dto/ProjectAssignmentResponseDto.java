@@ -9,6 +9,7 @@ public record ProjectAssignmentResponseDto(
     UUID id,
     UUID employeeId,
     UUID projectId,
+    UUID teamId,
     UUID supervisorId,
     ProjectRole assignmentRole,
     LocalDate startDate,

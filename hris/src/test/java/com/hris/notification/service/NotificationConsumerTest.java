@@ -1,6 +1,8 @@
 package com.hris.notification.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
 import com.hris.notification.entity.Notification;
@@ -35,6 +37,12 @@ import static org.mockito.Mockito.when;
 @DisplayName("NotificationConsumer Unit Tests")
 class NotificationConsumerTest {
 
+    private static ObjectMapper testObjectMapper() {
+        return new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
     @Mock
     private NotificationRepository notificationRepository;
 
@@ -47,7 +55,7 @@ class NotificationConsumerTest {
     @Test
     @DisplayName("should render admin submitted notification parameters in correct order")
     void shouldRenderAdminSubmittedNotificationParamsInCorrectOrder() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = testObjectMapper();
         NotificationConsumer notificationConsumer = new NotificationConsumer(
             notificationRepository, userRepository, messageSource, objectMapper);
         UUID userId = UUID.randomUUID();
@@ -99,7 +107,7 @@ class NotificationConsumerTest {
     @Test
     @DisplayName("should persist project assignment notification link path")
     void shouldPersistProjectAssignmentNotificationLinkPath() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = testObjectMapper();
         NotificationConsumer notificationConsumer = new NotificationConsumer(
             notificationRepository, userRepository, messageSource, objectMapper);
         UUID userId = UUID.randomUUID();
@@ -144,7 +152,7 @@ class NotificationConsumerTest {
     @Test
     @DisplayName("should render rejected admin request notification parameters in correct order")
     void shouldRenderRejectedAdminRequestNotificationParamsInCorrectOrder() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = testObjectMapper();
         NotificationConsumer notificationConsumer = new NotificationConsumer(
             notificationRepository, userRepository, messageSource, objectMapper);
         UUID userId = UUID.randomUUID();
@@ -193,7 +201,7 @@ class NotificationConsumerTest {
     @Test
     @DisplayName("should fail when target user is missing so the message can reach the DLQ")
     void shouldFailWhenTargetUserMissing() {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = testObjectMapper();
         NotificationConsumer notificationConsumer = new NotificationConsumer(
             notificationRepository, userRepository, messageSource, objectMapper);
         UUID userId = UUID.randomUUID();

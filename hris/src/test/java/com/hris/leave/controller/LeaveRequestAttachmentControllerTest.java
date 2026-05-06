@@ -1,10 +1,10 @@
 package com.hris.leave.controller;
 
-import com.hris.approval.service.ApprovalViewService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.leave.mapper.LeaveMapper;
-import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.leave.dto.FileAttachmentDto;
+import com.hris.leave.entity.FileAttachment;
 import com.hris.leave.service.AttachmentDownload;
+import com.hris.leave.service.LeaveRequestQueryService;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.auth.service.UserProvisioningService;
@@ -20,11 +20,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.ByteArrayInputStream;
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,8 +37,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,11 +58,7 @@ class LeaveRequestAttachmentControllerTest {
     @MockBean
     private LeaveRequestService leaveRequestService;
     @MockBean
-    private LeaveMapper leaveMapper;
-    @MockBean
-    private ApprovalViewService approvalViewService;
-    @MockBean
-    private LeaveTypeRepository leaveTypeRepository;
+    private LeaveRequestQueryService leaveRequestQueryService;
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean
@@ -99,6 +101,75 @@ class LeaveRequestAttachmentControllerTest {
                 .with(user(USER_ID.toString()).roles("EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"medical_note.pdf\""));
+    }
+
+    @Test
+    void uploadAttachmentReturnsCreatedDtoWhenAuthorized() throws Exception {
+        Instant uploadedAt = Instant.parse("2026-05-05T12:00:00Z");
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "medical_note.pdf",
+            MediaType.APPLICATION_PDF_VALUE,
+            "%PDF-demo".getBytes()
+        );
+        FileAttachment attachment = FileAttachment.builder()
+            .id(ATTACHMENT_ID)
+            .requestId(REQUEST_ID)
+            .fileName("medical_note.pdf")
+            .mimeType("application/pdf")
+            .uploadedAt(uploadedAt)
+            .build();
+        FileAttachmentDto attachmentDto = new FileAttachmentDto(
+            ATTACHMENT_ID,
+            REQUEST_ID,
+            "medical_note.pdf",
+            "application/pdf",
+            uploadedAt
+        );
+
+        when(leaveRequestService.uploadAttachment(REQUEST_ID, file, USER_ID)).thenReturn(attachment);
+        when(leaveRequestQueryService.toAttachmentDto(attachment)).thenReturn(attachmentDto);
+
+        mockMvc.perform(multipart("/api/leave-requests/{id}/attachments", REQUEST_ID)
+                .file(file)
+                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.id").value(ATTACHMENT_ID.toString()))
+            .andExpect(jsonPath("$.data.requestId").value(REQUEST_ID.toString()))
+            .andExpect(jsonPath("$.data.fileName").value("medical_note.pdf"))
+            .andExpect(jsonPath("$.data.mimeType").value("application/pdf"));
+    }
+
+    @Test
+    void listAttachmentsReturnsDtosWhenAuthorized() throws Exception {
+        Instant uploadedAt = Instant.parse("2026-05-05T12:00:00Z");
+        FileAttachment attachment = FileAttachment.builder()
+            .id(ATTACHMENT_ID)
+            .requestId(REQUEST_ID)
+            .fileName("medical_note.pdf")
+            .mimeType("application/pdf")
+            .uploadedAt(uploadedAt)
+            .build();
+        FileAttachmentDto attachmentDto = new FileAttachmentDto(
+            ATTACHMENT_ID,
+            REQUEST_ID,
+            "medical_note.pdf",
+            "application/pdf",
+            uploadedAt
+        );
+
+        when(leaveRequestService.getAttachments(REQUEST_ID, USER_ID)).thenReturn(List.of(attachment));
+        when(leaveRequestQueryService.toAttachmentDtos(List.of(attachment))).thenReturn(List.of(attachmentDto));
+
+        mockMvc.perform(get("/api/leave-requests/{id}/attachments", REQUEST_ID)
+                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data[0].id").value(ATTACHMENT_ID.toString()))
+            .andExpect(jsonPath("$.data[0].requestId").value(REQUEST_ID.toString()))
+            .andExpect(jsonPath("$.data[0].fileName").value("medical_note.pdf"))
+            .andExpect(jsonPath("$.data[0].mimeType").value("application/pdf"));
     }
 
     @Test

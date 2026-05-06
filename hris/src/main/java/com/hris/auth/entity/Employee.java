@@ -45,6 +45,9 @@ public class Employee {
     @Column(name = "department_id", nullable = false)
     private UUID departmentId;
 
+    @Column(name = "supervisor_employee_id")
+    private UUID supervisorEmployeeId;
+
     @Column(name = "work_schedule_id", nullable = false)
     private UUID workScheduleId;
 
@@ -55,6 +58,10 @@ public class Employee {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", insertable = false, updatable = false)
     private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supervisor_employee_id", insertable = false, updatable = false)
+    private Employee supervisor;
 
     @Override
     public boolean equals(Object o) {

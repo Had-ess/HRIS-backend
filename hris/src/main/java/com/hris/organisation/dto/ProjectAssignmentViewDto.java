@@ -12,6 +12,8 @@ public record ProjectAssignmentViewDto(
     String employeeCode,
     String employeeName,
     UUID projectId,
+    UUID teamId,
+    String teamName,
     UUID supervisorId,
     UUID supervisorUserId,
     String supervisorCode,

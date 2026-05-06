@@ -6,12 +6,14 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.service.ApprovalViewService;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
+import com.hris.leave.dto.LeaveTypeDto;
 import com.hris.leave.entity.LeaveRequest;
-import com.hris.leave.entity.LeaveType;
 import com.hris.leave.enums.LeaveStatus;
 import com.hris.leave.enums.UrgencyLevel;
-import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.leave.dto.LeaveRequestResponseDto;
+import com.hris.leave.service.LeaveTypeService;
 import com.hris.leave.service.LeaveRequestService;
+import com.hris.leave.service.LeaveRequestQueryService;
 import com.hris.security.JwtAuthenticationFilter;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +35,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +47,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LeaveRequestController.class)
-@Import({GlobalExceptionHandler.class, LeaveRequestControllerTest.TestSecurityConfig.class})
+@Import({
+    GlobalExceptionHandler.class,
+    LeaveRequestControllerTest.TestSecurityConfig.class,
+    LeaveRequestQueryService.class
+})
 class LeaveRequestControllerTest {
 
     private static final UUID USER_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
@@ -58,12 +63,6 @@ class LeaveRequestControllerTest {
     private LeaveRequestService leaveRequestService;
 
     @MockBean
-    private ApprovalViewService approvalViewService;
-
-    @MockBean
-    private LeaveTypeRepository leaveTypeRepository;
-
-    @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @MockBean
@@ -71,6 +70,12 @@ class LeaveRequestControllerTest {
 
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @MockBean
+    private LeaveTypeService leaveTypeService;
+
+    @MockBean
+    private ApprovalViewService approvalViewService;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -100,8 +105,21 @@ class LeaveRequestControllerTest {
             .comment("Family trip")
             .submittedAt(Instant.now())
             .build();
-        LeaveType leaveType = LeaveType.builder().id(leaveTypeId).code("ANNUAL").name("Annual Leave").build();
-        ApprovalStepResponseDto approvalStep = new ApprovalStepResponseDto(
+        LeaveRequestResponseDto responseDto = new LeaveRequestResponseDto(
+            leaveId,
+            request.getEmployeeId(),
+            leaveTypeId,
+            "ANNUAL",
+            "Annual Leave",
+            request.getStartDate(),
+            request.getEndDate(),
+            request.getWorkingDays(),
+            request.getUrgencyLevel(),
+            request.getStatus(),
+            request.getComment(),
+            request.getSubmittedAt(),
+            true,
+            List.of(new ApprovalStepResponseDto(
             UUID.randomUUID(),
             UUID.randomUUID(),
             "LEAVE",
@@ -118,12 +136,13 @@ class LeaveRequestControllerTest {
             "{\"role\":\"DEPT_HEAD\"}",
             null,
             null
-        );
+        )));
+        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "ANNUAL", "Annual Leave", true, false, true);
 
         when(leaveRequestService.getById(leaveId, USER_ID)).thenReturn(request);
-        when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
+        when(leaveTypeService.getDtoById(leaveTypeId)).thenReturn(leaveTypeDto);
+        when(approvalViewService.getStepsForSubject("LEAVE", leaveId)).thenReturn(responseDto.approvalSteps());
         when(leaveRequestService.canUploadAttachment(request, USER_ID)).thenReturn(true);
-        when(approvalViewService.getStepsForSubject("LEAVE", leaveId)).thenReturn(List.of(approvalStep));
 
         mockMvc.perform(get("/api/leave-requests/{id}", leaveId).with(user(USER_ID.toString()).roles("EMPLOYEE")))
             .andExpect(status().isOk())
@@ -150,14 +169,31 @@ class LeaveRequestControllerTest {
             .status(LeaveStatus.PENDING)
             .submittedAt(Instant.now())
             .build();
-        LeaveType leaveType = LeaveType.builder().id(leaveTypeId).code("SICK").name("Sick Leave").build();
+        LeaveRequestResponseDto responseDto = new LeaveRequestResponseDto(
+            leaveId,
+            request.getEmployeeId(),
+            leaveTypeId,
+            "SICK",
+            "Sick Leave",
+            request.getStartDate(),
+            request.getEndDate(),
+            request.getWorkingDays(),
+            request.getUrgencyLevel(),
+            request.getStatus(),
+            request.getComment(),
+            request.getSubmittedAt(),
+            true,
+            List.of()
+        );
+        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "SICK", "Sick Leave", true, true, true);
+        var requestPage = new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1);
 
         when(leaveRequestService.getMyRequests(eq(USER_ID), eq(null), any()))
-            .thenReturn(new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1));
-        when(leaveTypeRepository.findAllById(List.of(leaveTypeId))).thenReturn(List.of(leaveType));
-        when(leaveRequestService.canUploadAttachment(request, USER_ID)).thenReturn(true);
+            .thenReturn(requestPage);
+        when(leaveTypeService.getDtoById(leaveTypeId)).thenReturn(leaveTypeDto);
         when(approvalViewService.getStepsForSubjects("LEAVE", List.of(leaveId)))
-            .thenReturn(Map.of(leaveId, List.of()));
+            .thenReturn(Map.of(leaveId, responseDto.approvalSteps()));
+        when(leaveRequestService.canUploadAttachment(request, USER_ID)).thenReturn(true);
 
         mockMvc.perform(get("/api/leave-requests").with(user(USER_ID.toString()).roles("EMPLOYEE")))
             .andExpect(status().isOk())

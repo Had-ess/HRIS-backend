@@ -3,9 +3,7 @@ package com.hris.notification.controller;
 import com.hris.common.ApiResponse;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.notification.dto.NotificationResponseDto;
-import com.hris.notification.entity.Notification;
-import com.hris.notification.mapper.NotificationMapper;
-import com.hris.notification.repository.NotificationRepository;
+import com.hris.notification.service.NotificationService;
 import com.hris.support.TestAuthenticationFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,14 +16,11 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,17 +29,14 @@ import static org.mockito.Mockito.when;
 class NotificationControllerTest {
 
     @Mock
-    private NotificationRepository notificationRepository;
-
-    @Mock
-    private NotificationMapper notificationMapper;
+    private NotificationService notificationService;
 
     @Test
     @DisplayName("unread count only returns the current user's count")
     void unreadCountOnlyReturnsTheCurrentUsersCount() {
         UUID userId = UUID.randomUUID();
-        NotificationController controller = new NotificationController(notificationRepository, notificationMapper);
-        when(notificationRepository.countByUserIdAndIsReadFalse(userId)).thenReturn(4L);
+        NotificationController controller = new NotificationController(notificationService);
+        when(notificationService.getUnreadCount(userId)).thenReturn(4L);
 
         ResponseEntity<ApiResponse<Long>> response = controller.getUnreadCount(
             TestAuthenticationFactory.jwtAuthentication(userId, "EMPLOYEE")
@@ -53,7 +45,7 @@ class NotificationControllerTest {
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().data()).isEqualTo(4L);
-        verify(notificationRepository).countByUserIdAndIsReadFalse(userId);
+        verify(notificationService).getUnreadCount(userId);
     }
 
     @Test
@@ -61,17 +53,7 @@ class NotificationControllerTest {
     void markAsReadOnlyUpdatesNotificationOwnedByCurrentUser() {
         UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
-        Notification notification = Notification.builder()
-            .id(notificationId)
-            .userId(userId)
-            .title("Title")
-            .body("Body")
-            .isRead(false)
-            .createdAt(Instant.now())
-            .build();
-        NotificationController controller = new NotificationController(notificationRepository, notificationMapper);
-
-        when(notificationRepository.findByIdAndUserId(notificationId, userId)).thenReturn(Optional.of(notification));
+        NotificationController controller = new NotificationController(notificationService);
 
         ResponseEntity<ApiResponse<Void>> response = controller.markAsRead(
             notificationId,
@@ -79,9 +61,7 @@ class NotificationControllerTest {
         );
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-        assertThat(notification.isRead()).isTrue();
-        verify(notificationRepository).findByIdAndUserId(notificationId, userId);
-        verify(notificationRepository).save(notification);
+        verify(notificationService).markAsRead(notificationId, userId);
     }
 
     @Test
@@ -89,9 +69,10 @@ class NotificationControllerTest {
     void markAsReadRejectsNotificationsOwnedByAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
-        NotificationController controller = new NotificationController(notificationRepository, notificationMapper);
+        NotificationController controller = new NotificationController(notificationService);
 
-        when(notificationRepository.findByIdAndUserId(notificationId, userId)).thenReturn(Optional.empty());
+        org.mockito.Mockito.doThrow(new EntityNotFoundException("Notification not found"))
+            .when(notificationService).markAsRead(notificationId, userId);
 
         assertThatThrownBy(() -> controller.markAsRead(
             notificationId,
@@ -100,8 +81,7 @@ class NotificationControllerTest {
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessageContaining("Notification not found");
 
-        verify(notificationRepository).findByIdAndUserId(notificationId, userId);
-        verify(notificationRepository, never()).save(any(Notification.class));
+        verify(notificationService).markAsRead(notificationId, userId);
     }
 
     @Test
@@ -109,14 +89,6 @@ class NotificationControllerTest {
     void getNotificationsPreservesWrappedPageResponseShape() {
         UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
-        Notification notification = Notification.builder()
-            .id(notificationId)
-            .userId(userId)
-            .title("Title")
-            .body("Body")
-            .isRead(false)
-            .createdAt(Instant.now())
-            .build();
         NotificationResponseDto dto = new NotificationResponseDto(
             notificationId,
             userId,
@@ -124,13 +96,12 @@ class NotificationControllerTest {
             "Body",
             "/projects/123",
             false,
-            notification.getCreatedAt()
+            Instant.now()
         );
-        NotificationController controller = new NotificationController(notificationRepository, notificationMapper);
+        NotificationController controller = new NotificationController(notificationService);
 
-        when(notificationRepository.findByUserIdAndIsReadOrderByCreatedAtDesc(eq(userId), eq(false), any()))
-            .thenReturn(new PageImpl<>(List.of(notification), PageRequest.of(0, 20), 1));
-        when(notificationMapper.toDto(notification)).thenReturn(dto);
+        when(notificationService.getMyNotifications(eq(userId), eq(false), eq(PageRequest.of(0, 20))))
+            .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 20), 1));
 
         ResponseEntity<ApiResponse<com.hris.common.PageResponse<NotificationResponseDto>>> response =
             controller.getMyNotifications(

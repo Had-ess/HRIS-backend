@@ -8,5 +8,8 @@ public record DepartmentDto(
     String name,
     String code,
     UUID headEmployeeId,
-    boolean isActive
+    boolean isActive,
+    long employeeCount,
+    long projectCount,
+    long projectAssignmentCount
 ) {}

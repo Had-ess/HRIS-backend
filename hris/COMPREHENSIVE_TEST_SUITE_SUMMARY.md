@@ -3,94 +3,95 @@
 ## Summary
 - Tests live under `src/test/java/com/hris`
 - Build tool: Maven
-- Main test stack in use:
-  - JUnit 5 via `spring-boot-starter-test`
+- Main test stack in current use:
+  - JUnit 5 through `spring-boot-starter-test`
   - Mockito
   - AssertJ
   - Spring Test / MockMvc
   - Spring Security Test
-- Testcontainers dependencies are present in `pom.xml`, but there are no checked-in tests currently using `@Testcontainers`, container classes, or `@SpringBootTest`
+- `pom.xml` also includes Testcontainers dependencies, but there are no checked-in tests currently using `@Testcontainers`
 
-## Test Layout
+## Current Test Inventory
+
+- Total checked-in `*Test.java` files: 32
+- Current top-level test packages:
+  - `admin`
+  - `approval`
+  - `auth`
+  - `common`
+  - `dashboard`
+  - `leave`
+  - `notification`
+  - `organisation`
+  - `security`
+  - `support`
 
 ```text
 src/test/java/com/hris/
-├── admin/
-│   ├── entity/
-│   └── service/
-├── approval/
-│   ├── controller/
-│   ├── entity/
-│   └── service/
-├── auth/
-│   ├── controller/
-│   └── service/
-├── dashboard/
-│   ├── controller/
-│   └── service/
-├── leave/
-│   ├── controller/
-│   ├── entity/
-│   └── service/
-├── notification/
-│   └── service/
-├── organisation/
-│   ├── controller/
-│   └── service/
-├── security/
-└── support/
+|-- admin/
+|-- approval/
+|-- auth/
+|-- common/
+|-- dashboard/
+|-- leave/
+|-- notification/
+|-- organisation/
+|-- security/
+`-- support/
 ```
 
-## Current Test Structure
+## Test Styles In Use
 
-### Unit Tests
-- Most tests are plain JUnit 5 + Mockito tests using `@ExtendWith(MockitoExtension.class)`.
-- This covers service classes, some controller classes, entity behavior, and security helpers.
+### Mockito-Based Unit Tests
+- Most service and helper tests use `@ExtendWith(MockitoExtension.class)`.
+- This is the dominant pattern in the current suite.
 
 Examples:
 - `admin/service/AdminRequestServiceTest`
 - `approval/service/ApprovalStepServiceTest`
 - `auth/service/RoleServiceTest`
-- `dashboard/controller/DashboardControllerTest`
+- `dashboard/service/DashboardServiceTest`
 - `security/JwtAuthenticationFilterTest`
 
-### Web Slice Test
-- `leave/controller/LeaveRequestAttachmentControllerTest` uses:
-  - `@WebMvcTest(controllers = LeaveRequestController.class)`
-  - `MockMvc`
-  - `@MockBean`
-  - Spring Security test support with `user(...)`
+### Spring MVC Slice Tests
+- The checked-in suite currently contains three `@WebMvcTest` classes:
+  - `approval/controller/ApprovalStepControllerTest`
+  - `leave/controller/LeaveRequestControllerTest`
+  - `leave/controller/LeaveRequestAttachmentControllerTest`
 
-### Controller Testing Style
-- There is no single controller-test pattern across the suite.
-- Current controller coverage includes:
-  - Mockito-only tests that instantiate controllers directly
-  - standalone `MockMvcBuilders.standaloneSetup(...)`
-  - one Spring MVC slice test with `@WebMvcTest`
+### Entity and Support Tests
+- The suite also includes targeted entity behavior tests and shared support helpers.
 
-### Integration Tests
-- No checked-in test class currently uses:
+Examples:
+- `admin/entity/AdminRequestTest`
+- `approval/entity/ApprovalStepTest`
+- `leave/entity/LeaveBalanceTest`
+- `support/TestAuthenticationFactory.java`
+
+## What Is Not Present
+
+- No checked-in class currently uses:
   - `@SpringBootTest`
   - `@DataJpaTest`
   - `@Testcontainers`
   - `@ActiveProfiles`
   - `@Transactional`
-- There are also no `*IT` test classes in `src/test/java`.
-
-## Naming Conventions
-- All checked-in test classes currently end with `Test`.
-- No separate integration-test naming convention is present.
+- No `src/test/resources` directory is checked in.
+- No `application-test.yml` or `application-test.properties` file is checked in.
+- No Maven test profile is defined in `pom.xml`.
+- No JaCoCo plugin is configured in `pom.xml`.
+- No Maven wrapper (`mvnw`) is checked in.
 
 ## Running Tests
 
-Run commands from `hris/`.
+Run commands from `backend/hris/`.
 
 ### Run All Tests
 ```bash
 mvn test
 ```
 
-### Run a Specific Test Class
+### Run One Test Class
 ```bash
 mvn -Dtest=RoleServiceTest test
 ```
@@ -100,38 +101,12 @@ mvn -Dtest=RoleServiceTest test
 mvn -Dtest=JwtAuthenticationFilterTest,ProjectServiceTest,RoleServiceTest,LeaveRequestServiceTest test
 ```
 
-## Test Support and Mocking
+## Reports and Output
 
-### Mocking Strategy
-- Mockito is the default mocking approach.
-- Common patterns in the suite:
-  - `@Mock`
-  - `@InjectMocks`
-  - direct constructor wiring in tests
-  - `@MockBean` in the MVC slice test
+- Maven Surefire writes reports to `target/surefire-reports/`.
+- Because JaCoCo is not configured, there is no checked-in coverage-report command documented here.
 
-### Security Test Support
-- `spring-security-test` is on the classpath.
-- Current usage includes:
-  - `user(...)` request post-processors for MockMvc
-  - direct testing of authorization logic and controller-level access behavior
+## Notes
 
-### Shared Test Utilities
-- `src/test/java/com/hris/support/TestAuthenticationFactory.java`
-- `src/test/java/com/hris/dashboard/controller/TestAuthenticationFactory.java`
-
-## Test Configuration
-
-- There is no `src/test/resources` directory checked in.
-- There is no `application-test.yml` or `application-test.properties` file checked in.
-- No Maven test profile is defined in `pom.xml`.
-
-## Coverage and Reports
-
-- `pom.xml` does not currently configure JaCoCo.
-- Standard Maven Surefire reports are produced under `target/surefire-reports/` when tests run.
-
-## Assumptions / Needs Review
-
-- `pom.xml` includes Testcontainers modules for PostgreSQL and RabbitMQ, but the current test suite does not reference them. If container-based integration tests exist outside the checked-in source tree, this document does not cover them.
-- There is no Maven wrapper (`mvnw`) checked in, so this documentation only lists `mvn` commands.
+- This document describes the test suite currently checked into the repository. It does not assume the existence of local-only integration tests.
+- Testcontainers artifacts are present as dependencies only. If container-based integration tests are added later, this document should be updated from the source tree rather than inferred from `pom.xml` alone.

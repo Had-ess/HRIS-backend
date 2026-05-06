@@ -5,8 +5,7 @@ import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
-import com.hris.auth.entity.User;
-import com.hris.auth.repository.UserRepository;
+import com.hris.auth.service.UserDisplayNameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,7 @@ public class ApprovalViewService {
 
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final ApprovalStepRepository approvalStepRepository;
-    private final UserRepository userRepository;
+    private final UserDisplayNameService userDisplayNameService;
 
     @Transactional(readOnly = true)
     public List<ApprovalStepResponseDto> getStepsForSubject(String subjectType, UUID subjectId) {
@@ -117,19 +116,12 @@ public class ApprovalViewService {
             return Map.of();
         }
 
-        return userRepository.findAllById(approverIds).stream()
-            .collect(Collectors.toMap(User::getId, this::toDisplayName));
-    }
-
-    private String toDisplayName(User user) {
-        String firstName = user.getFirstName() == null ? "" : user.getFirstName().trim();
-        String lastName = user.getLastName() == null ? "" : user.getLastName().trim();
-        String fullName = (firstName + " " + lastName).trim();
-        if (!fullName.isBlank()) {
-            return fullName;
-        }
-
-        String email = user.getEmail() == null ? "" : user.getEmail().trim();
-        return email.isBlank() ? UNAVAILABLE_APPROVER : email;
+        return userDisplayNameService.resolveDisplayNames(approverIds).entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue() == null || entry.getValue().isBlank()
+                    ? UNAVAILABLE_APPROVER
+                    : entry.getValue()
+            ));
     }
 }

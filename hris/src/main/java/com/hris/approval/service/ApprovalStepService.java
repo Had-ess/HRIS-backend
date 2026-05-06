@@ -11,10 +11,8 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.StepAlreadyDecidedException;
-import com.hris.leave.service.LeaveRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,8 +31,7 @@ public class ApprovalStepService {
     private final ApprovalStepRepository approvalStepRepository;
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final AuditLogService auditLogService;
-    @Lazy
-    private final LeaveRequestService leaveRequestService;
+    private final List<WorkflowCompletionHandler> completionHandlers;
 
     @Transactional(readOnly = true)
     public Page<ApprovalStep> getPendingForApprover(UUID approverId, Pageable pageable) {
@@ -150,9 +147,10 @@ public class ApprovalStepService {
         workflow.setCompletedAt(Instant.now());
         approvalWorkflowRepository.save(workflow);
 
-        if ("LEAVE".equals(workflow.getSubjectType())) {
-            leaveRequestService.handleWorkflowCompletion(workflow.getSubjectId(), status, actorId);
-        }
+        completionHandlers.stream()
+            .filter(handler -> handler.supports(workflow.getSubjectType()))
+            .findFirst()
+            .ifPresent(handler -> handler.handleCompletion(workflow.getSubjectId(), status, actorId));
 
         log.info("Workflow {} completed with status: {}", workflowId, status);
     }

@@ -17,7 +17,6 @@ import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
-import com.hris.common.exception.FileAttachmentValidationException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidWorkflowStateException;
@@ -33,7 +32,7 @@ import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.organisation.service.WorkScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,45 +42,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.core.io.InputStreamResource;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LeaveRequestService {
-
-    private static final long MAX_ATTACHMENT_SIZE_BYTES = 10L * 1024L * 1024L;
-    private static final Set<String> ALLOWED_ATTACHMENT_MIME_TYPES = Set.of(
-        "application/pdf",
-        "image/png",
-        "image/jpeg"
-    );
-    private static final Set<String> ALLOWED_ATTACHMENT_EXTENSIONS = Set.of(
-        "pdf",
-        "png",
-        "jpg",
-        "jpeg"
-    );
-    private static final Map<String, String> ATTACHMENT_MIME_TYPE_BY_EXTENSION = Map.of(
-        "pdf", "application/pdf",
-        "png", "image/png",
-        "jpg", "image/jpeg",
-        "jpeg", "image/jpeg"
-    );
-    private static final byte[] PDF_SIGNATURE = new byte[] {0x25, 0x50, 0x44, 0x46, 0x2D};
-    private static final byte[] PNG_SIGNATURE = new byte[] {
-        (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
-    };
-    private static final byte[] JPEG_SIGNATURE_PREFIX = new byte[] {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
 
     private final LeaveRequestRepository leaveRequestRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
@@ -93,8 +63,8 @@ public class LeaveRequestService {
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final ApprovalRouter approvalRouter;
     private final WorkScheduleService workScheduleService;
-    private final FileStorageService fileStorageService;
-    private final NotificationPublisher notificationPublisher;
+    private final LeaveAttachmentService leaveAttachmentService;
+    private final TransactionalNotificationPublisher notificationPublisher;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
     private final LeaveTypeRepository leaveTypeRepository;
@@ -178,7 +148,7 @@ public class LeaveRequestService {
         approvalWorkflowRepository.save(workflow);
 
         for (ApprovalStep step : steps) {
-            notificationPublisher.publish(buildSubmittedEvent(saved, step, employee));
+            notificationPublisher.publishAfterCommit(buildSubmittedEvent(saved, step, employee));
         }
 
         auditLogService.log(requesterId, AuditAction.CREATE, "leave_request",
@@ -322,13 +292,13 @@ public class LeaveRequestService {
             balance.confirmUsage(request.getWorkingDays());
 
             Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
-            notificationPublisher.publish(buildApprovedEvent(request, employee));
+            notificationPublisher.publishAfterCommit(buildApprovedEvent(request, employee));
         } else {
             request.setStatus(LeaveStatus.REJECTED);
             balance.restoreDays(request.getWorkingDays());
 
             Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
-            notificationPublisher.publish(buildRejectedEvent(request, employee));
+            notificationPublisher.publishAfterCommit(buildRejectedEvent(request, employee));
         }
 
         leaveRequestRepository.save(request);
@@ -356,26 +326,7 @@ public class LeaveRequestService {
                 "Attachments can only be uploaded for leave requests that are pending approval");
         }
 
-        String detectedMimeType = validateAttachment(file);
-        String sanitizedFileName = sanitizeAttachmentFilename(file.getOriginalFilename());
-
-        String storagePath = fileStorageService.store(file, requestId);
-
-        FileAttachment attachment = FileAttachment.builder()
-            .requestId(requestId)
-            .fileName(sanitizedFileName)
-            .mimeType(detectedMimeType)
-            .storagePath(storagePath)
-            .uploadedById(uploaderId)
-            .uploadedAt(Instant.now())
-            .build();
-
-        FileAttachment saved = fileAttachmentRepository.save(attachment);
-
-        auditLogService.log(uploaderId, AuditAction.CREATE, "file_attachment",
-            saved.getId(), null, saved);
-
-        return saved;
+        return leaveAttachmentService.upload(requestId, file, uploaderId);
     }
 
     @Transactional(readOnly = true)
@@ -388,7 +339,7 @@ public class LeaveRequestService {
                 "You are not allowed to access attachments for this leave request");
         }
 
-        return fileAttachmentRepository.findByRequestId(requestId);
+        return leaveAttachmentService.list(requestId);
     }
 
     @Transactional(readOnly = true)
@@ -401,18 +352,7 @@ public class LeaveRequestService {
                 "You are not allowed to access attachments for this leave request");
         }
 
-        FileAttachment attachment = fileAttachmentRepository.findById(attachmentId)
-            .orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
-
-        if (!attachment.getRequestId().equals(requestId)) {
-            throw new EntityNotFoundException("Attachment not found");
-        }
-
-        return new AttachmentDownload(
-            attachment.getFileName(),
-            attachment.getMimeType(),
-            new InputStreamResource(fileStorageService.retrieve(attachment.getStoragePath()))
-        );
+        return leaveAttachmentService.download(requestId, attachmentId);
     }
 
     @Transactional
@@ -433,17 +373,7 @@ public class LeaveRequestService {
                 "Attachments can only be removed for leave requests that are pending approval");
         }
 
-        FileAttachment attachment = fileAttachmentRepository.findById(attachmentId)
-            .orElseThrow(() -> new EntityNotFoundException("Attachment not found"));
-
-        if (!attachment.getRequestId().equals(requestId)) {
-            throw new EntityNotFoundException("Attachment not found");
-        }
-
-        fileAttachmentRepository.delete(attachment);
-        fileStorageService.delete(attachment.getStoragePath());
-        auditLogService.log(requesterId, AuditAction.DELETE, "file_attachment",
-            attachment.getId(), attachment, null);
+        leaveAttachmentService.delete(requestId, attachmentId, requesterId);
     }
 
     private NotificationEvent buildSubmittedEvent(LeaveRequest request,ApprovalStep step,Employee employee) {
@@ -571,83 +501,4 @@ public class LeaveRequestService {
         return startDate.getYear();
     }
 
-    private String validateAttachment(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new FileAttachmentValidationException("Attachment file is required");
-        }
-
-        String sanitizedFilename = sanitizeAttachmentFilename(file.getOriginalFilename());
-        int extensionSeparator = sanitizedFilename.lastIndexOf('.');
-        String extension = extensionSeparator >= 0
-            ? sanitizedFilename.substring(extensionSeparator + 1).toLowerCase()
-            : "";
-
-        if (!ALLOWED_ATTACHMENT_EXTENSIONS.contains(extension)) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
-        }
-
-        String detectedMimeType = detectAttachmentMimeType(file);
-        if (!ALLOWED_ATTACHMENT_MIME_TYPES.contains(detectedMimeType)) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
-        }
-
-        String expectedMimeType = ATTACHMENT_MIME_TYPE_BY_EXTENSION.get(extension);
-        if (!detectedMimeType.equals(expectedMimeType)) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
-        }
-
-        if (file.getSize() > MAX_ATTACHMENT_SIZE_BYTES) {
-            throw new FileAttachmentValidationException(
-                "Attachment exceeds the maximum allowed size of 10 MB");
-        }
-
-        String declaredContentType = file.getContentType();
-        if (declaredContentType != null
-            && !declaredContentType.isBlank()
-            && !detectedMimeType.equals(declaredContentType.toLowerCase())) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
-        }
-
-        return detectedMimeType;
-    }
-
-    private String detectAttachmentMimeType(MultipartFile file) {
-        try (InputStream inputStream = file.getInputStream()) {
-            byte[] header = inputStream.readNBytes(PNG_SIGNATURE.length);
-
-            if (startsWith(header, PDF_SIGNATURE)) {
-                return "application/pdf";
-            }
-            if (startsWith(header, PNG_SIGNATURE)) {
-                return "image/png";
-            }
-            if (startsWith(header, JPEG_SIGNATURE_PREFIX)) {
-                return "image/jpeg";
-            }
-        } catch (IOException e) {
-            throw new FileAttachmentValidationException("Failed to read attachment content");
-        }
-
-        throw new FileAttachmentValidationException(
-            "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
-    }
-
-    private boolean startsWith(byte[] actual, byte[] expectedPrefix) {
-        if (actual.length < expectedPrefix.length) {
-            return false;
-        }
-        return Arrays.equals(Arrays.copyOf(actual, expectedPrefix.length), expectedPrefix);
-    }
-
-    private String sanitizeAttachmentFilename(String originalFilename) {
-        String sanitizedFilename = fileStorageService.sanitizeFilename(originalFilename);
-        if (sanitizedFilename == null || sanitizedFilename.isBlank()) {
-            return "unknown";
-        }
-        return sanitizedFilename;
-    }
 }

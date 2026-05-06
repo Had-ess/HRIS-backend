@@ -5,11 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record ProjectCreateDto(
     @NotBlank String name,
     @NotBlank String code,
     @NotNull ProjectStatus status,
     @NotNull LocalDate startDate,
-    LocalDate endDate
+    LocalDate endDate,
+    UUID projectManagerEmployeeId
 ) {}

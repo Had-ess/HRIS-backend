@@ -1,13 +1,10 @@
 package com.hris.approval.controller;
 
 import com.hris.approval.entity.ApprovalStep;
-import com.hris.approval.entity.ApprovalWorkflow;
 import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
-import com.hris.approval.repository.ApprovalWorkflowRepository;
+import com.hris.approval.service.ApprovalStepQueryService;
 import com.hris.approval.service.ApprovalStepService;
-import com.hris.auth.entity.User;
-import com.hris.auth.repository.UserRepository;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.security.JwtAuthenticationFilter;
@@ -29,7 +26,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,9 +53,7 @@ class ApprovalStepControllerTest {
     @MockBean
     private ApprovalStepService approvalStepService;
     @MockBean
-    private ApprovalWorkflowRepository approvalWorkflowRepository;
-    @MockBean
-    private UserRepository userRepository;
+    private ApprovalStepQueryService approvalStepQueryService;
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean
@@ -102,19 +96,25 @@ class ApprovalStepControllerTest {
 
         when(approvalStepService.getPendingForApprover(eq(USER_ID), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(step)));
-        when(approvalWorkflowRepository.findById(WORKFLOW_ID))
-            .thenReturn(Optional.of(ApprovalWorkflow.builder()
-                .id(WORKFLOW_ID)
-                .subjectType("LEAVE")
-                .subjectId(SUBJECT_ID)
-                .build()));
-        when(userRepository.findById(USER_ID))
-            .thenReturn(Optional.of(User.builder()
-                .id(USER_ID)
-                .firstName("Amine")
-                .lastName("Supervisor")
-                .email("amine@example.com")
-                .build()));
+        when(approvalStepQueryService.toPendingPage(any(PageImpl.class)))
+            .thenReturn(new PageImpl<>(List.of(new com.hris.approval.dto.ApprovalStepResponseDto(
+                STEP_ID,
+                WORKFLOW_ID,
+                "LEAVE",
+                SUBJECT_ID,
+                SUBJECT_ID.toString(),
+                "Requester Name",
+                "Engineering",
+                null,
+                USER_ID,
+                "Amine Supervisor",
+                1,
+                StepStatus.PENDING,
+                ApprovalContext.PROJECT,
+                "{\"role\":\"PROJECT_SUPERVISOR\"}",
+                null,
+                null
+            ))));
 
         mockMvc.perform(get("/api/approval-steps/pending").with(user(USER_ID.toString()).roles("EMPLOYEE")))
             .andExpect(status().isOk())
