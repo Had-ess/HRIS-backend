@@ -1,5 +1,6 @@
 package com.hris.approval.entity;
 
+import com.hris.analytics.enums.ApprovalSourceType;
 import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
 import jakarta.persistence.*;
@@ -39,6 +40,13 @@ public class ApprovalStep {
     @Column(nullable = false, length = 50)
     private ApprovalContext context;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source_type", length = 50)
+    private ApprovalSourceType sourceType;
+
+    @Column(name = "approver_level")
+    private Integer approverLevel;
+
     @Column(name = "routing_snapshot", nullable = false, columnDefinition = "TEXT")
     private String routingSnapshot;
 
@@ -55,6 +63,10 @@ public class ApprovalStep {
         return status == StepStatus.PENDING;
     }
 
+    public boolean isDecidable() {
+        return status == StepStatus.PENDING;
+    }
+
     public void approve(String comment) {
         this.status = StepStatus.APPROVED;
         this.comment = comment;
@@ -63,6 +75,12 @@ public class ApprovalStep {
 
     public void reject(String comment) {
         this.status = StepStatus.REJECTED;
+        this.comment = comment;
+        this.decidedAt = Instant.now();
+    }
+
+    public void skip(String comment) {
+        this.status = StepStatus.SKIPPED;
         this.comment = comment;
         this.decidedAt = Instant.now();
     }

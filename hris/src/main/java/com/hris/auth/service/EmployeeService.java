@@ -1,6 +1,7 @@
 package com.hris.auth.service;
 
 import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
@@ -18,9 +19,11 @@ import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,16 +47,34 @@ public class EmployeeService {
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final AdminUserService adminUserService;
     private final AuditLogService auditLogService;
+    private final AnalyticsEventPublisher analyticsEventPublisher;
+    private final EmployeeHistoryService employeeHistoryService;
+    private final AccessScopeService accessScopeService;
 
     @Transactional(readOnly = true)
-    public Page<EmployeeResponseDto> getAll(Pageable pageable) {
-        return employeeRepository.findAll(pageable).map(employeeMapper::toDto);
+    public Page<EmployeeResponseDto> getAll(UUID requesterId, Pageable pageable) {
+        EmployeeReadScope scope = resolveReadScope(requesterId);
+        return switch (scope.type()) {
+            case GLOBAL -> employeeRepository.findAll(pageable).map(employeeMapper::toDto);
+            case DEPARTMENT -> {
+                if (scope.departmentId() == null) {
+                    yield Page.empty(pageable);
+                }
+                yield employeeRepository.findByDepartmentId(scope.departmentId(), pageable).map(employeeMapper::toDto);
+            }
+        };
     }
 
     @Transactional(readOnly = true)
-    public EmployeeResponseDto getById(UUID id) {
+    public EmployeeResponseDto getById(UUID id, UUID requesterId) {
+        EmployeeReadScope scope = resolveReadScope(requesterId);
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        if (scope.type() == EmployeeReadScopeType.DEPARTMENT
+            && scope.departmentId() != null
+            && !scope.departmentId().equals(employee.getDepartmentId())) {
+            throw new AccessDeniedException("You are not allowed to access this employee");
+        }
         return employeeMapper.toDto(employee);
     }
 
@@ -102,6 +123,24 @@ public class EmployeeService {
         }
 
         Employee saved = employeeRepository.save(employee);
+        if (previous.getDepartmentId() != null && !previous.getDepartmentId().equals(saved.getDepartmentId())) {
+            employeeHistoryService.recordDepartmentTransfer(previous, saved, actorId, LocalDate.now());
+            analyticsEventPublisher.publishEmployeeTransferEvent(previous, saved);
+        }
+        if (previous.getStatus() != saved.getStatus()) {
+            LocalDate effectiveDate = saved.getStatus() == EmployeeStatus.TERMINATED
+                ? (saved.getTerminationDate() != null ? saved.getTerminationDate() : LocalDate.now())
+                : LocalDate.now();
+            String reason = saved.getStatus() == EmployeeStatus.TERMINATED ? "TERMINATION" : "STATUS_UPDATE";
+            employeeHistoryService.recordStatusChange(previous, saved, actorId, effectiveDate, reason);
+        }
+        if (previous.getStatus() != EmployeeStatus.TERMINATED && saved.getStatus() == EmployeeStatus.TERMINATED) {
+            if (saved.getTerminationDate() == null) {
+                saved.setTerminationDate(LocalDate.now());
+                saved = employeeRepository.save(saved);
+            }
+            analyticsEventPublisher.publishEmployeeTerminationEvent(saved);
+        }
 
         auditLogService.log(actorId, AuditAction.UPDATE, "employee",
             saved.getId(), previous, saved);
@@ -178,5 +217,31 @@ public class EmployeeService {
         if (employeeRepository.findById(supervisorEmployeeId).isEmpty()) {
             throw new EntityNotFoundException("Supervisor employee not found");
         }
+    }
+
+    private EmployeeReadScope resolveReadScope(UUID requesterId) {
+        if (accessScopeService.hasGlobalBusinessRead(requesterId)) {
+            return EmployeeReadScope.global();
+        }
+
+        Employee requester = accessScopeService.findEmployee(requesterId).orElse(null);
+        return accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requester)
+            .map(EmployeeReadScope::department)
+            .orElseThrow(() -> new AccessDeniedException("You are not allowed to access employees"));
+    }
+
+    private record EmployeeReadScope(EmployeeReadScopeType type, UUID departmentId) {
+        static EmployeeReadScope global() {
+            return new EmployeeReadScope(EmployeeReadScopeType.GLOBAL, null);
+        }
+
+        static EmployeeReadScope department(UUID departmentId) {
+            return new EmployeeReadScope(EmployeeReadScopeType.DEPARTMENT, departmentId);
+        }
+    }
+
+    private enum EmployeeReadScopeType {
+        GLOBAL,
+        DEPARTMENT
     }
 }

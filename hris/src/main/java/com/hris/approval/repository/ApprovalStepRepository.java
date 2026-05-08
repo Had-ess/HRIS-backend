@@ -29,6 +29,8 @@ public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID
 
     List<ApprovalStep> findByApproverIdAndStatus(UUID approverId, StepStatus status);
 
+    List<ApprovalStep> findByStatus(StepStatus status);
+
     Page<ApprovalStep> findByApproverIdAndStatusOrderByStepOrderAsc(
         UUID approverId, StepStatus status, Pageable pageable);
 

@@ -1,6 +1,8 @@
 package com.hris.approval.service;
 
+import com.hris.access.service.AccessResolutionService;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
 import com.hris.approval.enums.StepStatus;
@@ -10,6 +12,7 @@ import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.StepAlreadyDecidedException;
+import com.hris.settings.validation.entity.ValidationMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
@@ -33,12 +38,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("ApprovalStepService Unit Tests")
 class ApprovalStepServiceTest {
 
     @Mock private ApprovalStepRepository approvalStepRepository;
     @Mock private ApprovalWorkflowRepository approvalWorkflowRepository;
     @Mock private AuditLogService auditLogService;
+    @Mock private AnalyticsEventPublisher analyticsEventPublisher;
+    @Mock private AccessResolutionService accessResolutionService;
     @Mock private WorkflowCompletionHandler workflowCompletionHandler;
 
     private ApprovalStepService approvalStepService;
@@ -58,8 +66,11 @@ class ApprovalStepServiceTest {
             approvalStepRepository,
             approvalWorkflowRepository,
             auditLogService,
+            analyticsEventPublisher,
+            accessResolutionService,
             List.of(workflowCompletionHandler)
         );
+        when(accessResolutionService.hasPermissionName(approverId, "LEAVE_REQUEST_APPROVE")).thenReturn(true);
     }
 
     @Nested
@@ -78,12 +89,16 @@ class ApprovalStepServiceTest {
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ALL_REQUIRED)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
             when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
             when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
-            when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(1L);
+            when(approvalStepRepository.findByWorkflowIdOrderByStepOrder(workflowId)).thenReturn(List.of(
+                step,
+                ApprovalStep.builder().id(UUID.randomUUID()).workflowId(workflowId).approverId(UUID.randomUUID()).status(StepStatus.PENDING).build()
+            ));
 
             approvalStepService.approve(stepId, approverId, "Looks good");
 
@@ -112,22 +127,24 @@ class ApprovalStepServiceTest {
                 .subjectType("LEAVE")
                 .subjectId(subjectId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ONE_REQUIRED)
+                .requiredApprovals(1)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
             when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
             when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
-            when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(0L);
-            when(approvalStepRepository.countByWorkflowIdAndStatus(workflowId, StepStatus.REJECTED)).thenReturn(0L);
+            when(approvalStepRepository.findByWorkflowIdOrderByStepOrder(workflowId)).thenReturn(List.of(step));
+            when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING)).thenReturn(List.of());
             when(workflowCompletionHandler.supports("LEAVE")).thenReturn(true);
 
             approvalStepService.approve(stepId, approverId, "Approved");
 
-            assertThat(workflow.getStatus()).isEqualTo(WorkflowStatus.COMPLETED);
+            assertThat(workflow.getStatus()).isEqualTo(WorkflowStatus.APPROVED);
             assertThat(workflow.getCompletedAt()).isNotNull();
 
             verify(approvalWorkflowRepository).save(workflow);
-            verify(workflowCompletionHandler).handleCompletion(subjectId, WorkflowStatus.COMPLETED, approverId);
+            verify(workflowCompletionHandler).handleCompletion(subjectId, WorkflowStatus.APPROVED, approverId);
         }
 
         @Test
@@ -144,6 +161,7 @@ class ApprovalStepServiceTest {
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ALL_REQUIRED)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
@@ -167,6 +185,7 @@ class ApprovalStepServiceTest {
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ALL_REQUIRED)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
@@ -197,7 +216,7 @@ class ApprovalStepServiceTest {
                 .build();
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
-                .status(WorkflowStatus.REJECTED)
+                .status(WorkflowStatus.CANCELLED)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
@@ -229,6 +248,7 @@ class ApprovalStepServiceTest {
                 .subjectType("LEAVE")
                 .subjectId(subjectId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ALL_REQUIRED)
                 .build();
             ApprovalStep siblingStep = ApprovalStep.builder()
                 .id(UUID.randomUUID())
@@ -240,6 +260,7 @@ class ApprovalStepServiceTest {
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
             when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));
             when(approvalWorkflowRepository.findByIdForUpdate(workflowId)).thenReturn(Optional.of(workflow));
+            when(approvalStepRepository.findByWorkflowIdOrderByStepOrder(workflowId)).thenReturn(List.of(step, siblingStep));
             when(approvalStepRepository.findByWorkflowIdAndStatus(workflowId, StepStatus.PENDING))
                 .thenReturn(List.of(siblingStep));
             when(workflowCompletionHandler.supports("LEAVE")).thenReturn(true);
@@ -248,7 +269,7 @@ class ApprovalStepServiceTest {
 
             assertThat(step.getStatus()).isEqualTo(StepStatus.REJECTED);
             assertThat(step.getComment()).isEqualTo("Not justified");
-            assertThat(siblingStep.getStatus()).isEqualTo(StepStatus.REJECTED);
+            assertThat(siblingStep.getStatus()).isEqualTo(StepStatus.SKIPPED);
             assertThat(siblingStep.getComment()).isEqualTo("Auto-closed due to workflow rejection");
             assertThat(workflow.getStatus()).isEqualTo(WorkflowStatus.REJECTED);
             assertThat(workflow.getCompletedAt()).isNotNull();
@@ -271,6 +292,7 @@ class ApprovalStepServiceTest {
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ALL_REQUIRED)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
@@ -292,7 +314,7 @@ class ApprovalStepServiceTest {
                 .build();
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
-                .status(WorkflowStatus.REJECTED)
+                .status(WorkflowStatus.CANCELLED)
                 .build();
 
             when(approvalStepRepository.findByIdForUpdate(stepId)).thenReturn(Optional.of(step));
@@ -316,6 +338,7 @@ class ApprovalStepServiceTest {
             ApprovalWorkflow workflow = ApprovalWorkflow.builder()
                 .id(workflowId)
                 .status(WorkflowStatus.IN_PROGRESS)
+                .validationMode(ValidationMode.ALL_REQUIRED)
                 .build();
 
             when(approvalStepRepository.findById(stepId)).thenReturn(Optional.of(step));

@@ -1,6 +1,7 @@
 package com.hris.leave.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
@@ -8,11 +9,9 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.enums.WorkflowStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
-import com.hris.approval.service.ApprovalRouter;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
@@ -29,7 +28,9 @@ import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.service.TransactionalNotificationPublisher;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.service.WorkScheduleService;
+import com.hris.security.service.AccessScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,16 +66,18 @@ class LeaveRequestServiceTest {
     @Mock private LeaveBalanceRepository leaveBalanceRepository;
     @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
-    @Mock private UserRoleRepository userRoleRepository;
     @Mock private ApprovalStepRepository approvalStepRepository;
     @Mock private ApprovalWorkflowRepository approvalWorkflowRepository;
-    @Mock private ApprovalRouter approvalRouter;
     @Mock private WorkScheduleService workScheduleService;
     @Mock private LeaveAttachmentService leaveAttachmentService;
+    @Mock private LeaveApprovalWorkflowService leaveApprovalWorkflowService;
     @Mock private TransactionalNotificationPublisher notificationPublisher;
+    @Mock private AnalyticsEventPublisher analyticsEventPublisher;
     @Mock private AuditLogService auditLogService;
     @Mock private ObjectMapper objectMapper;
     @Mock private LeaveTypeRepository leaveTypeRepository;
+    @Mock private ProjectAssignmentRepository projectAssignmentRepository;
+    @Mock private AccessScopeService accessScopeService;
 
     @InjectMocks
     private LeaveRequestService leaveRequestService;
@@ -138,8 +141,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             UUID savedRequestId = UUID.randomUUID();
-            UUID workflowId = UUID.randomUUID();
-
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(5);
@@ -150,18 +151,22 @@ class LeaveRequestServiceTest {
                 request.setId(savedRequestId);
                 return request;
             });
-            when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class))).thenAnswer(inv -> {
-                ApprovalWorkflow workflow = inv.getArgument(0);
-                workflow.setId(workflowId);
-                return workflow;
-            });
-            when(approvalRouter.resolveSteps(eq(employeeId), eq(workflowId), any(), any()))
-                .thenReturn(List.of(ApprovalStep.builder()
-                    .id(UUID.randomUUID())
-                    .workflowId(workflowId)
-                    .approverId(UUID.randomUUID())
-                    .status(StepStatus.PENDING)
-                    .build()));
+            ApprovalWorkflow workflow = ApprovalWorkflow.builder()
+                .id(UUID.randomUUID())
+                .subjectType("LEAVE")
+                .subjectId(savedRequestId)
+                .status(WorkflowStatus.IN_PROGRESS)
+                .build();
+            when(leaveApprovalWorkflowService.instantiate(any(), eq(employee), eq(leaveType)))
+                .thenReturn(new LeaveApprovalWorkflowService.InstantiatedWorkflow(
+                    workflow,
+                    List.of(ApprovalStep.builder()
+                        .id(UUID.randomUUID())
+                        .workflowId(workflow.getId())
+                        .approverId(UUID.randomUUID())
+                        .status(StepStatus.PENDING)
+                        .build())
+                ));
             when(userRepository.findById(any(UUID.class))).thenAnswer(invocation -> {
                 UUID userId = invocation.getArgument(0);
                 if (requesterId.equals(userId)) {
@@ -205,8 +210,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             UUID savedRequestId = UUID.randomUUID();
-            UUID workflowId = UUID.randomUUID();
-
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(5);
@@ -217,18 +220,22 @@ class LeaveRequestServiceTest {
                 request.setId(savedRequestId);
                 return request;
             });
-            when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class))).thenAnswer(inv -> {
-                ApprovalWorkflow workflow = inv.getArgument(0);
-                workflow.setId(workflowId);
-                return workflow;
-            });
-            when(approvalRouter.resolveSteps(eq(employeeId), eq(workflowId), any(), any()))
-                .thenReturn(List.of(ApprovalStep.builder()
-                    .id(UUID.randomUUID())
-                    .workflowId(workflowId)
-                    .approverId(UUID.randomUUID())
-                    .status(StepStatus.PENDING)
-                    .build()));
+            ApprovalWorkflow workflow = ApprovalWorkflow.builder()
+                .id(UUID.randomUUID())
+                .subjectType("LEAVE")
+                .subjectId(savedRequestId)
+                .status(WorkflowStatus.IN_PROGRESS)
+                .build();
+            when(leaveApprovalWorkflowService.instantiate(any(), eq(employee), eq(leaveType)))
+                .thenReturn(new LeaveApprovalWorkflowService.InstantiatedWorkflow(
+                    workflow,
+                    List.of(ApprovalStep.builder()
+                        .id(UUID.randomUUID())
+                        .workflowId(workflow.getId())
+                        .approverId(UUID.randomUUID())
+                        .status(StepStatus.PENDING)
+                        .build())
+                ));
             when(userRepository.findById(any(UUID.class))).thenAnswer(invocation -> {
                 UUID userId = invocation.getArgument(0);
                 if (requesterId.equals(userId)) {
@@ -348,8 +355,6 @@ class LeaveRequestServiceTest {
                 .pendingDays(0)
                 .build();
 
-            UUID workflowId = UUID.randomUUID();
-
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(3);
@@ -360,13 +365,8 @@ class LeaveRequestServiceTest {
                 request.setId(UUID.randomUUID());
                 return request;
             });
-            when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class))).thenAnswer(inv -> {
-                ApprovalWorkflow workflow = inv.getArgument(0);
-                workflow.setId(workflowId);
-                return workflow;
-            });
-            when(approvalRouter.resolveSteps(eq(employeeId), eq(workflowId), any(), any()))
-                .thenReturn(List.of());
+            when(leaveApprovalWorkflowService.instantiate(any(), eq(employee), eq(leaveType)))
+                .thenThrow(new InvalidWorkflowStateException("No approvers could be resolved for this leave request"));
 
             assertThatThrownBy(() -> leaveRequestService.create(dto, requesterId))
                 .isInstanceOf(InvalidWorkflowStateException.class)
@@ -449,7 +449,7 @@ class LeaveRequestServiceTest {
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.CANCELLED);
             assertThat(balance.getPendingDays()).isEqualTo(0);
-            assertThat(pendingStep.getStatus()).isEqualTo(StepStatus.REJECTED);
+            assertThat(pendingStep.getStatus()).isEqualTo(StepStatus.SKIPPED);
             assertThat(pendingStep.getComment()).isEqualTo("Auto-closed due to cancellation");
             assertThat(pendingStep.getDecidedAt()).isNotNull();
 
@@ -542,7 +542,7 @@ class LeaveRequestServiceTest {
             when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
             when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
-            leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.COMPLETED);
+            leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.APPROVED);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.APPROVED);
             assertThat(balance.getUsedDays()).isEqualTo(5);
@@ -610,7 +610,7 @@ class LeaveRequestServiceTest {
 
             when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
-            leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.COMPLETED);
+            leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.APPROVED);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.CANCELLED);
             verify(leaveBalanceRepository, never()).findByEmployeeIdAndLeaveTypeIdAndYear(any(), any(), anyInt());
@@ -633,7 +633,9 @@ class LeaveRequestServiceTest {
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
+            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
+            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
+            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
 
             LeaveRequest result = leaveRequestService.getById(requestId, requesterId);
 
@@ -660,7 +662,9 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
+            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
+            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
+            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
 
             assertThatThrownBy(() -> leaveRequestService.getById(requestId, requesterId))
@@ -680,7 +684,9 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findEffectiveByUserId(eq(approverUserId), any(Instant.class))).thenReturn(List.of());
+            when(accessScopeService.hasGlobalBusinessRead(approverUserId)).thenReturn(false);
+            when(accessScopeService.findEmployee(approverUserId)).thenReturn(Optional.empty());
+            when(accessScopeService.resolveDepartmentManagerDepartmentId(eq(approverUserId), eq(null))).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(approverUserId)).thenReturn(Optional.empty());
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
@@ -793,7 +799,9 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
+            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
+            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
+            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.empty());
@@ -816,7 +824,9 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
+            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
+            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
+            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
@@ -863,7 +873,9 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(userRoleRepository.findEffectiveByUserId(eq(requesterId), any(Instant.class))).thenReturn(List.of());
+            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
+            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
+            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()

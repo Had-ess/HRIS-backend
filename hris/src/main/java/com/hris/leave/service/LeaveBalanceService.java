@@ -12,8 +12,10 @@ import com.hris.leave.entity.LeavePolicy;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,7 @@ public class LeaveBalanceService {
     private final EmployeeRepository employeeRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final AuditLogService auditLogService;
+    private final AccessScopeService accessScopeService;
 
     @Transactional(readOnly = true)
     public List<LeaveBalanceDto> getMyBalances(UUID userId) {
@@ -47,9 +50,27 @@ public class LeaveBalanceService {
     }
 
     @Transactional(readOnly = true)
-    public List<LeaveBalanceDto> getForEmployee(UUID employeeId) {
+    public List<LeaveBalanceDto> getForEmployee(UUID employeeId, UUID requesterId) {
+        Employee targetEmployee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        assertLeaveBalanceVisibility(targetEmployee, requesterId);
         return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(
             employeeId, LocalDate.now().getYear()));
+    }
+
+    private void assertLeaveBalanceVisibility(Employee targetEmployee, UUID requesterId) {
+        if (accessScopeService.hasGlobalBusinessRead(requesterId)) {
+            return;
+        }
+
+        Employee requesterEmployee = accessScopeService.findEmployee(requesterId).orElse(null);
+        UUID managedDepartmentId = accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee)
+            .orElse(null);
+        if (managedDepartmentId != null && managedDepartmentId.equals(targetEmployee.getDepartmentId())) {
+            return;
+        }
+
+        throw new AccessDeniedException("You are not allowed to view leave balances for this employee");
     }
 
     @Scheduled(cron = "0 0 3 1 1 *") // January 1st at 3 AM

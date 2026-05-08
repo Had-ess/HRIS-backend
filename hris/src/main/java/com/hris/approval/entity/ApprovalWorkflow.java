@@ -1,6 +1,7 @@
 package com.hris.approval.entity;
 
 import com.hris.approval.enums.WorkflowStatus;
+import com.hris.settings.validation.entity.ValidationMode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,19 @@ public class ApprovalWorkflow {
     @Column(nullable = false, length = 50)
     private WorkflowStatus status;
 
+    @Column(name = "workflow_code", length = 80)
+    private String workflowCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "validation_mode", length = 50)
+    private ValidationMode validationMode;
+
+    @Column(name = "required_approvals")
+    private Integer requiredApprovals;
+
+    @Column(name = "routing_snapshot", columnDefinition = "TEXT")
+    private String routingSnapshot;
+
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
@@ -42,7 +56,9 @@ public class ApprovalWorkflow {
     private Integer version;
 
     public boolean isComplete() {
-        return status == WorkflowStatus.COMPLETED || status == WorkflowStatus.REJECTED;
+        return status == WorkflowStatus.APPROVED
+            || status == WorkflowStatus.REJECTED
+            || status == WorkflowStatus.CANCELLED;
     }
 
     @Override

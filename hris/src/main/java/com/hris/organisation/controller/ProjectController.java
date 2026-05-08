@@ -45,7 +45,7 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<ProjectResponseDto>> create(
             @Valid @RequestBody ProjectCreateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "PORTFOLIO_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(projectService.create(dto, actorId)));
@@ -64,7 +64,7 @@ public class ProjectController {
             @PathVariable UUID id,
             @Valid @RequestBody ProjectCreateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "PORTFOLIO_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(projectService.update(id, dto, actorId)));
     }
@@ -73,7 +73,7 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<Void>> deactivate(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "PORTFOLIO_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         projectService.deactivate(id, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
@@ -100,7 +100,7 @@ public class ProjectController {
             @PathVariable UUID id,
             @Valid @RequestBody ProjectTeamCreateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "TEAM", "MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(projectService.createTeam(id, dto, actorId)));
@@ -111,7 +111,7 @@ public class ProjectController {
             @PathVariable UUID id,
             @Valid @RequestBody ProjectAssignmentCreateDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "ASSIGNMENT_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(projectService.assignEmployee(id, dto, actorId)));
@@ -122,7 +122,7 @@ public class ProjectController {
             @PathVariable UUID id,
             @PathVariable UUID asgId,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "ASSIGNMENT_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         projectService.removeAssignment(id, asgId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
@@ -141,7 +141,7 @@ public class ProjectController {
             @PathVariable UUID id,
             @Valid @RequestBody ProjectDepartmentAssignDto dto,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "PORTFOLIO_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(projectService.assignDepartment(id, dto, actorId)));
@@ -152,7 +152,7 @@ public class ProjectController {
             @PathVariable UUID id,
             @PathVariable UUID departmentId,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "PROJECT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "PORTFOLIO_MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         projectService.removeDepartment(id, departmentId, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));

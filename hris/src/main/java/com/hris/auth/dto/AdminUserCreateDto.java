@@ -31,7 +31,7 @@ public record AdminUserCreateDto(
 
     Boolean temporaryPassword,
 
-    @NotEmpty(message = "At least one role must be assigned")
-    List<UUID> roleIds
+    @NotEmpty(message = "At least one access profile must be assigned")
+    List<UUID> profileIds
 ) {
 }

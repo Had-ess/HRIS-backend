@@ -164,19 +164,17 @@ public class DepartmentService {
     }
 
     private DepartmentReadScope resolveReadScope(UUID userId) {
-        var effectiveRoles = accessScopeService.getEffectiveRoles(userId);
-
-        if (accessScopeService.hasAdministrationOrHrVisibility(effectiveRoles)) {
+        if (accessScopeService.hasGlobalBusinessRead(userId)) {
             return DepartmentReadScope.all();
         }
 
-        if (!accessScopeService.hasAnyRole(effectiveRoles, "DEPT_MANAGER")) {
+        if (!accessScopeService.hasPermissionName(userId, "DEPARTMENT_READ")) {
             return DepartmentReadScope.all();
         }
 
         return DepartmentReadScope.department(
             accessScopeService.resolveDepartmentManagerDepartmentId(
-                effectiveRoles,
+                userId,
                 accessScopeService.findEmployee(userId).orElse(null)
             ).orElse(null)
         );

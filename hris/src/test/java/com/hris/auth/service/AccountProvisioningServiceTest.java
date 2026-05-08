@@ -1,10 +1,11 @@
 package com.hris.auth.service;
 
 import com.hris.analytics.service.AuditLogService;
+import com.hris.access.entity.AccessProfile;
+import com.hris.access.repository.AccessProfileRepository;
+import com.hris.access.service.UserAccessAssignmentService;
 import com.hris.auth.dto.AccountProvisioningRequest;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
-import com.hris.auth.repository.RoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.KeycloakProvisioningException;
 import org.junit.jupiter.api.DisplayName;
@@ -30,8 +31,8 @@ import static org.mockito.Mockito.when;
 class AccountProvisioningServiceTest {
 
     @Mock private UserRepository userRepository;
-    @Mock private RoleRepository roleRepository;
-    @Mock private UserRoleAssignmentService userRoleAssignmentService;
+    @Mock private AccessProfileRepository accessProfileRepository;
+    @Mock private UserAccessAssignmentService userAccessAssignmentService;
     @Mock private KeycloakAdminClient keycloakAdminClient;
     @Mock private AuditLogService auditLogService;
 
@@ -40,7 +41,7 @@ class AccountProvisioningServiceTest {
     @Test
     @DisplayName("propagates Keycloak provisioning conflict without wrapping it")
     void propagatesKeycloakProvisioningConflictWithoutWrappingIt() {
-        UUID roleId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
 
         AccountProvisioningRequest request = new AccountProvisioningRequest(
@@ -50,13 +51,12 @@ class AccountProvisioningServiceTest {
             "User",
             "Temp123!",
             false,
-            List.of(roleId)
+            List.of(profileId)
         );
-
-        Role role = Role.builder()
-            .id(roleId)
-            .code("EMPLOYEE")
-            .name("Employee")
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("SELF_SERVICE")
+            .displayKey("profile.selfService")
             .isActive(true)
             .build();
 
@@ -70,7 +70,7 @@ class AccountProvisioningServiceTest {
         );
 
         when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
-        when(roleRepository.findAllById(List.of(roleId))).thenReturn(List.of(role));
+        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
         when(keycloakAdminClient.createUser(any())).thenThrow(exception);
 
         assertThatThrownBy(() -> accountProvisioningService.provision(request, actorId))
@@ -83,7 +83,7 @@ class AccountProvisioningServiceTest {
     @Test
     @DisplayName("deletes created Keycloak user when local user save fails")
     void deletesCreatedKeycloakUserWhenLocalUserSaveFails() {
-        UUID roleId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
 
         AccountProvisioningRequest request = new AccountProvisioningRequest(
@@ -93,18 +93,17 @@ class AccountProvisioningServiceTest {
             "User",
             "Temp123!",
             false,
-            List.of(roleId)
+            List.of(profileId)
         );
-
-        Role role = Role.builder()
-            .id(roleId)
-            .code("EMPLOYEE")
-            .name("Employee")
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("SELF_SERVICE")
+            .displayKey("profile.selfService")
             .isActive(true)
             .build();
 
         when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
-        when(roleRepository.findAllById(List.of(roleId))).thenReturn(List.of(role));
+        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
         when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-123");
         when(userRepository.save(any(User.class))).thenThrow(new IllegalStateException("Local save failed"));
 

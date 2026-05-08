@@ -29,7 +29,7 @@ public class DepartmentController {
     public ResponseEntity<ApiResponse<DepartmentDto>> getById(
             @PathVariable UUID id,
             Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ", "DEPT_MANAGER", "HR_ADMIN", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.getById(id, userId)));
     }
@@ -38,7 +38,7 @@ public class DepartmentController {
     public ResponseEntity<ApiResponse<PageResponse<DepartmentDto>>> getAll(
             Pageable pageable,
             Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ", "DEPT_MANAGER", "HR_ADMIN", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(
             PageResponse.of(departmentService.getAll(userId, pageable))));
@@ -47,7 +47,7 @@ public class DepartmentController {
     @PostMapping
     public ResponseEntity<ApiResponse<DepartmentDto>> create(
             @Valid @RequestBody DepartmentCreateDto dto, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "CREATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(departmentService.create(dto, userId)));
@@ -58,14 +58,14 @@ public class DepartmentController {
             @PathVariable UUID id,
             @Valid @RequestBody DepartmentCreateDto dto,
             Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "UPDATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.update(id, dto, userId)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "DELETE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         departmentService.delete(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
@@ -73,7 +73,7 @@ public class DepartmentController {
 
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<ApiResponse<DepartmentDto>> deactivate(@PathVariable UUID id, Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "DEACTIVATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.deactivate(id, userId)));
     }

@@ -176,7 +176,7 @@ class AdminRequestControllerTest {
         );
 
         doNothing().when(permissionAuthorizationService)
-            .authorize(any(), eq("ADMIN_REQUEST"), eq("PROCESS"), eq("HR_ADMIN"), eq("ADMINISTRATION"));
+            .authorize(any(), eq("ADMIN_REQUEST"), eq("PROCESS"));
         when(adminRequestService.getIncoming(any()))
             .thenReturn(new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1));
         when(adminRequestQueryService.toDtoPage(any(PageImpl.class)))
@@ -189,7 +189,7 @@ class AdminRequestControllerTest {
             .andExpect(jsonPath("$.data.content[0].requesterName").value("Jane Requester"));
 
         verify(permissionAuthorizationService)
-            .authorize(any(), eq("ADMIN_REQUEST"), eq("PROCESS"), eq("HR_ADMIN"), eq("ADMINISTRATION"));
+            .authorize(any(), eq("ADMIN_REQUEST"), eq("PROCESS"));
     }
 
     @TestConfiguration

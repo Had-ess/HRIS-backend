@@ -15,6 +15,7 @@ import com.hris.leave.service.LeaveTypeService;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.leave.service.LeaveRequestQueryService;
 import com.hris.security.JwtAuthenticationFilter;
+import com.hris.security.PermissionAuthorizationService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,6 +77,8 @@ class LeaveRequestControllerTest {
 
     @MockBean
     private ApprovalViewService approvalViewService;
+    @MockBean
+    private PermissionAuthorizationService permissionAuthorizationService;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -137,7 +140,7 @@ class LeaveRequestControllerTest {
             null,
             null
         )));
-        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "ANNUAL", "Annual Leave", true, false, true);
+        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "ANNUAL", "Annual Leave", true, false, true, null, null, null);
 
         when(leaveRequestService.getById(leaveId, USER_ID)).thenReturn(request);
         when(leaveTypeService.getDtoById(leaveTypeId)).thenReturn(leaveTypeDto);
@@ -185,7 +188,7 @@ class LeaveRequestControllerTest {
             true,
             List.of()
         );
-        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "SICK", "Sick Leave", true, true, true);
+        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "SICK", "Sick Leave", true, true, true, null, null, null);
         var requestPage = new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1);
 
         when(leaveRequestService.getMyRequests(eq(USER_ID), eq(null), any()))

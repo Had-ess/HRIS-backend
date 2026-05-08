@@ -10,6 +10,6 @@ public record AccountProvisioningRequest(
     String lastName,
     String password,
     boolean temporaryPassword,
-    List<UUID> roleIds
+    List<UUID> profileIds
 ) {
 }

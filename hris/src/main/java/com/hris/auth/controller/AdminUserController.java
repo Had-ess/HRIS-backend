@@ -32,7 +32,7 @@ public class AdminUserController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<AdminUserResponseDto>>> getAll(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "USER", "READ", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "USER", "READ");
         return ResponseEntity.ok(ApiResponse.ok(adminUserService.getAll()));
     }
 
@@ -41,7 +41,7 @@ public class AdminUserController {
         @Valid @RequestBody AdminUserCreateDto dto,
         Authentication authentication
     ) {
-        permissionAuthorizationService.authorize(authentication, "USER", "CREATE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "USER", "CREATE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(adminUserService.create(dto, actorId)));
@@ -52,7 +52,7 @@ public class AdminUserController {
         @PathVariable UUID id,
         Authentication authentication
     ) {
-        permissionAuthorizationService.authorize(authentication, "USER", "DELETE", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "USER", "DELETE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         adminUserService.delete(id, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));

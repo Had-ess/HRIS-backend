@@ -1,6 +1,7 @@
 package com.hris.auth.service;
 
 import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.AccountProvisioningRequest;
 import com.hris.auth.dto.EmployeeCreateDto;
@@ -26,6 +27,8 @@ public class EmployeeOnboardingService {
     private final AccountProvisioningService accountProvisioningService;
     private final EmployeeOnboardingEmailService employeeOnboardingEmailService;
     private final AuditLogService auditLogService;
+    private final AnalyticsEventPublisher analyticsEventPublisher;
+    private final EmployeeHistoryService employeeHistoryService;
 
     @Transactional
     public EmployeeResponseDto onboard(EmployeeCreateDto dto, UUID actorId) {
@@ -44,7 +47,7 @@ public class EmployeeOnboardingService {
             dto.lastName(),
             dto.password(),
             dto.temporaryPassword() != null && dto.temporaryPassword(),
-            dto.roleIds()
+            dto.profileIds()
         ), actorId);
 
         try {
@@ -60,7 +63,9 @@ public class EmployeeOnboardingService {
                 .workScheduleId(dto.workScheduleId())
                 .build());
 
+            employeeHistoryService.recordHire(saved, actorId);
             employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
+            analyticsEventPublisher.publishEmployeeHireEvent(saved);
             auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
             employeeOnboardingEmailService.sendCredentials(
                 dto.email().trim(),

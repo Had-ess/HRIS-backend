@@ -10,6 +10,7 @@ import com.hris.leave.enums.LeaveStatus;
 import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.service.LeaveRequestQueryService;
 import com.hris.leave.service.LeaveRequestService;
+import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class LeaveRequestController {
 
     private final LeaveRequestService leaveRequestService;
     private final LeaveRequestQueryService leaveRequestQueryService;
+    private final PermissionAuthorizationService permissionAuthorizationService;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -56,6 +58,21 @@ public class LeaveRequestController {
         Page<LeaveRequest> page = leaveRequestService.getMyRequests(userId, status, pageable);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
             leaveRequestQueryService.toDtoPage(page, userId)
+        )));
+    }
+
+    @GetMapping("/visible")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<PageResponse<LeaveRequestResponseDto>>> getVisibleRequests(
+            @RequestParam(required = false) LeaveStatus status,
+            @RequestParam(required = false) UUID employeeId,
+            Pageable pageable,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "LEAVE_REQUEST", "READ");
+        UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
+        Page<LeaveRequest> page = leaveRequestService.getVisibleRequests(requesterId, status, employeeId, pageable);
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
+            leaveRequestQueryService.toDtoPage(page, requesterId)
         )));
     }
 

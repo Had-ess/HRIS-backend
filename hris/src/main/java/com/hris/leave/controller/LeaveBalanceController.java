@@ -3,10 +3,10 @@ package com.hris.leave.controller;
 import com.hris.common.ApiResponse;
 import com.hris.leave.dto.LeaveBalanceDto;
 import com.hris.leave.service.LeaveBalanceService;
+import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +19,7 @@ import java.util.UUID;
 public class LeaveBalanceController {
 
     private final LeaveBalanceService leaveBalanceService;
+    private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getMyBalances(Authentication auth) {
@@ -27,8 +28,11 @@ public class LeaveBalanceController {
     }
 
     @GetMapping("/employee/{id}")
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
-    public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getForEmployee(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getForEmployee(id)));
+    public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getForEmployee(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "LEAVE_BALANCE", "READ");
+        UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getForEmployee(id, requesterId)));
     }
 }

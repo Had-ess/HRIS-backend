@@ -5,10 +5,8 @@ import com.hris.auth.entity.Employee;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.MissingDepartmentHeadException;
-import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
-import com.hris.organisation.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +26,8 @@ public class ApprovalRouteResolver {
 
     private final EmployeeRepository employeeRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
-    private final ProjectRepository projectRepository;
     private final EmployeeHierarchyResolver employeeHierarchyResolver;
+    private final ProjectAssignmentHierarchyResolver projectAssignmentHierarchyResolver;
 
     public ApprovalRoutePlan resolveRoutePlan(UUID requesterId, LocalDate startDate, LocalDate endDate) {
         Employee employee = employeeRepository.findById(requesterId)
@@ -42,7 +40,7 @@ public class ApprovalRouteResolver {
         List<ApprovalRouteStep> steps = new ArrayList<>();
         Set<UUID> addedApproverUsers = new HashSet<>();
         int order = addEmployeeHierarchyStep(steps, addedApproverUsers, 1, employee);
-        addAssignmentHierarchySteps(activeAssignments, employee, steps, addedApproverUsers, order);
+        addAssignmentHierarchySteps(activeAssignments, employee, startDate, endDate, steps, addedApproverUsers, order);
 
         if (steps.isEmpty()) {
             throw new MissingDepartmentHeadException("No approval supervisor could be resolved");
@@ -84,76 +82,39 @@ public class ApprovalRouteResolver {
 
     private int addAssignmentHierarchySteps(List<ProjectAssignment> assignments,
                                             Employee requester,
+                                            LocalDate startDate,
+                                            LocalDate endDate,
                                             List<ApprovalRouteStep> steps,
                                             Set<UUID> addedApproverUsers,
                                             int order) {
         for (ProjectAssignment assignment : assignments) {
-            ResolvedApprover resolvedApprover = resolveApproverForAssignment(assignment, requester);
-            if (resolvedApprover == null || !addedApproverUsers.add(resolvedApprover.userId())) {
-                continue;
-            }
+            List<ProjectAssignmentHierarchyResolver.ProjectApprover> projectApprovers =
+                projectAssignmentHierarchyResolver.resolveApprovers(
+                    assignment, requester, startDate, endDate);
+            for (ProjectAssignmentHierarchyResolver.ProjectApprover projectApprover : projectApprovers) {
+                if (!addedApproverUsers.add(projectApprover.approverUserId())) {
+                    continue;
+                }
 
-            Map<String, String> snapshot = new LinkedHashMap<>();
-            snapshot.put("projectId", assignment.getProjectId().toString());
-            snapshot.put("role", resolvedApprover.roleCode());
-            if (assignment.getTeamId() != null) {
-                snapshot.put("teamId", assignment.getTeamId().toString());
-            }
+                Map<String, String> snapshot = new LinkedHashMap<>();
+                snapshot.put("projectId", assignment.getProjectId().toString());
+                snapshot.put("role", projectApprover.roleCode());
+                snapshot.put("distance", Integer.toString(projectApprover.distance()));
+                snapshot.put("source", projectApprover.source());
+                if (assignment.getTeamId() != null) {
+                    snapshot.put("teamId", assignment.getTeamId().toString());
+                }
 
-            steps.add(new ApprovalRouteStep(
-                resolvedApprover.userId(),
-                order++,
-                resolvedApprover.context(),
-                snapshot
-            ));
+                steps.add(new ApprovalRouteStep(
+                    projectApprover.approverUserId(),
+                    order++,
+                    ApprovalContext.PROJECT,
+                    snapshot
+                ));
+            }
         }
 
         return order;
-    }
-
-    private ResolvedApprover resolveApproverForAssignment(ProjectAssignment assignment, Employee requester) {
-        if (assignment.getTeamId() != null) {
-            ResolvedApprover teamLeader = resolveEmployeeApprover(
-                assignment.getSupervisorId(),
-                requester,
-                ApprovalContext.PROJECT,
-                "TEAM_LEADER"
-            );
-            if (teamLeader != null) {
-                return teamLeader;
-            }
-        }
-
-        Project project = projectRepository.findById(assignment.getProjectId())
-            .orElseThrow(() -> new EntityNotFoundException("Project not found: " + assignment.getProjectId()));
-        ResolvedApprover projectManager = resolveEmployeeApprover(
-            project.getProjectManagerEmployeeId(),
-            requester,
-            ApprovalContext.PROJECT,
-            "PROJECT_MANAGER"
-        );
-        if (projectManager != null) {
-            return projectManager;
-        }
-
-        return null;
-    }
-
-    private ResolvedApprover resolveEmployeeApprover(UUID employeeId,
-                                                     Employee requester,
-                                                     ApprovalContext context,
-                                                     String roleCode) {
-        if (employeeId == null || employeeId.equals(requester.getId())) {
-            return null;
-        }
-
-        Employee approverEmployee = employeeRepository.findById(employeeId)
-            .orElseThrow(() -> new EntityNotFoundException("Approver employee not found: " + employeeId));
-        if (approverEmployee.getStatus() != com.hris.auth.enums.EmployeeStatus.ACTIVE) {
-            return null;
-        }
-
-        return new ResolvedApprover(approverEmployee.getUserId(), context, roleCode);
     }
 
     public record ApprovalRoutePlan(List<ApprovalRouteStep> steps) {
@@ -163,8 +124,5 @@ public class ApprovalRouteResolver {
                                     int stepOrder,
                                     ApprovalContext context,
                                     Map<String, String> routingSnapshot) {
-    }
-
-    private record ResolvedApprover(UUID userId, ApprovalContext context, String roleCode) {
     }
 }

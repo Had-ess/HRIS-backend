@@ -5,11 +5,9 @@ import com.hris.auth.entity.Employee;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.exception.MissingDepartmentHeadException;
-import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.enums.ProjectRole;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
-import com.hris.organisation.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,10 +36,10 @@ class ApprovalRouteResolverTest {
     private ProjectAssignmentRepository projectAssignmentRepository;
 
     @Mock
-    private ProjectRepository projectRepository;
+    private EmployeeHierarchyResolver employeeHierarchyResolver;
 
     @Mock
-    private EmployeeHierarchyResolver employeeHierarchyResolver;
+    private ProjectAssignmentHierarchyResolver projectAssignmentHierarchyResolver;
 
     private ApprovalRouteResolver approvalRouteResolver;
     private UUID requesterId;
@@ -54,8 +52,8 @@ class ApprovalRouteResolverTest {
         approvalRouteResolver = new ApprovalRouteResolver(
             employeeRepository,
             projectAssignmentRepository,
-            projectRepository,
-            employeeHierarchyResolver
+            employeeHierarchyResolver,
+            projectAssignmentHierarchyResolver
         );
         requesterId = UUID.randomUUID();
         requesterUserId = UUID.randomUUID();
@@ -70,15 +68,13 @@ class ApprovalRouteResolverTest {
     }
 
     @Test
-    @DisplayName("routes through department hierarchy and distinct project supervisors")
-    void routesThroughDepartmentHierarchyAndDistinctProjectSupervisors() {
+    @DisplayName("routes through department hierarchy and generic project chain approvers")
+    void routesThroughDepartmentHierarchyAndGenericProjectChainApprovers() {
         UUID departmentSupervisorUserId = UUID.randomUUID();
-        UUID leaderAId = UUID.randomUUID();
         UUID leaderAUserId = UUID.randomUUID();
-        UUID leaderBId = UUID.randomUUID();
         UUID leaderBUserId = UUID.randomUUID();
-        ProjectAssignment assignmentA = projectAssignment(leaderAId, UUID.randomUUID());
-        ProjectAssignment assignmentB = projectAssignment(leaderBId, UUID.randomUUID());
+        ProjectAssignment assignmentA = projectAssignment(UUID.randomUUID(), UUID.randomUUID());
+        ProjectAssignment assignmentB = projectAssignment(UUID.randomUUID(), UUID.randomUUID());
 
         when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
             requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
@@ -90,10 +86,20 @@ class ApprovalRouteResolverTest {
                 "N_PLUS_1"
             )
         ));
-        when(employeeRepository.findById(leaderAId))
-            .thenReturn(Optional.of(activeEmployee(leaderAId, leaderAUserId)));
-        when(employeeRepository.findById(leaderBId))
-            .thenReturn(Optional.of(activeEmployee(leaderBId, leaderBUserId)));
+        when(projectAssignmentHierarchyResolver.resolveApprovers(
+            assignmentA, requester, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .thenReturn(List.of(
+                new ProjectAssignmentHierarchyResolver.ProjectApprover(
+                    leaderAUserId, 1, "PROJECT_N_PLUS_1", "ASSIGNMENT_CHAIN"
+                )
+            ));
+        when(projectAssignmentHierarchyResolver.resolveApprovers(
+            assignmentB, requester, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .thenReturn(List.of(
+                new ProjectAssignmentHierarchyResolver.ProjectApprover(
+                    leaderBUserId, 1, "PROJECT_N_PLUS_1", "ASSIGNMENT_CHAIN"
+                )
+            ));
 
         ApprovalRouteResolver.ApprovalRoutePlan plan = approvalRouteResolver.resolveRoutePlan(
             requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
@@ -104,24 +110,17 @@ class ApprovalRouteResolverTest {
         assertThat(plan.steps().get(0).context()).isEqualTo(ApprovalContext.DEPARTMENT);
         assertThat(plan.steps().get(0).routingSnapshot()).containsEntry("role", "N_PLUS_1");
         assertThat(plan.steps().get(1).context()).isEqualTo(ApprovalContext.PROJECT);
-        assertThat(plan.steps().get(1).routingSnapshot()).containsEntry("role", "TEAM_LEADER");
+        assertThat(plan.steps().get(1).routingSnapshot()).containsEntry("role", "PROJECT_N_PLUS_1");
+        assertThat(plan.steps().get(1).routingSnapshot()).containsEntry("source", "ASSIGNMENT_CHAIN");
     }
 
     @Test
-    @DisplayName("routes team leader to project manager when assignment supervisor is requester")
-    void routesTeamLeaderToProjectManagerWhenAssignmentSupervisorIsRequester() {
+    @DisplayName("appends deeper project chain approvers in order")
+    void appendsDeeperProjectChainApproversInOrder() {
         UUID departmentSupervisorUserId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID projectManagerId = UUID.randomUUID();
+        UUID leaderUserId = UUID.randomUUID();
         UUID projectManagerUserId = UUID.randomUUID();
-        ProjectAssignment assignment = ProjectAssignment.builder()
-            .employeeId(requesterId)
-            .projectId(projectId)
-            .teamId(UUID.randomUUID())
-            .supervisorId(requesterId)
-            .assignmentRole(ProjectRole.MANAGER)
-            .startDate(LocalDate.of(2026, 4, 1))
-            .build();
+        ProjectAssignment assignment = projectAssignment(UUID.randomUUID(), UUID.randomUUID());
 
         when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(
             requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
@@ -133,20 +132,25 @@ class ApprovalRouteResolverTest {
                 "N_PLUS_1"
             )
         ));
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(Project.builder()
-            .id(projectId)
-            .projectManagerEmployeeId(projectManagerId)
-            .build()));
-        when(employeeRepository.findById(projectManagerId))
-            .thenReturn(Optional.of(activeEmployee(projectManagerId, projectManagerUserId)));
+        when(projectAssignmentHierarchyResolver.resolveApprovers(
+            assignment, requester, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .thenReturn(List.of(
+                new ProjectAssignmentHierarchyResolver.ProjectApprover(
+                    leaderUserId, 1, "PROJECT_N_PLUS_1", "ASSIGNMENT_CHAIN"
+                ),
+                new ProjectAssignmentHierarchyResolver.ProjectApprover(
+                    projectManagerUserId, 2, "PROJECT_N_PLUS_2", "PROJECT_MANAGER_DEFAULT"
+                )
+            ));
 
         ApprovalRouteResolver.ApprovalRoutePlan plan = approvalRouteResolver.resolveRoutePlan(
             requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
 
-        assertThat(plan.steps()).hasSize(2);
+        assertThat(plan.steps()).hasSize(3);
         assertThat(plan.steps()).extracting(ApprovalRouteResolver.ApprovalRouteStep::approverId)
-            .containsExactly(departmentSupervisorUserId, projectManagerUserId);
-        assertThat(plan.steps().get(1).routingSnapshot()).containsEntry("role", "PROJECT_MANAGER");
+            .containsExactly(departmentSupervisorUserId, leaderUserId, projectManagerUserId);
+        assertThat(plan.steps().get(2).routingSnapshot()).containsEntry("role", "PROJECT_N_PLUS_2");
+        assertThat(plan.steps().get(2).routingSnapshot()).containsEntry("source", "PROJECT_MANAGER_DEFAULT");
     }
 
     @Test
@@ -192,8 +196,13 @@ class ApprovalRouteResolverTest {
                 "N_PLUS_1"
             )
         ));
-        when(employeeRepository.findById(sharedSupervisorId))
-            .thenReturn(Optional.of(activeEmployee(sharedSupervisorId, sharedSupervisorUserId)));
+        when(projectAssignmentHierarchyResolver.resolveApprovers(
+            assignment, requester, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)))
+            .thenReturn(List.of(
+                new ProjectAssignmentHierarchyResolver.ProjectApprover(
+                    sharedSupervisorUserId, 1, "PROJECT_N_PLUS_1", "ASSIGNMENT_CHAIN"
+                )
+            ));
 
         ApprovalRouteResolver.ApprovalRoutePlan plan = approvalRouteResolver.resolveRoutePlan(
             requesterId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
@@ -235,4 +244,5 @@ class ApprovalRouteResolverTest {
             .status(EmployeeStatus.ACTIVE)
             .build();
     }
+
 }

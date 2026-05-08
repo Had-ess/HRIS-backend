@@ -1,6 +1,7 @@
 package com.hris.auth.service;
 
 import com.hris.analytics.service.AuditLogService;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.dto.UpdateCurrentUserDto;
 import com.hris.auth.dto.UpdateLocaleDto;
 import com.hris.auth.dto.UserResponseDto;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     @Mock private UserRepository userRepository;
-    @Mock private UserRoleAssignmentService userRoleAssignmentService;
+    @Mock private AccessResolutionService accessResolutionService;
     @Mock private AuditLogService auditLogService;
     @Mock private KeycloakAdminClient keycloakAdminClient;
 
@@ -55,7 +56,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.findByEmail("new@demo.hris.local")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(userRoleAssignmentService.getRoles(userId)).thenReturn(List.of());
+        when(accessResolutionService.getEffectiveProfiles(userId)).thenReturn(List.of());
 
         UserResponseDto response = userService.updateCurrentUser(userId, new UpdateCurrentUserDto(
             "new@demo.hris.local",
@@ -125,7 +126,7 @@ class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(userRoleAssignmentService.getRoles(userId)).thenReturn(List.of());
+        when(accessResolutionService.getEffectiveProfiles(userId)).thenReturn(List.of());
 
         UserResponseDto response = userService.updateLocale(userId, new UpdateLocaleDto("en"));
 

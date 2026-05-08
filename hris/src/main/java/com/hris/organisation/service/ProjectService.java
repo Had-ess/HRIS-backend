@@ -3,18 +3,16 @@ package com.hris.organisation.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.enums.AnalyticsEventType;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
-import com.hris.auth.entity.UserRole;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.RoleRepository;
 import com.hris.auth.repository.UserRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.DuplicateProjectDepartmentAssignmentException;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
@@ -30,12 +28,14 @@ import com.hris.organisation.dto.ProjectTeamResponseDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.entity.ProjectDepartment;
-import com.hris.organisation.entity.ProjectTeam;
+import com.hris.organisation.entity.Team;
+import com.hris.organisation.entity.TeamProjectLink;
 import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
-import com.hris.organisation.repository.ProjectTeamRepository;
+import com.hris.organisation.repository.TeamProjectLinkRepository;
+import com.hris.organisation.repository.TeamRepository;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.TransactionalNotificationPublisher;
@@ -64,15 +64,15 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final ProjectDepartmentRepository projectDepartmentRepository;
-    private final ProjectTeamRepository projectTeamRepository;
+    private final TeamRepository teamRepository;
+    private final TeamProjectLinkRepository teamProjectLinkRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
-    private final RoleRepository roleRepository;
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
     private final AccessScopeService accessScopeService;
     private final ProjectMapper projectMapper;
     private final AuditLogService auditLogService;
+    private final AnalyticsEventPublisher analyticsEventPublisher;
     private final TransactionalNotificationPublisher notificationPublisher;
     private final ObjectMapper objectMapper;
 
@@ -151,6 +151,7 @@ public class ProjectService {
             UUID projectId,
             ProjectAssignmentCreateDto dto,
             UUID actorId) {
+        ensureProjectScopedManagementAccess(projectId, actorId);
         Project project = projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found"));
         Employee employee = employeeRepository.findByIdForUpdate(dto.employeeId())
@@ -175,6 +176,7 @@ public class ProjectService {
 
         auditLogService.log(actorId, AuditAction.CREATE, "project_assignment",
             saved.getId(), null, saved);
+        analyticsEventPublisher.publishProjectAssignmentEvent(AnalyticsEventType.PROJECT_ASSIGNMENT_CREATED, saved);
 
         scheduleAssignmentNotification(project, employee, supervisor);
 
@@ -185,13 +187,14 @@ public class ProjectService {
     public List<ProjectTeamResponseDto> getTeams(UUID projectId, UUID userId) {
         getScopedProject(projectId, userId);
 
-        return projectTeamRepository.findByProjectIdAndIsActiveTrue(projectId).stream()
-            .map(this::toTeamDto)
+        return teamRepository.findActiveByProjectId(projectId).stream()
+            .map(team -> toTeamDto(team, projectId))
             .toList();
     }
 
     @Transactional
     public ProjectTeamResponseDto createTeam(UUID projectId, ProjectTeamCreateDto dto, UUID actorId) {
+        ensureProjectScopedManagementAccess(projectId, actorId);
         Project project = projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
@@ -203,20 +206,32 @@ public class ProjectService {
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
         Employee supervisor = employeeRepository.findById(dto.supervisorEmployeeId())
             .orElseThrow(() -> new EntityNotFoundException("Supervisor not found"));
+        Employee parentSupervisor = resolveLeaderParentSupervisor(project, dto, supervisor);
 
-        validateTeam(dto, department, supervisor, projectId);
+        validateTeam(dto, department, supervisor, parentSupervisor, projectId, project);
 
-        ProjectTeam team = ProjectTeam.builder()
-            .projectId(projectId)
+        Team team = Team.builder()
+            .id(UUID.randomUUID())
+            .code(buildTeamCode(project, dto))
             .departmentId(dto.departmentId())
             .name(dto.name().trim())
             .supervisorEmployeeId(dto.supervisorEmployeeId())
             .isActive(true)
             .build();
-        ProjectTeam savedTeam = projectTeamRepository.save(team);
-        auditLogService.log(actorId, AuditAction.CREATE, "project_team", savedTeam.getId(), null, savedTeam);
+        Team savedTeam = teamRepository.save(team);
+        auditLogService.log(actorId, AuditAction.CREATE, "team", savedTeam.getId(), null, savedTeam);
 
-        createTeamAssignment(project, savedTeam, supervisor, supervisor, dto, actorId,
+        TeamProjectLink teamProjectLink = TeamProjectLink.builder()
+            .teamId(savedTeam.getId())
+            .projectId(projectId)
+            .startDate(dto.startDate())
+            .endDate(dto.endDate())
+            .isActive(true)
+            .build();
+        TeamProjectLink savedLink = teamProjectLinkRepository.save(teamProjectLink);
+        auditLogService.log(actorId, AuditAction.CREATE, "team_project_link", savedLink.getId(), null, savedLink);
+
+        createTeamAssignment(project, savedTeam, parentSupervisor == null ? supervisor : parentSupervisor, supervisor, dto, actorId,
             com.hris.organisation.enums.ProjectRole.MANAGER);
 
         List<Employee> members = employeeRepository.findAllById(dto.employeeIds());
@@ -225,12 +240,12 @@ public class ProjectService {
                 com.hris.organisation.enums.ProjectRole.MEMBER);
         }
 
-        ensureProjectSupervisorRole(supervisor, actorId);
-        return toTeamDto(savedTeam);
+        return toTeamDto(savedTeam, projectId);
     }
 
     @Transactional
     public void removeAssignment(UUID projectId, UUID assignmentId, UUID actorId) {
+        ensureProjectScopedManagementAccess(projectId, actorId);
         ProjectAssignment assignment = projectAssignmentRepository.findByIdForUpdate(assignmentId)
             .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
 
@@ -244,6 +259,7 @@ public class ProjectService {
             assignment.setEndDate(LocalDate.now());
         }
         projectAssignmentRepository.save(assignment);
+        analyticsEventPublisher.publishProjectAssignmentEvent(AnalyticsEventType.PROJECT_ASSIGNMENT_ENDED, assignment);
 
         auditLogService.log(actorId, AuditAction.UPDATE, "project_assignment",
             assignmentId, previous, assignment);
@@ -398,16 +414,14 @@ public class ProjectService {
     }
 
     private ProjectReadScope resolveReadScope(UUID userId) {
-        List<UserRole> effectiveRoles = accessScopeService.getEffectiveRoles(userId);
-
-        if (accessScopeService.hasAdministrationOrHrVisibility(effectiveRoles)) {
+        if (accessScopeService.hasGlobalBusinessRead(userId)) {
             return ProjectReadScope.all();
         }
 
         LinkedHashSet<UUID> projectIds = new LinkedHashSet<>();
         Employee employee = accessScopeService.findEmployee(userId).orElse(null);
 
-        accessScopeService.resolveDepartmentManagerDepartmentId(effectiveRoles, employee)
+        accessScopeService.resolveDepartmentManagerDepartmentId(userId, employee)
             .ifPresent(departmentId ->
                 projectIds.addAll(projectDepartmentRepository.findProjectIdsByDepartmentId(departmentId)));
 
@@ -416,14 +430,40 @@ public class ProjectService {
             projectIds.addAll(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(
                 employee.getId(), LocalDate.now()));
 
-            if (accessScopeService.hasAnyRole(effectiveRoles, "PROJECT_SUPERVISOR")) {
+            if (accessScopeService.hasProjectScopedManagement(userId)) {
                 projectIds.addAll(projectAssignmentRepository.findActiveProjectIdsBySupervisorId(
                     employee.getId(), LocalDate.now()));
-                projectIds.addAll(projectTeamRepository.findProjectIdsBySupervisorEmployeeId(employee.getId()));
+                projectIds.addAll(teamRepository.findProjectIdsBySupervisorEmployeeId(employee.getId()));
             }
         }
 
         return ProjectReadScope.projects(List.copyOf(projectIds));
+    }
+
+    private void ensureProjectScopedManagementAccess(UUID projectId, UUID actorId) {
+        if (!accessScopeService.hasProjectScopedManagement(actorId)) {
+            throw new AccessDeniedException("You are not allowed to manage this project");
+        }
+        if (accessScopeService.hasPermissionName(actorId, "PROJECT_PORTFOLIO_MANAGE")) {
+            return;
+        }
+
+        Employee employee = accessScopeService.getEmployeeOrThrow(actorId);
+        LocalDate today = LocalDate.now();
+        boolean managesProject = projectRepository.findProjectIdsByProjectManagerEmployeeId(employee.getId())
+            .stream()
+            .anyMatch(projectId::equals);
+        boolean supervisesAssignments = projectAssignmentRepository
+            .findActiveProjectIdsBySupervisorId(employee.getId(), today)
+            .stream()
+            .anyMatch(projectId::equals);
+        boolean supervisesTeams = teamRepository.findProjectIdsBySupervisorEmployeeId(employee.getId())
+            .stream()
+            .anyMatch(projectId::equals);
+
+        if (!managesProject && !supervisesAssignments && !supervisesTeams) {
+            throw new AccessDeniedException("You are not allowed to manage this project");
+        }
     }
 
     private Project snapshot(Project project) {
@@ -519,7 +559,9 @@ public class ProjectService {
             ProjectTeamCreateDto dto,
             Department department,
             Employee supervisor,
-            UUID projectId) {
+            Employee parentSupervisor,
+            UUID projectId,
+            Project project) {
         if (dto.endDate() != null && dto.startDate().isAfter(dto.endDate())) {
             throw new IllegalArgumentException("Team start date must be before or equal to end date");
         }
@@ -531,6 +573,9 @@ public class ProjectService {
         }
         if (!department.getId().equals(supervisor.getDepartmentId())) {
             throw new InvalidProjectAssignmentException("Supervisor must belong to the selected department");
+        }
+        if (parentSupervisor != null) {
+            validateLeaderParentSupervisor(dto, supervisor, parentSupervisor, projectId, project);
         }
         long supervisorOverlappingAssignments = dto.endDate() != null
             ? projectAssignmentRepository.countOverlappingActiveAssignments(
@@ -574,9 +619,55 @@ public class ProjectService {
         }
     }
 
+    private void validateLeaderParentSupervisor(
+            ProjectTeamCreateDto dto,
+            Employee supervisor,
+            Employee parentSupervisor,
+            UUID projectId,
+            Project project) {
+        if (supervisor.getId().equals(parentSupervisor.getId())) {
+            throw new InvalidProjectAssignmentException("Parent supervisor cannot be the same employee as the team leader");
+        }
+        if (parentSupervisor.getStatus() != EmployeeStatus.ACTIVE) {
+            throw new InvalidProjectAssignmentException("Parent supervisor must be an active employee");
+        }
+        if (project.getProjectManagerEmployeeId() != null
+            && project.getProjectManagerEmployeeId().equals(parentSupervisor.getId())) {
+            return;
+        }
+
+        long activeAssignments = dto.endDate() != null
+            ? projectAssignmentRepository.countOverlappingActiveAssignments(
+                parentSupervisor.getId(), projectId, dto.startDate(), dto.endDate())
+            : projectAssignmentRepository.countOverlappingActiveAssignmentsOpenEnded(
+                parentSupervisor.getId(), projectId, dto.startDate());
+        if (activeAssignments == 0) {
+            throw new InvalidProjectAssignmentException(
+                "Parent supervisor must already be assigned to the project or be the project manager");
+        }
+    }
+
+    private Employee resolveLeaderParentSupervisor(
+            Project project,
+            ProjectTeamCreateDto dto,
+            Employee supervisor) {
+        if (dto.parentSupervisorEmployeeId() != null) {
+            return employeeRepository.findById(dto.parentSupervisorEmployeeId())
+                .orElseThrow(() -> new EntityNotFoundException("Parent supervisor not found"));
+        }
+        if (project.getProjectManagerEmployeeId() == null
+            || project.getProjectManagerEmployeeId().equals(supervisor.getId())) {
+            return null;
+        }
+
+        return employeeRepository.findById(project.getProjectManagerEmployeeId())
+            .filter(candidate -> candidate.getStatus() == EmployeeStatus.ACTIVE)
+            .orElse(null);
+    }
+
     private void createTeamAssignment(
             Project project,
-            ProjectTeam team,
+            Team team,
             Employee supervisor,
             Employee member,
             ProjectTeamCreateDto dto,
@@ -595,29 +686,11 @@ public class ProjectService {
 
         ProjectAssignment saved = projectAssignmentRepository.save(assignment);
         auditLogService.log(actorId, AuditAction.CREATE, "project_assignment", saved.getId(), null, saved);
+        analyticsEventPublisher.publishProjectAssignmentEvent(AnalyticsEventType.PROJECT_ASSIGNMENT_CREATED, saved);
         scheduleAssignmentNotification(project, member, supervisor);
     }
 
-    private void ensureProjectSupervisorRole(Employee supervisor, UUID actorId) {
-        Optional<Role> supervisorRole = roleRepository.findByCode("PROJECT_SUPERVISOR");
-        if (supervisorRole.isEmpty()) {
-            return;
-        }
-        Role role = supervisorRole.get();
-        if (userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(supervisor.getUserId(), role.getId())) {
-            return;
-        }
-
-        UserRole userRole = UserRole.builder()
-            .userId(supervisor.getUserId())
-            .roleId(role.getId())
-            .isActive(true)
-            .build();
-        UserRole saved = userRoleRepository.save(userRole);
-        auditLogService.log(actorId, AuditAction.CREATE, "user_role", saved.getId(), null, saved);
-    }
-
-    private ProjectTeamResponseDto toTeamDto(ProjectTeam team) {
+    private ProjectTeamResponseDto toTeamDto(Team team, UUID projectId) {
         Department department = departmentRepository.findById(team.getDepartmentId())
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
         Employee supervisor = employeeRepository.findById(team.getSupervisorEmployeeId())
@@ -626,7 +699,7 @@ public class ProjectService {
 
         return new ProjectTeamResponseDto(
             team.getId(),
-            team.getProjectId(),
+            projectId,
             department.getId(),
             department.getName(),
             department.getCode(),
@@ -656,6 +729,17 @@ public class ProjectService {
             projectManager != null ? projectManager.getEmployeeCode() : null,
             projectManager != null ? resolveEmployeeName(projectManager) : null
         );
+    }
+
+    private String buildTeamCode(Project project, ProjectTeamCreateDto dto) {
+        String projectCode = project.getCode() == null ? "TEAM" : project.getCode().trim().toUpperCase();
+        String normalizedName = dto.name().trim().toUpperCase().replaceAll("[^A-Z0-9]+", "_");
+        if (normalizedName.isBlank()) {
+            normalizedName = "TEAM";
+        }
+        String suffix = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String code = projectCode + "_" + normalizedName + "_" + suffix;
+        return code.length() > 80 ? code.substring(0, 80) : code;
     }
 
     private record ProjectReadScope(ProjectReadScopeType type, List<UUID> projectIds) {

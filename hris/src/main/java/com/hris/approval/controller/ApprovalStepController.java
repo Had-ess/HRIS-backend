@@ -30,6 +30,7 @@ public class ApprovalStepController {
     private final ApprovalStepQueryService approvalStepQueryService;
 
     @GetMapping("/pending")
+    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'APPROVAL_STEP', 'READ')")
     public ResponseEntity<ApiResponse<PageResponse<ApprovalStepResponseDto>>> getMyPending(
             Pageable pageable, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
@@ -39,6 +40,7 @@ public class ApprovalStepController {
     }
 
     @PatchMapping("/{id}/approve")
+    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'APPROVAL_STEP', 'DECIDE')")
     public ResponseEntity<ApiResponse<Void>> approve(
             @PathVariable UUID id,
             @RequestBody(required = false) ApprovalCommentDto dto,
@@ -49,6 +51,7 @@ public class ApprovalStepController {
     }
 
     @PatchMapping("/{id}/reject")
+    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'APPROVAL_STEP', 'DECIDE')")
     public ResponseEntity<ApiResponse<Void>> reject(
             @PathVariable UUID id,
             @Valid @RequestBody ApprovalDecisionDto dto,

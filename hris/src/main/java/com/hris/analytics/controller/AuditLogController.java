@@ -27,7 +27,7 @@ public class AuditLogController {
     private final AuditLogQueryService auditLogQueryService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('HR_ADMIN', 'ADMINISTRATION')")
+    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'AUDIT_LOG', 'READ')")
     public ResponseEntity<ApiResponse<PageResponse<AuditLogDto>>> search(
             @RequestParam(required = false) String resource,
             @RequestParam(required = false) AuditAction action,

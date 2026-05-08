@@ -1,5 +1,7 @@
 package com.hris.auth.service;
 
+import com.hris.access.service.AccessResolutionService;
+import com.hris.access.service.UserAccessAssignmentService;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.repository.AuditLogRepository;
@@ -9,12 +11,9 @@ import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.auth.dto.AccountProvisioningRequest;
 import com.hris.auth.dto.AdminUserCreateDto;
 import com.hris.auth.dto.AdminUserResponseDto;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.RolePermissionRepository;
 import com.hris.auth.repository.UserRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.notification.repository.NotificationEventRepository;
@@ -23,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,13 +30,13 @@ import java.util.UUID;
 public class AdminUserService {
 
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
+    private final AccessResolutionService accessResolutionService;
+    private final UserAccessAssignmentService userAccessAssignmentService;
     private final AccountProvisioningService accountProvisioningService;
     private final EmployeeRepository employeeRepository;
     private final ApprovalStepRepository approvalStepRepository;
     private final FileAttachmentRepository fileAttachmentRepository;
     private final AdminRequestRepository adminRequestRepository;
-    private final RolePermissionRepository rolePermissionRepository;
     private final NotificationRepository notificationRepository;
     private final NotificationEventRepository notificationEventRepository;
     private final AuditLogRepository auditLogRepository;
@@ -56,8 +54,8 @@ public class AdminUserService {
 
     @Transactional
     public AdminUserResponseDto create(AdminUserCreateDto dto, UUID actorId) {
-        if (dto.roleIds() == null || dto.roleIds().isEmpty()) {
-            throw new IllegalArgumentException("At least one role must be assigned");
+        if (dto.profileIds() == null || dto.profileIds().isEmpty()) {
+            throw new IllegalArgumentException("At least one access profile must be assigned");
         }
 
         User saved = accountProvisioningService.provision(new AccountProvisioningRequest(
@@ -67,7 +65,7 @@ public class AdminUserService {
             dto.lastName(),
             dto.password(),
             dto.temporaryPassword() != null && dto.temporaryPassword(),
-            dto.roleIds()
+            dto.profileIds()
         ), actorId);
         return toDto(saved);
     }
@@ -89,17 +87,16 @@ public class AdminUserService {
 
         notificationRepository.deleteByUserId(userId);
         notificationEventRepository.deleteByTargetUserId(userId);
-        userRoleRepository.deleteByUserId(userId);
+        userAccessAssignmentService.getProfiles(userId)
+            .forEach(profile -> userAccessAssignmentService.removeProfile(userId, profile.id(), actorId));
         userRepository.delete(user);
 
         auditLogService.log(actorId, AuditAction.DELETE, "user", userId, user, null);
     }
 
     private AdminUserResponseDto toDto(User user) {
-        List<String> roles = userRoleRepository.findEffectiveByUserId(user.getId(), Instant.now()).stream()
-            .map(userRole -> userRole.getRole())
-            .filter(java.util.Objects::nonNull)
-            .map(Role::getCode)
+        List<String> profiles = accessResolutionService.getEffectiveProfiles(user.getId()).stream()
+            .map(profile -> profile.getCode())
             .sorted()
             .toList();
 
@@ -112,7 +109,7 @@ public class AdminUserService {
             user.isActive(),
             user.getCreatedAt(),
             user.getLastLogin(),
-            roles
+            profiles
         );
     }
 
@@ -128,9 +125,6 @@ public class AdminUserService {
         }
         if (adminRequestRepository.existsByRequesterId(userId) || adminRequestRepository.existsByResolvedById(userId)) {
             throw new IllegalStateException("User cannot be deleted because it is referenced by administrative requests");
-        }
-        if (rolePermissionRepository.existsByGrantedById(userId)) {
-            throw new IllegalStateException("User cannot be deleted because it granted role permissions");
         }
         if (auditLogRepository.existsByActorId(userId)) {
             throw new IllegalStateException("User cannot be deleted because it is referenced in audit history");

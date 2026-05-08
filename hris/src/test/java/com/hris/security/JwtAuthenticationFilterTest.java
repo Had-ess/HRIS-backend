@@ -1,8 +1,5 @@
 package com.hris.security;
 
-import com.hris.auth.entity.Role;
-import com.hris.auth.entity.UserRole;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.service.UserProvisioningService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
@@ -19,12 +16,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,26 +32,23 @@ class JwtAuthenticationFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    @Mock
-    private UserRoleRepository userRoleRepository;
-
     @AfterEach
     void clearSecurityContext() {
         SecurityContextHolder.clearContext();
     }
 
     @Test
-    @DisplayName("provisioning conflict returns 409 and stops filter chain")
-    void provisioningFailureReturnsUnauthorized() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(userProvisioningService, userRoleRepository);
+    @DisplayName("provisioning failure returns 409 and clears authentication")
+    void provisioningFailureReturnsConflict() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(userProvisioningService);
         Jwt jwt = buildJwt();
         SecurityContextHolder.getContext().setAuthentication(
-            new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+            new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("SCOPE_profile.read"))));
 
         doThrow(new IllegalStateException("provisioning failed"))
             .when(userProvisioningService).resolveUserId(jwt);
 
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/leave-requests");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/access/me");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilterInternal(request, response, filterChain);
@@ -68,21 +59,17 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("valid provisioning enriches authentication and continues filter chain")
-    void validProvisioningContinuesFilterChain() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(userProvisioningService, userRoleRepository);
+    @DisplayName("valid provisioning enriches JWT with local user id and keeps incoming authorities untouched")
+    void validProvisioningKeepsAuthoritiesUntouched() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(userProvisioningService);
         Jwt jwt = buildJwt();
         UUID localUserId = UUID.randomUUID();
-        Role employeeRole = Role.builder().code("EMPLOYEE").isActive(true).build();
-        UserRole userRole = UserRole.builder().role(employeeRole).build();
 
         SecurityContextHolder.getContext().setAuthentication(
-            new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+            new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority("SCOPE_profile.read"))));
         when(userProvisioningService.resolveUserId(jwt)).thenReturn(localUserId);
-        when(userRoleRepository.findEffectiveByUserId(eq(localUserId), any()))
-            .thenReturn(List.of(userRole));
 
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/leave-requests");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/access/me");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilterInternal(request, response, filterChain);
@@ -99,7 +86,10 @@ class JwtAuthenticationFilterTest {
         assertThat(authentication.getName()).isEqualTo(localUserId.toString());
         assertThat(authentication.getAuthorities())
             .extracting(authority -> authority.getAuthority())
-            .containsExactly("ROLE_EMPLOYEE");
+            .containsExactly("SCOPE_profile.read");
+        assertThat(authentication.getAuthorities())
+            .extracting(authority -> authority.getAuthority())
+            .noneMatch(authority -> authority.startsWith("ROLE_"));
     }
 
     private Jwt buildJwt() {

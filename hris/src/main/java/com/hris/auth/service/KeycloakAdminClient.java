@@ -16,7 +16,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -71,7 +70,6 @@ public class KeycloakAdminClient {
         String userId = extractUserId(location);
         try {
             setPassword(accessToken, userId, request.password(), request.temporaryPassword());
-            assignRealmRoles(accessToken, userId, request.realmRoles());
             return userId;
         } catch (KeycloakProvisioningException ex) {
             rollbackCreatedUser(accessToken, userId, ex);
@@ -186,100 +184,6 @@ public class KeycloakAdminClient {
         }
     }
 
-    private void assignRealmRoles(String accessToken, String userId, List<String> roleNames) {
-        List<Map<String, Object>> roles = roleNames.stream()
-            .map(roleName -> ensureRealmRole(accessToken, roleName))
-            .toList();
-
-        try {
-            restClient.post()
-                .uri(serverUrl + "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/realm")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(roles)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
-                    throw mapOperationFailure(
-                        "assign realm roles",
-                        clientResponse.getStatusCode(),
-                        readBody(clientResponse)
-                    );
-                })
-                .toBodilessEntity();
-        } catch (ResourceAccessException ex) {
-            throw unavailable("assign realm roles", "Keycloak is unavailable. Please retry later.", ex);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> getRealmRole(String accessToken, String roleName) {
-        try {
-            String response = restClient.get()
-                .uri(buildAdminUri("/admin/realms/{realm}/roles/{roleName}", realm, roleName))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
-                    throw mapRoleLookupFailure(clientResponse.getStatusCode(), readBody(clientResponse));
-                })
-                .body(String.class);
-
-            return objectMapper.readValue(response, MAP_TYPE);
-        } catch (KeycloakProvisioningException ex) {
-            throw ex;
-        } catch (ResourceAccessException ex) {
-            throw unavailable("lookup realm role", "Keycloak is unavailable. Please retry later.", ex);
-        } catch (IOException ex) {
-            throw new KeycloakProvisioningException(
-                HttpStatus.BAD_GATEWAY,
-                "Keycloak returned an invalid role lookup response.",
-                "lookup realm role",
-                HttpStatus.OK,
-                null,
-                ex
-            );
-        }
-    }
-
-    private Map<String, Object> ensureRealmRole(String accessToken, String roleName) {
-        try {
-            return getRealmRole(accessToken, roleName);
-        } catch (KeycloakProvisioningException ex) {
-            if ("lookup realm role".equals(ex.getOperation())
-                && ex.getKeycloakStatus() == HttpStatus.NOT_FOUND) {
-                createRealmRole(accessToken, roleName);
-                return getRealmRole(accessToken, roleName);
-            }
-            throw ex;
-        }
-    }
-
-    private void createRealmRole(String accessToken, String roleName) {
-        try {
-            restClient.post()
-                .uri(buildAdminUri("/admin/realms/{realm}/roles", realm))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Map.of(
-                    "name", roleName,
-                    "description", "Synchronized from HRIS role provisioning"
-                ))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
-                    HttpStatusCode statusCode = clientResponse.getStatusCode();
-                    String responseBody = readBody(clientResponse);
-                    if (statusCode.value() == HttpStatus.CONFLICT.value()) {
-                        return;
-                    }
-                    throw mapOperationFailure("create realm role", statusCode, responseBody);
-                })
-                .toBodilessEntity();
-        } catch (KeycloakProvisioningException ex) {
-            throw ex;
-        } catch (ResourceAccessException ex) {
-            throw unavailable("create realm role", "Keycloak is unavailable. Please retry later.", ex);
-        }
-    }
-
     private String obtainAccessToken() {
         if (clientId == null || clientId.isBlank() || clientSecret == null || clientSecret.isBlank()) {
             log.error(
@@ -364,14 +268,6 @@ public class KeycloakAdminClient {
         } catch (RuntimeException rollbackEx) {
             log.warn("Failed to rollback created Keycloak user {} after {} failure", userId, classifyOperation(cause), rollbackEx);
         }
-    }
-
-    private URI buildAdminUri(String pathTemplate, Object... uriVariables) {
-        return UriComponentsBuilder.fromHttpUrl(serverUrl)
-            .path(pathTemplate)
-            .buildAndExpand(uriVariables)
-            .encode()
-            .toUri();
     }
 
     private Map<String, Object> buildCreateUserBody(KeycloakAdminUserCreateRequest request) {
@@ -481,21 +377,6 @@ public class KeycloakAdminClient {
             );
         }
         return mapOperationFailure("obtain access token", statusCode, responseBody);
-    }
-
-    private KeycloakProvisioningException mapRoleLookupFailure(HttpStatusCode statusCode, String responseBody) {
-        HttpStatus keycloakStatus = HttpStatus.resolve(statusCode.value());
-        if (statusCode.value() == HttpStatus.NOT_FOUND.value()) {
-            return new KeycloakProvisioningException(
-                HttpStatus.BAD_GATEWAY,
-                "One or more Keycloak roles are not configured for account provisioning.",
-                "lookup realm role",
-                keycloakStatus,
-                responseBody,
-                null
-            );
-        }
-        return mapOperationFailure("lookup realm role", statusCode, responseBody);
     }
 
     private KeycloakProvisioningException mapOperationFailure(

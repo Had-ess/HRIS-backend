@@ -1,12 +1,13 @@
 package com.hris.auth.service;
 
+import com.hris.access.entity.AccessProfile;
+import com.hris.access.repository.AccessProfileRepository;
+import com.hris.access.service.UserAccessAssignmentService;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.AccountProvisioningRequest;
 import com.hris.auth.dto.KeycloakAdminUserCreateRequest;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
-import com.hris.auth.repository.RoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.KeycloakProvisioningException;
@@ -25,15 +26,15 @@ import java.util.UUID;
 public class AccountProvisioningService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final UserRoleAssignmentService userRoleAssignmentService;
+    private final AccessProfileRepository accessProfileRepository;
+    private final UserAccessAssignmentService userAccessAssignmentService;
     private final KeycloakAdminClient keycloakAdminClient;
     private final AuditLogService auditLogService;
 
     @Transactional
     public User provision(AccountProvisioningRequest request, UUID actorId) {
-        if (request.roleIds() == null || request.roleIds().isEmpty()) {
-            throw new IllegalArgumentException("At least one role must be assigned");
+        if (request.profileIds() == null || request.profileIds().isEmpty()) {
+            throw new IllegalArgumentException("At least one access profile must be assigned");
         }
 
         String normalizedEmail = normalizeEmail(request.email());
@@ -45,12 +46,12 @@ public class AccountProvisioningService {
             throw new IllegalStateException("User email must be unique");
         }
 
-        List<Role> roles = roleRepository.findAllById(request.roleIds());
-        if (roles.size() != request.roleIds().size()) {
-            throw new EntityNotFoundException("Role not found");
+        List<AccessProfile> profiles = accessProfileRepository.findByIdIn(request.profileIds());
+        if (profiles.size() != request.profileIds().size()) {
+            throw new EntityNotFoundException("Access profile not found");
         }
-        if (roles.stream().anyMatch(role -> !role.isActive())) {
-            throw new IllegalStateException("Only active roles can be assigned");
+        if (profiles.stream().anyMatch(profile -> !profile.isActive())) {
+            throw new IllegalStateException("Only active access profiles can be assigned");
         }
 
         String keycloakUserId = keycloakAdminClient.createUser(new KeycloakAdminUserCreateRequest(
@@ -59,8 +60,7 @@ public class AccountProvisioningService {
             firstName,
             lastName,
             request.password(),
-            request.temporaryPassword(),
-            roles.stream().map(Role::getCode).toList()
+            request.temporaryPassword()
         ));
 
         try {
@@ -73,8 +73,8 @@ public class AccountProvisioningService {
                 .isActive(true)
                 .build());
 
-            for (Role role : roles) {
-                userRoleAssignmentService.assignRole(saved.getId(), role.getId(), actorId);
+            for (AccessProfile profile : profiles) {
+                userAccessAssignmentService.assignProfile(saved.getId(), profile.getId(), actorId);
             }
 
             auditLogService.log(actorId, AuditAction.CREATE, "user", saved.getId(), null, saved);

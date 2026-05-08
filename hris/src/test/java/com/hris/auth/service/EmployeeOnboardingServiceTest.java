@@ -1,6 +1,7 @@
 package com.hris.auth.service;
 
 import com.hris.analytics.service.AuditLogService;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.auth.dto.AccountProvisioningRequest;
 import com.hris.auth.dto.EmployeeCreateDto;
 import com.hris.auth.dto.EmployeeResponseDto;
@@ -40,6 +41,8 @@ class EmployeeOnboardingServiceTest {
     @Mock private AccountProvisioningService accountProvisioningService;
     @Mock private EmployeeOnboardingEmailService employeeOnboardingEmailService;
     @Mock private AuditLogService auditLogService;
+    @Mock private AnalyticsEventPublisher analyticsEventPublisher;
+    @Mock private EmployeeHistoryService employeeHistoryService;
 
     @InjectMocks private EmployeeOnboardingService employeeOnboardingService;
 
@@ -109,6 +112,7 @@ class EmployeeOnboardingServiceTest {
         EmployeeResponseDto result = employeeOnboardingService.onboard(dto, actorId);
 
         assertThat(result.userId()).isEqualTo(userId);
+        verify(employeeHistoryService).recordHire(savedEmployee, actorId);
         verify(employeeService).initializeLeaveBalancesForNewEmployee(savedEmployee.getId());
         verify(employeeOnboardingEmailService).sendCredentials(
             dto.email(),

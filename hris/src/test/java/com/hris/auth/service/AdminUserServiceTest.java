@@ -1,5 +1,8 @@
 package com.hris.auth.service;
 
+import com.hris.access.entity.AccessProfile;
+import com.hris.access.service.AccessResolutionService;
+import com.hris.access.service.UserAccessAssignmentService;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.analytics.repository.AuditLogRepository;
 import com.hris.analytics.repository.ExportRecordRepository;
@@ -9,14 +12,9 @@ import com.hris.auth.dto.AccountProvisioningRequest;
 import com.hris.auth.dto.AdminUserCreateDto;
 import com.hris.auth.dto.AdminUserResponseDto;
 import com.hris.auth.entity.Employee;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
-import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.RoleRepository;
-import com.hris.auth.repository.RolePermissionRepository;
 import com.hris.auth.repository.UserRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.notification.repository.NotificationEventRepository;
 import com.hris.notification.repository.NotificationRepository;
@@ -35,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,14 +41,13 @@ import static org.mockito.Mockito.when;
 class AdminUserServiceTest {
 
     @Mock private UserRepository userRepository;
-    @Mock private RoleRepository roleRepository;
-    @Mock private UserRoleRepository userRoleRepository;
+    @Mock private AccessResolutionService accessResolutionService;
+    @Mock private UserAccessAssignmentService userAccessAssignmentService;
     @Mock private AccountProvisioningService accountProvisioningService;
     @Mock private EmployeeRepository employeeRepository;
     @Mock private ApprovalStepRepository approvalStepRepository;
     @Mock private FileAttachmentRepository fileAttachmentRepository;
     @Mock private AdminRequestRepository adminRequestRepository;
-    @Mock private RolePermissionRepository rolePermissionRepository;
     @Mock private NotificationRepository notificationRepository;
     @Mock private NotificationEventRepository notificationEventRepository;
     @Mock private AuditLogRepository auditLogRepository;
@@ -64,9 +62,7 @@ class AdminUserServiceTest {
     @DisplayName("creates user through shared account provisioning")
     void createsUserThroughSharedAccountProvisioning() {
         UUID actorId = UUID.randomUUID();
-        UUID roleId = UUID.randomUUID();
-
-        Role role = Role.builder().id(roleId).code("EMPLOYEE").name("Employee").isActive(true).build();
+        UUID profileId = UUID.randomUUID();
         User savedUser = User.builder()
             .id(UUID.randomUUID())
             .keycloakId("kc-user-123")
@@ -78,8 +74,8 @@ class AdminUserServiceTest {
             .build();
 
         when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(savedUser);
-        when(userRoleRepository.findEffectiveByUserId(eq(savedUser.getId()), any())).thenReturn(List.of(
-            UserRole.builder().role(role).build()
+        when(accessResolutionService.getEffectiveProfiles(savedUser.getId())).thenReturn(List.of(
+            AccessProfile.builder().id(profileId).code("SELF_SERVICE").displayKey("profile.selfService").isActive(true).build()
         ));
 
         AdminUserResponseDto result = adminUserService.create(new AdminUserCreateDto(
@@ -89,17 +85,17 @@ class AdminUserServiceTest {
             "User",
             "Temp123!",
             false,
-            List.of(roleId)
+            List.of(profileId)
         ), actorId);
 
         assertThat(result.email()).isEqualTo("new.user@demo.hris.local");
-        assertThat(result.roles()).containsExactly("EMPLOYEE");
+        assertThat(result.profiles()).containsExactly("SELF_SERVICE");
         verify(accountProvisioningService).provision(any(AccountProvisioningRequest.class), eq(actorId));
     }
 
     @Test
-    @DisplayName("requires at least one role")
-    void requiresAtLeastOneRole() {
+    @DisplayName("requires at least one access profile")
+    void requiresAtLeastOneAccessProfile() {
         assertThatThrownBy(() -> adminUserService.create(new AdminUserCreateDto(
             "new.user",
             "new.user@demo.hris.local",
@@ -110,7 +106,7 @@ class AdminUserServiceTest {
             List.of()
         ), UUID.randomUUID()))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("At least one role must be assigned");
+            .hasMessage("At least one access profile must be assigned");
     }
 
     @Test
@@ -133,16 +129,18 @@ class AdminUserServiceTest {
         when(fileAttachmentRepository.existsByUploadedById(userId)).thenReturn(false);
         when(adminRequestRepository.existsByRequesterId(userId)).thenReturn(false);
         when(adminRequestRepository.existsByResolvedById(userId)).thenReturn(false);
-        when(rolePermissionRepository.existsByGrantedById(userId)).thenReturn(false);
         when(auditLogRepository.existsByActorId(userId)).thenReturn(false);
         when(exportRecordRepository.existsByExportedById(userId)).thenReturn(false);
+        when(userAccessAssignmentService.getProfiles(userId)).thenReturn(List.of(
+            new com.hris.access.dto.UserProfileSummaryDto(UUID.randomUUID(), "SELF_SERVICE", "profile.selfService", true)
+        ));
 
         adminUserService.delete(userId, actorId);
 
         verify(keycloakAdminClient).deleteUser("kc-user-123");
         verify(notificationRepository).deleteByUserId(userId);
         verify(notificationEventRepository).deleteByTargetUserId(userId);
-        verify(userRoleRepository).deleteByUserId(userId);
+        verify(userAccessAssignmentService).removeProfile(eq(userId), any(UUID.class), eq(actorId));
         verify(userRepository).delete(user);
         verify(auditLogService).log(eq(actorId), eq(com.hris.analytics.enums.AuditAction.DELETE), eq("user"), eq(userId), eq(user), eq(null));
     }
@@ -176,5 +174,7 @@ class AdminUserServiceTest {
         assertThatThrownBy(() -> adminUserService.delete(actorId, actorId))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("You cannot delete your own account");
+
+        verify(userRepository, never()).findById(any());
     }
 }

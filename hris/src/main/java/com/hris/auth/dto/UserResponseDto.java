@@ -13,5 +13,6 @@ public record UserResponseDto(
     boolean isActive,
     Instant createdAt,
     Instant lastLogin,
-    List<String> effectiveRoles
-) {}
+    List<String> profileCodes
+) {
+}

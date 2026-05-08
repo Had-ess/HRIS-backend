@@ -13,4 +13,6 @@ public interface LeaveTypeRepository extends JpaRepository<LeaveType, UUID> {
     Optional<LeaveType> findByCode(String code);
 
     List<LeaveType> findByIsActiveTrue();
+
+    boolean existsByValidationWorkflowId(UUID validationWorkflowId);
 }

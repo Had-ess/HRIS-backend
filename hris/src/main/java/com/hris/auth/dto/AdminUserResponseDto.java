@@ -13,6 +13,6 @@ public record AdminUserResponseDto(
     boolean active,
     Instant createdAt,
     Instant lastLogin,
-    List<String> roles
+    List<String> profiles
 ) {
 }

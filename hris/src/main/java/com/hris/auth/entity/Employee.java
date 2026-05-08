@@ -48,6 +48,9 @@ public class Employee {
     @Column(name = "supervisor_employee_id")
     private UUID supervisorEmployeeId;
 
+    @Column(name = "termination_date")
+    private LocalDate terminationDate;
+
     @Column(name = "work_schedule_id", nullable = false)
     private UUID workScheduleId;
 

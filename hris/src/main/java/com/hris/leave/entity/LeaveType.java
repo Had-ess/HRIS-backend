@@ -16,6 +16,7 @@ public class LeaveType {
     @Column(name = "is_paid", nullable = false) @Builder.Default private boolean isPaid = true;
     @Column(name = "requires_justification", nullable = false) @Builder.Default private boolean requiresJustification = false;
     @Column(name = "is_active", nullable = false) @Builder.Default private boolean isActive = true;
+    @Column(name = "validation_workflow_id") private UUID validationWorkflowId;
 
     @Override public boolean equals(Object o) {
         if (this == o) return true;

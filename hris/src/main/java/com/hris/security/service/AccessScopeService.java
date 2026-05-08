@@ -1,17 +1,13 @@
 package com.hris.security.service;
 
+import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.entity.Employee;
-import com.hris.auth.entity.UserRole;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,22 +15,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccessScopeService {
 
-    private final UserRoleRepository userRoleRepository;
+    private final AccessResolutionService accessResolutionService;
     private final EmployeeRepository employeeRepository;
 
     @Transactional(readOnly = true)
-    public List<UserRole> getEffectiveRoles(UUID userId) {
-        return userRoleRepository.findEffectiveByUserId(userId, Instant.now()).stream()
-            .filter(userRole -> userRole.getRole() != null && userRole.getRole().isActive())
-            .toList();
+    public boolean hasPermission(UUID userId, String resource, String action) {
+        return accessResolutionService.hasPermission(userId, resource, action);
     }
 
-    public boolean hasAnyRole(List<UserRole> roles, String... roleCodes) {
-        return roles.stream()
-            .map(UserRole::getRole)
-            .filter(role -> role != null && role.getCode() != null)
-            .map(role -> normalize(role.getCode()))
-            .anyMatch(roleCode -> matchesAny(roleCode, roleCodes));
+    @Transactional(readOnly = true)
+    public boolean hasPermissionName(UUID userId, String permissionName) {
+        return accessResolutionService.hasPermissionName(userId, permissionName);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasAnyPermissionName(UUID userId, String... permissionNames) {
+        for (String permissionName : permissionNames) {
+            if (hasPermissionName(userId, permissionName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Transactional(readOnly = true)
@@ -48,38 +49,46 @@ public class AccessScopeService {
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
     }
 
-    public Optional<UUID> resolveDepartmentManagerDepartmentId(List<UserRole> roles, Employee employee) {
-        if (!hasAnyRole(roles, "DEPT_MANAGER")) {
+    public Optional<UUID> resolveDepartmentManagerDepartmentId(UUID userId, Employee employee) {
+        if (!hasManagerDepartmentVisibility(userId)) {
             return Optional.empty();
         }
-
-        return roles.stream()
-            .filter(userRole -> userRole.getRole() != null
-                && "DEPT_MANAGER".equals(normalize(userRole.getRole().getCode())))
-            .map(UserRole::getDepartmentId)
-            .filter(departmentId -> departmentId != null)
-            .findFirst()
-            .or(() -> Optional.ofNullable(employee).map(Employee::getDepartmentId));
+        return Optional.ofNullable(employee).map(Employee::getDepartmentId);
     }
 
-    public boolean hasGlobalAnalyticsVisibility(List<UserRole> roles) {
-        return hasAnyRole(roles, "ADMINISTRATION", "HR_ADMIN", "DIRECTOR");
+    public boolean hasGlobalAnalyticsVisibility(UUID userId) {
+        return hasPermissionName(userId, "DASHBOARD_HR_VIEW")
+            || hasPermissionName(userId, "DASHBOARD_DIRECTOR_VIEW")
+            || hasPermissionName(userId, "ANALYTICS_GLOBAL_READ");
     }
 
-    public boolean hasAdministrationOrHrVisibility(List<UserRole> roles) {
-        return hasAnyRole(roles, "ADMINISTRATION", "HR_ADMIN");
+    public boolean hasGlobalBusinessRead(UUID userId) {
+        return hasPermissionName(userId, "EMPLOYEE_MANAGE")
+            || hasPermissionName(userId, "PROJECT_PORTFOLIO_MANAGE")
+            || hasPermissionName(userId, "DEPARTMENT_MANAGE")
+            || hasPermissionName(userId, "DASHBOARD_HR_VIEW")
+            || hasPermissionName(userId, "DASHBOARD_DIRECTOR_VIEW");
     }
 
-    private boolean matchesAny(String roleCode, String... expectedRoleCodes) {
-        for (String expectedRoleCode : expectedRoleCodes) {
-            if (roleCode.equals(normalize(expectedRoleCode))) {
-                return true;
-            }
-        }
-        return false;
+    public boolean hasAdministrationOrHrVisibility(UUID userId) {
+        return hasPermissionName(userId, "DASHBOARD_HR_VIEW")
+            || hasPermissionName(userId, "USER_READ");
     }
 
-    private String normalize(String value) {
-        return value.trim().toUpperCase(Locale.ROOT);
+    public boolean hasProjectScopedManagement(UUID userId) {
+        return hasPermissionName(userId, "PROJECT_ASSIGNMENT_MANAGE")
+            || hasPermissionName(userId, "TEAM_MANAGE")
+            || hasPermissionName(userId, "PROJECT_PORTFOLIO_MANAGE");
+    }
+
+    public boolean hasManagerInboxAccess(UUID userId) {
+        return hasPermissionName(userId, "DASHBOARD_SUPERVISOR_VIEW")
+            || hasPermissionName(userId, "LEAVE_REQUEST_READ");
+    }
+
+    private boolean hasManagerDepartmentVisibility(UUID userId) {
+        return hasPermissionName(userId, "DASHBOARD_SUPERVISOR_VIEW")
+            || hasPermissionName(userId, "LEAVE_REQUEST_READ")
+            || hasPermissionName(userId, "LEAVE_BALANCE_READ");
     }
 }

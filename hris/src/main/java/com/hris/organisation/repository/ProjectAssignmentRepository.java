@@ -27,9 +27,25 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
           AND pa.startDate <= :endDate
           AND (pa.endDate >= :startDate OR pa.endDate IS NULL)
           AND pa.isActive = true
+        ORDER BY pa.projectId ASC, pa.startDate ASC, pa.id ASC
         """)
     List<ProjectAssignment> findActiveAssignmentsDuringPeriod(
         @Param("eid") UUID employeeId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        SELECT pa FROM ProjectAssignment pa
+        WHERE pa.employeeId = :employeeId
+          AND pa.projectId = :projectId
+          AND pa.startDate <= :endDate
+          AND (pa.endDate >= :startDate OR pa.endDate IS NULL)
+          AND pa.isActive = true
+        ORDER BY pa.startDate ASC, pa.id ASC
+        """)
+    List<ProjectAssignment> findActiveAssignmentsByEmployeeIdAndProjectIdDuringPeriod(
+        @Param("employeeId") UUID employeeId,
+        @Param("projectId") UUID projectId,
         @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate);
 
@@ -58,7 +74,7 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
             concat(coalesce(u.firstName, ''), ' ', coalesce(u.lastName, '')),
             pa.projectId,
             pa.teamId,
-            pt.name,
+            t.name,
             s.id,
             s.userId,
             s.employeeCode,
@@ -71,7 +87,7 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
         from ProjectAssignment pa
         join Employee e on e.id = pa.employeeId
         join User u on u.id = e.userId
-        left join ProjectTeam pt on pt.id = pa.teamId
+        left join Team t on t.id = pa.teamId
         join Employee s on s.id = pa.supervisorId
         join User su on su.id = s.userId
         where pa.projectId = :projectId

@@ -23,6 +23,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
 
     Page<LeaveRequest> findByEmployeeIdOrderBySubmittedAtDesc(UUID employeeId, Pageable pageable);
     Page<LeaveRequest> findByEmployeeIdAndStatusOrderBySubmittedAtDesc(UUID employeeId, LeaveStatus status, Pageable pageable);
+    Page<LeaveRequest> findAllByOrderBySubmittedAtDesc(Pageable pageable);
+    Page<LeaveRequest> findByStatusOrderBySubmittedAtDesc(LeaveStatus status, Pageable pageable);
     List<LeaveRequest> findByEmployeeId(UUID employeeId);
     List<LeaveRequest> findTop5ByEmployeeIdOrderBySubmittedAtDesc(UUID employeeId);
     boolean existsByEmployeeId(UUID employeeId);
@@ -53,4 +55,56 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
         @Param("supervisorId") UUID supervisorEmployeeId,
         @Param("status") LeaveStatus status,
         @Param("startDate") LocalDate startDate);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId = :departmentId
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdOrderBySubmittedAtDesc(
+        @Param("departmentId") UUID departmentId,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId = :departmentId
+          AND lr.status = :status
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdAndStatusOrderBySubmittedAtDesc(
+        @Param("departmentId") UUID departmentId,
+        @Param("status") LeaveStatus status,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId = :departmentId
+          AND lr.employeeId = :employeeId
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdAndEmployeeIdOrderBySubmittedAtDesc(
+        @Param("departmentId") UUID departmentId,
+        @Param("employeeId") UUID employeeId,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId = :departmentId
+          AND lr.employeeId = :employeeId
+          AND lr.status = :status
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdAndEmployeeIdAndStatusOrderBySubmittedAtDesc(
+        @Param("departmentId") UUID departmentId,
+        @Param("employeeId") UUID employeeId,
+        @Param("status") LeaveStatus status,
+        Pageable pageable);
 }

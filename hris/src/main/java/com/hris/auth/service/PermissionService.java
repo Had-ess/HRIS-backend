@@ -1,11 +1,11 @@
 package com.hris.auth.service;
 
+import com.hris.access.repository.ProfilePermissionRepository;
 import com.hris.auth.dto.PermissionCreateDto;
 import com.hris.auth.dto.PermissionResponseDto;
 import com.hris.auth.dto.PermissionUpdateDto;
 import com.hris.auth.entity.Permission;
 import com.hris.auth.repository.PermissionRepository;
-import com.hris.auth.repository.RolePermissionRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.PermissionDeletionNotAllowedException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class PermissionService {
     private static final String DEFAULT_SCOPE = "GLOBAL";
 
     private final PermissionRepository permissionRepository;
-    private final RolePermissionRepository rolePermissionRepository;
+    private final ProfilePermissionRepository profilePermissionRepository;
 
     @Transactional(readOnly = true)
     public List<PermissionResponseDto> getAll() {
@@ -85,9 +85,9 @@ public class PermissionService {
     @Transactional
     public void delete(UUID id) {
         Permission permission = getEntityById(id);
-        if (rolePermissionRepository.existsByPermissionId(id)) {
+        if (profilePermissionRepository.existsByPermissionId(id)) {
             throw new PermissionDeletionNotAllowedException(
-                "Permission cannot be deleted because it is assigned to one or more roles");
+                "Permission cannot be deleted because it is assigned to one or more access profiles");
         }
         permissionRepository.delete(permission);
     }

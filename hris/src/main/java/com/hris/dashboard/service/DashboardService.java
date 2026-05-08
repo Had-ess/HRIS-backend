@@ -5,9 +5,9 @@ import com.hris.admin.entity.AdminRequestType;
 import com.hris.admin.enums.AdminRequestStatus;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.admin.repository.AdminRequestTypeRepository;
-import com.hris.analytics.dto.LeaveMetricsDto;
-import com.hris.analytics.enums.ScopeType;
-import com.hris.analytics.service.AnalyticsService;
+import com.hris.analytics.dto.LeaveMetricsSnapshotDto;
+import com.hris.analytics.enums.AnalyticsScopeType;
+import com.hris.analytics.service.AnalyticsQueryService;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
 import com.hris.approval.enums.StepStatus;
@@ -16,7 +16,6 @@ import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.common.ScopeFilter;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.dashboard.dto.AdminRequestSummaryDto;
 import com.hris.dashboard.dto.ApprovalSummaryDto;
@@ -73,7 +72,7 @@ public class DashboardService {
     private final ProjectRepository projectRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final AccessScopeService accessScopeService;
-    private final AnalyticsService analyticsService;
+    private final AnalyticsQueryService analyticsQueryService;
 
     @Transactional(readOnly = true)
     public EmployeeDashboardDto getEmployeeDashboard(UUID userId) {
@@ -102,13 +101,12 @@ public class DashboardService {
                 userId, StepStatus.PENDING);
         Employee employee = accessScopeService.getEmployeeOrThrow(userId);
         LocalDate today = LocalDate.now();
-        List<com.hris.auth.entity.UserRole> effectiveRoles = accessScopeService.getEffectiveRoles(userId);
 
         long teamMembersCount;
         long upcomingTeamAbsencesCount;
 
-        if (accessScopeService.hasAnyRole(effectiveRoles, "PROJECT_SUPERVISOR")
-            && !accessScopeService.hasAnyRole(effectiveRoles, "DEPT_MANAGER")) {
+        if (accessScopeService.hasProjectScopedManagement(userId)
+            && !accessScopeService.resolveDepartmentManagerDepartmentId(userId, employee).isPresent()) {
             teamMembersCount = projectAssignmentRepository.countActiveDistinctEmployeesBySupervisorId(
                 employee.getId(), today);
             upcomingTeamAbsencesCount = leaveRequestRepository.countUpcomingSupervisorRequests(
@@ -142,10 +140,12 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
-        LeaveMetricsDto liveLeaveMetrics = analyticsService.getLeaveMetrics(
-            new ScopeFilter(ScopeType.ALL, null, List.of()),
-            null,
-            null);
+        LocalDate today = LocalDate.now();
+        LeaveMetricsSnapshotDto leaveMetrics = analyticsQueryService.getLeaveMetrics(
+            today,
+            AnalyticsScopeType.GLOBAL,
+            null
+        );
 
         return new DirectorDashboardDto(
             employeeRepository.count(),
@@ -153,11 +153,11 @@ public class DashboardService {
             projectRepository.countByStatus(ProjectStatus.ACTIVE),
             approvalStepRepository.countByStatus(StepStatus.PENDING),
             new LeaveMetricsSummaryDto(
-                "LIVE",
-                Math.toIntExact(liveLeaveMetrics.totalRequests()),
-                Math.toIntExact(liveLeaveMetrics.approvedCount()),
-                Math.toIntExact(liveLeaveMetrics.rejectedCount()),
-                liveLeaveMetrics.averageProcessingDays()
+                today.toString(),
+                leaveMetrics.totalRequests(),
+                leaveMetrics.approvedCount(),
+                leaveMetrics.rejectedCount(),
+                leaveMetrics.averageProcessingDays().doubleValue()
             ),
             adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES)
         );

@@ -7,6 +7,7 @@ import com.hris.leave.service.AttachmentDownload;
 import com.hris.leave.service.LeaveRequestQueryService;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.security.JwtAuthenticationFilter;
+import com.hris.security.PermissionAuthorizationService;
 import com.hris.auth.service.UserProvisioningService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +66,8 @@ class LeaveRequestAttachmentControllerTest {
     private UserProvisioningService userProvisioningService;
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+    @MockBean
+    private PermissionAuthorizationService permissionAuthorizationService;
 
     @BeforeEach
     void setUp() throws Exception {

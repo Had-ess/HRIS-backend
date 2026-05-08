@@ -30,5 +30,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     long countByDepartmentId(UUID departmentId);
 
+    Page<Employee> findByDepartmentId(UUID departmentId, Pageable pageable);
+
     Page<Employee> findAll(Pageable pageable);
 }

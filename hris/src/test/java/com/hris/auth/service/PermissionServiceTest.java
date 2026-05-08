@@ -1,11 +1,11 @@
 package com.hris.auth.service;
 
+import com.hris.access.repository.ProfilePermissionRepository;
 import com.hris.auth.dto.PermissionCreateDto;
 import com.hris.auth.dto.PermissionResponseDto;
 import com.hris.auth.dto.PermissionUpdateDto;
 import com.hris.auth.entity.Permission;
 import com.hris.auth.repository.PermissionRepository;
-import com.hris.auth.repository.RolePermissionRepository;
 import com.hris.common.exception.PermissionDeletionNotAllowedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class PermissionServiceTest {
     private PermissionRepository permissionRepository;
 
     @Mock
-    private RolePermissionRepository rolePermissionRepository;
+    private ProfilePermissionRepository profilePermissionRepository;
 
     @InjectMocks
     private PermissionService permissionService;
@@ -100,8 +100,8 @@ class PermissionServiceTest {
     }
 
     @Test
-    @DisplayName("cannot delete permission assigned to a role")
-    void cannotDeletePermissionAssignedToRole() {
+    @DisplayName("cannot delete permission assigned to an access profile")
+    void cannotDeletePermissionAssignedToAccessProfile() {
         UUID permissionId = UUID.randomUUID();
         Permission permission = Permission.builder()
             .id(permissionId)
@@ -112,12 +112,12 @@ class PermissionServiceTest {
             .build();
 
         when(permissionRepository.findById(permissionId)).thenReturn(Optional.of(permission));
-        when(rolePermissionRepository.existsByPermissionId(permissionId)).thenReturn(true);
+        when(profilePermissionRepository.existsByPermissionId(permissionId)).thenReturn(true);
 
         assertThatThrownBy(() -> permissionService.delete(permissionId))
             .isInstanceOf(PermissionDeletionNotAllowedException.class)
-            .hasMessage("Permission cannot be deleted because it is assigned to one or more roles");
+            .hasMessage("Permission cannot be deleted because it is assigned to one or more access profiles");
 
-        verify(rolePermissionRepository).existsByPermissionId(permissionId);
+        verify(profilePermissionRepository).existsByPermissionId(permissionId);
     }
 }

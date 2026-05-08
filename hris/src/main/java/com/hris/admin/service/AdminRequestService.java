@@ -177,9 +177,13 @@ public class AdminRequestService {
         paramsMap.put("linkPath", "/requests/inbox");
         String paramsJson = serializeMap(paramsMap);
 
-        List<User> administrationUsers = userRepository.findByRole("ADMINISTRATION");
-        List<User> hrAdmins = administrationUsers.isEmpty() ? userRepository.findByRole("HR_ADMIN") : administrationUsers;
-        UUID targetUserId = hrAdmins.isEmpty() ? requesterId : hrAdmins.get(0).getId();
+        List<User> processors = userRepository.findByPermissionNames(List.of(
+            "ADMIN_REQUEST_INBOX_READ",
+            "ADMIN_REQUEST_PROCESS",
+            "ADMIN_REQUEST_APPROVE",
+            "ADMIN_REQUEST_COMPLETE"
+        ));
+        UUID targetUserId = processors.isEmpty() ? requesterId : processors.get(0).getId();
 
         return NotificationEvent.builder()
             .eventType(NotificationEventType.ADMIN_REQUEST_SUBMITTED)

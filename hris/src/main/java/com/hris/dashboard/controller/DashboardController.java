@@ -10,7 +10,6 @@ import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,21 +32,21 @@ public class DashboardController {
     }
 
     @GetMapping("/supervisor")
-    @PreAuthorize("hasAnyRole('DEPT_MANAGER', 'PROJECT_SUPERVISOR', 'HR_ADMIN', 'ADMINISTRATION')")
     public ResponseEntity<ApiResponse<SupervisorDashboardDto>> getSupervisorDashboard(Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "DASHBOARD", "SUPERVISOR_VIEW");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getSupervisorDashboard(userId)));
     }
 
     @GetMapping("/hr")
     public ResponseEntity<ApiResponse<HrDashboardDto>> getHrDashboard(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "HR_VIEW", "HR_ADMIN", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "HR_VIEW");
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getHrDashboard()));
     }
 
     @GetMapping("/director")
     public ResponseEntity<ApiResponse<DirectorDashboardDto>> getDirectorDashboard(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "DIRECTOR_VIEW", "DIRECTOR", "ADMINISTRATION");
+        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "DIRECTOR_VIEW");
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getDirectorDashboard()));
     }
 }

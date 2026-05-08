@@ -3,6 +3,8 @@ package com.hris.leave.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.enums.AnalyticsEventType;
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
@@ -10,11 +12,9 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.enums.WorkflowStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
-import com.hris.approval.service.ApprovalRouter;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.UserRoleRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
@@ -34,10 +34,14 @@ import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.organisation.service.WorkScheduleService;
+import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,17 +61,19 @@ public class LeaveRequestService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
     private final FileAttachmentRepository fileAttachmentRepository;
     private final ApprovalStepRepository approvalStepRepository;
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
-    private final ApprovalRouter approvalRouter;
     private final WorkScheduleService workScheduleService;
     private final LeaveAttachmentService leaveAttachmentService;
+    private final LeaveApprovalWorkflowService leaveApprovalWorkflowService;
     private final TransactionalNotificationPublisher notificationPublisher;
+    private final AnalyticsEventPublisher analyticsEventPublisher;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
     private final LeaveTypeRepository leaveTypeRepository;
+    private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final AccessScopeService accessScopeService;
 
     @Transactional
     public LeaveRequest create(CreateLeaveRequestDto dto, UUID requesterId) {
@@ -124,32 +130,26 @@ public class LeaveRequestService {
         balance.deductDays(workingDays);
         leaveBalanceRepository.save(balance);
 
-        ApprovalWorkflow workflow = ApprovalWorkflow.builder()
-            .subjectType("LEAVE")
-            .subjectId(saved.getId())
-            .status(WorkflowStatus.INITIATED)
-            .createdAt(Instant.now())
-            .build();
-
-        workflow = approvalWorkflowRepository.save(workflow);
-
-        List<ApprovalStep> steps = approvalRouter.resolveSteps(
-            employee.getId(), workflow.getId(), dto.startDate(), dto.endDate());
-
-        if (steps.isEmpty()) {
-            throw new InvalidWorkflowStateException(
-                "No approvers could be resolved for this leave request");
-        }
+        LeaveApprovalWorkflowService.InstantiatedWorkflow instantiatedWorkflow =
+            leaveApprovalWorkflowService.instantiate(saved, employee, leaveType);
+        ApprovalWorkflow workflow = instantiatedWorkflow.workflow();
+        List<ApprovalStep> steps = instantiatedWorkflow.steps();
 
         saved.setStatus(LeaveStatus.IN_APPROVAL);
         leaveRequestRepository.save(saved);
 
-        workflow.setStatus(WorkflowStatus.IN_PROGRESS);
-        approvalWorkflowRepository.save(workflow);
-
         for (ApprovalStep step : steps) {
-            notificationPublisher.publishAfterCommit(buildSubmittedEvent(saved, step, employee));
+            if (step.getStatus() == StepStatus.PENDING) {
+                notificationPublisher.publishAfterCommit(buildSubmittedEvent(saved, step, employee));
+            }
         }
+        analyticsEventPublisher.publishLeaveEvent(
+            AnalyticsEventType.LEAVE_SUBMITTED,
+            saved,
+            employee,
+            resolvePrimaryAssignment(employee.getId(), saved.getStartDate(), saved.getEndDate()),
+            null
+        );
 
         auditLogService.log(requesterId, AuditAction.CREATE, "leave_request",
             saved.getId(), null, saved);
@@ -167,6 +167,19 @@ public class LeaveRequestService {
                 employee.getId(), status, pageable);
         }
         return leaveRequestRepository.findByEmployeeIdOrderBySubmittedAtDesc(employee.getId(), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<LeaveRequest> getVisibleRequests(
+            UUID requesterId,
+            LeaveStatus status,
+            UUID employeeId,
+            Pageable pageable) {
+        LeaveVisibilityScope scope = resolveLeaveVisibilityScope(requesterId);
+        return switch (scope.type()) {
+            case GLOBAL -> resolveGlobalVisibleRequests(status, employeeId, pageable);
+            case DEPARTMENT -> resolveDepartmentVisibleRequests(scope.departmentId(), status, employeeId, pageable);
+        };
     }
 
     @Transactional(readOnly = true)
@@ -239,10 +252,17 @@ public class LeaveRequestService {
 
         if (workflow != null) {
             closePendingSteps(workflow.getId(), "Auto-closed due to cancellation");
-            workflow.setStatus(WorkflowStatus.REJECTED);
+            workflow.setStatus(WorkflowStatus.CANCELLED);
             workflow.setCompletedAt(Instant.now());
             approvalWorkflowRepository.save(workflow);
         }
+        analyticsEventPublisher.publishLeaveEvent(
+            AnalyticsEventType.LEAVE_CANCELLED,
+            request,
+            employee,
+            resolvePrimaryAssignment(employee.getId(), request.getStartDate(), request.getEndDate()),
+            Instant.now()
+        );
 
         auditLogService.log(requesterId, AuditAction.UPDATE, "leave_request",
             requestId, previousStatus, LeaveStatus.CANCELLED);
@@ -287,18 +307,32 @@ public class LeaveRequestService {
             .submittedAt(request.getSubmittedAt())
             .build();
 
-        if (workflowStatus == WorkflowStatus.COMPLETED) {
+        if (workflowStatus == WorkflowStatus.APPROVED) {
             request.setStatus(LeaveStatus.APPROVED);
             balance.confirmUsage(request.getWorkingDays());
 
             Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
             notificationPublisher.publishAfterCommit(buildApprovedEvent(request, employee));
+            analyticsEventPublisher.publishLeaveEvent(
+                AnalyticsEventType.LEAVE_APPROVED,
+                request,
+                employee,
+                resolvePrimaryAssignment(employee.getId(), request.getStartDate(), request.getEndDate()),
+                Instant.now()
+            );
         } else {
             request.setStatus(LeaveStatus.REJECTED);
             balance.restoreDays(request.getWorkingDays());
 
             Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
             notificationPublisher.publishAfterCommit(buildRejectedEvent(request, employee));
+            analyticsEventPublisher.publishLeaveEvent(
+                AnalyticsEventType.LEAVE_REJECTED,
+                request,
+                employee,
+                resolvePrimaryAssignment(employee.getId(), request.getStartDate(), request.getEndDate()),
+                Instant.now()
+            );
         }
 
         leaveRequestRepository.save(request);
@@ -461,12 +495,12 @@ public class LeaveRequestService {
             return;
         }
 
-        pendingSteps.forEach(step -> step.reject(comment));
+        pendingSteps.forEach(step -> step.skip(comment));
         approvalStepRepository.saveAll(pendingSteps);
     }
 
     private boolean canAccessLeaveRequest(LeaveRequest request, UUID requesterId) {
-        if (hasLeaveOversightAccess(requesterId)) {
+        if (hasLeaveOversightAccess(request, requesterId)) {
             return true;
         }
 
@@ -487,11 +521,72 @@ public class LeaveRequestService {
             .orElse(false);
     }
 
-    private boolean hasLeaveOversightAccess(UUID userId) {
-        return userRoleRepository.findEffectiveByUserId(userId, Instant.now()).stream()
-            .anyMatch(userRole -> userRole.getRole() != null
-                && ("HR_ADMIN".equals(userRole.getRole().getCode())
-                    || "ADMINISTRATION".equals(userRole.getRole().getCode())));
+    private boolean hasLeaveOversightAccess(LeaveRequest request, UUID userId) {
+        if (accessScopeService.hasGlobalBusinessRead(userId)) {
+            return true;
+        }
+
+        Employee requesterEmployee = accessScopeService.findEmployee(userId).orElse(null);
+        return accessScopeService.resolveDepartmentManagerDepartmentId(userId, requesterEmployee)
+            .map(departmentId -> requestBelongsToDepartment(request, departmentId))
+            .orElse(false);
+    }
+
+    private boolean requestBelongsToDepartment(LeaveRequest request, UUID departmentId) {
+        return employeeRepository.findById(request.getEmployeeId())
+            .map(employee -> departmentId.equals(employee.getDepartmentId()))
+            .orElse(false);
+    }
+
+    private LeaveVisibilityScope resolveLeaveVisibilityScope(UUID requesterId) {
+        if (accessScopeService.hasGlobalBusinessRead(requesterId)) {
+            return LeaveVisibilityScope.global();
+        }
+
+        Employee requesterEmployee = accessScopeService.findEmployee(requesterId).orElse(null);
+        UUID departmentId = accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee)
+            .orElse(null);
+        if (departmentId != null) {
+            return LeaveVisibilityScope.department(departmentId);
+        }
+
+        throw new AccessDeniedException("You are not allowed to browse leave requests");
+    }
+
+    private Page<LeaveRequest> resolveGlobalVisibleRequests(
+            LeaveStatus status,
+            UUID employeeId,
+            Pageable pageable) {
+        if (employeeId != null) {
+            return status == null
+                ? leaveRequestRepository.findByEmployeeIdOrderBySubmittedAtDesc(employeeId, pageable)
+                : leaveRequestRepository.findByEmployeeIdAndStatusOrderBySubmittedAtDesc(employeeId, status, pageable);
+        }
+        return status == null
+            ? leaveRequestRepository.findAllByOrderBySubmittedAtDesc(pageable)
+            : leaveRequestRepository.findByStatusOrderBySubmittedAtDesc(status, pageable);
+    }
+
+    private Page<LeaveRequest> resolveDepartmentVisibleRequests(
+            UUID departmentId,
+            LeaveStatus status,
+            UUID employeeId,
+            Pageable pageable) {
+        if (employeeId != null) {
+            Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+            if (!departmentId.equals(employee.getDepartmentId())) {
+                throw new AccessDeniedException("You are not allowed to browse leave requests for this employee");
+            }
+            return status == null
+                ? leaveRequestRepository.findByDepartmentIdAndEmployeeIdOrderBySubmittedAtDesc(
+                    departmentId, employeeId, pageable)
+                : leaveRequestRepository.findByDepartmentIdAndEmployeeIdAndStatusOrderBySubmittedAtDesc(
+                    departmentId, employeeId, status, pageable);
+        }
+        return status == null
+            ? leaveRequestRepository.findByDepartmentIdOrderBySubmittedAtDesc(departmentId, pageable)
+            : leaveRequestRepository.findByDepartmentIdAndStatusOrderBySubmittedAtDesc(departmentId, status, pageable);
     }
 
     private int validateAndResolveBalanceYear(LocalDate startDate, LocalDate endDate) {
@@ -499,6 +594,30 @@ public class LeaveRequestService {
             throw new InvalidLeavePeriodException("Leave request cannot span multiple calendar years");
         }
         return startDate.getYear();
+    }
+
+    private ProjectAssignment resolvePrimaryAssignment(UUID employeeId, LocalDate startDate, LocalDate endDate) {
+        List<ProjectAssignment> assignments = projectAssignmentRepository
+            .findActiveAssignmentsDuringPeriod(employeeId, startDate, endDate);
+        if (assignments == null || assignments.isEmpty()) {
+            return null;
+        }
+        return assignments.getFirst();
+    }
+
+    private record LeaveVisibilityScope(LeaveVisibilityScopeType type, UUID departmentId) {
+        static LeaveVisibilityScope global() {
+            return new LeaveVisibilityScope(LeaveVisibilityScopeType.GLOBAL, null);
+        }
+
+        static LeaveVisibilityScope department(UUID departmentId) {
+            return new LeaveVisibilityScope(LeaveVisibilityScopeType.DEPARTMENT, departmentId);
+        }
+    }
+
+    private enum LeaveVisibilityScopeType {
+        GLOBAL,
+        DEPARTMENT
     }
 
 }

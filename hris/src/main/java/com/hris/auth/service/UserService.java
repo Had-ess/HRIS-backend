@@ -1,11 +1,11 @@
 package com.hris.auth.service;
 
+import com.hris.access.service.AccessResolutionService;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.UpdateCurrentUserDto;
 import com.hris.auth.dto.UpdateLocaleDto;
 import com.hris.auth.dto.UserResponseDto;
-import com.hris.auth.entity.Role;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +24,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserRoleAssignmentService userRoleAssignmentService;
+    private final AccessResolutionService accessResolutionService;
     private final AuditLogService auditLogService;
     private final KeycloakAdminClient keycloakAdminClient;
 
@@ -79,11 +78,11 @@ public class UserService {
     }
 
     private UserResponseDto toDto(User user) {
-        List<String> effectiveRoles = userRoleAssignmentService.getRoles(user.getId()).stream()
-            .map(Role::getCode)
-            .filter(code -> code != null && !code.isBlank())
-            .sorted(Comparator.naturalOrder())
-            .toList();
+        List<String> effectiveProfiles = accessResolutionService == null
+            ? List.of()
+            : accessResolutionService.getEffectiveProfiles(user.getId()).stream()
+                .map(profile -> profile.getCode())
+                .toList();
 
         return new UserResponseDto(
             user.getId(),
@@ -94,7 +93,7 @@ public class UserService {
             user.isActive(),
             user.getCreatedAt(),
             user.getLastLogin(),
-            effectiveRoles
+            effectiveProfiles
         );
     }
 

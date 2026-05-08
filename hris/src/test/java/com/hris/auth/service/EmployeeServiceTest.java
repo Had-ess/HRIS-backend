@@ -1,6 +1,9 @@
 package com.hris.auth.service;
 
+import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.auth.dto.EmployeeResponseDto;
+import com.hris.auth.dto.EmployeeUpdateDto;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
@@ -24,8 +27,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +47,8 @@ class EmployeeServiceTest {
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
     @Mock private AdminUserService adminUserService;
     @Mock private AuditLogService auditLogService;
+    @Mock private AnalyticsEventPublisher analyticsEventPublisher;
+    @Mock private EmployeeHistoryService employeeHistoryService;
 
     @InjectMocks
     private EmployeeService employeeService;
@@ -104,6 +111,63 @@ class EmployeeServiceTest {
         verify(adminUserService, never()).delete(employee.getUserId(), actorId);
     }
 
+    @Test
+    @DisplayName("records department transfer history and analytics when department changes")
+    void recordsDepartmentTransferHistoryAndAnalyticsWhenDepartmentChanges() {
+        UUID employeeId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
+        UUID previousDepartmentId = UUID.randomUUID();
+        UUID newDepartmentId = UUID.randomUUID();
+        Employee employee = activeEmployee(employeeId, previousDepartmentId);
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(employeeMapper.toDto(any(Employee.class))).thenReturn(responseFor(employeeId, newDepartmentId, EmployeeStatus.ACTIVE));
+
+        employeeService.update(employeeId, new EmployeeUpdateDto(
+            null,
+            null,
+            null,
+            null,
+            null,
+            newDepartmentId,
+            null,
+            null
+        ), actorId);
+
+        verify(employeeHistoryService).recordDepartmentTransfer(any(Employee.class), any(Employee.class), eq(actorId), any(LocalDate.class));
+        verify(analyticsEventPublisher).publishEmployeeTransferEvent(any(Employee.class), any(Employee.class));
+        verify(employeeHistoryService, never()).recordStatusChange(any(Employee.class), any(Employee.class), eq(actorId), any(LocalDate.class), any());
+    }
+
+    @Test
+    @DisplayName("records termination history and analytics when employee is terminated")
+    void recordsTerminationHistoryAndAnalyticsWhenEmployeeIsTerminated() {
+        UUID employeeId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
+        UUID departmentId = UUID.randomUUID();
+        Employee employee = activeEmployee(employeeId, departmentId);
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(employeeMapper.toDto(any(Employee.class))).thenReturn(responseFor(employeeId, departmentId, EmployeeStatus.TERMINATED));
+
+        employeeService.update(employeeId, new EmployeeUpdateDto(
+            null,
+            null,
+            null,
+            EmployeeStatus.TERMINATED,
+            null,
+            null,
+            null,
+            null
+        ), actorId);
+
+        verify(employeeHistoryService).recordStatusChange(any(Employee.class), any(Employee.class), eq(actorId), any(LocalDate.class), eq("TERMINATION"));
+        verify(analyticsEventPublisher).publishEmployeeTerminationEvent(any(Employee.class));
+        verify(employeeRepository, times(2)).save(any(Employee.class));
+    }
+
     private Employee terminatedEmployee(UUID employeeId) {
         return Employee.builder()
             .id(employeeId)
@@ -116,5 +180,35 @@ class EmployeeServiceTest {
             .departmentId(UUID.randomUUID())
             .workScheduleId(UUID.randomUUID())
             .build();
+    }
+
+    private Employee activeEmployee(UUID employeeId, UUID departmentId) {
+        return Employee.builder()
+            .id(employeeId)
+            .userId(UUID.randomUUID())
+            .employeeCode("EMP-ACT")
+            .hireDate(LocalDate.of(2022, 1, 1))
+            .jobTitle("Analyst")
+            .status(EmployeeStatus.ACTIVE)
+            .contractType(ContractType.PERMANENT)
+            .departmentId(departmentId)
+            .workScheduleId(UUID.randomUUID())
+            .build();
+    }
+
+    private EmployeeResponseDto responseFor(UUID employeeId, UUID departmentId, EmployeeStatus status) {
+        return new EmployeeResponseDto(
+            employeeId,
+            UUID.randomUUID(),
+            "EMP-ACT",
+            LocalDate.of(2022, 1, 1),
+            "Analyst",
+            status,
+            ContractType.PERMANENT,
+            departmentId,
+            null,
+            UUID.randomUUID(),
+            null
+        );
     }
 }

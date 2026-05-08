@@ -24,10 +24,27 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     void updateLastLogin(@Param("userId") UUID userId, @Param("timestamp") Instant timestamp);
 
     @Query("""
-        SELECT u FROM User u
-        JOIN UserRole ur ON ur.userId = u.id
-        JOIN Role r ON r.id = ur.roleId
-        WHERE r.code = :roleCode AND ur.isActive = true
+        SELECT DISTINCT u FROM User u
+        JOIN UserProfileAssignment assignment ON assignment.userId = u.id
+        JOIN AccessProfile profile ON profile.id = assignment.profileId
+        JOIN ProfilePermission profilePermission ON profilePermission.profileId = profile.id
+        JOIN Permission permission ON permission.id = profilePermission.permissionId
+        WHERE assignment.isActive = true
+          AND profile.isActive = true
+          AND permission.isActive = true
+          AND permission.name IN :permissionNames
+        ORDER BY u.email ASC
         """)
-    List<User> findByRole(@Param("roleCode") String roleCode);
+    List<User> findByPermissionNames(@Param("permissionNames") List<String> permissionNames);
+
+    @Query("""
+        SELECT DISTINCT u FROM User u
+        JOIN UserProfileAssignment assignment ON assignment.userId = u.id
+        JOIN AccessProfile profile ON profile.id = assignment.profileId
+        WHERE assignment.isActive = true
+          AND profile.isActive = true
+          AND profile.id = :profileId
+        ORDER BY u.email ASC
+        """)
+    List<User> findByAccessProfileId(@Param("profileId") UUID profileId);
 }

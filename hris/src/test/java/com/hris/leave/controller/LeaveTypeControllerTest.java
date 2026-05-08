@@ -5,6 +5,7 @@ import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.dto.LeaveTypeDto;
 import com.hris.leave.service.LeaveTypeService;
 import com.hris.security.JwtAuthenticationFilter;
+import com.hris.security.PermissionAuthorizationService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +51,8 @@ class LeaveTypeControllerTest {
     private UserProvisioningService userProvisioningService;
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+    @MockBean
+    private PermissionAuthorizationService permissionAuthorizationService;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -67,10 +70,10 @@ class LeaveTypeControllerTest {
     void listReturnsLeaveTypeDtos() throws Exception {
         UUID typeId = UUID.randomUUID();
         when(leaveTypeService.getAllActive()).thenReturn(List.of(
-            new LeaveTypeDto(typeId, "ANNUAL", "Annual Leave", true, false, true)
+            new LeaveTypeDto(typeId, "ANNUAL", "Annual Leave", true, false, true, null, null, null)
         ));
 
-        mockMvc.perform(get("/api/leave-types"))
+        mockMvc.perform(get("/api/leave-types").with(user(UUID.randomUUID().toString())))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data[0].id").value(typeId.toString()))
@@ -78,6 +81,8 @@ class LeaveTypeControllerTest {
             .andExpect(jsonPath("$.data[0].isPaid").value(true))
             .andExpect(jsonPath("$.data[0].requiresJustification").value(false))
             .andExpect(jsonPath("$.data[0].isActive").value(true));
+
+        verify(permissionAuthorizationService).authorize(any(), eq("LEAVE_TYPE"), eq("READ"));
     }
 
     @Test
@@ -85,7 +90,7 @@ class LeaveTypeControllerTest {
     void createDelegatesToServiceAndReturnsDtoResponseShape() throws Exception {
         UUID typeId = UUID.randomUUID();
         when(leaveTypeService.create(any())).thenReturn(
-            new LeaveTypeDto(typeId, "SICK", "Sick Leave", true, true, true)
+            new LeaveTypeDto(typeId, "SICK", "Sick Leave", true, true, true, null, null, null)
         );
 
         mockMvc.perform(post("/api/leave-types")
@@ -131,7 +136,7 @@ class LeaveTypeControllerTest {
     void updateDelegatesToServiceAndValidatesPayload() throws Exception {
         UUID typeId = UUID.randomUUID();
         when(leaveTypeService.update(eq(typeId), any())).thenReturn(
-            new LeaveTypeDto(typeId, "UNPAID", "Unpaid Leave", false, false, true)
+            new LeaveTypeDto(typeId, "UNPAID", "Unpaid Leave", false, false, true, null, null, null)
         );
 
         mockMvc.perform(patch("/api/leave-types/{id}", typeId)
