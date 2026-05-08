@@ -3,6 +3,7 @@ package com.hris.leave.service;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.entity.LeaveType;
+import com.hris.settings.quick.repository.EnterpriseSettingsRepository;
 import com.hris.settings.validation.entity.ValidationUsage;
 import com.hris.settings.validation.entity.ValidationWorkflow;
 import com.hris.settings.validation.repository.ValidationWorkflowRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LeaveValidationWorkflowResolver {
 
     private final ValidationWorkflowRepository validationWorkflowRepository;
+    private final EnterpriseSettingsRepository enterpriseSettingsRepository;
 
     @Transactional(readOnly = true)
     public ValidationWorkflow resolveForLeaveType(LeaveType leaveType) {
@@ -23,6 +25,15 @@ public class LeaveValidationWorkflowResolver {
                 .orElseThrow(() -> new EntityNotFoundException("Validation workflow not found"));
             validateUsable(explicitWorkflow);
             return explicitWorkflow;
+        }
+
+        ValidationWorkflow quickSettingWorkflow = enterpriseSettingsRepository.findFirstBySingletonKeyTrue()
+            .filter(settings -> settings.getDefaultValidationWorkflowId() != null)
+            .flatMap(settings -> validationWorkflowRepository.findById(settings.getDefaultValidationWorkflowId()))
+            .orElse(null);
+        if (quickSettingWorkflow != null) {
+            validateUsable(quickSettingWorkflow);
+            return quickSettingWorkflow;
         }
 
         return validationWorkflowRepository.findFirstByUsageAndActiveTrueAndDefaultWorkflowTrue(ValidationUsage.LEAVE)

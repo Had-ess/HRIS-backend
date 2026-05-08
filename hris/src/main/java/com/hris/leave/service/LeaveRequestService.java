@@ -22,7 +22,6 @@ import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.dto.CreateLeaveRequestDto;
 import com.hris.leave.entity.FileAttachment;
-import com.hris.leave.entity.LeaveBalance;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.enums.LeaveStatus;
@@ -74,6 +73,7 @@ public class LeaveRequestService {
     private final LeaveTypeRepository leaveTypeRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final AccessScopeService accessScopeService;
+    private final LeaveBalanceLedgerService leaveBalanceLedgerService;
 
     @Transactional
     public LeaveRequest create(CreateLeaveRequestDto dto, UUID requesterId) {
@@ -101,16 +101,11 @@ public class LeaveRequestService {
             throw new IllegalArgumentException("No working days in the selected period");
         }
 
-        LeaveBalance balance = leaveBalanceRepository
-            .findByEmployeeIdAndLeaveTypeIdAndYear(
-                employee.getId(), dto.leaveTypeId(), balanceYear)
-            .orElseThrow(() -> new InsufficientLeaveBalanceException(
-                "No balance found for this leave type"));
-
-        if (balance.getAvailableDays() < workingDays) {
-            throw new InsufficientLeaveBalanceException(
-                String.format("Insufficient balance. Available: %d, Requested: %d",
-                    balance.getAvailableDays(), workingDays));
+        if (leaveType.isBalanceTracked()) {
+            leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
+                    employee.getId(), dto.leaveTypeId(), balanceYear)
+                .orElseThrow(() -> new InsufficientLeaveBalanceException(
+                    "No balance found for this leave type"));
         }
 
         LeaveRequest request = LeaveRequest.builder()
@@ -127,8 +122,7 @@ public class LeaveRequestService {
 
         LeaveRequest saved = leaveRequestRepository.save(request);
 
-        balance.deductDays(workingDays);
-        leaveBalanceRepository.save(balance);
+        leaveBalanceLedgerService.reserveForLeaveRequest(employee, leaveType, saved, workingDays, requesterId);
 
         LeaveApprovalWorkflowService.InstantiatedWorkflow instantiatedWorkflow =
             leaveApprovalWorkflowService.instantiate(saved, employee, leaveType);
@@ -237,14 +231,7 @@ public class LeaveRequestService {
             throw new IllegalStateException("Cannot cancel a leave request in status: " + request.getStatus());
         }
 
-        LeaveBalance balance = leaveBalanceRepository
-            .findByEmployeeIdAndLeaveTypeIdAndYear(
-                request.getEmployeeId(), request.getLeaveTypeId(),
-                validateAndResolveBalanceYear(request.getStartDate(), request.getEndDate()))
-            .orElseThrow(() -> new EntityNotFoundException("Balance not found"));
-
-        balance.restoreDays(request.getWorkingDays());
-        leaveBalanceRepository.save(balance);
+        leaveBalanceLedgerService.releaseCancelledLeaveRequest(request, requesterId);
 
         LeaveStatus previousStatus = request.getStatus();
         request.setStatus(LeaveStatus.CANCELLED);
@@ -288,12 +275,6 @@ public class LeaveRequestService {
             return;
         }
 
-        LeaveBalance balance = leaveBalanceRepository
-            .findByEmployeeIdAndLeaveTypeIdAndYear(
-                request.getEmployeeId(), request.getLeaveTypeId(),
-                validateAndResolveBalanceYear(request.getStartDate(), request.getEndDate()))
-            .orElseThrow(() -> new EntityNotFoundException("Balance not found"));
-
         LeaveRequest previous = LeaveRequest.builder()
             .id(request.getId())
             .employeeId(request.getEmployeeId())
@@ -309,7 +290,7 @@ public class LeaveRequestService {
 
         if (workflowStatus == WorkflowStatus.APPROVED) {
             request.setStatus(LeaveStatus.APPROVED);
-            balance.confirmUsage(request.getWorkingDays());
+            leaveBalanceLedgerService.confirmApprovedLeaveRequest(request, actorId);
 
             Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
             notificationPublisher.publishAfterCommit(buildApprovedEvent(request, employee));
@@ -322,7 +303,7 @@ public class LeaveRequestService {
             );
         } else {
             request.setStatus(LeaveStatus.REJECTED);
-            balance.restoreDays(request.getWorkingDays());
+            leaveBalanceLedgerService.releaseRejectedLeaveRequest(request, actorId);
 
             Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
             notificationPublisher.publishAfterCommit(buildRejectedEvent(request, employee));
@@ -336,7 +317,6 @@ public class LeaveRequestService {
         }
 
         leaveRequestRepository.save(request);
-        leaveBalanceRepository.save(balance);
 
         auditLogService.log(actorId, AuditAction.UPDATE, "leave_request",
             request.getId(), previous, request);

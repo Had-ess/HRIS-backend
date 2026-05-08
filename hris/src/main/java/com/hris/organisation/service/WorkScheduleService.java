@@ -6,6 +6,8 @@ import com.hris.organisation.dto.WorkScheduleDto;
 import com.hris.organisation.repository.PublicHolidayRepository;
 import com.hris.organisation.repository.WorkScheduleRepository;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.settings.calendar.repository.HrHolidayRepository;
+import com.hris.settings.quick.repository.EnterpriseSettingsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ public class WorkScheduleService {
 
     private final WorkScheduleRepository workScheduleRepository;
     private final PublicHolidayRepository publicHolidayRepository;
+    private final EnterpriseSettingsRepository enterpriseSettingsRepository;
+    private final HrHolidayRepository hrHolidayRepository;
 
     @Transactional(readOnly = true)
     public List<WorkScheduleDto> getAll() {
@@ -43,10 +47,15 @@ public class WorkScheduleService {
 
         Set<DayOfWeek> workingDaysSet = schedule.getWorkingDaysSet();
 
-        List<PublicHoliday> holidays = publicHolidayRepository.findByDateBetween(start, end);
-        Set<LocalDate> holidayDates = holidays.stream()
-            .map(PublicHoliday::getDate)
-            .collect(Collectors.toSet());
+        Set<LocalDate> holidayDates = enterpriseSettingsRepository.findFirstBySingletonKeyTrue()
+            .filter(settings -> settings.getActiveCalendarId() != null)
+            .map(settings -> hrHolidayRepository.findByCalendarIdAndDateBetween(settings.getActiveCalendarId(), start, end).stream()
+                .map(com.hris.settings.calendar.entity.HrHoliday::getDate)
+                .collect(Collectors.toSet()))
+            .orElseGet(() -> {
+                List<PublicHoliday> holidays = publicHolidayRepository.findByDateBetween(start, end);
+                return holidays.stream().map(PublicHoliday::getDate).collect(Collectors.toSet());
+            });
 
         int count = 0;
         LocalDate current = start;

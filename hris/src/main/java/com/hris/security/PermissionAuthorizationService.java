@@ -36,4 +36,40 @@ public class PermissionAuthorizationService {
             throw new AccessDeniedException("You do not have permission to perform this action");
         }
     }
+
+    public boolean hasPermissionName(Authentication authentication, String permissionName) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        UUID userId;
+        try {
+            userId = SecurityUtils.getCurrentUserId(authentication);
+        } catch (IllegalStateException ex) {
+            return false;
+        }
+
+        return accessResolutionService.hasPermissionName(userId, permissionName);
+    }
+
+    public boolean hasAnyPermissionName(Authentication authentication, String... permissionNames) {
+        for (String permissionName : permissionNames) {
+            if (hasPermissionName(authentication, permissionName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void authorizePermissionName(Authentication authentication, String permissionName) {
+        if (!hasPermissionName(authentication, permissionName)) {
+            throw new AccessDeniedException("You do not have permission to perform this action");
+        }
+    }
+
+    public void authorizeAnyPermissionName(Authentication authentication, String... permissionNames) {
+        if (!hasAnyPermissionName(authentication, permissionNames)) {
+            throw new AccessDeniedException("You do not have permission to perform this action");
+        }
+    }
 }

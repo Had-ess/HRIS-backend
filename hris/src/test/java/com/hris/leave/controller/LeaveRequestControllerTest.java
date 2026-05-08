@@ -140,7 +140,7 @@ class LeaveRequestControllerTest {
             null,
             null
         )));
-        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "ANNUAL", "Annual Leave", true, false, true, null, null, null);
+        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "ANNUAL", "Annual Leave", true, false, true, true, null, null, null);
 
         when(leaveRequestService.getById(leaveId, USER_ID)).thenReturn(request);
         when(leaveTypeService.getDtoById(leaveTypeId)).thenReturn(leaveTypeDto);
@@ -188,7 +188,7 @@ class LeaveRequestControllerTest {
             true,
             List.of()
         );
-        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "SICK", "Sick Leave", true, true, true, null, null, null);
+        LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "SICK", "Sick Leave", true, true, true, true, null, null, null);
         var requestPage = new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1);
 
         when(leaveRequestService.getMyRequests(eq(USER_ID), eq(null), any()))

@@ -24,6 +24,10 @@ public class LeaveBalance {
         return totalDays + carryOverDays - usedDays - pendingDays;
     }
 
+    public void adjustTotalDays(int amount) {
+        this.totalDays += amount;
+    }
+
     public void deductDays(int n) {
         if (n <= 0) throw new IllegalArgumentException("Deduction must be positive");
         this.pendingDays += n;

@@ -78,6 +78,7 @@ class LeaveRequestServiceTest {
     @Mock private LeaveTypeRepository leaveTypeRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
     @Mock private AccessScopeService accessScopeService;
+    @Mock private LeaveBalanceLedgerService leaveBalanceLedgerService;
 
     @InjectMocks
     private LeaveRequestService leaveRequestService;
@@ -113,6 +114,7 @@ class LeaveRequestServiceTest {
             .id(leaveTypeId)
             .name("Annual Leave")
             .requiresJustification(false)
+            .balanceTracked(true)
             .build();
     }
 
@@ -190,7 +192,7 @@ class LeaveRequestServiceTest {
         }
 
         @Test
-        @DisplayName("should create leave request and deduct balance when sufficient days available")
+        @DisplayName("should create leave request and reserve balance when sufficient days available")
         void shouldCreateLeaveRequest_WhenBalanceSufficient() throws Exception {
             CreateLeaveRequestDto dto = new CreateLeaveRequestDto(
                 leaveTypeId,
@@ -257,11 +259,11 @@ class LeaveRequestServiceTest {
             assertThat(result.getLeaveTypeId()).isEqualTo(leaveTypeId);
             assertThat(result.getWorkingDays()).isEqualTo(5);
             assertThat(result.getStatus()).isEqualTo(LeaveStatus.IN_APPROVAL);
-            assertThat(balance.getPendingDays()).isEqualTo(5);
 
             verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2027);
-            verify(leaveBalanceRepository).save(balance);
+            verify(leaveBalanceLedgerService).reserveForLeaveRequest(
+                employee, leaveType, result, 5, requesterId);
         }
 
         @Test
@@ -289,6 +291,10 @@ class LeaveRequestServiceTest {
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(8);
             when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2026)).thenReturn(Optional.of(balance));
+            when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(leaveBalanceLedgerService.reserveForLeaveRequest(
+                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(8), eq(requesterId)))
+                .thenThrow(new InsufficientLeaveBalanceException("Insufficient balance"));
 
             assertThatThrownBy(() -> leaveRequestService.create(dto, requesterId))
                 .isInstanceOf(InsufficientLeaveBalanceException.class)
@@ -365,6 +371,9 @@ class LeaveRequestServiceTest {
                 request.setId(UUID.randomUUID());
                 return request;
             });
+            when(leaveBalanceLedgerService.reserveForLeaveRequest(
+                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(3), eq(requesterId)))
+                .thenReturn(balance);
             when(leaveApprovalWorkflowService.instantiate(any(), eq(employee), eq(leaveType)))
                 .thenThrow(new InvalidWorkflowStateException("No approvers could be resolved for this leave request"));
 
@@ -414,15 +423,6 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.PENDING)
                 .build();
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2027)
-                .totalDays(20)
-                .usedDays(0)
-                .pendingDays(3)
-                .build();
-
             ApprovalStep pendingStep = ApprovalStep.builder()
                 .id(UUID.randomUUID())
                 .workflowId(workflowId)
@@ -433,8 +433,6 @@ class LeaveRequestServiceTest {
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2027)).thenReturn(Optional.of(balance));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
                     .id(workflowId)
@@ -448,15 +446,12 @@ class LeaveRequestServiceTest {
             leaveRequestService.cancel(requestId, requesterId);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.CANCELLED);
-            assertThat(balance.getPendingDays()).isEqualTo(0);
             assertThat(pendingStep.getStatus()).isEqualTo(StepStatus.SKIPPED);
             assertThat(pendingStep.getComment()).isEqualTo("Auto-closed due to cancellation");
             assertThat(pendingStep.getDecidedAt()).isNotNull();
 
             verify(leaveRequestRepository).save(request);
-            verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2027);
-            verify(leaveBalanceRepository).save(balance);
+            verify(leaveBalanceLedgerService).releaseCancelledLeaveRequest(request, requesterId);
             verify(approvalStepRepository).saveAll(List.of(pendingStep));
         }
 
@@ -526,30 +521,16 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.IN_APPROVAL)
                 .build();
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2028)
-                .totalDays(20)
-                .usedDays(0)
-                .pendingDays(5)
-                .build();
-
             when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2028)).thenReturn(Optional.of(balance));
             when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
-            when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
+            when(userRepository.findById(requesterUser.getId())).thenReturn(Optional.of(requesterUser));
             when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
             leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.APPROVED);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.APPROVED);
-            assertThat(balance.getUsedDays()).isEqualTo(5);
-            assertThat(balance.getPendingDays()).isEqualTo(0);
 
-            verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2028);
+            verify(leaveBalanceLedgerService).confirmApprovedLeaveRequest(request, null);
             verify(notificationPublisher).publishAfterCommit(any());
         }
 
@@ -568,28 +549,16 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.IN_APPROVAL)
                 .build();
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2026)
-                .totalDays(20)
-                .usedDays(0)
-                .pendingDays(5)
-                .build();
-
             when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2026)).thenReturn(Optional.of(balance));
             when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
-            when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
+            when(userRepository.findById(requesterUser.getId())).thenReturn(Optional.of(requesterUser));
             when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
             leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.REJECTED);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.REJECTED);
-            assertThat(balance.getPendingDays()).isEqualTo(0);
-            assertThat(balance.getUsedDays()).isEqualTo(0);
 
+            verify(leaveBalanceLedgerService).releaseRejectedLeaveRequest(request, null);
             verify(notificationPublisher).publishAfterCommit(any());
         }
 
@@ -613,7 +582,7 @@ class LeaveRequestServiceTest {
             leaveRequestService.handleWorkflowCompletion(requestId, WorkflowStatus.APPROVED);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.CANCELLED);
-            verify(leaveBalanceRepository, never()).findByEmployeeIdAndLeaveTypeIdAndYear(any(), any(), anyInt());
+            verify(leaveBalanceLedgerService, never()).confirmApprovedLeaveRequest(any(), any());
             verify(notificationPublisher, never()).publishAfterCommit(any());
         }
     }

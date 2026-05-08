@@ -2,9 +2,14 @@ package com.hris.leave.controller;
 
 import com.hris.common.ApiResponse;
 import com.hris.leave.dto.LeaveBalanceDto;
+import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
+import com.hris.leave.dto.LeaveBalanceSummaryDto;
+import com.hris.leave.dto.LeaveBalanceTransactionDto;
 import com.hris.leave.service.LeaveBalanceService;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,16 +28,75 @@ public class LeaveBalanceController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getMyBalances(Authentication auth) {
+        permissionAuthorizationService.authorizePermissionName(auth, "LEAVE_BALANCE_READ_OWN");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getMyBalances(userId)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<LeaveBalanceSummaryDto>>> getVisibleBalances(
+            @RequestParam(required = false) UUID employeeId,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Integer year,
+            Pageable pageable,
+            Authentication authentication) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            authentication,
+            "LEAVE_BALANCE_READ_SCOPED",
+            "LEAVE_BALANCE_MANAGE"
+        );
+        UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(
+            leaveBalanceService.getVisibleBalances(requesterId, employeeId, query, year, pageable)
+        ));
+    }
+
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getForEmployeeByPath(
+            @PathVariable UUID employeeId,
+            Authentication authentication) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            authentication,
+            "LEAVE_BALANCE_READ_SCOPED",
+            "LEAVE_BALANCE_MANAGE"
+        );
+        UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getForEmployee(employeeId, requesterId)));
     }
 
     @GetMapping("/employee/{id}")
     public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> getForEmployee(
             @PathVariable UUID id,
             Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "LEAVE_BALANCE", "READ");
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            authentication,
+            "LEAVE_BALANCE_READ_SCOPED",
+            "LEAVE_BALANCE_MANAGE"
+        );
         UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getForEmployee(id, requesterId)));
+    }
+
+    @GetMapping("/{employeeId}/transactions")
+    public ResponseEntity<ApiResponse<List<LeaveBalanceTransactionDto>>> getTransactions(
+            @PathVariable UUID employeeId,
+            Authentication authentication) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            authentication,
+            "LEAVE_BALANCE_READ_SCOPED",
+            "LEAVE_BALANCE_MANAGE"
+        );
+        UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getTransactions(employeeId, requesterId)));
+    }
+
+    @PostMapping("/{employeeId}/adjustments")
+    public ResponseEntity<ApiResponse<List<LeaveBalanceDto>>> adjustBalance(
+            @PathVariable UUID employeeId,
+            @Valid @RequestBody LeaveBalanceAdjustmentDto dto,
+            Authentication authentication) {
+        permissionAuthorizationService.authorizePermissionName(authentication, "LEAVE_BALANCE_MANAGE");
+        UUID requesterId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.adjustBalance(employeeId, dto, requesterId)));
     }
 }

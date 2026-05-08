@@ -12,6 +12,7 @@ public record LeaveTypeUpdateDto(
     @NotNull Boolean isPaid,
     @NotNull Boolean requiresJustification,
     @NotNull Boolean isActive,
+    @NotNull Boolean balanceTracked,
     UUID validationWorkflowId
 ) {
 }

@@ -89,6 +89,7 @@ public class AccessScopeService {
     private boolean hasManagerDepartmentVisibility(UUID userId) {
         return hasPermissionName(userId, "DASHBOARD_SUPERVISOR_VIEW")
             || hasPermissionName(userId, "LEAVE_REQUEST_READ")
-            || hasPermissionName(userId, "LEAVE_BALANCE_READ");
+            || hasPermissionName(userId, "LEAVE_BALANCE_READ")
+            || hasPermissionName(userId, "LEAVE_BALANCE_READ_SCOPED");
     }
 }

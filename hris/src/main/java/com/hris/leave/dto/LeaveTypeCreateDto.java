@@ -11,6 +11,7 @@ public record LeaveTypeCreateDto(
     Boolean isPaid,
     Boolean requiresJustification,
     Boolean isActive,
+    Boolean balanceTracked,
     UUID validationWorkflowId
 ) {
 }

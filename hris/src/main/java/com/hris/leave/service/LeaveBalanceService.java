@@ -3,9 +3,15 @@ package com.hris.leave.service;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.User;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.dto.LeaveBalanceDto;
+import com.hris.leave.dto.LeaveBalanceSummaryDto;
+import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
+import com.hris.leave.dto.LeaveBalanceTransactionDto;
+import com.hris.leave.acquisition.repository.LeaveAcquisitionPolicyRepository;
 import com.hris.leave.entity.LeaveBalance;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.entity.LeavePolicy;
@@ -19,6 +25,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -36,9 +43,12 @@ public class LeaveBalanceService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeavePolicyRepository leavePolicyRepository;
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final AuditLogService auditLogService;
     private final AccessScopeService accessScopeService;
+    private final LeaveBalanceLedgerService leaveBalanceLedgerService;
+    private final LeaveAcquisitionPolicyRepository leaveAcquisitionPolicyRepository;
 
     @Transactional(readOnly = true)
     public List<LeaveBalanceDto> getMyBalances(UUID userId) {
@@ -73,9 +83,50 @@ public class LeaveBalanceService {
         throw new AccessDeniedException("You are not allowed to view leave balances for this employee");
     }
 
+    @Transactional(readOnly = true)
+    public List<LeaveBalanceSummaryDto> getVisibleBalances(UUID requesterId, UUID employeeId, String query, Integer year, Pageable pageable) {
+        int targetYear = year != null ? year : LocalDate.now().getYear();
+
+        if (employeeId != null) {
+            Employee targetEmployee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+            assertLeaveBalanceVisibility(targetEmployee, requesterId);
+        } else if (!accessScopeService.hasAnyPermissionName(requesterId,
+            "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE", "DASHBOARD_HR_VIEW")) {
+            throw new AccessDeniedException("You are not allowed to browse leave balances");
+        }
+
+        return leaveBalanceRepository.searchForYear(targetYear, employeeId, normalizeQuery(query), pageable).stream()
+            .map(this::toSummaryDto)
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveBalanceTransactionDto> getTransactions(UUID employeeId, UUID requesterId) {
+        Employee targetEmployee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        assertLeaveBalanceVisibility(targetEmployee, requesterId);
+        return leaveBalanceLedgerService.getTransactions(employeeId);
+    }
+
+    @Transactional
+    public List<LeaveBalanceDto> adjustBalance(UUID employeeId, LeaveBalanceAdjustmentDto dto, UUID requesterId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        if (!accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")) {
+            throw new AccessDeniedException("You are not allowed to adjust leave balances");
+        }
+        leaveBalanceLedgerService.adjustBalance(employee.getId(), dto, requesterId);
+        return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(employeeId, LocalDate.now().getYear()));
+    }
+
     @Scheduled(cron = "0 0 3 1 1 *") // January 1st at 3 AM
     @Transactional
     public void rolloverBalances() {
+        if (!leaveAcquisitionPolicyRepository.findAll().isEmpty()) {
+            log.info("Skipping legacy leave balance rollover because acquisition policies are configured");
+            return;
+        }
         int currentYear = LocalDate.now().getYear();
         int previousYear = currentYear - 1;
 
@@ -143,5 +194,34 @@ public class LeaveBalanceService {
             balance.getCarryOverDays(),
             balance.getAvailableDays()
         );
+    }
+
+    private LeaveBalanceSummaryDto toSummaryDto(LeaveBalance balance) {
+        Employee employee = employeeRepository.findById(balance.getEmployeeId())
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        User user = userRepository.findById(employee.getUserId())
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        LeaveType leaveType = leaveTypeRepository.findById(balance.getLeaveTypeId()).orElse(null);
+        return new LeaveBalanceSummaryDto(
+            balance.getId(),
+            employee.getId(),
+            employee.getEmployeeCode(),
+            user.getId(),
+            user.getFirstName(),
+            user.getLastName(),
+            balance.getLeaveTypeId(),
+            leaveType != null ? leaveType.getCode() : null,
+            leaveType != null ? leaveType.getName() : null,
+            balance.getYear(),
+            balance.getTotalDays(),
+            balance.getUsedDays(),
+            balance.getPendingDays(),
+            balance.getCarryOverDays(),
+            balance.getAvailableDays()
+        );
+    }
+
+    private String normalizeQuery(String query) {
+        return query == null || query.isBlank() ? null : query.trim().toLowerCase();
     }
 }

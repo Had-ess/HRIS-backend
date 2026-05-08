@@ -98,6 +98,6 @@ class LeaveTypeServiceTest {
     }
 
     private LeaveTypeCreateDto leaveRequest(String code, UUID assignedWorkflowId) {
-        return new LeaveTypeCreateDto(code, "Annual Leave", true, false, true, assignedWorkflowId);
+        return new LeaveTypeCreateDto(code, "Annual Leave", true, false, true, true, assignedWorkflowId);
     }
 }

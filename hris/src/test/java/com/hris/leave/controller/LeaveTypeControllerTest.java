@@ -3,6 +3,7 @@ package com.hris.leave.controller;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.dto.LeaveTypeDto;
+import com.hris.leave.service.LeaveAcquisitionPolicyService;
 import com.hris.leave.service.LeaveTypeService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
@@ -46,6 +47,8 @@ class LeaveTypeControllerTest {
     @MockBean
     private LeaveTypeService leaveTypeService;
     @MockBean
+    private LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
+    @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean
     private UserProvisioningService userProvisioningService;
@@ -70,7 +73,7 @@ class LeaveTypeControllerTest {
     void listReturnsLeaveTypeDtos() throws Exception {
         UUID typeId = UUID.randomUUID();
         when(leaveTypeService.getAllActive()).thenReturn(List.of(
-            new LeaveTypeDto(typeId, "ANNUAL", "Annual Leave", true, false, true, null, null, null)
+            new LeaveTypeDto(typeId, "ANNUAL", "Annual Leave", true, false, true, true, null, null, null)
         ));
 
         mockMvc.perform(get("/api/leave-types").with(user(UUID.randomUUID().toString())))
@@ -90,11 +93,11 @@ class LeaveTypeControllerTest {
     void createDelegatesToServiceAndReturnsDtoResponseShape() throws Exception {
         UUID typeId = UUID.randomUUID();
         when(leaveTypeService.create(any())).thenReturn(
-            new LeaveTypeDto(typeId, "SICK", "Sick Leave", true, true, true, null, null, null)
+            new LeaveTypeDto(typeId, "SICK", "Sick Leave", true, true, true, true, null, null, null)
         );
 
         mockMvc.perform(post("/api/leave-types")
-                .with(user(UUID.randomUUID().toString()).roles("HR_ADMIN"))
+                .with(user(UUID.randomUUID().toString()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -102,7 +105,8 @@ class LeaveTypeControllerTest {
                       "name": "Sick Leave",
                       "isPaid": true,
                       "requiresJustification": true,
-                      "isActive": true
+                      "isActive": true,
+                      "balanceTracked": true
                     }
                     """))
             .andExpect(status().isCreated())
@@ -118,7 +122,7 @@ class LeaveTypeControllerTest {
     @DisplayName("create rejects invalid payload")
     void createRejectsInvalidPayload() throws Exception {
         mockMvc.perform(post("/api/leave-types")
-                .with(user(UUID.randomUUID().toString()).roles("HR_ADMIN"))
+                .with(user(UUID.randomUUID().toString()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -136,11 +140,11 @@ class LeaveTypeControllerTest {
     void updateDelegatesToServiceAndValidatesPayload() throws Exception {
         UUID typeId = UUID.randomUUID();
         when(leaveTypeService.update(eq(typeId), any())).thenReturn(
-            new LeaveTypeDto(typeId, "UNPAID", "Unpaid Leave", false, false, true, null, null, null)
+            new LeaveTypeDto(typeId, "UNPAID", "Unpaid Leave", false, false, true, false, null, null, null)
         );
 
         mockMvc.perform(patch("/api/leave-types/{id}", typeId)
-                .with(user(UUID.randomUUID().toString()).roles("HR_ADMIN"))
+                .with(user(UUID.randomUUID().toString()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -148,7 +152,8 @@ class LeaveTypeControllerTest {
                       "name": "Unpaid Leave",
                       "isPaid": false,
                       "requiresJustification": false,
-                      "isActive": true
+                      "isActive": true,
+                      "balanceTracked": false
                     }
                     """))
             .andExpect(status().isOk())
@@ -164,7 +169,7 @@ class LeaveTypeControllerTest {
         UUID typeId = UUID.randomUUID();
 
         mockMvc.perform(patch("/api/leave-types/{id}", typeId)
-                .with(user(UUID.randomUUID().toString()).roles("HR_ADMIN"))
+                .with(user(UUID.randomUUID().toString()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -172,7 +177,8 @@ class LeaveTypeControllerTest {
                       "name": "",
                       "isPaid": null,
                       "requiresJustification": null,
-                      "isActive": null
+                      "isActive": null,
+                      "balanceTracked": null
                     }
                     """))
             .andExpect(status().isBadRequest())

@@ -47,6 +47,7 @@ public class LeaveTypeService {
             .isPaid(dto.isPaid() == null || dto.isPaid())
             .requiresJustification(Boolean.TRUE.equals(dto.requiresJustification()))
             .isActive(dto.isActive() == null || dto.isActive())
+            .balanceTracked(dto.balanceTracked() == null || dto.balanceTracked())
             .validationWorkflowId(workflow != null ? workflow.getId() : null)
             .build());
         return toDto(saved, workflow);
@@ -62,6 +63,7 @@ public class LeaveTypeService {
         existing.setPaid(dto.isPaid());
         existing.setRequiresJustification(dto.requiresJustification());
         existing.setActive(dto.isActive());
+        existing.setBalanceTracked(dto.balanceTracked());
         existing.setValidationWorkflowId(workflow != null ? workflow.getId() : null);
         return toDto(leaveTypeRepository.save(existing), workflow);
     }
@@ -89,6 +91,7 @@ public class LeaveTypeService {
             leaveType.isPaid(),
             leaveType.isRequiresJustification(),
             leaveType.isActive(),
+            leaveType.isBalanceTracked(),
             leaveType.getValidationWorkflowId(),
             workflow != null ? workflow.getCode() : null,
             workflow != null ? workflow.getName() : null

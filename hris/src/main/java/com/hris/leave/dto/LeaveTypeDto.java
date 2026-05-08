@@ -9,6 +9,7 @@ public record LeaveTypeDto(
     boolean isPaid,
     boolean requiresJustification,
     boolean isActive,
+    boolean balanceTracked,
     UUID validationWorkflowId,
     String validationWorkflowCode,
     String validationWorkflowName
