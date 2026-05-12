@@ -10,6 +10,7 @@ import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * GAP-B-11/12 FIXED:
- * - Uses user.getLocalePreference() instead of event.getLocale()
- * - Deserializes params as a Map and converts to Object[] for MessageSource
+ * Consumes notification events from RabbitMQ queues and persists Notification records.
+ * Supports idempotency via eventId deduplication and MDC correlation tracking.
  */
 @Service
 @RequiredArgsConstructor
@@ -51,6 +51,15 @@ public class NotificationConsumer {
         processEvent(event);
     }
 
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_SYSTEM)
+    public void onSystemEvent(org.springframework.amqp.core.Message message) {
+        log.debug("Received system notification message id={}, routingKey={}",
+            message.getMessageProperties().getMessageId(),
+            message.getMessageProperties().getReceivedRoutingKey());
+        NotificationEvent event = deserializeMessage(message);
+        processEvent(event);
+    }
+
     private NotificationEvent deserializeMessage(org.springframework.amqp.core.Message message) {
         try {
             return objectMapper.readValue(message.getBody(), NotificationEvent.class);
@@ -61,9 +70,20 @@ public class NotificationConsumer {
     }
 
     private void processEvent(NotificationEvent event) {
+        // Set MDC for correlation tracking
+        if (event.getCorrelationId() != null) {
+            MDC.put("correlationId", event.getCorrelationId().toString());
+        }
         try {
             log.debug("Processing notification event type={}, targetUserId={}",
                 event.getEventType(), event.getTargetUserId());
+
+            // Idempotency check: skip if notification already exists for this event
+            if (event.getId() != null && notificationRepository.existsByEventId(event.getId())) {
+                log.info("Skipping duplicate notification event id={}, type={}",
+                    event.getId(), event.getEventType());
+                return;
+            }
 
             User user = userRepository.findById(event.getTargetUserId())
                 .orElse(null);
@@ -77,7 +97,7 @@ public class NotificationConsumer {
             log.debug("Found target user for notification event type={}, userId={}",
                 event.getEventType(), user.getId());
 
-            // GAP-B-11: Use user's locale preference, not event's locale
+            // Use user's locale preference, not event's locale
             Locale locale = Locale.forLanguageTag(
                 user.getLocalePreference() != null ? user.getLocalePreference() : "fr");
 
@@ -106,6 +126,7 @@ public class NotificationConsumer {
                 .title(title)
                 .body(body)
                 .linkPath(linkPath)
+                .eventId(event.getId())
                 .isRead(false)
                 .createdAt(Instant.now())
                 .build();
@@ -116,6 +137,8 @@ public class NotificationConsumer {
         } catch (Exception e) {
             log.error("Failed to process notification event: {}", event.getEventType(), e);
             throw new IllegalStateException("Failed to process notification event " + event.getEventType(), e);
+        } finally {
+            MDC.remove("correlationId");
         }
     }
 
@@ -153,17 +176,45 @@ public class NotificationConsumer {
                 map.getOrDefault("endDate", ""),
                 map.getOrDefault("workingDays", "")
             };
+            case LEAVE_CANCELLED -> new Object[]{
+                map.getOrDefault("employeeName", ""),
+                map.getOrDefault("startDate", ""),
+                map.getOrDefault("endDate", ""),
+                map.getOrDefault("workingDays", "")
+            };
+            case LEAVE_BALANCE_ADJUSTED -> new Object[]{
+                map.getOrDefault("leaveTypeName", ""),
+                map.getOrDefault("adjustmentAmount", ""),
+                map.getOrDefault("newBalance", "")
+            };
+            case LEAVE_ACCRUAL_APPLIED -> new Object[]{
+                map.getOrDefault("policiesProcessed", ""),
+                map.getOrDefault("transactionsCreated", ""),
+                map.getOrDefault("runDate", "")
+            };
             case ADMIN_REQUEST_SUBMITTED -> new Object[]{
-                map.getOrDefault("requesterName", ""),
-                map.getOrDefault("trackingNumber", ""),
+                map.getOrDefault("requestNumber", ""),
                 map.getOrDefault("requestType", "")
             };
-            case ADMIN_REQUEST_PROCESSED -> new Object[]{
-                map.getOrDefault("trackingNumber", "")
+            case ADMIN_REQUEST_CREATED,
+                 ADMIN_REQUEST_IN_REVIEW,
+                 ADMIN_REQUEST_APPROVED,
+                 ADMIN_REQUEST_COMPLETED,
+                 ADMIN_REQUEST_CANCELLED,
+                 ADMIN_REQUEST_COMMENT_ADDED,
+                 ADMIN_REQUEST_ATTACHMENT_ADDED,
+                 ADMIN_REQUEST_RESPONSE_ATTACHMENT_ADDED -> new Object[]{
+                map.getOrDefault("requestNumber", ""),
+                map.getOrDefault("subject", "")
             };
             case ADMIN_REQUEST_REJECTED -> new Object[] {
-                map.getOrDefault("trackingNumber", ""),
+                map.getOrDefault("requestNumber", ""),
                 map.getOrDefault("rejectionReason", "")
+            };
+            case ADMIN_REQUEST_SLA_EXCEEDED -> new Object[] {
+                map.getOrDefault("requestNumber", ""),
+                map.getOrDefault("subject", ""),
+                map.getOrDefault("dueAt", "")
             };
             case PROJECT_ASSIGNED -> new Object[] {
                 map.getOrDefault("projectName", "")

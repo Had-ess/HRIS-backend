@@ -18,6 +18,7 @@ public class AuditLog {
     @Column(name = "previous_state", columnDefinition = "TEXT") private String previousState;
     @Column(name = "new_state", columnDefinition = "TEXT") private String newState;
     @Column(name = "ip_address", length = 45) private String ipAddress;
+    @Column(name = "actor_type", length = 20) @Builder.Default private String actorType = "USER";
     @Column(nullable = false) @Builder.Default private Instant timestamp = Instant.now();
 
     @Override public boolean equals(Object o) {

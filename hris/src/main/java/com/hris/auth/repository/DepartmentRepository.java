@@ -20,6 +20,8 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
     boolean existsByHeadEmployeeId(UUID headEmployeeId);
 
+    java.util.List<Department> findByHeadEmployeeIdAndIsActiveTrue(UUID headEmployeeId);
+
     Page<Department> findAllByIdIn(Collection<UUID> ids, Pageable pageable);
 
     @Query("SELECT d.headEmployee FROM Department d WHERE d.id = :deptId")

@@ -1,13 +1,15 @@
 package com.hris.admin.controller;
 
+import com.hris.admin.dto.AdminRequestAttachmentDto;
+import com.hris.admin.dto.AdminRequestCommentDto;
 import com.hris.admin.dto.AdminRequestResponseDto;
+import com.hris.admin.dto.AdminRequestStatusHistoryDto;
 import com.hris.admin.entity.AdminRequest;
 import com.hris.admin.enums.AdminRequestStatus;
 import com.hris.admin.service.AdminRequestQueryService;
 import com.hris.admin.service.AdminRequestService;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.leave.enums.UrgencyLevel;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import jakarta.servlet.FilterChain;
@@ -39,6 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,58 +53,32 @@ class AdminRequestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private AdminRequestService adminRequestService;
-    @MockBean
-    private AdminRequestQueryService adminRequestQueryService;
-    @MockBean
-    private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean
-    private UserProvisioningService userProvisioningService;
-    @MockBean
-    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+    @MockBean private AdminRequestService adminRequestService;
+    @MockBean private AdminRequestQueryService adminRequestQueryService;
+    @MockBean private PermissionAuthorizationService permissionAuthorizationService;
+    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @MockBean private UserProvisioningService userProvisioningService;
+    @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach
     void setUp() throws Exception {
         doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(
-                invocation.getArgument(0),
-                invocation.getArgument(1)
-            );
+            ((FilterChain) invocation.getArgument(2)).doFilter(invocation.getArgument(0), invocation.getArgument(1));
             return null;
         }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
     }
 
     @Test
-    @DisplayName("create preserves endpoint path and returns enriched response shape")
-    void createPreservesEndpointPathAndReturnsEnrichedResponseShape() throws Exception {
-        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    @DisplayName("create draft keeps endpoint path and response shape")
+    void createDraftKeepsResponseShape() throws Exception {
+        UUID userId = UUID.randomUUID();
         UUID requestId = UUID.randomUUID();
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .requesterId(userId)
-            .submittedAt(Instant.now())
-            .build();
-        AdminRequestResponseDto dto = new AdminRequestResponseDto(
-            requestId,
-            userId,
-            "Jane Requester",
-            UUID.randomUUID(),
-            "AR-2026-001",
-            "Need document",
-            UrgencyLevel.NORMAL,
-            AdminRequestStatus.SUBMITTED,
-            null,
-            null,
-            request.getSubmittedAt(),
-            null,
-            null
-        );
+        AdminRequest request = AdminRequest.builder().id(requestId).requesterUserId(userId).build();
+        AdminRequestResponseDto dto = responseDto(requestId, userId, AdminRequestStatus.DRAFT);
 
         when(adminRequestService.create(any(), eq(userId))).thenReturn(request);
-        when(adminRequestQueryService.toDto(request)).thenReturn(dto);
+        when(adminRequestQueryService.toDto(request, false)).thenReturn(dto);
+        doNothing().when(permissionAuthorizationService).authorizePermissionName(any(), eq("ADMIN_REQUEST_CREATE"));
 
         mockMvc.perform(post("/api/admin-requests")
                 .with(user(userId.toString()).roles("EMPLOYEE"))
@@ -109,98 +86,108 @@ class AdminRequestControllerTest {
                 .content("""
                     {
                       "requestTypeId": "22222222-2222-2222-2222-222222222222",
-                      "description": "Need document",
-                      "urgencyLevel": "NORMAL"
+                      "subject": "Need document",
+                      "description": "Please issue it"
                     }
                     """))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(requestId.toString()))
-            .andExpect(jsonPath("$.data.requesterName").value("Jane Requester"))
+            .andExpect(jsonPath("$.data.status").value("DRAFT"));
+    }
+
+    @Test
+    @DisplayName("my requests endpoint uses /my path and wrapped page")
+    void myRequestsEndpointUsesMyPath() throws Exception {
+        UUID userId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder().id(UUID.randomUUID()).requesterUserId(userId).build();
+        AdminRequestResponseDto dto = responseDto(request.getId(), userId, AdminRequestStatus.SUBMITTED);
+
+        when(adminRequestService.getMyRequests(eq(userId), any()))
+            .thenReturn(new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1));
+        when(adminRequestQueryService.toDtoPage(any(PageImpl.class), eq(false)))
+            .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 20), 1));
+        doNothing().when(permissionAuthorizationService).authorizePermissionName(any(), eq("ADMIN_REQUEST_READ_OWN"));
+
+        mockMvc.perform(get("/api/admin-requests/my").with(user(userId.toString()).roles("EMPLOYEE")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].requestNumber").value("AR-2026-001"));
+    }
+
+    @Test
+    @DisplayName("submit delegates through permission-gated action endpoint")
+    void submitDelegatesThroughPermissionGatedActionEndpoint() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder().id(requestId).requesterUserId(userId).build();
+        AdminRequestResponseDto dto = responseDto(requestId, userId, AdminRequestStatus.SUBMITTED);
+
+        doNothing().when(permissionAuthorizationService).authorizePermissionName(any(), eq("ADMIN_REQUEST_CREATE"));
+        when(adminRequestService.submit(requestId, userId)).thenReturn(request);
+        when(adminRequestQueryService.toDto(request, false)).thenReturn(dto);
+
+        mockMvc.perform(post("/api/admin-requests/{id}/submit", requestId)
+                .with(user(userId.toString()).roles("EMPLOYEE")))
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.status").value("SUBMITTED"));
     }
 
     @Test
-    @DisplayName("my requests preserves wrapped page response shape")
-    void myRequestsPreservesWrappedPageResponseShape() throws Exception {
-        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        AdminRequest request = AdminRequest.builder().id(UUID.randomUUID()).requesterId(userId).build();
-        AdminRequestResponseDto dto = new AdminRequestResponseDto(
-            request.getId(),
-            userId,
-            "Jane Requester",
-            UUID.randomUUID(),
-            "AR-2026-001",
-            "Need document",
-            UrgencyLevel.NORMAL,
-            AdminRequestStatus.SUBMITTED,
-            null,
-            null,
-            Instant.now(),
-            null,
-            null
-        );
+    @DisplayName("approve uses permission-name authorization and global detail path")
+    void approveUsesPermissionNameAuthorization() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = AdminRequest.builder().id(requestId).requesterUserId(UUID.randomUUID()).build();
+        AdminRequestResponseDto dto = responseDto(requestId, UUID.randomUUID(), AdminRequestStatus.APPROVED);
 
-        when(adminRequestService.getMyRequests(eq(userId), any()))
-            .thenReturn(new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1));
-        when(adminRequestQueryService.toDtoPage(any(PageImpl.class)))
-            .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 20), 1));
+        doNothing().when(permissionAuthorizationService).authorizePermissionName(any(), eq("ADMIN_REQUEST_APPROVE"));
+        when(adminRequestService.approve(requestId, userId)).thenReturn(request);
+        when(adminRequestQueryService.toDto(request, true)).thenReturn(dto);
 
-        mockMvc.perform(get("/api/admin-requests")
-                .with(user(userId.toString()).roles("EMPLOYEE")))
+        mockMvc.perform(post("/api/admin-requests/{id}/approve", requestId)
+                .with(user(userId.toString()).roles("ADMIN")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.content[0].requesterName").value("Jane Requester"))
-            .andExpect(jsonPath("$.data.totalElements").value(1));
-    }
+            .andExpect(jsonPath("$.data.status").value("APPROVED"));
 
-    @Test
-    @DisplayName("incoming requests delegates through query service and keeps path")
-    void incomingRequestsDelegatesThroughQueryServiceAndKeepsPath() throws Exception {
-        UUID requesterId = UUID.randomUUID();
-        AdminRequest request = AdminRequest.builder().id(UUID.randomUUID()).requesterId(requesterId).build();
-        AdminRequestResponseDto dto = new AdminRequestResponseDto(
-            request.getId(),
-            requesterId,
-            "Jane Requester",
-            UUID.randomUUID(),
-            "AR-2026-009",
-            "Need urgent document",
-            UrgencyLevel.URGENT,
-            AdminRequestStatus.IN_PROGRESS,
-            null,
-            null,
-            Instant.now(),
-            null,
-            null
-        );
-
-        doNothing().when(permissionAuthorizationService)
-            .authorize(any(), eq("ADMIN_REQUEST"), eq("PROCESS"));
-        when(adminRequestService.getIncoming(any()))
-            .thenReturn(new PageImpl<>(List.of(request), PageRequest.of(0, 20), 1));
-        when(adminRequestQueryService.toDtoPage(any(PageImpl.class)))
-            .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 20), 1));
-
-        mockMvc.perform(get("/api/admin-requests/incoming")
-                .with(user(UUID.randomUUID().toString()).roles("HR_ADMIN")))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.content[0].trackingNumber").value("AR-2026-009"))
-            .andExpect(jsonPath("$.data.content[0].requesterName").value("Jane Requester"));
-
-        verify(permissionAuthorizationService)
-            .authorize(any(), eq("ADMIN_REQUEST"), eq("PROCESS"));
+        verify(permissionAuthorizationService).authorizePermissionName(any(), eq("ADMIN_REQUEST_APPROVE"));
     }
 
     @TestConfiguration
     static class TestSecurityConfig {
-
         @Bean
         org.springframework.security.web.SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http
-                .csrf(csrf -> csrf.disable())
+            return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .build();
         }
+    }
+
+    private AdminRequestResponseDto responseDto(UUID requestId, UUID requesterUserId, AdminRequestStatus status) {
+        return new AdminRequestResponseDto(
+            requestId,
+            "AR-2026-001",
+            UUID.randomUUID(),
+            requesterUserId,
+            "Jane Requester",
+            UUID.randomUUID(),
+            "Certificate",
+            "Need document",
+            "Please issue it",
+            status,
+            Instant.now(),
+            null,
+            null,
+            null,
+            null,
+            false,
+            0L,
+            null,
+            null,
+            null,
+            Instant.now(),
+            Instant.now(),
+            List.<AdminRequestAttachmentDto>of(),
+            List.<AdminRequestCommentDto>of(),
+            List.<AdminRequestStatusHistoryDto>of()
+        );
     }
 }

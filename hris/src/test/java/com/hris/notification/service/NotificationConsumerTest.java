@@ -74,8 +74,8 @@ class NotificationConsumerTest {
             .titleKey("admin.submitted.title")
             .bodyKey("admin.submitted.body")
             .params(objectMapper.writeValueAsString(Map.of(
-                "requesterName", "Ali Ben",
-                "trackingNumber", "AR-20260415-00001",
+                "requestNumber", "AR-20260415-00001",
+                "subject", "Salary certificate",
                 "requestType", "Salary Certificate"
             )))
             .locale("fr")
@@ -89,7 +89,7 @@ class NotificationConsumerTest {
         when(messageSource.getMessage(eq("admin.submitted.body"), any(Object[].class), any(Locale.class)))
             .thenAnswer(invocation -> {
                 Object[] args = invocation.getArgument(1, Object[].class);
-                return args[0] + "|" + args[1] + "|" + args[2];
+                return args[0] + "|" + args[1];
             });
 
         notificationConsumer.onAdminEvent(toMessage(objectMapper, event));
@@ -99,7 +99,7 @@ class NotificationConsumerTest {
 
         Notification notification = captor.getValue();
         assertThat(notification.getTitle()).isEqualTo("New administrative request");
-        assertThat(notification.getBody()).isEqualTo("Ali Ben|AR-20260415-00001|Salary Certificate");
+        assertThat(notification.getBody()).isEqualTo("AR-20260415-00001|Salary Certificate");
         assertThat(notification.getUserId()).isEqualTo(userId);
         assertThat(notification.getLinkPath()).isNull();
     }
@@ -171,7 +171,7 @@ class NotificationConsumerTest {
             .titleKey("admin.rejected.title")
             .bodyKey("admin.rejected.body")
             .params(objectMapper.writeValueAsString(Map.of(
-                "trackingNumber", "AR-20260428-00042",
+                "requestNumber", "AR-20260428-00042",
                 "rejectionReason", "Missing attachment"
             )))
             .locale("en")
@@ -230,5 +230,128 @@ class NotificationConsumerTest {
 
     private Message toMessage(ObjectMapper objectMapper, NotificationEvent event) throws Exception {
         return new Message(objectMapper.writeValueAsBytes(event), new MessageProperties());
+    }
+
+    @Test
+    @DisplayName("should skip duplicate notification event (idempotency)")
+    void shouldSkipDuplicateNotificationEvent() throws Exception {
+        ObjectMapper objectMapper = testObjectMapper();
+        NotificationConsumer notificationConsumer = new NotificationConsumer(
+            notificationRepository, userRepository, messageSource, objectMapper);
+        UUID eventId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        NotificationEvent event = NotificationEvent.builder()
+            .id(eventId)
+            .eventType(NotificationEventType.LEAVE_SUBMITTED)
+            .targetUserId(userId)
+            .titleKey("leave.submitted.title")
+            .bodyKey("leave.submitted.body")
+            .params("{\"employeeName\":\"Test\",\"startDate\":\"2026-05-01\",\"endDate\":\"2026-05-03\",\"workingDays\":2}")
+            .locale("en")
+            .routingKey("leave.submitted")
+            .publishedAt(Instant.now())
+            .build();
+
+        when(notificationRepository.existsByEventId(eventId)).thenReturn(true);
+
+        notificationConsumer.onLeaveEvent(toMessage(objectMapper, event));
+
+        verify(notificationRepository, never()).save(any(Notification.class));
+    }
+
+    @Test
+    @DisplayName("should process LEAVE_CANCELLED notification event")
+    void shouldProcessLeaveCancelledEvent() throws Exception {
+        ObjectMapper objectMapper = testObjectMapper();
+        NotificationConsumer notificationConsumer = new NotificationConsumer(
+            notificationRepository, userRepository, messageSource, objectMapper);
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+            .id(userId)
+            .email("supervisor@hris.local")
+            .firstName("Super")
+            .lastName("Visor")
+            .localePreference("en")
+            .build();
+
+        NotificationEvent event = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.LEAVE_CANCELLED)
+            .targetUserId(userId)
+            .titleKey("leave.cancelled.title")
+            .bodyKey("leave.cancelled.body")
+            .params(objectMapper.writeValueAsString(Map.of(
+                "employeeName", "John Doe",
+                "startDate", "2026-06-01",
+                "endDate", "2026-06-05",
+                "workingDays", 5
+            )))
+            .locale("en")
+            .routingKey("leave.cancelled")
+            .publishedAt(Instant.now())
+            .build();
+
+        when(notificationRepository.existsByEventId(any())).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(messageSource.getMessage(eq("leave.cancelled.title"), any(Object[].class), any(Locale.class)))
+            .thenReturn("Leave request cancelled");
+        when(messageSource.getMessage(eq("leave.cancelled.body"), any(Object[].class), any(Locale.class)))
+            .thenReturn("John Doe cancelled their leave");
+
+        notificationConsumer.onLeaveEvent(toMessage(objectMapper, event));
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        Notification notification = captor.getValue();
+        assertThat(notification.getTitle()).isEqualTo("Leave request cancelled");
+        assertThat(notification.getUserId()).isEqualTo(userId);
+        assertThat(notification.getEventId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("should process system event from system queue")
+    void shouldProcessSystemEvent() throws Exception {
+        ObjectMapper objectMapper = testObjectMapper();
+        NotificationConsumer notificationConsumer = new NotificationConsumer(
+            notificationRepository, userRepository, messageSource, objectMapper);
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+            .id(userId)
+            .email("hr@hris.local")
+            .firstName("HR")
+            .lastName("Admin")
+            .localePreference("en")
+            .build();
+
+        NotificationEvent event = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.LEAVE_ACCRUAL_APPLIED)
+            .targetUserId(userId)
+            .titleKey("leave.accrual.summary.title")
+            .bodyKey("leave.accrual.summary.body")
+            .params(objectMapper.writeValueAsString(Map.of(
+                "policiesProcessed", 3,
+                "transactionsCreated", 15,
+                "runDate", "2026-05-10"
+            )))
+            .locale("en")
+            .routingKey("system.accrual.summary")
+            .publishedAt(Instant.now())
+            .build();
+
+        when(notificationRepository.existsByEventId(any())).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(messageSource.getMessage(eq("leave.accrual.summary.title"), any(Object[].class), any(Locale.class)))
+            .thenReturn("Accrual run completed");
+        when(messageSource.getMessage(eq("leave.accrual.summary.body"), any(Object[].class), any(Locale.class)))
+            .thenReturn("3 policies processed, 15 transactions");
+
+        notificationConsumer.onSystemEvent(toMessage(objectMapper, event));
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+        assertThat(captor.getValue().getTitle()).isEqualTo("Accrual run completed");
     }
 }

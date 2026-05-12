@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.repository.AuditLogRepository;
+import com.hris.common.event.ActorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,9 +33,17 @@ public class AuditLogService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(UUID actorId, AuditAction action, String resource,
                     UUID resourceId, Object previousState, Object newState) {
+        log(actorId, ActorType.USER, action, resource, resourceId, previousState, newState);
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void log(UUID actorId, ActorType actorType, AuditAction action, String resource,
+                    UUID resourceId, Object previousState, Object newState) {
         try {
             AuditLog auditLog = AuditLog.builder()
                 .actorId(actorId)
+                .actorType(actorType != null ? actorType.name() : "USER")
                 .action(action)
                 .resource(resource)
                 .resourceId(resourceId)

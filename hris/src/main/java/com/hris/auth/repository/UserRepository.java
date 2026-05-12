@@ -38,6 +38,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findByPermissionNames(@Param("permissionNames") List<String> permissionNames);
 
     @Query("""
+        SELECT u.id FROM User u
+        WHERE LOWER(COALESCE(u.firstName, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+           OR LOWER(COALESCE(u.lastName, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+           OR LOWER(COALESCE(u.email, '')) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        ORDER BY u.email ASC
+        """)
+    List<UUID> searchIds(@Param("searchTerm") String searchTerm);
+
+    @Query("""
         SELECT DISTINCT u FROM User u
         JOIN UserProfileAssignment assignment ON assignment.userId = u.id
         JOIN AccessProfile profile ON profile.id = assignment.profileId

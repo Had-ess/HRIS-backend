@@ -14,14 +14,14 @@ public interface LeaveAcquisitionPolicyRepository extends JpaRepository<LeaveAcq
 
     List<LeaveAcquisitionPolicy> findByLeaveTypeIdOrderByCodeAsc(UUID leaveTypeId);
 
-    List<LeaveAcquisitionPolicy> findByIsActiveTrueAndFrequencyOrderByCodeAsc(AcquisitionFrequency frequency);
+    List<LeaveAcquisitionPolicy> findByActiveTrueAndFrequencyOrderByCodeAsc(AcquisitionFrequency frequency);
 
-    List<LeaveAcquisitionPolicy> findByLeaveTypeIdAndIsActiveTrueOrderByStartDateDesc(UUID leaveTypeId);
+    List<LeaveAcquisitionPolicy> findByLeaveTypeIdAndActiveTrueOrderByStartDateDesc(UUID leaveTypeId);
 
     boolean existsByCode(String code);
 
     default LeaveAcquisitionPolicy findEffectivePolicy(UUID leaveTypeId, LocalDate onDate) {
-        return findByLeaveTypeIdAndIsActiveTrueOrderByStartDateDesc(leaveTypeId).stream()
+        return findByLeaveTypeIdAndActiveTrueOrderByStartDateDesc(leaveTypeId).stream()
             .filter(policy -> policy.isEffectiveOn(onDate))
             .findFirst()
             .orElse(null);

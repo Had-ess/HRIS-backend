@@ -1,7 +1,6 @@
 package com.hris.admin.entity;
 
 import com.hris.admin.enums.AdminRequestStatus;
-import com.hris.leave.enums.UrgencyLevel;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -15,21 +14,26 @@ import java.util.UUID;
 @Getter @Setter @NoArgsConstructor @Builder @AllArgsConstructor
 public class AdminRequest {
     @Id @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
-    @Column(name = "requester_id", nullable = false) private UUID requesterId;
-    @Column(name = "request_type_id", nullable = false) private UUID requestTypeId;
-    @Column(name = "tracking_number", nullable = false, unique = true, length = 50) private String trackingNumber;
+    @Column(name = "request_number", nullable = false, unique = true, length = 50) private String requestNumber;
+    @Column(name = "requester_employee_id", nullable = false) private UUID requesterEmployeeId;
+    @Column(name = "requester_user_id", nullable = false) private UUID requesterUserId;
+    @Column(name = "type_id", nullable = false) private UUID typeId;
+    @Column(nullable = false, length = 255) private String subject;
     @Column(nullable = false, columnDefinition = "TEXT") private String description;
     @Enumerated(EnumType.STRING)
-    @Column(name = "urgency_level", nullable = false, length = 50) private UrgencyLevel urgencyLevel;
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50) private AdminRequestStatus status;
-    @Column(columnDefinition = "TEXT") private String metadata;
     @Column(name = "rejection_reason", columnDefinition = "TEXT") private String rejectionReason;
-    @Column(name = "submitted_at", nullable = false) @Builder.Default private Instant submittedAt = Instant.now();
-    @Column(name = "resolved_at") private Instant resolvedAt;
-    @Column(name = "resolved_by_id") private UUID resolvedById;
+    @Column(name = "submitted_at") private Instant submittedAt;
+    @Column(name = "reviewed_at") private Instant reviewedAt;
+    @Column(name = "decided_at") private Instant decidedAt;
+    @Column(name = "completed_at") private Instant completedAt;
+    @Column(name = "due_at") private Instant dueAt;
+    @Column(name = "processed_by_user_id") private UUID processedByUserId;
+    @Column(name = "sla_notified_at") private Instant slaNotifiedAt;
+    @Column(name = "created_at", nullable = false) @Builder.Default private Instant createdAt = Instant.now();
+    @Column(name = "updated_at", nullable = false) @Builder.Default private Instant updatedAt = Instant.now();
 
-    public static String generateTrackingNumber() {
+    public static String generateRequestNumber() {
         return "AR-" + DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now())
             + "-" + String.format("%05d", new Random().nextInt(100000));
     }

@@ -113,11 +113,11 @@ public class ApprovalStepQueryService {
             return SubjectDetails.withReference(subjectId.toString());
         }
 
-        User requester = userRepository.findById(request.getRequesterId()).orElse(null);
+        User requester = userRepository.findById(request.getRequesterUserId()).orElse(null);
 
         return new SubjectDetails(
-            request.getTrackingNumber() != null && !request.getTrackingNumber().isBlank()
-                ? request.getTrackingNumber()
+            request.getRequestNumber() != null && !request.getRequestNumber().isBlank()
+                ? request.getRequestNumber()
                 : request.getId().toString(),
             userDisplayNameService.toDisplayName(requester),
             null,

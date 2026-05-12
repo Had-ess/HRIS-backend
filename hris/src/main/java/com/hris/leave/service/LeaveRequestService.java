@@ -251,7 +251,15 @@ public class LeaveRequestService {
             Instant.now()
         );
 
-        auditLogService.log(requesterId, AuditAction.UPDATE, "leave_request",
+        // Notify supervisor about cancellation
+        final LeaveRequest cancelledRequest = request;
+        if (employee.getSupervisorEmployeeId() != null) {
+            employeeRepository.findById(employee.getSupervisorEmployeeId())
+                .ifPresent(supervisor -> notificationPublisher.publishAfterCommit(
+                    buildCancelledEvent(cancelledRequest, employee, supervisor)));
+        }
+
+        auditLogService.log(requesterId, AuditAction.CANCEL, "leave_request",
             requestId, previousStatus, LeaveStatus.CANCELLED);
     }
 
@@ -456,6 +464,30 @@ public class LeaveRequestService {
             .params(paramsJson)
             .locale(user.getLocalePreference())
             .routingKey("leave.rejected")
+            .publishedAt(Instant.now())
+            .build();
+    }
+
+    private NotificationEvent buildCancelledEvent(LeaveRequest request, Employee requesterEmployee, Employee supervisorEmployee) {
+        User requester = userRepository.findById(requesterEmployee.getUserId()).orElseThrow();
+        User supervisor = userRepository.findById(supervisorEmployee.getUserId()).orElseThrow();
+
+        Map<String, Object> params = new java.util.LinkedHashMap<>();
+        params.put("employeeName", requester.getFirstName() + " " + requester.getLastName());
+        params.put("startDate", request.getStartDate().toString());
+        params.put("endDate", request.getEndDate().toString());
+        params.put("workingDays", request.getWorkingDays());
+        params.put("linkPath", "/leave/" + request.getId());
+        String paramsJson = serializeParams(params);
+
+        return NotificationEvent.builder()
+            .eventType(NotificationEventType.LEAVE_CANCELLED)
+            .targetUserId(supervisor.getId())
+            .titleKey("leave.cancelled.title")
+            .bodyKey("leave.cancelled.body")
+            .params(paramsJson)
+            .locale(supervisor.getLocalePreference())
+            .routingKey("leave.cancelled")
             .publishedAt(Instant.now())
             .build();
     }

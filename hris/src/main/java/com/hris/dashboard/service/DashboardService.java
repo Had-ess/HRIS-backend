@@ -5,7 +5,7 @@ import com.hris.admin.entity.AdminRequestType;
 import com.hris.admin.enums.AdminRequestStatus;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.admin.repository.AdminRequestTypeRepository;
-import com.hris.analytics.dto.LeaveMetricsSnapshotDto;
+import com.hris.analytics.dto.AnalyticsLeaveRequestReportDto;
 import com.hris.analytics.enums.AnalyticsScopeType;
 import com.hris.analytics.service.AnalyticsQueryService;
 import com.hris.approval.entity.ApprovalStep;
@@ -56,7 +56,8 @@ public class DashboardService {
 
     private static final List<AdminRequestStatus> ACTIONABLE_ADMIN_REQUEST_STATUSES = List.of(
         AdminRequestStatus.SUBMITTED,
-        AdminRequestStatus.IN_PROGRESS
+        AdminRequestStatus.IN_REVIEW,
+        AdminRequestStatus.APPROVED
     );
 
     private final NotificationRepository notificationRepository;
@@ -84,7 +85,7 @@ public class DashboardService {
         List<LeaveRequest> leaveRequests =
             leaveRequestRepository.findTop5ByEmployeeIdOrderBySubmittedAtDesc(employee.getId());
         List<AdminRequest> adminRequests =
-            adminRequestRepository.findTop5ByRequesterIdOrderBySubmittedAtDesc(userId);
+            adminRequestRepository.findTop5ByRequesterUserIdOrderByCreatedAtDesc(userId);
 
         return new EmployeeDashboardDto(
             notificationRepository.countByUserIdAndIsReadFalse(userId),
@@ -141,7 +142,8 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
         LocalDate today = LocalDate.now();
-        LeaveMetricsSnapshotDto leaveMetrics = analyticsQueryService.getLeaveMetrics(
+        AnalyticsLeaveRequestReportDto leaveMetrics = analyticsQueryService.getLeaveRequests(
+            today.withDayOfMonth(1),
             today,
             AnalyticsScopeType.GLOBAL,
             null
@@ -153,11 +155,11 @@ public class DashboardService {
             projectRepository.countByStatus(ProjectStatus.ACTIVE),
             approvalStepRepository.countByStatus(StepStatus.PENDING),
             new LeaveMetricsSummaryDto(
-                today.toString(),
-                leaveMetrics.totalRequests(),
-                leaveMetrics.approvedCount(),
-                leaveMetrics.rejectedCount(),
-                leaveMetrics.averageProcessingDays().doubleValue()
+                today.withDayOfMonth(1) + " - " + today,
+                Math.toIntExact(leaveMetrics.totalRequests()),
+                Math.toIntExact(leaveMetrics.approvedCount()),
+                Math.toIntExact(leaveMetrics.rejectedCount()),
+                leaveMetrics.averageProcessingDays()
             ),
             adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES)
         );
@@ -203,18 +205,17 @@ public class DashboardService {
 
     private List<AdminRequestSummaryDto> mapAdminRequests(List<AdminRequest> requests) {
         Map<UUID, String> requestTypeNames = adminRequestTypeRepository.findAllById(
-                requests.stream().map(AdminRequest::getRequestTypeId).collect(Collectors.toSet()))
+                requests.stream().map(AdminRequest::getTypeId).collect(Collectors.toSet()))
             .stream()
             .collect(Collectors.toMap(AdminRequestType::getId, AdminRequestType::getName));
 
         return requests.stream()
             .map(request -> new AdminRequestSummaryDto(
                 request.getId(),
-                request.getRequestTypeId(),
-                requestTypeNames.get(request.getRequestTypeId()),
-                request.getTrackingNumber(),
+                request.getTypeId(),
+                requestTypeNames.get(request.getTypeId()),
+                request.getRequestNumber(),
                 request.getStatus(),
-                request.getUrgencyLevel(),
                 request.getSubmittedAt()
             ))
             .toList();

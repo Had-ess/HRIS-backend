@@ -127,8 +127,8 @@ class AdminUserServiceTest {
         when(employeeRepository.findByUserId(userId)).thenReturn(java.util.Optional.empty());
         when(approvalStepRepository.existsByApproverId(userId)).thenReturn(false);
         when(fileAttachmentRepository.existsByUploadedById(userId)).thenReturn(false);
-        when(adminRequestRepository.existsByRequesterId(userId)).thenReturn(false);
-        when(adminRequestRepository.existsByResolvedById(userId)).thenReturn(false);
+        when(adminRequestRepository.existsByRequesterUserId(userId)).thenReturn(false);
+        when(adminRequestRepository.existsByProcessedByUserId(userId)).thenReturn(false);
         when(auditLogRepository.existsByActorId(userId)).thenReturn(false);
         when(exportRecordRepository.existsByExportedById(userId)).thenReturn(false);
         when(userAccessAssignmentService.getProfiles(userId)).thenReturn(List.of(

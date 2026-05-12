@@ -25,8 +25,27 @@ public class AdminRequestTypeController {
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<AdminRequestTypeDto>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(adminRequestTypeService.getAll()));
+    public ResponseEntity<ApiResponse<List<AdminRequestTypeDto>>> getAll(
+            @RequestParam(defaultValue = "false") boolean activeOnly,
+            Authentication authentication) {
+        permissionAuthorizationService.authorizeAnyPermissionName(authentication,
+            "ADMIN_REQUEST_TYPE_MANAGE",
+            "ADMIN_REQUEST_CREATE",
+            "ADMIN_REQUEST_INBOX_READ",
+            "ADMIN_REQUEST_READ_GLOBAL");
+        return ResponseEntity.ok(ApiResponse.ok(adminRequestTypeService.getAll(activeOnly)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<AdminRequestTypeDto>> getById(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorizeAnyPermissionName(authentication,
+            "ADMIN_REQUEST_TYPE_MANAGE",
+            "ADMIN_REQUEST_CREATE",
+            "ADMIN_REQUEST_INBOX_READ",
+            "ADMIN_REQUEST_READ_GLOBAL");
+        return ResponseEntity.ok(ApiResponse.ok(adminRequestTypeService.getById(id)));
     }
 
     @PostMapping
@@ -50,7 +69,7 @@ public class AdminRequestTypeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id, Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "ADMIN_REQUEST_TYPE", "MANAGE");
-        adminRequestTypeService.deactivate(id);
+        adminRequestTypeService.deleteOrDeactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

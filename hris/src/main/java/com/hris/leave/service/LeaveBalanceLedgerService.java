@@ -1,9 +1,14 @@
 package com.hris.leave.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.User;
 import com.hris.auth.enums.EmployeeStatus;
+import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
@@ -17,15 +22,22 @@ import com.hris.leave.ledger.entity.LeaveBalanceTransactionType;
 import com.hris.leave.ledger.repository.LeaveBalanceTransactionRepository;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.notification.entity.NotificationEvent;
+import com.hris.notification.enums.NotificationEventType;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LeaveBalanceLedgerService {
@@ -35,6 +47,10 @@ public class LeaveBalanceLedgerService {
     private final LeaveTypeRepository leaveTypeRepository;
     private final LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
     private final AuditLogService auditLogService;
+    private final TransactionalNotificationPublisher notificationPublisher;
+    private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
     public List<LeaveBalanceTransactionDto> getTransactions(UUID employeeId) {
@@ -69,7 +85,39 @@ public class LeaveBalanceLedgerService {
             Instant.now()
         );
         auditLogService.log(actorId, AuditAction.UPDATE, "leave_balance", balance.getId(), null, balance);
+
+        // Notify the employee about their balance adjustment
+        publishBalanceAdjustedNotification(employeeId, leaveType, dto.amount(), balance.getAvailableDays());
+
         return balance;
+    }
+
+    private void publishBalanceAdjustedNotification(UUID employeeId, LeaveType leaveType, int adjustmentAmount, int newBalance) {
+        try {
+            Employee employee = employeeRepository.findById(employeeId).orElse(null);
+            if (employee == null) return;
+            User user = userRepository.findById(employee.getUserId()).orElse(null);
+            if (user == null) return;
+
+            Map<String, Object> params = new LinkedHashMap<>();
+            params.put("leaveTypeName", leaveType.getName());
+            params.put("adjustmentAmount", adjustmentAmount);
+            params.put("newBalance", newBalance);
+            params.put("linkPath", "/leave");
+
+            notificationPublisher.publishAfterCommit(NotificationEvent.builder()
+                .eventType(NotificationEventType.LEAVE_BALANCE_ADJUSTED)
+                .targetUserId(user.getId())
+                .titleKey("leave.balance.adjusted.title")
+                .bodyKey("leave.balance.adjusted.body")
+                .params(objectMapper.writeValueAsString(params))
+                .locale(user.getLocalePreference())
+                .routingKey("leave.balance.adjusted")
+                .publishedAt(Instant.now())
+                .build());
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to serialize balance adjustment notification params", e);
+        }
     }
 
     @Transactional

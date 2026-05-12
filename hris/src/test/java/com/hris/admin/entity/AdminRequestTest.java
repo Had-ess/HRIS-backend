@@ -3,29 +3,27 @@ package com.hris.admin.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("AdminRequest Entity Unit Tests")
 class AdminRequestTest {
 
     @Test
-    @DisplayName("generateTrackingNumber should produce AR-yyyyMMdd-xxxxx format")
-    void shouldGenerateTrackingNumber_InCorrectFormat() {
-        String tracking = AdminRequest.generateTrackingNumber();
+    @DisplayName("generateRequestNumber should produce AR-yyyyMMdd-xxxxx format")
+    void shouldGenerateRequestNumberInCorrectFormat() {
+        String requestNumber = AdminRequest.generateRequestNumber();
 
-        assertThat(tracking).startsWith("AR-");
-        assertThat(tracking).matches("AR-\\d{8}-\\d{5}");
+        assertThat(requestNumber).startsWith("AR-");
+        assertThat(requestNumber).matches("AR-\\d{8}-\\d{5}");
     }
 
     @Test
-    @DisplayName("generateTrackingNumber should produce unique values")
-    void shouldGenerateUniqueValues() {
-        String t1 = AdminRequest.generateTrackingNumber();
-        String t2 = AdminRequest.generateTrackingNumber();
+    @DisplayName("generateRequestNumber should produce format consistently")
+    void shouldGenerateRequestNumberConsistently() {
+        String first = AdminRequest.generateRequestNumber();
+        String second = AdminRequest.generateRequestNumber();
 
-        // Extremely unlikely but not guaranteed to differ;
-        // the test validates format consistency across calls
-        assertThat(t1).matches("AR-\\d{8}-\\d{5}");
-        assertThat(t2).matches("AR-\\d{8}-\\d{5}");
+        assertThat(first).matches("AR-\\d{8}-\\d{5}");
+        assertThat(second).matches("AR-\\d{8}-\\d{5}");
     }
 }

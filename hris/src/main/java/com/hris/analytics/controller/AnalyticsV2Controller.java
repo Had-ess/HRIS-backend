@@ -5,10 +5,10 @@ import com.hris.analytics.enums.AnalyticsScopeType;
 import com.hris.analytics.service.AnalyticsQueryService;
 import com.hris.analytics.service.AnalyticsScopeService;
 import com.hris.common.ApiResponse;
+import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,104 +26,103 @@ public class AnalyticsV2Controller {
 
     private final AnalyticsScopeService analyticsScopeService;
     private final AnalyticsQueryService analyticsQueryService;
+    private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping("/scopes")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<List<AnalyticsScopeOptionDto>>> getScopes(Authentication auth) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
+    public ResponseEntity<ApiResponse<List<AnalyticsScopeOptionDto>>> getScopes(Authentication authentication) {
+        UUID userId = authorizeRead(authentication);
         return ResponseEntity.ok(ApiResponse.ok(analyticsScopeService.getAvailableScopes(userId)));
     }
 
-    @GetMapping("/leave-metrics")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<LeaveMetricsSnapshotDto>> getLeaveMetrics(
-            Authentication auth,
-            @RequestParam AnalyticsScopeType scopeType,
-            @RequestParam(required = false) UUID scopeId,
-            @RequestParam(required = false) LocalDate date) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
-        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getLeaveMetrics(date != null ? date : LocalDate.now(), scopeType, scopeId)));
+    @GetMapping("/filters")
+    public ResponseEntity<ApiResponse<AnalyticsFiltersDto>> getFilters(Authentication authentication) {
+        UUID userId = authorizeRead(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsScopeService.getFilters(userId)));
     }
 
-    @GetMapping("/headcount")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<HeadcountMetricsSnapshotDto>> getHeadcount(
-            Authentication auth,
-            @RequestParam AnalyticsScopeType scopeType,
-            @RequestParam(required = false) UUID scopeId,
-            @RequestParam(required = false) LocalDate date) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
-        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getHeadcountMetrics(date != null ? date : LocalDate.now(), scopeType, scopeId)));
-    }
-
-    @GetMapping("/leave-distribution")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<List<LeaveDistributionSnapshotDto>>> getLeaveDistribution(
-            Authentication auth,
-            @RequestParam AnalyticsScopeType scopeType,
-            @RequestParam(required = false) UUID scopeId,
-            @RequestParam(required = false) LocalDate date) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
-        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getLeaveDistribution(date != null ? date : LocalDate.now(), scopeType, scopeId)));
-    }
-
-    @GetMapping("/approval-bottlenecks")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<List<ApprovalBottleneckSnapshotDto>>> getApprovalBottlenecks(
-            Authentication auth,
-            @RequestParam AnalyticsScopeType scopeType,
-            @RequestParam(required = false) UUID scopeId,
-            @RequestParam(required = false) LocalDate date) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
-        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getApprovalBottlenecks(date != null ? date : LocalDate.now(), scopeType, scopeId)));
-    }
-
-    @GetMapping("/project-absence")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<List<ProjectAbsenceFactDto>>> getProjectAbsence(
-            Authentication auth,
-            @RequestParam AnalyticsScopeType scopeType,
-            @RequestParam(required = false) UUID scopeId,
-            @RequestParam(required = false) LocalDate date) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
-        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getProjectAbsence(date != null ? date : LocalDate.now(), scopeType, scopeId)));
-    }
-
-    @GetMapping("/leave-metrics/timeseries")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<List<LeaveMetricsTimeseriesPointDto>>> getLeaveMetricsTimeseries(
-            Authentication auth,
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<AnalyticsSummaryDto>> getSummary(
+            Authentication authentication,
             @RequestParam AnalyticsScopeType scopeType,
             @RequestParam(required = false) UUID scopeId,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        UUID userId = authorizeRead(authentication);
         analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getLeaveMetricsTimeseries(from, to, scopeType, scopeId)));
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getSummary(from, to, scopeType, scopeId)));
     }
 
-    @GetMapping("/headcount/timeseries")
-    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'ANALYTICS', 'READ')")
-    public ResponseEntity<ApiResponse<List<HeadcountMetricsTimeseriesPointDto>>> getHeadcountTimeseries(
-            Authentication auth,
+    @GetMapping("/leave-requests")
+    public ResponseEntity<ApiResponse<AnalyticsLeaveRequestReportDto>> getLeaveRequests(
+            Authentication authentication,
             @RequestParam AnalyticsScopeType scopeType,
             @RequestParam(required = false) UUID scopeId,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to) {
-        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        UUID userId = authorizeRead(authentication);
         analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
-        return ResponseEntity.ok(ApiResponse.ok(
-            analyticsQueryService.getHeadcountMetricsTimeseries(from, to, scopeType, scopeId)));
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveRequests(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/leave-balances")
+    public ResponseEntity<ApiResponse<AnalyticsLeaveBalanceReportDto>> getLeaveBalances(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveBalances(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/approvals")
+    public ResponseEntity<ApiResponse<AnalyticsApprovalReportDto>> getApprovals(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getApprovals(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/admin-requests")
+    public ResponseEntity<ApiResponse<AnalyticsAdminRequestReportDto>> getAdminRequests(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getAdminRequests(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<AnalyticsDashboardDto>> getDashboard(
+            Authentication authentication,
+            @RequestParam(required = false) AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        if (scopeType != null) {
+            analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        }
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getDashboard(userId, scopeType, scopeId, from, to)));
+    }
+
+    private UUID authorizeRead(Authentication authentication) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            authentication,
+            "ANALYTICS_READ_OWN",
+            "ANALYTICS_READ_SCOPED",
+            "ANALYTICS_READ_GLOBAL",
+            "REPORT_READ",
+            "ANALYTICS_READ"
+        );
+        return SecurityUtils.getCurrentUserId(authentication);
     }
 }

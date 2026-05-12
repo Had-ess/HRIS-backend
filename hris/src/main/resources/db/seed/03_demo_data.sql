@@ -76,9 +76,37 @@ INSERT INTO approval_steps (id, workflow_id, approver_id, step_order, status, co
 VALUES ('cccccccc-cccc-cccc-cccc-cccccccc0401', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0401', '33333333-3333-3333-3333-333333333303', 1, 'PENDING', 'LEAVE_REQUEST', 'PROJECT_CHAIN', 1, '{"seed":"demo"}', NULL, NULL, 0)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO admin_requests (id, requester_id, request_type_id, tracking_number, description, urgency_level, status, metadata, rejection_reason, submitted_at, resolved_at, resolved_by_id)
-VALUES ('dddddddd-dddd-dddd-dddd-dddddddd0401', '33333333-3333-3333-3333-333333333304', '33333333-3333-3333-3333-333333333201', 'AR-DEMO-0001', 'Demo administrative request', 'NORMAL', 'SUBMITTED', '{"seed":"demo"}', NULL, NOW() - INTERVAL '2 days', NULL, NULL)
-ON CONFLICT (tracking_number) DO NOTHING;
+INSERT INTO admin_requests (
+    id,
+    request_number,
+    requester_employee_id,
+    requester_user_id,
+    type_id,
+    subject,
+    description,
+    status,
+    submitted_at,
+    due_at,
+    created_at,
+    updated_at,
+    processed_by_user_id
+)
+VALUES (
+    'dddddddd-dddd-dddd-dddd-dddddddd0401',
+    'AR-DEMO-0001',
+    '55555555-5555-5555-5555-555555555404',
+    '33333333-3333-3333-3333-333333333304',
+    '33333333-3333-3333-3333-333333333201',
+    'Certificate request',
+    'Demo administrative request',
+    'SUBMITTED',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '2 days',
+    NULL
+)
+ON CONFLICT (request_number) DO NOTHING;
 
 INSERT INTO notifications (id, user_id, title, body, link_path, is_read, created_at)
 VALUES ('eeeeeeee-eeee-eeee-eeee-eeeeeeee0401', '33333333-3333-3333-3333-333333333304', 'Welcome', 'Your demo account is ready.', '/dashboard', FALSE, NOW() - INTERVAL '3 hours')

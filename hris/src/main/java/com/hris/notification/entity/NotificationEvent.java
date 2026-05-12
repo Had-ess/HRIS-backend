@@ -17,6 +17,7 @@ public class NotificationEvent {
     @Column(name = "body_key", nullable = false, length = 255) private String bodyKey;
     @Column(nullable = false, columnDefinition = "TEXT") private String params;
     @Column(nullable = false, length = 10) private String locale;
+    @Column(name = "correlation_id") private UUID correlationId;
     @Column(name = "routing_key", nullable = false, length = 100) private String routingKey;
     @Column(name = "published_at", nullable = false) @Builder.Default private Instant publishedAt = Instant.now();
 

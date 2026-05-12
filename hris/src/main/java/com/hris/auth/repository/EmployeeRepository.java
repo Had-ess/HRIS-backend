@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -29,6 +30,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     boolean existsBySupervisorEmployeeId(UUID supervisorEmployeeId);
 
     long countByDepartmentId(UUID departmentId);
+
+    List<Employee> findByDepartmentId(UUID departmentId);
+
+    List<Employee> findBySupervisorEmployeeId(UUID supervisorEmployeeId);
 
     Page<Employee> findByDepartmentId(UUID departmentId, Pageable pageable);
 

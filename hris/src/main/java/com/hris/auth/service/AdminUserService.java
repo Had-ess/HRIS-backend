@@ -123,7 +123,8 @@ public class AdminUserService {
         if (fileAttachmentRepository.existsByUploadedById(userId)) {
             throw new IllegalStateException("User cannot be deleted because it is referenced by uploaded files");
         }
-        if (adminRequestRepository.existsByRequesterId(userId) || adminRequestRepository.existsByResolvedById(userId)) {
+        if (adminRequestRepository.existsByRequesterUserId(userId)
+            || adminRequestRepository.existsByProcessedByUserId(userId)) {
             throw new IllegalStateException("User cannot be deleted because it is referenced by administrative requests");
         }
         if (auditLogRepository.existsByActorId(userId)) {

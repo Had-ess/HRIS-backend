@@ -1,10 +1,33 @@
 package com.hris.admin.dto;
 import com.hris.admin.enums.AdminRequestStatus;
-import com.hris.leave.enums.UrgencyLevel;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+
 public record AdminRequestResponseDto(
-    UUID id, UUID requesterId, String requesterName, UUID requestTypeId, String trackingNumber,
-    String description, UrgencyLevel urgencyLevel, AdminRequestStatus status,
-    String metadata, String rejectionReason, Instant submittedAt, Instant resolvedAt, UUID resolvedById
+    UUID id,
+    String requestNumber,
+    UUID requesterEmployeeId,
+    UUID requesterUserId,
+    String requesterName,
+    UUID typeId,
+    String typeName,
+    String subject,
+    String description,
+    AdminRequestStatus status,
+    Instant submittedAt,
+    Instant reviewedAt,
+    Instant decidedAt,
+    Instant completedAt,
+    Instant dueAt,
+    boolean overdue,
+    Long processingDurationMinutes,
+    UUID processedByUserId,
+    String processedByName,
+    String rejectionReason,
+    Instant createdAt,
+    Instant updatedAt,
+    List<AdminRequestAttachmentDto> attachments,
+    List<AdminRequestCommentDto> comments,
+    List<AdminRequestStatusHistoryDto> statusHistory
 ) {}

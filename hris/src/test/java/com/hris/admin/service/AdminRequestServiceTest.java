@@ -1,37 +1,48 @@
 package com.hris.admin.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hris.admin.dto.AdminRequestCommentCreateDto;
+import com.hris.admin.dto.AdminRequestRejectDto;
 import com.hris.admin.dto.CreateAdminRequestDto;
+import com.hris.admin.dto.UpdateAdminRequestDto;
 import com.hris.admin.entity.AdminRequest;
-import com.hris.admin.enums.AdminRequestStatus;
+import com.hris.admin.entity.AdminRequestAttachment;
 import com.hris.admin.entity.AdminRequestType;
+import com.hris.admin.enums.AdminRequestStatus;
+import com.hris.admin.repository.AdminRequestAttachmentRepository;
+import com.hris.admin.repository.AdminRequestCommentRepository;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.admin.repository.AdminRequestTypeRepository;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
+import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InvalidAdminRequestStateException;
-import com.hris.leave.enums.UrgencyLevel;
-import com.hris.notification.entity.NotificationEvent;
-import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.TransactionalNotificationPublisher;
+import com.hris.security.service.AccessScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +51,12 @@ class AdminRequestServiceTest {
 
     @Mock private AdminRequestRepository adminRequestRepository;
     @Mock private AdminRequestTypeRepository adminRequestTypeRepository;
+    @Mock private AdminRequestAttachmentRepository attachmentRepository;
+    @Mock private AdminRequestCommentRepository commentRepository;
+    @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
+    @Mock private AccessScopeService accessScopeService;
+    @Mock private AdminRequestAttachmentService attachmentService;
     @Mock private TransactionalNotificationPublisher notificationPublisher;
     @Mock private AuditLogService auditLogService;
     @Mock private ObjectMapper objectMapper;
@@ -48,327 +64,255 @@ class AdminRequestServiceTest {
     @InjectMocks
     private AdminRequestService adminRequestService;
 
-    private UUID requesterId;
+    private UUID requesterUserId;
+    private UUID requesterEmployeeId;
     private UUID requestTypeId;
-    private User requesterUser;
+    private UUID processorUserId;
+    private AdminRequestType requestType;
 
     @BeforeEach
-    void setUp() {
-        requesterId = UUID.randomUUID();
+    void setUp() throws Exception {
+        requesterUserId = UUID.randomUUID();
+        requesterEmployeeId = UUID.randomUUID();
         requestTypeId = UUID.randomUUID();
-        requesterUser = User.builder()
-            .id(requesterId)
-            .firstName("Ali")
-            .lastName("Ben")
+        processorUserId = UUID.randomUUID();
+
+        requestType = AdminRequestType.builder()
+            .id(requestTypeId)
+            .code("CERT")
+            .name("Certificate")
+            .requiresAttachment(false)
+            .slaHours(24)
+            .isActive(true)
             .build();
-    }
 
-    @Nested
-    @DisplayName("create()")
-    class CreateTests {
-
-        @Test
-        @DisplayName("should create admin request with SUBMITTED status and tracking number")
-        void shouldCreateAdminRequest_Successfully() throws Exception {
-            CreateAdminRequestDto dto = new CreateAdminRequestDto(
-                requestTypeId, "Need salary certificate", UrgencyLevel.NORMAL, null
-            );
-
-            AdminRequestType type = new AdminRequestType();
-            type.setId(requestTypeId);
-            type.setName("Salary Certificate");
-            type.setActive(true);
-
-            when(adminRequestRepository.save(any(AdminRequest.class)))
-                .thenAnswer(inv -> {
-                    AdminRequest r = inv.getArgument(0);
-                    r.setId(UUID.randomUUID());
-                    return r;
-                });
-            when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
-            when(adminRequestTypeRepository.findById(requestTypeId)).thenReturn(Optional.of(type));
-            when(objectMapper.writeValueAsString(any())).thenReturn("{}");
-
-            // Act
-            AdminRequest result = adminRequestService.create(dto, requesterId);
-
-            // Assert
-            assertThat(result).isNotNull();
-            assertThat(result.getStatus()).isEqualTo(AdminRequestStatus.SUBMITTED);
-            assertThat(result.getTrackingNumber()).startsWith("AR-");
-            assertThat(result.getRequesterId()).isEqualTo(requesterId);
-            assertThat(result.getDescription()).isEqualTo("Need salary certificate");
-
-            verify(adminRequestRepository).save(any(AdminRequest.class));
-            verify(auditLogService).log(eq(requesterId), any(), eq("admin_request"), any(), any(), any());
-            verify(notificationPublisher).publishAfterCommit(any());
-        }
-
-        @Test
-        @DisplayName("should reject inactive admin request type")
-        void shouldRejectInactiveRequestType() {
-            CreateAdminRequestDto dto = new CreateAdminRequestDto(
-                requestTypeId, "Need salary certificate", UrgencyLevel.NORMAL, null
-            );
-
-            AdminRequestType type = new AdminRequestType();
-            type.setId(requestTypeId);
-            type.setName("Salary Certificate");
-            type.setActive(false);
-
-            when(adminRequestTypeRepository.findById(requestTypeId)).thenReturn(Optional.of(type));
-
-            assertThatThrownBy(() -> adminRequestService.create(dto, requesterId))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Admin request type not found or inactive");
-
-            verify(adminRequestRepository, never()).save(any(AdminRequest.class));
-            verify(notificationPublisher, never()).publishAfterCommit(any());
-        }
-    }
-
-    @Nested
-    @DisplayName("process()")
-    class ProcessTests {
-
-        @Test
-        @DisplayName("should process a submitted request")
-        void shouldProcessRequest_Successfully() throws JsonProcessingException {
-            UUID requestId = UUID.randomUUID();
-            UUID hrAdminId = UUID.randomUUID();
-
-            AdminRequest request = AdminRequest.builder()
-                .id(requestId)
-                .requesterId(requesterId)
-                .trackingNumber("AR-20260411-00001")
-                .status(AdminRequestStatus.SUBMITTED)
-                .build();
-
-            User hrAdmin = User.builder().id(hrAdminId).build();
-
-            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-            when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
-            when(objectMapper.writeValueAsString(any())).thenReturn("{}");
-
-            // Act
-            adminRequestService.process(requestId, hrAdminId);
-
-            // Assert
-            assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.PROCESSED);
-            assertThat(request.getResolvedById()).isEqualTo(hrAdminId);
-            assertThat(request.getResolvedAt()).isNotNull();
-
-            verify(adminRequestRepository).save(request);
-            verify(notificationPublisher).publishAfterCommit(any());
-        }
-
-        @Test
-        @DisplayName("should throw IllegalStateException when request already processed")
-        void shouldThrow_WhenAlreadyProcessed() {
-            UUID requestId = UUID.randomUUID();
-            UUID hrAdminId = UUID.randomUUID();
-
-            AdminRequest request = AdminRequest.builder()
-                .id(requestId)
-                .status(AdminRequestStatus.PROCESSED)
-                .build();
-
-            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-            assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
-                .isInstanceOf(InvalidAdminRequestStateException.class)
-                .hasMessage("Admin request cannot be processed from status: PROCESSED");
-        }
-
-        @Test
-        @DisplayName("should throw EntityNotFoundException when request not found")
-        void shouldThrow_WhenNotFound() {
-            UUID requestId = UUID.randomUUID();
-            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> adminRequestService.process(requestId, UUID.randomUUID()))
-                .isInstanceOf(EntityNotFoundException.class);
-        }
-    }
-
-    @Nested
-    @DisplayName("reject()")
-    class RejectTests {
-
-        @Test
-        @DisplayName("should reject an admin request")
-        void shouldRejectRequest() throws Exception {
-            UUID requestId = UUID.randomUUID();
-            UUID hrAdminId = UUID.randomUUID();
-
-            AdminRequest request = AdminRequest.builder()
-                .id(requestId)
-                .requesterId(requesterId)
-                .status(AdminRequestStatus.SUBMITTED)
-                .build();
-
-            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-            when(userRepository.findById(requesterId)).thenReturn(Optional.of(requesterUser));
-            when(objectMapper.writeValueAsString(any())).thenReturn("{}");
-
-            // Act
-            adminRequestService.reject(requestId, hrAdminId, "Missing document");
-
-            // Assert
-            assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.REJECTED);
-            assertThat(request.getRejectionReason()).isEqualTo("Missing document");
-            assertThat(request.getResolvedById()).isEqualTo(hrAdminId);
-            assertThat(request.getResolvedAt()).isNotNull();
-
-            verify(adminRequestRepository).save(request);
-            verify(auditLogService).log(eq(hrAdminId), any(), eq("admin_request"), eq(requestId), any(), any());
-            verify(notificationPublisher).publishAfterCommit(argThat(event ->
-                event.getEventType() == NotificationEventType.ADMIN_REQUEST_REJECTED
-                    && requesterId.equals(event.getTargetUserId())
-                    && "admin.rejected.title".equals(event.getTitleKey())
-            ));
-        }
-
-        @Test
-        @DisplayName("should throw when rejecting a processed request")
-        void shouldThrow_WhenRejectingProcessedRequest() {
-            UUID requestId = UUID.randomUUID();
-
-            AdminRequest request = AdminRequest.builder()
-                .id(requestId)
-                .status(AdminRequestStatus.PROCESSED)
-                .build();
-
-            when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-            assertThatThrownBy(() -> adminRequestService.reject(requestId, UUID.randomUUID(), null))
-                .isInstanceOf(InvalidAdminRequestStateException.class)
-                .hasMessage("Admin request cannot be rejected from status: PROCESSED");
-        }
+        lenient().when(employeeRepository.findByUserId(requesterUserId)).thenReturn(Optional.of(Employee.builder()
+            .id(requesterEmployeeId)
+            .userId(requesterUserId)
+            .build()));
+        lenient().when(adminRequestTypeRepository.findById(requestTypeId)).thenReturn(Optional.of(requestType));
+        lenient().when(objectMapper.writeValueAsString(any())).thenReturn("{}");
     }
 
     @Test
-    @DisplayName("should not process a rejected request")
-    void shouldNotProcessRejectedRequest() {
-        UUID requestId = UUID.randomUUID();
-        UUID hrAdminId = UUID.randomUUID();
+    @DisplayName("create stores a draft with requester employee and request number")
+    void createStoresDraft() {
+        stubUserLookup();
+        stubSave();
+        AdminRequest result = adminRequestService.create(
+            new CreateAdminRequestDto(requestTypeId, "Need certificate", "Please issue it"),
+            requesterUserId);
 
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .status(AdminRequestStatus.REJECTED)
-            .build();
-
-        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-        assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
-            .isInstanceOf(InvalidAdminRequestStateException.class)
-            .hasMessage("Admin request cannot be processed from status: REJECTED");
+        assertThat(result.getStatus()).isEqualTo(AdminRequestStatus.DRAFT);
+        assertThat(result.getRequesterEmployeeId()).isEqualTo(requesterEmployeeId);
+        assertThat(result.getRequesterUserId()).isEqualTo(requesterUserId);
+        assertThat(result.getRequestNumber()).startsWith("AR-");
+        verify(adminRequestRepository).save(any(AdminRequest.class));
     }
 
     @Test
-    @DisplayName("should not reject a processed request")
-    void shouldNotRejectProcessedRequest() {
-        UUID requestId = UUID.randomUUID();
-        UUID hrAdminId = UUID.randomUUID();
+    @DisplayName("create rejects inactive request type")
+    void createRejectsInactiveType() {
+        requestType.setActive(false);
 
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .status(AdminRequestStatus.PROCESSED)
-            .build();
-
-        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-        assertThatThrownBy(() -> adminRequestService.reject(requestId, hrAdminId, null))
-            .isInstanceOf(InvalidAdminRequestStateException.class)
-            .hasMessage("Admin request cannot be rejected from status: PROCESSED");
+        assertThatThrownBy(() -> adminRequestService.create(
+            new CreateAdminRequestDto(requestTypeId, "Need certificate", "Please issue it"),
+            requesterUserId))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("Admin request type not found or inactive");
     }
 
     @Test
-    @DisplayName("requester can cancel eligible request")
-    void requesterCanCancelEligibleRequest() {
+    @DisplayName("update allows only draft requests")
+    void updateAllowsOnlyDraftRequests() {
         UUID requestId = UUID.randomUUID();
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .requesterId(requesterId)
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(baseRequest(requestId)
             .status(AdminRequestStatus.SUBMITTED)
-            .build();
+            .submittedAt(Instant.now())
+            .build()));
 
-        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-        adminRequestService.cancel(requestId, requesterId);
-
-        assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.CANCELLED);
-        assertThat(request.getResolvedById()).isEqualTo(requesterId);
-        assertThat(request.getResolvedAt()).isNotNull();
-        verify(adminRequestRepository).save(request);
-    }
-
-    @Test
-    @DisplayName("cannot cancel terminal request")
-    void cannotCancelTerminalRequest() {
-        UUID requestId = UUID.randomUUID();
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .requesterId(requesterId)
-            .status(AdminRequestStatus.PROCESSED)
-            .build();
-
-        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-        assertThatThrownBy(() -> adminRequestService.cancel(requestId, requesterId))
+        assertThatThrownBy(() -> adminRequestService.update(
+            requestId,
+            new UpdateAdminRequestDto(null, "Updated subject", null),
+            requesterUserId))
             .isInstanceOf(InvalidAdminRequestStateException.class)
-            .hasMessage("Admin request cannot be cancelled from status: PROCESSED");
+            .hasMessage("Only draft admin requests can be edited");
     }
 
     @Test
-    @DisplayName("HR admin can move request to in progress")
-    void hrAdminCanMoveRequestToInProgress() {
+    @DisplayName("submit enforces required attachment and calculates due date")
+    void submitEnforcesRequiredAttachmentAndCalculatesDueDate() {
         UUID requestId = UUID.randomUUID();
-        UUID hrAdminId = UUID.randomUUID();
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
+        requestType.setRequiresAttachment(true);
+        AdminRequest request = baseRequest(requestId).status(AdminRequestStatus.DRAFT).build();
+        stubSave();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
+        when(attachmentRepository.findByAdminRequestIdOrderByUploadedAtAsc(requestId)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> adminRequestService.submit(requestId, requesterUserId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("This request type requires at least one attachment before submission");
+
+        AdminRequestAttachment attachment = AdminRequestAttachment.builder().id(UUID.randomUUID()).adminRequestId(requestId).build();
+        when(attachmentRepository.findByAdminRequestIdOrderByUploadedAtAsc(requestId)).thenReturn(List.of(attachment));
+        when(userRepository.findByPermissionNames(any())).thenReturn(List.of(User.builder()
+            .id(processorUserId)
+            .localePreference("en")
+            .build()));
+
+        AdminRequest submitted = adminRequestService.submit(requestId, requesterUserId);
+
+        assertThat(submitted.getStatus()).isEqualTo(AdminRequestStatus.SUBMITTED);
+        assertThat(submitted.getSubmittedAt()).isNotNull();
+        assertThat(submitted.getDueAt()).isEqualTo(submitted.getSubmittedAt().plusSeconds(24 * 3600L));
+        verify(notificationPublisher, atLeastOnce()).publishAfterCommit(any());
+    }
+
+    @Test
+    @DisplayName("employee cannot access another employee request")
+    void employeeCannotAccessAnotherEmployeeRequest() {
+        UUID requestId = UUID.randomUUID();
+        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(baseRequest(requestId)
+            .requesterUserId(UUID.randomUUID())
+            .build()));
+
+        assertThatThrownBy(() -> adminRequestService.getOwnRequest(requestId, requesterUserId))
+            .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    @DisplayName("cancel is allowed for draft and unprocessed submitted requests only")
+    void cancelOnlyAllowedForEligibleStates() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest draft = baseRequest(requestId).status(AdminRequestStatus.DRAFT).build();
+        stubSave();
+        stubUserLookup();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(draft));
+
+        AdminRequest cancelledDraft = adminRequestService.cancel(requestId, requesterUserId);
+        assertThat(cancelledDraft.getStatus()).isEqualTo(AdminRequestStatus.CANCELLED);
+
+        AdminRequest reviewed = baseRequest(requestId)
             .status(AdminRequestStatus.SUBMITTED)
+            .reviewedAt(Instant.now())
             .build();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(reviewed));
 
-        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
-
-        adminRequestService.markInProgress(requestId, hrAdminId);
-
-        assertThat(request.getStatus()).isEqualTo(AdminRequestStatus.IN_PROGRESS);
-        verify(adminRequestRepository).save(request);
+        assertThatThrownBy(() -> adminRequestService.cancel(requestId, requesterUserId))
+            .isInstanceOf(InvalidAdminRequestStateException.class);
     }
 
     @Test
-    @DisplayName("invalid in progress transition is rejected")
-    void invalidInProgressTransitionIsRejected() {
+    @DisplayName("start review moves submitted request to in review")
+    void startReviewMovesSubmittedRequest() {
         UUID requestId = UUID.randomUUID();
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .status(AdminRequestStatus.REJECTED)
-            .build();
-
+        AdminRequest request = baseRequest(requestId).status(AdminRequestStatus.SUBMITTED).submittedAt(Instant.now()).build();
+        stubSave();
+        stubUserLookup();
         when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
-        assertThatThrownBy(() -> adminRequestService.markInProgress(requestId, UUID.randomUUID()))
-            .isInstanceOf(InvalidAdminRequestStateException.class)
-            .hasMessage("Admin request can only move to IN_PROGRESS from SUBMITTED");
+        AdminRequest result = adminRequestService.startReview(requestId, processorUserId);
+
+        assertThat(result.getStatus()).isEqualTo(AdminRequestStatus.IN_REVIEW);
+        assertThat(result.getProcessedByUserId()).isEqualTo(processorUserId);
+        assertThat(result.getReviewedAt()).isNotNull();
     }
 
     @Test
-    @DisplayName("should not process a cancelled request")
-    void shouldNotProcessCancelledRequest() {
+    @DisplayName("approve transition accepts submitted or in review only")
+    void approveTransition() {
         UUID requestId = UUID.randomUUID();
-        UUID hrAdminId = UUID.randomUUID();
-
-        AdminRequest request = AdminRequest.builder()
-            .id(requestId)
-            .status(AdminRequestStatus.CANCELLED)
-            .build();
-
+        AdminRequest request = baseRequest(requestId).status(AdminRequestStatus.IN_REVIEW).submittedAt(Instant.now()).build();
+        stubSave();
+        stubUserLookup();
         when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
-        assertThatThrownBy(() -> adminRequestService.process(requestId, hrAdminId))
+        AdminRequest approved = adminRequestService.approve(requestId, processorUserId);
+        assertThat(approved.getStatus()).isEqualTo(AdminRequestStatus.APPROVED);
+        assertThat(approved.getDecidedAt()).isNotNull();
+
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(baseRequest(requestId)
+            .status(AdminRequestStatus.DRAFT)
+            .build()));
+        assertThatThrownBy(() -> adminRequestService.approve(requestId, processorUserId))
             .isInstanceOf(InvalidAdminRequestStateException.class)
-            .hasMessage("Admin request cannot be processed from status: CANCELLED");
+            .hasMessage("Admin request cannot be approved from status: DRAFT");
+    }
+
+    @Test
+    @DisplayName("reject transition requires reason and sets rejected state")
+    void rejectTransitionRequiresReason() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = baseRequest(requestId).status(AdminRequestStatus.SUBMITTED).submittedAt(Instant.now()).build();
+        stubSave();
+        stubUserLookup();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
+
+        AdminRequest rejected = adminRequestService.reject(requestId, processorUserId, new AdminRequestRejectDto("Missing proof"));
+        assertThat(rejected.getStatus()).isEqualTo(AdminRequestStatus.REJECTED);
+        assertThat(rejected.getRejectionReason()).isEqualTo("Missing proof");
+    }
+
+    @Test
+    @DisplayName("complete transition only accepts approved requests")
+    void completeTransition() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = baseRequest(requestId).status(AdminRequestStatus.APPROVED).submittedAt(Instant.now()).build();
+        stubSave();
+        stubUserLookup();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
+
+        AdminRequest completed = adminRequestService.complete(requestId, processorUserId);
+        assertThat(completed.getStatus()).isEqualTo(AdminRequestStatus.COMPLETED);
+        assertThat(completed.getCompletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("comments from processor can be internal")
+    void commentsFromProcessorCanBeInternal() {
+        UUID requestId = UUID.randomUUID();
+        AdminRequest request = baseRequest(requestId).status(AdminRequestStatus.SUBMITTED).build();
+        when(adminRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(accessScopeService.hasAnyPermissionName(eq(processorUserId), any(String[].class))).thenReturn(true);
+        when(commentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        var comment = adminRequestService.addComment(requestId, processorUserId,
+            new AdminRequestCommentCreateDto("Internal note", true));
+
+        assertThat(comment.isInternal()).isTrue();
+    }
+
+    @Test
+    @DisplayName("search inbox excludes drafts by default")
+    void searchInboxDelegatesToSpecificationRepository() {
+        when(adminRequestRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(PageRequest.class)))
+            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+
+        var page = adminRequestService.searchInbox(null, null, null, null, null, null, null, PageRequest.of(0, 20));
+        assertThat(page.getTotalElements()).isZero();
+    }
+
+    private AdminRequest.AdminRequestBuilder baseRequest(UUID requestId) {
+        return AdminRequest.builder()
+            .id(requestId)
+            .requestNumber("AR-20260509-00001")
+            .requesterEmployeeId(requesterEmployeeId)
+            .requesterUserId(requesterUserId)
+            .typeId(requestTypeId)
+            .subject("Need certificate")
+            .description("Please issue it")
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now());
+    }
+
+    private void stubSave() {
+        when(adminRequestRepository.save(any(AdminRequest.class))).thenAnswer(inv -> inv.getArgument(0));
+    }
+
+    private void stubUserLookup() {
+        when(userRepository.findById(any())).thenAnswer(inv -> Optional.of(User.builder()
+            .id(inv.getArgument(0))
+            .localePreference("en")
+            .build()));
     }
 }

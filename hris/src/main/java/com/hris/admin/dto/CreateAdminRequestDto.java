@@ -1,11 +1,10 @@
 package com.hris.admin.dto;
-import com.hris.leave.enums.UrgencyLevel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 public record CreateAdminRequestDto(
     @NotNull UUID requestTypeId,
-    @NotBlank String description,
-    @NotNull UrgencyLevel urgencyLevel,
-    String metadata
+    @NotBlank @Size(max = 255) String subject,
+    @NotBlank @Size(max = 4000) String description
 ) {}

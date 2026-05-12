@@ -103,6 +103,14 @@ app:
     login-url: ${APP_ONBOARDING_LOGIN_URL:http://localhost:4200}
   mail:
     from: ${APP_MAIL_FROM:no-reply@hris.local}
+  leave:
+    accrual:
+      enabled: ${APP_LEAVE_ACCRUAL_ENABLED:false}
+      cron: ${APP_LEAVE_ACCRUAL_CRON:0 0 5 * * *}
+  admin:
+    sla-check:
+      enabled: ${APP_ADMIN_SLA_CHECK_ENABLED:false}
+      cron: ${APP_ADMIN_SLA_CHECK_CRON:0 0 */4 * * *}
 
 keycloak:
   admin:

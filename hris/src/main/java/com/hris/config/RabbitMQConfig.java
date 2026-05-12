@@ -17,6 +17,7 @@ public class RabbitMQConfig {
     public static final String DLX = "hris.notifications.dlq";
     public static final String QUEUE_LEAVE = "hris.leave";
     public static final String QUEUE_ADMIN = "hris.admin";
+    public static final String QUEUE_SYSTEM = "hris.system";
     public static final String QUEUE_DLQ = "hris.notifications.dlq";
 
     @Bean
@@ -46,6 +47,14 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue systemQueue() {
+        return QueueBuilder.durable(QUEUE_SYSTEM)
+            .withArgument("x-dead-letter-exchange", DLX)
+            .withArgument("x-dead-letter-routing-key", "dlq")
+            .build();
+    }
+
+    @Bean
     public Queue deadLetterQueue() {
         return QueueBuilder.durable(QUEUE_DLQ).build();
     }
@@ -62,6 +71,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(adminQueue)
             .to(notificationExchange)
             .with("admin.#");
+    }
+
+    @Bean
+    public Binding systemBinding(Queue systemQueue, TopicExchange notificationExchange) {
+        return BindingBuilder.bind(systemQueue)
+            .to(notificationExchange)
+            .with("system.#");
     }
 
     @Bean
