@@ -22,6 +22,7 @@ import java.util.UUID;
 public class UserProvisioningService {
 
     private static final String SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX = "KC_REPLACE_";
+    private static final String LEGACY_DEMO_KEYCLOAK_PLACEHOLDER_PREFIX = "KC_DEMO_";
 
     private final UserRepository userRepository;
 
@@ -112,6 +113,7 @@ public class UserProvisioningService {
         return existingKeycloakId == null
             || existingKeycloakId.isBlank()
             || existingKeycloakId.equals(keycloakId)
-            || existingKeycloakId.startsWith(SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX);
+            || existingKeycloakId.startsWith(SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX)
+            || existingKeycloakId.startsWith(LEGACY_DEMO_KEYCLOAK_PLACEHOLDER_PREFIX);
     }
 }

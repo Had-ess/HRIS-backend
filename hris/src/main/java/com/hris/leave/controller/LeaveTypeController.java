@@ -28,9 +28,11 @@ public class LeaveTypeController {
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<LeaveTypeDto>>> getAll(Authentication authentication) {
+    public ResponseEntity<ApiResponse<List<LeaveTypeDto>>> getAll(
+            @RequestParam(name = "includeInactive", defaultValue = "false") boolean includeInactive,
+            Authentication authentication) {
         permissionAuthorizationService.authorize(authentication, "LEAVE_TYPE", "READ");
-        return ResponseEntity.ok(ApiResponse.ok(leaveTypeService.getAllActive()));
+        return ResponseEntity.ok(ApiResponse.ok(includeInactive ? leaveTypeService.getAll() : leaveTypeService.getAllActive()));
     }
 
     @PostMapping

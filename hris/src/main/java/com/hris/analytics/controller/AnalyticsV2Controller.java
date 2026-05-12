@@ -52,6 +52,18 @@ public class AnalyticsV2Controller {
         return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getSummary(from, to, scopeType, scopeId)));
     }
 
+    @GetMapping("/leave-metrics")
+    public ResponseEntity<ApiResponse<LeaveMetricsSnapshotDto>> getLeaveMetrics(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveMetrics(from, to, scopeType, scopeId)));
+    }
+
     @GetMapping("/leave-requests")
     public ResponseEntity<ApiResponse<AnalyticsLeaveRequestReportDto>> getLeaveRequests(
             Authentication authentication,
@@ -74,6 +86,42 @@ public class AnalyticsV2Controller {
         UUID userId = authorizeRead(authentication);
         analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
         return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveBalances(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/headcount")
+    public ResponseEntity<ApiResponse<HeadcountMetricsSnapshotDto>> getHeadcount(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getHeadcountMetrics(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/leave-distribution")
+    public ResponseEntity<ApiResponse<List<LeaveDistributionSnapshotDto>>> getLeaveDistribution(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveDistribution(from, to, scopeType, scopeId)));
+    }
+
+    @GetMapping("/leave-metrics/timeseries")
+    public ResponseEntity<ApiResponse<List<LeaveMetricsTimeseriesPointDto>>> getLeaveMetricsTimeseries(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveMetricsTimeseries(from, to, scopeType, scopeId)));
     }
 
     @GetMapping("/approvals")
@@ -112,6 +160,16 @@ public class AnalyticsV2Controller {
             analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
         }
         return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getDashboard(userId, scopeType, scopeId, from, to)));
+    }
+
+    @GetMapping("/project-absence")
+    public ResponseEntity<ApiResponse<List<ProjectAbsenceFactDto>>> getProjectAbsence(
+            Authentication authentication,
+            @RequestParam AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId) {
+        UUID userId = authorizeRead(authentication);
+        analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getProjectAbsenceFacts(scopeType, scopeId)));
     }
 
     private UUID authorizeRead(Authentication authentication) {

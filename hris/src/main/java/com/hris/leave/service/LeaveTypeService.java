@@ -32,6 +32,13 @@ public class LeaveTypeService {
     }
 
     @Transactional(readOnly = true)
+    public List<LeaveTypeDto> getAll() {
+        return leaveTypeRepository.findAll().stream()
+            .map(this::toDto)
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
     public LeaveTypeDto getDtoById(UUID id) {
         return leaveTypeRepository.findById(id)
             .map(this::toDto)

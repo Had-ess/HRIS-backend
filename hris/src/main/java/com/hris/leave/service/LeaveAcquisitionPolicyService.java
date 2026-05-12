@@ -43,6 +43,11 @@ public class LeaveAcquisitionPolicyService {
     }
 
     @Transactional(readOnly = true)
+    public LeaveAcquisitionPolicyDto toDtoView(LeaveAcquisitionPolicy policy) {
+        return toDto(policy);
+    }
+
+    @Transactional(readOnly = true)
     public LeaveAcquisitionPolicy resolveEffectivePolicy(UUID leaveTypeId, LocalDate onDate) {
         return repository.findEffectivePolicy(leaveTypeId, onDate);
     }

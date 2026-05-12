@@ -1,17 +1,22 @@
 package com.hris.leave.controller;
 
+import com.hris.common.ApiResponse;
+import com.hris.common.PageResponse;
 import com.hris.common.event.ActorType;
-import com.hris.leave.acquisition.entity.LeaveAcquisitionPolicy;
+import com.hris.leave.acquisition.dto.LeaveAcquisitionPolicyDto;
 import com.hris.leave.dto.LeaveAccrualRunDto;
 import com.hris.leave.service.LeaveAccrualService;
+import com.hris.leave.service.LeaveAcquisitionPolicyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,25 +28,29 @@ import java.util.UUID;
 public class LeaveAccrualRunController {
 
     private final LeaveAccrualService leaveAccrualService;
+    private final LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
 
     @GetMapping
     @PreAuthorize("@permissionAuthorizationService.hasAnyPermissionName(authentication, 'ACCRUAL_RUN_READ', 'ACCRUAL_RUN_MANAGE')")
-    public Page<LeaveAccrualRunDto> getRunHistory(Pageable pageable) {
-        return leaveAccrualService.getRunHistory(pageable);
+    public ResponseEntity<ApiResponse<PageResponse<LeaveAccrualRunDto>>> getRunHistory(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(leaveAccrualService.getRunHistory(pageable))));
     }
 
     @GetMapping("/due-policies")
     @PreAuthorize("@permissionAuthorizationService.hasAnyPermissionName(authentication, 'ACCRUAL_RUN_READ', 'ACCRUAL_RUN_MANAGE')")
-    public List<LeaveAcquisitionPolicy> getDuePolicies() {
-        return leaveAccrualService.findDuePolicies(LocalDate.now());
+    public ResponseEntity<ApiResponse<List<LeaveAcquisitionPolicyDto>>> getDuePolicies() {
+        List<LeaveAcquisitionPolicyDto> policies = leaveAccrualService.findDuePolicies(LocalDate.now()).stream()
+            .map(leaveAcquisitionPolicyService::toDtoView)
+            .toList();
+        return ResponseEntity.ok(ApiResponse.ok(policies));
     }
 
     @PostMapping("/run-due")
     @PreAuthorize("@permissionAuthorizationService.hasPermissionName(authentication, 'ACCRUAL_RUN_MANAGE')")
-    public ResponseEntity<LeaveAccrualRunDto> runDuePolicies(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<ApiResponse<LeaveAccrualRunDto>> runDuePolicies(@AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
         LeaveAccrualRunDto result = leaveAccrualService.runDuePoliciesWithTracking(
             LocalDate.now(), userId, ActorType.USER);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 }

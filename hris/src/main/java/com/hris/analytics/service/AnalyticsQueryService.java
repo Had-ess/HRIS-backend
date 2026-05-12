@@ -11,6 +11,11 @@ import com.hris.analytics.dto.AnalyticsLeaveBalanceReportDto;
 import com.hris.analytics.dto.AnalyticsLeaveRequestReportDto;
 import com.hris.analytics.dto.AnalyticsScopeOptionDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
+import com.hris.analytics.dto.HeadcountMetricsSnapshotDto;
+import com.hris.analytics.dto.LeaveDistributionSnapshotDto;
+import com.hris.analytics.dto.LeaveMetricsSnapshotDto;
+import com.hris.analytics.dto.LeaveMetricsTimeseriesPointDto;
+import com.hris.analytics.dto.ProjectAbsenceFactDto;
 import com.hris.analytics.enums.AnalyticsScopeType;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -171,13 +176,13 @@ public class AnalyticsQueryService {
             """.formatted(scope), copy(params).addValue("pendingStatuses", LEAVE_PENDING_STATUSES));
 
         double averageProcessingDays = singleDouble("""
-            SELECT AVG(EXTRACT(EPOCH FROM (lr.updated_at - lr.submitted_at)) / 86400.0)
+            SELECT AVG(lfact.approval_duration_days)
             FROM leave_requests lr
             JOIN employees e ON e.id = lr.employee_id
+            LEFT JOIN analytics_leave_facts lfact ON lfact.leave_request_id = lr.id
             WHERE %s
               AND lr.submitted_at >= :fromAt
               AND lr.submitted_at < :toExclusiveAt
-              AND lr.submitted_at IS NOT NULL
               AND lr.status IN ('APPROVED', 'REJECTED')
             """.formatted(scope), params);
 
@@ -687,6 +692,191 @@ public class AnalyticsQueryService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public LeaveMetricsSnapshotDto getLeaveMetrics(LocalDate from, LocalDate to, AnalyticsScopeType scopeType, UUID scopeId) {
+        AnalyticsLeaveRequestReportDto report = getLeaveRequests(from, to, scopeType, scopeId);
+        return new LeaveMetricsSnapshotDto(
+            (int) report.totalRequests(),
+            (int) report.approvedCount(),
+            (int) report.rejectedCount(),
+            (int) report.pendingCount(),
+            java.math.BigDecimal.valueOf(report.averageProcessingDays()).setScale(2, java.math.RoundingMode.HALF_UP)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public HeadcountMetricsSnapshotDto getHeadcountMetrics(LocalDate from, LocalDate to, AnalyticsScopeType scopeType, UUID scopeId) {
+        LocalDate normalizedFrom = normalizeFrom(from, to);
+        LocalDate normalizedTo = normalizeTo(from, to);
+        MapSqlParameterSource params = params(scopeType, scopeId, normalizedFrom, normalizedTo);
+        String scope = scopeCondition(scopeType, "e.id");
+
+        int totalEmployees = (int) singleLong("""
+            SELECT COUNT(*)
+            FROM employees e
+            WHERE %s
+            """.formatted(scope), params);
+
+        int activeEmployees = (int) singleLong("""
+            SELECT COUNT(*)
+            FROM employees e
+            WHERE %s
+              AND e.status = 'ACTIVE'
+            """.formatted(scope), params);
+
+        int newHires = (int) singleLong("""
+            SELECT COUNT(*)
+            FROM employees e
+            WHERE %s
+              AND e.hire_date >= :fromDate
+              AND e.hire_date <= :toDate
+            """.formatted(scope), copy(params)
+            .addValue("fromDate", normalizedFrom)
+            .addValue("toDate", normalizedTo));
+
+        int terminatedEmployees = (int) singleLong("""
+            SELECT COUNT(*)
+            FROM employees e
+            WHERE %s
+              AND e.termination_date IS NOT NULL
+              AND e.termination_date >= :fromDate
+              AND e.termination_date <= :toDate
+            """.formatted(scope), copy(params)
+            .addValue("fromDate", normalizedFrom)
+            .addValue("toDate", normalizedTo));
+
+        return new HeadcountMetricsSnapshotDto(totalEmployees, activeEmployees, newHires, terminatedEmployees);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveDistributionSnapshotDto> getLeaveDistribution(LocalDate from, LocalDate to, AnalyticsScopeType scopeType, UUID scopeId) {
+        LocalDate normalizedFrom = normalizeFrom(from, to);
+        LocalDate normalizedTo = normalizeTo(from, to);
+        MapSqlParameterSource params = params(scopeType, scopeId, normalizedFrom, normalizedTo);
+        String scope = scopeCondition(scopeType, "e.id");
+
+        return jdbcTemplate.query("""
+            SELECT lt.id,
+                   lt.code,
+                   lt.name,
+                   COUNT(*) AS request_count,
+                   COALESCE(SUM(lr.working_days), 0) AS total_days
+            FROM leave_requests lr
+            JOIN employees e ON e.id = lr.employee_id
+            JOIN leave_types lt ON lt.id = lr.leave_type_id
+            WHERE %s
+              AND lr.submitted_at >= :fromAt
+              AND lr.submitted_at < :toExclusiveAt
+            GROUP BY lt.id, lt.code, lt.name
+            ORDER BY request_count DESC, lt.name ASC
+            """.formatted(scope), params, (rs, rowNum) ->
+            new LeaveDistributionSnapshotDto(
+                rs.getObject("id", UUID.class),
+                rs.getString("code"),
+                rs.getString("name"),
+                rs.getInt("request_count"),
+                rs.getInt("total_days")
+            ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveMetricsTimeseriesPointDto> getLeaveMetricsTimeseries(LocalDate from, LocalDate to, AnalyticsScopeType scopeType, UUID scopeId) {
+        LocalDate normalizedFrom = normalizeFrom(from, to);
+        LocalDate normalizedTo = normalizeTo(from, to);
+        MapSqlParameterSource params = params(scopeType, scopeId, normalizedFrom, normalizedTo);
+        String scope = scopeCondition(scopeType, "e.id");
+
+        return jdbcTemplate.query("""
+            SELECT DATE(lr.submitted_at) AS snapshot_date,
+                   COUNT(*) AS total_requests,
+                   SUM(CASE WHEN lr.status = 'APPROVED' THEN 1 ELSE 0 END) AS approved_count,
+                   SUM(CASE WHEN lr.status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected_count,
+                   SUM(CASE WHEN lr.status IN ('PENDING', 'IN_APPROVAL') THEN 1 ELSE 0 END) AS pending_count,
+                   AVG(CASE WHEN lr.status IN ('APPROVED', 'REJECTED') THEN lfact.approval_duration_days ELSE NULL END) AS average_processing_days
+            FROM leave_requests lr
+            JOIN employees e ON e.id = lr.employee_id
+            LEFT JOIN analytics_leave_facts lfact ON lfact.leave_request_id = lr.id
+            WHERE %s
+              AND lr.submitted_at >= :fromAt
+              AND lr.submitted_at < :toExclusiveAt
+            GROUP BY DATE(lr.submitted_at)
+            ORDER BY snapshot_date ASC
+            """.formatted(scope), params, (rs, rowNum) ->
+            new LeaveMetricsTimeseriesPointDto(
+                rs.getDate("snapshot_date").toLocalDate(),
+                rs.getInt("total_requests"),
+                rs.getInt("approved_count"),
+                rs.getInt("rejected_count"),
+                rs.getInt("pending_count"),
+                java.math.BigDecimal.valueOf(rs.getDouble("average_processing_days")).setScale(2, java.math.RoundingMode.HALF_UP)
+            ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectAbsenceFactDto> getProjectAbsenceFacts(AnalyticsScopeType scopeType, UUID scopeId) {
+        LocalDate snapshotDate = latestProjectAbsenceSnapshotDate();
+        if (snapshotDate == null) {
+            return List.of();
+        }
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("snapshotDate", snapshotDate);
+        if (scopeId != null) {
+            params.addValue("scopeId", scopeId);
+        }
+
+        String scopeClause = switch (scopeType) {
+            case GLOBAL -> "1 = 1";
+            case PROJECT -> "paf.project_id = :scopeId";
+            case TEAM -> "paf.team_id = :scopeId";
+            case DEPARTMENT -> """
+                EXISTS (
+                    SELECT 1
+                    FROM project_departments pd
+                    WHERE pd.project_id = paf.project_id
+                      AND pd.department_id = :scopeId
+                )
+                """;
+            case EMPLOYEE -> """
+                EXISTS (
+                    SELECT 1
+                    FROM project_assignments pa
+                    WHERE pa.project_id = paf.project_id
+                      AND pa.employee_id = :scopeId
+                      AND pa.is_active = true
+                      AND pa.start_date <= CURRENT_DATE
+                      AND (pa.end_date IS NULL OR pa.end_date >= CURRENT_DATE)
+                )
+                """;
+        };
+
+        return jdbcTemplate.query("""
+            SELECT paf.project_id,
+                   COALESCE(NULLIF(TRIM(p.name), ''), p.code, 'Project') AS project_name,
+                   paf.team_id,
+                   paf.absent_employees,
+                   paf.absence_days,
+                   paf.affected_members,
+                   paf.estimated_delay_days,
+                   paf.risk_level
+            FROM analytics_project_absence_facts paf
+            JOIN projects p ON p.id = paf.project_id
+            WHERE paf.snapshot_date = :snapshotDate
+              AND %s
+            ORDER BY paf.estimated_delay_days DESC, project_name ASC
+            """.formatted(scopeClause), params, (rs, rowNum) ->
+            new ProjectAbsenceFactDto(
+                rs.getObject("project_id", UUID.class),
+                rs.getString("project_name"),
+                rs.getObject("team_id", UUID.class),
+                rs.getInt("absent_employees"),
+                rs.getInt("absence_days"),
+                rs.getInt("affected_members"),
+                rs.getInt("estimated_delay_days"),
+                com.hris.analytics.enums.RiskLevel.valueOf(rs.getString("risk_level"))
+            ));
+    }
+
     private String resolveScopeLabel(UUID userId, AnalyticsScopeType scopeType, UUID scopeId) {
         return analyticsScopeService.getAvailableScopes(userId).stream()
             .filter(option -> option.scopeType() == scopeType && Objects.equals(option.scopeId(), scopeId))
@@ -757,5 +947,12 @@ public class AnalyticsQueryService {
             return !to.isBefore(normalizeFrom(from, to)) ? to : normalizeFrom(from, to);
         }
         return LocalDate.now();
+    }
+
+    private LocalDate latestProjectAbsenceSnapshotDate() {
+        return jdbcTemplate.query(
+            "SELECT MAX(snapshot_date) AS snapshot_date FROM analytics_project_absence_facts",
+            rs -> rs.next() ? rs.getObject("snapshot_date", LocalDate.class) : null
+        );
     }
 }
