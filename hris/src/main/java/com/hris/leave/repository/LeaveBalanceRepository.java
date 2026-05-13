@@ -49,7 +49,7 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
             lb.usedDays,
             lb.pendingDays,
             lb.carryOverDays,
-            lb.availableDays
+            (lb.totalDays + lb.carryOverDays - lb.usedDays - lb.pendingDays)
         )
         FROM LeaveBalance lb
         JOIN Employee e ON lb.employeeId = e.id
@@ -64,7 +64,6 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
               OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(e.employeeCode) LIKE LOWER(CONCAT('%', :query, '%'))
           )
-        ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
         ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
         """)
     Page<LeaveBalanceSummaryDto> searchSummariesForYear(
@@ -90,7 +89,7 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
             lb.usedDays,
             lb.pendingDays,
             lb.carryOverDays,
-            lb.availableDays
+            (lb.totalDays + lb.carryOverDays - lb.usedDays - lb.pendingDays)
         )
         FROM LeaveBalance lb
         JOIN Employee e ON lb.employeeId = e.id
