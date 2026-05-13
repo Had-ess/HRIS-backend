@@ -49,7 +49,39 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
             lb.usedDays,
             lb.pendingDays,
             lb.carryOverDays,
-            lb.availableDays
+            (lb.totalDays + lb.carryOverDays - lb.usedDays - lb.pendingDays)
+        )
+        FROM LeaveBalance lb
+        JOIN Employee e ON lb.employeeId = e.id
+        JOIN User u ON e.userId = u.id
+        LEFT JOIN LeaveType lt ON lb.leaveTypeId = lt.id
+        WHERE lb.year = :year
+          AND (:employeeId IS NULL OR lb.employeeId = :employeeId)
+        ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
+        """)
+    Page<LeaveBalanceSummaryDto> searchSummariesForYear(
+        @Param("year") int year,
+        @Param("employeeId") UUID employeeId,
+        Pageable pageable
+    );
+
+    @Query("""
+        SELECT new com.hris.leave.dto.LeaveBalanceSummaryDto(
+            lb.id,
+            e.id,
+            e.employeeCode,
+            u.id,
+            u.firstName,
+            u.lastName,
+            lb.leaveTypeId,
+            lt.code,
+            lt.name,
+            lb.year,
+            lb.totalDays,
+            lb.usedDays,
+            lb.pendingDays,
+            lb.carryOverDays,
+            (lb.totalDays + lb.carryOverDays - lb.usedDays - lb.pendingDays)
         )
         FROM LeaveBalance lb
         JOIN Employee e ON lb.employeeId = e.id
@@ -58,16 +90,14 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
         WHERE lb.year = :year
           AND (:employeeId IS NULL OR lb.employeeId = :employeeId)
           AND (
-              :query IS NULL
-              OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
+              LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(e.employeeCode) LIKE LOWER(CONCAT('%', :query, '%'))
           )
         ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
-        ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
         """)
-    Page<LeaveBalanceSummaryDto> searchSummariesForYear(
+    Page<LeaveBalanceSummaryDto> searchSummariesForYearWithQuery(
         @Param("year") int year,
         @Param("employeeId") UUID employeeId,
         @Param("query") String query,
@@ -90,7 +120,39 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
             lb.usedDays,
             lb.pendingDays,
             lb.carryOverDays,
-            lb.availableDays
+            (lb.totalDays + lb.carryOverDays - lb.usedDays - lb.pendingDays)
+        )
+        FROM LeaveBalance lb
+        JOIN Employee e ON lb.employeeId = e.id
+        JOIN User u ON e.userId = u.id
+        LEFT JOIN LeaveType lt ON lb.leaveTypeId = lt.id
+        WHERE lb.year = :year
+          AND lb.employeeId IN :employeeIds
+        ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
+        """)
+    Page<LeaveBalanceSummaryDto> searchSummariesForYearAndEmployeeIds(
+        @Param("year") int year,
+        @Param("employeeIds") List<UUID> employeeIds,
+        Pageable pageable
+    );
+
+    @Query("""
+        SELECT new com.hris.leave.dto.LeaveBalanceSummaryDto(
+            lb.id,
+            e.id,
+            e.employeeCode,
+            u.id,
+            u.firstName,
+            u.lastName,
+            lb.leaveTypeId,
+            lt.code,
+            lt.name,
+            lb.year,
+            lb.totalDays,
+            lb.usedDays,
+            lb.pendingDays,
+            lb.carryOverDays,
+            (lb.totalDays + lb.carryOverDays - lb.usedDays - lb.pendingDays)
         )
         FROM LeaveBalance lb
         JOIN Employee e ON lb.employeeId = e.id
@@ -99,15 +161,14 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, UUID
         WHERE lb.year = :year
           AND lb.employeeId IN :employeeIds
           AND (
-              :query IS NULL
-              OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
+              LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
               OR LOWER(e.employeeCode) LIKE LOWER(CONCAT('%', :query, '%'))
           )
         ORDER BY u.lastName ASC, u.firstName ASC, lb.leaveTypeId ASC
         """)
-    Page<LeaveBalanceSummaryDto> searchSummariesForYearAndEmployeeIds(
+    Page<LeaveBalanceSummaryDto> searchSummariesForYearAndEmployeeIdsWithQuery(
         @Param("year") int year,
         @Param("employeeIds") List<UUID> employeeIds,
         @Param("query") String query,

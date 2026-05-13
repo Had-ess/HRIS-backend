@@ -53,7 +53,7 @@ class LeaveBalanceServiceTest {
         when(accessScopeService.hasAnyPermissionName(requesterId,
             "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")).thenReturn(true);
         when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")).thenReturn(true);
-        when(leaveBalanceRepository.searchSummariesForYear(any(Integer.class), eq(null), eq(null), any()))
+        when(leaveBalanceRepository.searchSummariesForYear(any(Integer.class), eq(null), any()))
             .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
 
         List<LeaveBalanceSummaryDto> result = leaveBalanceService.getVisibleBalances(
@@ -87,7 +87,7 @@ class LeaveBalanceServiceTest {
             Employee.builder().id(employeeOneId).departmentId(departmentId).build(),
             Employee.builder().id(employeeTwoId).departmentId(departmentId).build()
         ));
-        when(leaveBalanceRepository.searchSummariesForYearAndEmployeeIds(
+        when(leaveBalanceRepository.searchSummariesForYearAndEmployeeIdsWithQuery(
             eq(2026), eq(List.of(employeeOneId, employeeTwoId)), eq("alice"), any()))
             .thenReturn(new PageImpl<>(List.of(summary), PageRequest.of(0, 20), 1));
 
@@ -95,7 +95,7 @@ class LeaveBalanceServiceTest {
             requesterId, null, "alice", 2026, PageRequest.of(0, 20));
 
         assertThat(result).containsExactly(summary);
-        verify(leaveBalanceRepository, never()).searchSummariesForYear(eq(2026), eq(null), eq("alice"), any());
+        verify(leaveBalanceRepository, never()).searchSummariesForYear(eq(2026), eq(null), any());
     }
 
     @Test
@@ -116,7 +116,7 @@ class LeaveBalanceServiceTest {
         when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_OWN")).thenReturn(true);
         when(accessScopeService.getEmployeeOrThrow(requesterId)).thenReturn(requesterEmployee);
         when(leaveBalanceRepository.searchSummariesForYearAndEmployeeIds(
-            eq(2026), eq(List.of(employeeId)), eq(null), any()))
+            eq(2026), eq(List.of(employeeId)), any()))
             .thenReturn(new PageImpl<>(List.of(summary), PageRequest.of(0, 20), 1));
 
         List<LeaveBalanceSummaryDto> result = leaveBalanceService.getVisibleBalances(
