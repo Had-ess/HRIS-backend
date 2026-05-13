@@ -38,9 +38,9 @@ VALUES
     ('66666666-6666-6666-6666-666666666401', 'ENG_PLATFORM', '44444444-4444-4444-4444-444444444401', 'Platform Team', '55555555-5555-5555-5555-555555555403', TRUE)
 ON CONFLICT (code) DO NOTHING;
 
-INSERT INTO projects (id, name, code, status, start_date, end_date, project_manager_employee_id)
+INSERT INTO projects (id, name, code, status, start_date, end_date)
 VALUES
-    ('77777777-7777-7777-7777-777777777401', 'HRIS Modernization', 'HRIS-CORE', 'ACTIVE', CURRENT_DATE - INTERVAL '120 days', NULL, '55555555-5555-5555-5555-555555555403')
+    ('77777777-7777-7777-7777-777777777401', 'HRIS Modernization', 'HRIS-CORE', 'ACTIVE', CURRENT_DATE - INTERVAL '120 days', NULL)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO team_project_links (team_id, project_id, start_date, end_date, is_active)
@@ -73,7 +73,7 @@ VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0401', 'LEAVE_REQUEST', 'aaaaaaaa-aaaa-
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO approval_steps (id, workflow_id, approver_id, step_order, status, context, source_type, approver_level, routing_snapshot, comment, decided_at, version)
-VALUES ('cccccccc-cccc-cccc-cccc-cccccccc0401', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0401', '33333333-3333-3333-3333-333333333303', 1, 'PENDING', 'LEAVE_REQUEST', 'PROJECT_CHAIN', 1, '{"seed":"demo"}', NULL, NULL, 0)
+VALUES ('cccccccc-cccc-cccc-cccc-cccccccc0401', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0401', '33333333-3333-3333-3333-333333333303', 1, 'PENDING', 'TEAM', 'TEAM_CHAIN', 1, '{"seed":"demo"}', NULL, NULL, 0)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO admin_requests (

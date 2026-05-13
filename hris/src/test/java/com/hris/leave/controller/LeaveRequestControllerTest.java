@@ -16,11 +16,13 @@ import com.hris.leave.service.LeaveRequestService;
 import com.hris.leave.service.LeaveRequestQueryService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -42,12 +44,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LeaveRequestController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({
     GlobalExceptionHandler.class,
     LeaveRequestControllerTest.TestSecurityConfig.class,
@@ -81,14 +83,7 @@ class LeaveRequestControllerTest {
     private PermissionAuthorizationService permissionAuthorizationService;
 
     @BeforeEach
-    void setUp() throws Exception {
-        doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(
-                invocation.getArgument(0),
-                invocation.getArgument(1)
-            );
-            return null;
-        }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
+    void setUp() {
     }
 
     @Test
@@ -147,7 +142,7 @@ class LeaveRequestControllerTest {
         when(approvalViewService.getStepsForSubject("LEAVE", leaveId)).thenReturn(responseDto.approvalSteps());
         when(leaveRequestService.canUploadAttachment(request, USER_ID)).thenReturn(true);
 
-        mockMvc.perform(get("/api/leave-requests/{id}", leaveId).with(user(USER_ID.toString()).roles("EMPLOYEE")))
+        mockMvc.perform(get("/api/leave-requests/{id}", leaveId).with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(leaveId.toString()))
@@ -198,7 +193,7 @@ class LeaveRequestControllerTest {
             .thenReturn(Map.of(leaveId, responseDto.approvalSteps()));
         when(leaveRequestService.canUploadAttachment(request, USER_ID)).thenReturn(true);
 
-        mockMvc.perform(get("/api/leave-requests").with(user(USER_ID.toString()).roles("EMPLOYEE")))
+        mockMvc.perform(get("/api/leave-requests").with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.content[0].approvalSteps").isArray())

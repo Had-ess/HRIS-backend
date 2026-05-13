@@ -64,7 +64,7 @@ public class AnalyticsEventPublisher {
         payload.put("approvalStepId", step.getId());
         payload.put("approverId", step.getApproverId());
         payload.put("subjectType", workflow.getSubjectType());
-        payload.put("sourceType", step.getSourceType() != null ? step.getSourceType().name() : "PRIMARY_CHAIN");
+        payload.put("sourceType", step.getSourceType() != null ? step.getSourceType().name() : "TEAM_CHAIN");
         payload.put("approverLevel", step.getApproverLevel() != null ? step.getApproverLevel() : 1);
         payload.put("stepStatus", step.getStatus().name());
         payload.put("workflowCreatedAt", workflow.getCreatedAt() != null ? workflow.getCreatedAt().toString() : null);

@@ -3,6 +3,7 @@ package com.hris.support;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,5 +27,12 @@ public final class TestAuthenticationFactory {
                 .toList(),
             userId.toString()
         );
+    }
+
+    public static RequestPostProcessor jwtRequest(UUID userId, String... roles) {
+        return request -> {
+            request.setUserPrincipal(jwtAuthentication(userId, roles));
+            return request;
+        };
     }
 }

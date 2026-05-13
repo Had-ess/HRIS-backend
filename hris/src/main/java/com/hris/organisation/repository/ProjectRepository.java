@@ -53,11 +53,4 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
         @Param("projectId") UUID projectId,
         @Param("departmentId") UUID departmentId
     );
-
-    @Query("""
-        select p.id
-        from Project p
-        where p.projectManagerEmployeeId = :employeeId
-        """)
-    List<UUID> findProjectIdsByProjectManagerEmployeeId(@Param("employeeId") UUID employeeId);
 }

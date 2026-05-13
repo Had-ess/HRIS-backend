@@ -11,8 +11,5 @@ public record ProjectResponseDto(
     String code,
     ProjectStatus status,
     LocalDate startDate,
-    LocalDate endDate,
-    UUID projectManagerEmployeeId,
-    String projectManagerEmployeeCode,
-    String projectManagerName
+    LocalDate endDate
 ) {}

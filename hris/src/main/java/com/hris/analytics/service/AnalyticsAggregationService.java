@@ -130,7 +130,7 @@ public class AnalyticsAggregationService {
         Map<ApprovalKey, Long> pendingCounts = pendingSteps.stream()
             .collect(java.util.stream.Collectors.groupingBy(
                 step -> new ApprovalKey(
-                    step.getSourceType() != null ? step.getSourceType() : ApprovalSourceType.PRIMARY_CHAIN,
+                    step.getSourceType() != null ? step.getSourceType() : ApprovalSourceType.TEAM_CHAIN,
                     step.getApproverLevel() != null ? step.getApproverLevel() : 1
                 ),
                 java.util.stream.Collectors.counting()

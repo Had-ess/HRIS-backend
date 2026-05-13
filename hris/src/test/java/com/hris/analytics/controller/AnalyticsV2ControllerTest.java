@@ -10,6 +10,7 @@ import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,12 +34,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AnalyticsV2Controller.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({GlobalExceptionHandler.class, AnalyticsV2ControllerTest.TestSecurityConfig.class})
 class AnalyticsV2ControllerTest {
 
@@ -52,11 +54,7 @@ class AnalyticsV2ControllerTest {
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach
-    void setUp() throws Exception {
-        doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(invocation.getArgument(0), invocation.getArgument(1));
-            return null;
-        }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
+    void setUp() {
     }
 
     @Test
@@ -76,7 +74,7 @@ class AnalyticsV2ControllerTest {
             .thenReturn(new AnalyticsSummaryDto(10, 2, 3, 1, 20, 0, 1));
 
         mockMvc.perform(get("/api/analytics/v2/summary")
-                .with(user(userId.toString()).roles("EMPLOYEE"))
+                .with(TestAuthenticationFactory.jwtRequest(userId, "EMPLOYEE"))
                 .param("scopeType", "EMPLOYEE")
                 .param("scopeId", employeeId.toString())
                 .param("from", "2026-05-01")
@@ -111,7 +109,7 @@ class AnalyticsV2ControllerTest {
         ));
 
         mockMvc.perform(get("/api/analytics/v2/scopes")
-                .with(user(userId.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(userId, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data[0].scopeType").value("EMPLOYEE"))
             .andExpect(jsonPath("$.data[1].scopeType").value("GLOBAL"));
@@ -132,7 +130,7 @@ class AnalyticsV2ControllerTest {
             .thenReturn(new AnalyticsDashboardDto(AnalyticsScopeType.EMPLOYEE, userId, "My analytics", 1, 2, 0, 0, 12));
 
         mockMvc.perform(get("/api/analytics/v2/dashboard")
-                .with(user(userId.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(userId, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.scopeType").value("EMPLOYEE"))
             .andExpect(jsonPath("$.data.availableBalanceDays").value(12));

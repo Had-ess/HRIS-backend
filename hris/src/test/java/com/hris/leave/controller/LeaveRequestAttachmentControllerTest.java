@@ -9,10 +9,12 @@ import com.hris.leave.service.LeaveRequestService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.auth.service.UserProvisioningService;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,12 +42,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LeaveRequestController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({GlobalExceptionHandler.class, LeaveRequestAttachmentControllerTest.TestSecurityConfig.class})
 class LeaveRequestAttachmentControllerTest {
 
@@ -70,14 +72,7 @@ class LeaveRequestAttachmentControllerTest {
     private PermissionAuthorizationService permissionAuthorizationService;
 
     @BeforeEach
-    void setUp() throws Exception {
-        doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(
-                invocation.getArgument(0),
-                invocation.getArgument(1)
-            );
-            return null;
-        }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
+    void setUp() {
     }
 
     @Test
@@ -86,7 +81,7 @@ class LeaveRequestAttachmentControllerTest {
             .when(leaveRequestService).downloadAttachment(REQUEST_ID, ATTACHMENT_ID, USER_ID);
 
         mockMvc.perform(get("/api/leave-requests/{id}/attachments/{attachmentId}", REQUEST_ID, ATTACHMENT_ID)
-                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isForbidden());
     }
 
@@ -101,7 +96,7 @@ class LeaveRequestAttachmentControllerTest {
         );
 
         mockMvc.perform(get("/api/leave-requests/{id}/attachments/{attachmentId}", REQUEST_ID, ATTACHMENT_ID)
-                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"medical_note.pdf\""));
     }
@@ -135,7 +130,7 @@ class LeaveRequestAttachmentControllerTest {
 
         mockMvc.perform(multipart("/api/leave-requests/{id}/attachments", REQUEST_ID)
                 .file(file)
-                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(ATTACHMENT_ID.toString()))
@@ -166,7 +161,7 @@ class LeaveRequestAttachmentControllerTest {
         when(leaveRequestQueryService.toAttachmentDtos(List.of(attachment))).thenReturn(List.of(attachmentDto));
 
         mockMvc.perform(get("/api/leave-requests/{id}/attachments", REQUEST_ID)
-                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data[0].id").value(ATTACHMENT_ID.toString()))
@@ -181,14 +176,14 @@ class LeaveRequestAttachmentControllerTest {
             .when(leaveRequestService).deleteAttachment(REQUEST_ID, ATTACHMENT_ID, USER_ID);
 
         mockMvc.perform(delete("/api/leave-requests/{id}/attachments/{attachmentId}", REQUEST_ID, ATTACHMENT_ID)
-                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isForbidden());
     }
 
     @Test
     void deleteAttachmentReturnsOkWhenAuthorized() throws Exception {
         mockMvc.perform(delete("/api/leave-requests/{id}/attachments/{attachmentId}", REQUEST_ID, ATTACHMENT_ID)
-                .with(user(USER_ID.toString()).roles("EMPLOYEE")))
+                .with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isOk());
     }
 

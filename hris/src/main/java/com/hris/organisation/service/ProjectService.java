@@ -99,7 +99,6 @@ public class ProjectService {
         Project project = projectMapper.toEntity(dto);
         project.setName(dto.name().trim());
         project.setCode(dto.code().trim());
-        project.setProjectManagerEmployeeId(dto.projectManagerEmployeeId());
         Project saved = projectRepository.save(project);
 
         auditLogService.log(actorId, AuditAction.CREATE, "project",
@@ -121,7 +120,6 @@ public class ProjectService {
         project.setStatus(dto.status());
         project.setStartDate(dto.startDate());
         project.setEndDate(dto.endDate());
-        project.setProjectManagerEmployeeId(dto.projectManagerEmployeeId());
 
         Project saved = projectRepository.save(project);
         auditLogService.log(actorId, AuditAction.UPDATE, "project",
@@ -377,19 +375,6 @@ public class ProjectService {
                 throw new IllegalStateException("Project code must be unique");
             });
 
-        validateProjectManager(dto.projectManagerEmployeeId());
-    }
-
-    private void validateProjectManager(UUID projectManagerEmployeeId) {
-        if (projectManagerEmployeeId == null) {
-            return;
-        }
-
-        Employee projectManager = employeeRepository.findById(projectManagerEmployeeId)
-            .orElseThrow(() -> new EntityNotFoundException("Project manager not found"));
-        if (projectManager.getStatus() != EmployeeStatus.ACTIVE) {
-            throw new IllegalArgumentException("Project manager must be an active employee");
-        }
     }
 
     private void ensureProjectExists(UUID projectId) {
@@ -426,7 +411,6 @@ public class ProjectService {
                 projectIds.addAll(projectDepartmentRepository.findProjectIdsByDepartmentId(departmentId)));
 
         if (employee != null) {
-            projectIds.addAll(projectRepository.findProjectIdsByProjectManagerEmployeeId(employee.getId()));
             projectIds.addAll(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(
                 employee.getId(), LocalDate.now()));
 
@@ -450,9 +434,6 @@ public class ProjectService {
 
         Employee employee = accessScopeService.getEmployeeOrThrow(actorId);
         LocalDate today = LocalDate.now();
-        boolean managesProject = projectRepository.findProjectIdsByProjectManagerEmployeeId(employee.getId())
-            .stream()
-            .anyMatch(projectId::equals);
         boolean supervisesAssignments = projectAssignmentRepository
             .findActiveProjectIdsBySupervisorId(employee.getId(), today)
             .stream()
@@ -461,7 +442,7 @@ public class ProjectService {
             .stream()
             .anyMatch(projectId::equals);
 
-        if (!managesProject && !supervisesAssignments && !supervisesTeams) {
+        if (!supervisesAssignments && !supervisesTeams) {
             throw new AccessDeniedException("You are not allowed to manage this project");
         }
     }
@@ -474,7 +455,6 @@ public class ProjectService {
             .status(project.getStatus())
             .startDate(project.getStartDate())
             .endDate(project.getEndDate())
-            .projectManagerEmployeeId(project.getProjectManagerEmployeeId())
             .build();
     }
 
@@ -631,11 +611,6 @@ public class ProjectService {
         if (parentSupervisor.getStatus() != EmployeeStatus.ACTIVE) {
             throw new InvalidProjectAssignmentException("Parent supervisor must be an active employee");
         }
-        if (project.getProjectManagerEmployeeId() != null
-            && project.getProjectManagerEmployeeId().equals(parentSupervisor.getId())) {
-            return;
-        }
-
         long activeAssignments = dto.endDate() != null
             ? projectAssignmentRepository.countOverlappingActiveAssignments(
                 parentSupervisor.getId(), projectId, dto.startDate(), dto.endDate())
@@ -643,7 +618,7 @@ public class ProjectService {
                 parentSupervisor.getId(), projectId, dto.startDate());
         if (activeAssignments == 0) {
             throw new InvalidProjectAssignmentException(
-                "Parent supervisor must already be assigned to the project or be the project manager");
+                "Parent supervisor must already be assigned to the project");
         }
     }
 
@@ -655,14 +630,7 @@ public class ProjectService {
             return employeeRepository.findById(dto.parentSupervisorEmployeeId())
                 .orElseThrow(() -> new EntityNotFoundException("Parent supervisor not found"));
         }
-        if (project.getProjectManagerEmployeeId() == null
-            || project.getProjectManagerEmployeeId().equals(supervisor.getId())) {
-            return null;
-        }
-
-        return employeeRepository.findById(project.getProjectManagerEmployeeId())
-            .filter(candidate -> candidate.getStatus() == EmployeeStatus.ACTIVE)
-            .orElse(null);
+        return null;
     }
 
     private void createTeamAssignment(
@@ -713,21 +681,13 @@ public class ProjectService {
     }
 
     private ProjectResponseDto toProjectDto(Project project) {
-        Employee projectManager = project.getProjectManagerEmployeeId() == null
-            ? null
-            : employeeRepository.findById(project.getProjectManagerEmployeeId())
-                .orElseThrow(() -> new EntityNotFoundException("Project manager not found"));
-
         return new ProjectResponseDto(
             project.getId(),
             project.getName(),
             project.getCode(),
             project.getStatus(),
             project.getStartDate(),
-            project.getEndDate(),
-            projectManager != null ? projectManager.getId() : null,
-            projectManager != null ? projectManager.getEmployeeCode() : null,
-            projectManager != null ? resolveEmployeeName(projectManager) : null
+            project.getEndDate()
         );
     }
 

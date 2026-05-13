@@ -8,11 +8,13 @@ import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.common.GlobalExceptionHandler;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,12 +30,12 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AccessController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({GlobalExceptionHandler.class, AccessControllerTest.TestSecurityConfig.class})
 class AccessControllerTest {
 
@@ -53,11 +55,7 @@ class AccessControllerTest {
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach
-    void setUp() throws Exception {
-        doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(invocation.getArgument(0), invocation.getArgument(1));
-            return null;
-        }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
+    void setUp() {
     }
 
     @Test
@@ -70,7 +68,7 @@ class AccessControllerTest {
             List.of("GLOBAL")
         ));
 
-        mockMvc.perform(get("/api/access/me").with(user(userId.toString())))
+        mockMvc.perform(get("/api/access/me").with(TestAuthenticationFactory.jwtRequest(userId, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.profileCodes[0]").value("HR_CONSOLE"))
             .andExpect(jsonPath("$.data.permissions[0].name").value("ACCESS_PROFILE_READ"))
@@ -96,7 +94,7 @@ class AccessControllerTest {
             )
         ));
 
-        mockMvc.perform(get("/api/navigation/me").with(user(userId.toString())))
+        mockMvc.perform(get("/api/navigation/me").with(TestAuthenticationFactory.jwtRequest(userId, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data[0].code").value("WORKSPACE"))
             .andExpect(jsonPath("$.data[0].items[0].code").value("menu.workspace.dashboard"))

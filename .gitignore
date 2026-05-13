@@ -5,3 +5,35 @@ hris/hris.zip
 *.log
 *.class
 .idea/
+**/graphify-out/
+.graphify
+.graphify_*
+*.graphify.*
+# Python generated/cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# IDE files
+.idea/
+.vscode/
+
+# Frontend generated/dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Backend generated files
+backend/**/target/
+
+# OS files
+.DS_Store
+Thumbs.db

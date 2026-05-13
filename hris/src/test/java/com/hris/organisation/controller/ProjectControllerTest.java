@@ -1,11 +1,13 @@
-package com.hris.settings.quick.controller;
+package com.hris.organisation.controller;
 
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
+import com.hris.organisation.dto.ProjectResponseDto;
+import com.hris.organisation.enums.ProjectStatus;
+import com.hris.organisation.service.ProjectService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
-import com.hris.settings.quick.dto.QuickSettingsDto;
-import com.hris.settings.quick.service.QuickSettingsService;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,31 +21,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = QuickSettingsController.class)
+@WebMvcTest(controllers = ProjectController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import({GlobalExceptionHandler.class, QuickSettingsControllerTest.TestSecurityConfig.class})
-class QuickSettingsControllerTest {
+@Import({GlobalExceptionHandler.class, ProjectControllerTest.TestSecurityConfig.class})
+class ProjectControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private QuickSettingsService quickSettingsService;
+    @MockBean private ProjectService projectService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
     @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean private UserProvisioningService userProvisioningService;
@@ -54,42 +54,53 @@ class QuickSettingsControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/settings/quick returns settings")
-    void getReturnsSettings() throws Exception {
-        UUID workflowId = UUID.randomUUID();
-        UUID calendarId = UUID.randomUUID();
-        when(quickSettingsService.get()).thenReturn(new QuickSettingsDto(
-            2, 4, 16, "MON_FRI", workflowId, "LEAVE_DEFAULT", "Leave default", 24, 48, calendarId, "TN", "Tunisia", 8, null
+    @DisplayName("GET /api/projects/{id} does not expose project manager fields")
+    void getByIdDoesNotExposeProjectManagerFields() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        when(projectService.getById(any(), any())).thenReturn(new ProjectResponseDto(
+            projectId,
+            "HRIS Core",
+            "HRIS-CORE",
+            ProjectStatus.ACTIVE,
+            LocalDate.of(2026, 1, 1),
+            null
         ));
 
-        mockMvc.perform(get("/api/settings/quick").with(user(UUID.randomUUID().toString())))
+        mockMvc.perform(get("/api/projects/{id}", projectId).with(TestAuthenticationFactory.jwtRequest(UUID.randomUUID(), "EMPLOYEE")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.defaultValidationWorkflowCode").value("LEAVE_DEFAULT"))
-            .andExpect(jsonPath("$.data.activeCalendarCode").value("TN"));
+            .andExpect(jsonPath("$.data.id").value(projectId.toString()))
+            .andExpect(jsonPath("$.data.projectManagerEmployeeId").doesNotExist())
+            .andExpect(jsonPath("$.data.projectManagerEmployeeCode").doesNotExist())
+            .andExpect(jsonPath("$.data.projectManagerName").doesNotExist());
     }
 
     @Test
-    @DisplayName("PUT /api/settings/quick enforces SETTINGS_MANAGE")
-    void updateEnforcesPermission() throws Exception {
-        doThrow(new AccessDeniedException("forbidden"))
-            .when(permissionAuthorizationService).authorize(any(), eq("SETTINGS"), eq("MANAGE"));
+    @DisplayName("POST /api/projects accepts the aligned payload shape")
+    void createAcceptsAlignedPayloadShape() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        when(projectService.create(any(), any())).thenReturn(new ProjectResponseDto(
+            projectId,
+            "HRIS Core",
+            "HRIS-CORE",
+            ProjectStatus.ACTIVE,
+            LocalDate.of(2026, 1, 1),
+            null
+        ));
 
-        mockMvc.perform(put("/api/settings/quick")
-                .with(user(UUID.randomUUID().toString()))
+        mockMvc.perform(post("/api/projects")
+                .with(TestAuthenticationFactory.jwtRequest(UUID.randomUUID(), "EMPLOYEE"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "monthlyAcquisitionRate": 2,
-                      "maxAuthorizationsPerMonth": 4,
-                      "maxAuthorizationHours": 16,
-                      "workWeekPattern": "MON_FRI",
-                      "defaultWorkflowSlaHours": 24,
-                      "defaultValidationSlaHours": 48,
-                      "workingHoursPerDay": 8
+                      "name": "HRIS Core",
+                      "code": "HRIS-CORE",
+                      "status": "ACTIVE",
+                      "startDate": "2026-01-01",
+                      "endDate": null
                     }
                     """))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.success").value(false));
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.projectManagerEmployeeId").doesNotExist());
     }
 
     @TestConfiguration

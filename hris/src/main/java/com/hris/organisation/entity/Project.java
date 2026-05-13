@@ -37,9 +37,6 @@ public class Project {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "project_manager_employee_id")
-    private UUID projectManagerEmployeeId;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -58,8 +58,8 @@ class ApprovalViewServiceTest {
             .approverId(approverId)
             .stepOrder(1)
             .status(StepStatus.PENDING)
-            .context(ApprovalContext.PROJECT)
-            .routingSnapshot("{\"role\":\"PROJECT_SUPERVISOR\"}")
+            .context(ApprovalContext.TEAM)
+            .routingSnapshot("{\"routingSource\":\"TEAM_HIERARCHY\",\"role\":\"TEAM_LEAD\"}")
             .comment(null)
             .build();
         ApprovalViewService service = new ApprovalViewService(
@@ -82,8 +82,8 @@ class ApprovalViewServiceTest {
         assertThat(dto.subjectType()).isEqualTo("LEAVE");
         assertThat(dto.subjectId()).isEqualTo(subjectId);
         assertThat(dto.approverName()).isEqualTo("Jane Supervisor");
-        assertThat(dto.context()).isEqualTo(ApprovalContext.PROJECT);
-        assertThat(dto.routingSnapshot()).contains("PROJECT_SUPERVISOR");
+        assertThat(dto.context()).isEqualTo(ApprovalContext.TEAM);
+        assertThat(dto.routingSnapshot()).contains("TEAM_HIERARCHY");
     }
 
     @Test

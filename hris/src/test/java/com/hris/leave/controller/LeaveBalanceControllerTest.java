@@ -7,11 +7,13 @@ import com.hris.leave.dto.LeaveBalanceSummaryDto;
 import com.hris.leave.service.LeaveBalanceService;
 import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,13 +33,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LeaveBalanceController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({GlobalExceptionHandler.class, LeaveBalanceControllerTest.TestSecurityConfig.class})
 class LeaveBalanceControllerTest {
 
@@ -50,11 +52,7 @@ class LeaveBalanceControllerTest {
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach
-    void setUp() throws Exception {
-        doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(invocation.getArgument(0), invocation.getArgument(1));
-            return null;
-        }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
+    void setUp() {
     }
 
     @Test
@@ -81,7 +79,7 @@ class LeaveBalanceControllerTest {
             )
         ));
 
-        mockMvc.perform(get("/api/leave-balances").with(user(UUID.randomUUID().toString())))
+        mockMvc.perform(get("/api/leave-balances").with(TestAuthenticationFactory.jwtRequest(UUID.randomUUID(), "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data[0].employeeCode").value("E001"))
             .andExpect(jsonPath("$.data[0].availableDays").value(15));
@@ -95,7 +93,7 @@ class LeaveBalanceControllerTest {
             .when(permissionAuthorizationService).authorizePermissionName(any(), eq("LEAVE_BALANCE_MANAGE"));
 
         mockMvc.perform(post("/api/leave-balances/{employeeId}/adjustments", employeeId)
-                .with(user(UUID.randomUUID().toString()))
+                .with(TestAuthenticationFactory.jwtRequest(UUID.randomUUID(), "EMPLOYEE"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {

@@ -1,7 +1,10 @@
 package com.hris.leave.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
 import com.hris.leave.entity.LeaveBalance;
 import com.hris.leave.entity.LeaveRequest;
@@ -13,6 +16,7 @@ import com.hris.leave.acquisition.entity.AcquisitionFrequency;
 import com.hris.leave.acquisition.entity.LeaveAcquisitionPolicy;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +44,10 @@ class LeaveBalanceLedgerServiceTest {
     @Mock private LeaveTypeRepository leaveTypeRepository;
     @Mock private LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
     @Mock private AuditLogService auditLogService;
+    @Mock private TransactionalNotificationPublisher notificationPublisher;
+    @Mock private EmployeeRepository employeeRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private ObjectMapper objectMapper;
 
     @InjectMocks
     private LeaveBalanceLedgerService service;

@@ -8,11 +8,13 @@ import com.hris.approval.service.ApprovalStepService;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.security.JwtAuthenticationFilter;
+import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,12 +35,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ApprovalStepController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({GlobalExceptionHandler.class, ApprovalStepControllerTest.TestSecurityConfig.class})
 class ApprovalStepControllerTest {
 
@@ -62,14 +64,7 @@ class ApprovalStepControllerTest {
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach
-    void setUp() throws Exception {
-        doAnswer(invocation -> {
-            ((FilterChain) invocation.getArgument(2)).doFilter(
-                invocation.getArgument(0),
-                invocation.getArgument(1)
-            );
-            return null;
-        }).when(jwtAuthenticationFilter).doFilter(any(), any(), any());
+    void setUp() {
     }
 
     @Test
@@ -90,8 +85,8 @@ class ApprovalStepControllerTest {
             .approverId(USER_ID)
             .stepOrder(1)
             .status(StepStatus.PENDING)
-            .context(ApprovalContext.PROJECT)
-            .routingSnapshot("{\"role\":\"PROJECT_SUPERVISOR\"}")
+            .context(ApprovalContext.TEAM)
+            .routingSnapshot("{\"routingSource\":\"TEAM_HIERARCHY\",\"role\":\"TEAM_LEAD\"}")
             .build();
 
         when(approvalStepService.getPendingForApprover(eq(USER_ID), any(Pageable.class)))
@@ -110,13 +105,13 @@ class ApprovalStepControllerTest {
                 "Amine Supervisor",
                 1,
                 StepStatus.PENDING,
-                ApprovalContext.PROJECT,
-                "{\"role\":\"PROJECT_SUPERVISOR\"}",
+                ApprovalContext.TEAM,
+                "{\"routingSource\":\"TEAM_HIERARCHY\",\"role\":\"TEAM_LEAD\"}",
                 null,
                 null
             ))));
 
-        mockMvc.perform(get("/api/approval-steps/pending").with(user(USER_ID.toString()).roles("EMPLOYEE")))
+        mockMvc.perform(get("/api/approval-steps/pending").with(TestAuthenticationFactory.jwtRequest(USER_ID, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.content[0].workflowId").value(WORKFLOW_ID.toString()))
