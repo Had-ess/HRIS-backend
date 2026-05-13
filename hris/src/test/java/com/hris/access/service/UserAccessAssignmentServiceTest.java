@@ -59,7 +59,8 @@ class UserAccessAssignmentServiceTest {
 
         when(userRepository.existsById(userId)).thenReturn(true);
         when(accessProfileRepository.findById(profileId)).thenReturn(Optional.of(profile));
-        when(userProfileAssignmentRepository.existsByUserIdAndProfileIdAndIsActiveTrue(userId, profileId)).thenReturn(false);
+        when(userProfileAssignmentRepository.findEffectiveByUserIdAndProfileId(eq(userId), eq(profileId), any(Instant.class)))
+            .thenReturn(Optional.empty());
         when(userProfileAssignmentRepository.findEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(List.of(
             UserProfileAssignment.builder().profile(profile).profileId(profileId).build()
         ));
@@ -82,9 +83,10 @@ class UserAccessAssignmentServiceTest {
             .userId(userId)
             .profileId(profileId)
             .isActive(true)
+            .assignedAt(Instant.now().minusSeconds(60))
             .build();
 
-        when(userProfileAssignmentRepository.findByUserIdAndProfileIdAndIsActiveTrue(userId, profileId))
+        when(userProfileAssignmentRepository.findEffectiveByUserIdAndProfileId(eq(userId), eq(profileId), any(Instant.class)))
             .thenReturn(Optional.of(assignment));
 
         userAccessAssignmentService.removeProfile(userId, profileId, actorId);
@@ -104,5 +106,18 @@ class UserAccessAssignmentServiceTest {
         assertThatThrownBy(() -> userAccessAssignmentService.getProfiles(userId))
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessage("User not found");
+    }
+
+    @Test
+    @DisplayName("removeProfile blocks removing the current user's last active profile")
+    void removeProfileBlocksLastActiveProfileForSelf() {
+        UUID userId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
+
+        when(userProfileAssignmentRepository.countEffectiveByUserId(eq(userId), any(Instant.class))).thenReturn(1L);
+
+        assertThatThrownBy(() -> userAccessAssignmentService.removeProfile(userId, profileId, userId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("You cannot remove your last active access profile");
     }
 }

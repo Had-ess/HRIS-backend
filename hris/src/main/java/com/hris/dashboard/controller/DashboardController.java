@@ -33,14 +33,25 @@ public class DashboardController {
 
     @GetMapping("/supervisor")
     public ResponseEntity<ApiResponse<SupervisorDashboardDto>> getSupervisorDashboard(Authentication auth) {
-        permissionAuthorizationService.authorize(auth, "DASHBOARD", "SUPERVISOR_VIEW");
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "APPROVAL_STEP_READ",
+            "ANALYTICS_READ_SCOPED",
+            "DASHBOARD_SUPERVISOR_VIEW"
+        );
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getSupervisorDashboard(userId)));
     }
 
     @GetMapping("/hr")
     public ResponseEntity<ApiResponse<HrDashboardDto>> getHrDashboard(Authentication authentication) {
-        permissionAuthorizationService.authorize(authentication, "DASHBOARD", "HR_VIEW");
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            authentication,
+            "EMPLOYEE_MANAGE",
+            "ADMIN_REQUEST_PROCESS",
+            "LEAVE_BALANCE_MANAGE",
+            "DASHBOARD_HR_VIEW"
+        );
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getHrDashboard()));
     }
 

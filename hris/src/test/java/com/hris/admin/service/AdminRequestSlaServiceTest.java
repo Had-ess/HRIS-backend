@@ -10,7 +10,7 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
 import com.hris.notification.entity.NotificationEvent;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 class AdminRequestSlaServiceTest {
 
     @Mock private AdminRequestRepository adminRequestRepository;
-    @Mock private NotificationPublisher notificationPublisher;
+    @Mock private TransactionalNotificationPublisher notificationPublisher;
     @Mock private UserRepository userRepository;
     @Mock private AuditLogService auditLogService;
 
@@ -82,7 +82,7 @@ class AdminRequestSlaServiceTest {
         int count = slaService.checkAndNotifySlaExceeded();
 
         assertThat(count).isEqualTo(1);
-        verify(notificationPublisher).publish(any(NotificationEvent.class));
+        verify(notificationPublisher).publishAfterCommit(any(NotificationEvent.class));
         verify(adminRequestRepository).save(overdueRequest);
         assertThat(overdueRequest.getSlaNotifiedAt()).isNotNull();
     }
@@ -98,7 +98,7 @@ class AdminRequestSlaServiceTest {
         int count = slaService.checkAndNotifySlaExceeded();
 
         assertThat(count).isEqualTo(0);
-        verify(notificationPublisher, never()).publish(any());
+        verify(notificationPublisher, never()).publishAfterCommit(any(NotificationEvent.class));
     }
 
     @Test
@@ -131,7 +131,7 @@ class AdminRequestSlaServiceTest {
         assertThat(count).isEqualTo(1);
 
         ArgumentCaptor<NotificationEvent> captor = ArgumentCaptor.forClass(NotificationEvent.class);
-        verify(notificationPublisher, times(2)).publish(captor.capture());
+        verify(notificationPublisher, times(2)).publishAfterCommit(captor.capture());
 
         List<NotificationEvent> events = captor.getAllValues();
         assertThat(events).extracting(NotificationEvent::getTargetUserId)

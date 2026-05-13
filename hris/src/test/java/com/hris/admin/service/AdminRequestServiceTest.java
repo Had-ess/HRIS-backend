@@ -292,6 +292,51 @@ class AdminRequestServiceTest {
         assertThat(page.getTotalElements()).isZero();
     }
 
+    @Test
+    @DisplayName("requester attachments are blocked after processing starts")
+    void requesterAttachmentsBlockedAfterProcessingStarts() {
+        UUID requestId = UUID.randomUUID();
+        MultipartFile file = mock(MultipartFile.class);
+        AdminRequest inReview = baseRequest(requestId)
+            .status(AdminRequestStatus.IN_REVIEW)
+            .submittedAt(Instant.now())
+            .reviewedAt(Instant.now())
+            .processedByUserId(processorUserId)
+            .build();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(inReview));
+
+        assertThatThrownBy(() -> adminRequestService.uploadRequesterAttachment(requestId, file, requesterUserId))
+            .isInstanceOf(InvalidAdminRequestStateException.class)
+            .hasMessage("Requester attachments are only allowed for draft or unprocessed submitted requests");
+    }
+
+    @Test
+    @DisplayName("requester attachments remain allowed for unprocessed submitted requests")
+    void requesterAttachmentsAllowedForUnprocessedSubmittedRequests() {
+        UUID requestId = UUID.randomUUID();
+        UUID attachmentId = UUID.randomUUID();
+        MultipartFile file = mock(MultipartFile.class);
+        AdminRequest submitted = baseRequest(requestId)
+            .status(AdminRequestStatus.SUBMITTED)
+            .submittedAt(Instant.now())
+            .build();
+        when(adminRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(submitted));
+        when(attachmentService.store(requestId, file, requesterUserId, false)).thenReturn(AdminRequestAttachment.builder()
+            .id(attachmentId)
+            .adminRequestId(requestId)
+            .fileName("proof.pdf")
+            .build());
+        when(userRepository.findByPermissionNames(any())).thenReturn(List.of(User.builder()
+            .id(processorUserId)
+            .localePreference("en")
+            .build()));
+
+        AdminRequestAttachment attachment = adminRequestService.uploadRequesterAttachment(requestId, file, requesterUserId);
+
+        assertThat(attachment.getId()).isEqualTo(attachmentId);
+        verify(attachmentService).store(requestId, file, requesterUserId, false);
+    }
+
     private AdminRequest.AdminRequestBuilder baseRequest(UUID requestId) {
         return AdminRequest.builder()
             .id(requestId)

@@ -17,10 +17,34 @@ public interface UserProfileAssignmentRepository extends JpaRepository<UserProfi
         JOIN FETCH assignment.profile profile
         WHERE assignment.userId = :userId
           AND assignment.isActive = true
+          AND assignment.assignedAt <= :now
           AND profile.isActive = true
           AND (assignment.expiresAt IS NULL OR assignment.expiresAt > :now)
         """)
     List<UserProfileAssignment> findEffectiveByUserId(@Param("userId") UUID userId, @Param("now") Instant now);
+
+    @Query("""
+        SELECT assignment FROM UserProfileAssignment assignment
+        WHERE assignment.userId = :userId
+          AND assignment.profileId = :profileId
+          AND assignment.isActive = true
+          AND assignment.assignedAt <= :now
+          AND (assignment.expiresAt IS NULL OR assignment.expiresAt > :now)
+        """)
+    Optional<UserProfileAssignment> findEffectiveByUserIdAndProfileId(
+        @Param("userId") UUID userId,
+        @Param("profileId") UUID profileId,
+        @Param("now") Instant now
+    );
+
+    @Query("""
+        SELECT COUNT(assignment) FROM UserProfileAssignment assignment
+        WHERE assignment.userId = :userId
+          AND assignment.isActive = true
+          AND assignment.assignedAt <= :now
+          AND (assignment.expiresAt IS NULL OR assignment.expiresAt > :now)
+        """)
+    long countEffectiveByUserId(@Param("userId") UUID userId, @Param("now") Instant now);
 
     List<UserProfileAssignment> findByUserId(UUID userId);
 

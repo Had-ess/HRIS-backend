@@ -57,22 +57,25 @@ public class AccessScopeService {
     }
 
     public boolean hasGlobalAnalyticsVisibility(UUID userId) {
-        return hasPermissionName(userId, "DASHBOARD_HR_VIEW")
-            || hasPermissionName(userId, "DASHBOARD_DIRECTOR_VIEW")
-            || hasPermissionName(userId, "ANALYTICS_GLOBAL_READ");
+        return hasPermissionName(userId, "ANALYTICS_READ_GLOBAL")
+            || hasPermissionName(userId, "REPORT_READ")
+            || hasPermissionName(userId, "AUDIT_LOG_READ");
     }
 
     public boolean hasGlobalBusinessRead(UUID userId) {
         return hasPermissionName(userId, "EMPLOYEE_MANAGE")
             || hasPermissionName(userId, "PROJECT_PORTFOLIO_MANAGE")
             || hasPermissionName(userId, "DEPARTMENT_MANAGE")
-            || hasPermissionName(userId, "DASHBOARD_HR_VIEW")
-            || hasPermissionName(userId, "DASHBOARD_DIRECTOR_VIEW");
+            || hasPermissionName(userId, "LEAVE_BALANCE_MANAGE")
+            || hasPermissionName(userId, "ADMIN_REQUEST_READ_GLOBAL")
+            || hasPermissionName(userId, "ANALYTICS_READ_GLOBAL");
     }
 
     public boolean hasAdministrationOrHrVisibility(UUID userId) {
-        return hasPermissionName(userId, "DASHBOARD_HR_VIEW")
-            || hasPermissionName(userId, "USER_READ");
+        return hasPermissionName(userId, "USER_READ")
+            || hasPermissionName(userId, "EMPLOYEE_MANAGE")
+            || hasPermissionName(userId, "ADMIN_REQUEST_INBOX_READ")
+            || hasPermissionName(userId, "ADMIN_REQUEST_READ_GLOBAL");
     }
 
     public boolean hasProjectScopedManagement(UUID userId) {
@@ -82,14 +85,15 @@ public class AccessScopeService {
     }
 
     public boolean hasManagerInboxAccess(UUID userId) {
-        return hasPermissionName(userId, "DASHBOARD_SUPERVISOR_VIEW")
-            || hasPermissionName(userId, "LEAVE_REQUEST_READ");
+        return hasPermissionName(userId, "APPROVAL_STEP_READ")
+            || hasPermissionName(userId, "LEAVE_REQUEST_READ")
+            || hasPermissionName(userId, "ANALYTICS_READ_SCOPED");
     }
 
     private boolean hasManagerDepartmentVisibility(UUID userId) {
-        return hasPermissionName(userId, "DASHBOARD_SUPERVISOR_VIEW")
+        return hasPermissionName(userId, "APPROVAL_STEP_READ")
             || hasPermissionName(userId, "LEAVE_REQUEST_READ")
-            || hasPermissionName(userId, "LEAVE_BALANCE_READ")
-            || hasPermissionName(userId, "LEAVE_BALANCE_READ_SCOPED");
+            || hasPermissionName(userId, "LEAVE_BALANCE_READ_SCOPED")
+            || hasPermissionName(userId, "ANALYTICS_READ_SCOPED");
     }
 }

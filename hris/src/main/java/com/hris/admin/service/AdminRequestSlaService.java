@@ -13,7 +13,7 @@ import com.hris.common.event.ActorType;
 import com.hris.common.event.SystemActor;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +37,7 @@ import java.util.Map;
 public class AdminRequestSlaService {
 
     private final AdminRequestRepository adminRequestRepository;
-    private final NotificationPublisher notificationPublisher;
+    private final TransactionalNotificationPublisher notificationPublisher;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
@@ -119,7 +119,7 @@ public class AdminRequestSlaService {
             params.put("dueAt", request.getDueAt() != null ? request.getDueAt().toString() : "N/A");
             params.put("linkPath", "/admin/admin-requests");
 
-            notificationPublisher.publish(NotificationEvent.builder()
+            notificationPublisher.publishAfterCommit(NotificationEvent.builder()
                 .eventType(NotificationEventType.ADMIN_REQUEST_SLA_EXCEEDED)
                 .targetUserId(processor.getId())
                 .titleKey("admin.sla.exceeded.title")

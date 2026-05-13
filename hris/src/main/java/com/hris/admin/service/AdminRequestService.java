@@ -173,7 +173,7 @@ public class AdminRequestService {
     public AdminRequestAttachment uploadRequesterAttachment(UUID requestId, MultipartFile file, UUID requesterUserId) {
         AdminRequest request = findRequestForUpdate(requestId);
         ensureOwner(request, requesterUserId);
-        if (request.getStatus() != AdminRequestStatus.DRAFT && !canCancel(request) && request.getStatus() != AdminRequestStatus.SUBMITTED) {
+        if (!canRequesterUploadAttachment(request)) {
             throw new InvalidAdminRequestStateException("Requester attachments are only allowed for draft or unprocessed submitted requests");
         }
 
@@ -410,6 +410,10 @@ public class AdminRequestService {
             && request.getProcessedByUserId() == null
             && request.getReviewedAt() == null
             && request.getDecidedAt() == null;
+    }
+
+    private boolean canRequesterUploadAttachment(AdminRequest request) {
+        return request.getStatus() == AdminRequestStatus.DRAFT || canCancel(request);
     }
 
     private void transition(

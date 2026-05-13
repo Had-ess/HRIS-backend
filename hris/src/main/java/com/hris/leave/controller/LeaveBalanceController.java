@@ -42,6 +42,7 @@ public class LeaveBalanceController {
             Authentication authentication) {
         permissionAuthorizationService.authorizeAnyPermissionName(
             authentication,
+            "LEAVE_BALANCE_READ_OWN",
             "LEAVE_BALANCE_READ_SCOPED",
             "LEAVE_BALANCE_MANAGE"
         );

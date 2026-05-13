@@ -30,6 +30,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         JOIN ProfilePermission profilePermission ON profilePermission.profileId = profile.id
         JOIN Permission permission ON permission.id = profilePermission.permissionId
         WHERE assignment.isActive = true
+          AND assignment.assignedAt <= CURRENT_TIMESTAMP
+          AND (assignment.expiresAt IS NULL OR assignment.expiresAt > CURRENT_TIMESTAMP)
           AND profile.isActive = true
           AND permission.isActive = true
           AND permission.name IN :permissionNames
@@ -51,6 +53,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         JOIN UserProfileAssignment assignment ON assignment.userId = u.id
         JOIN AccessProfile profile ON profile.id = assignment.profileId
         WHERE assignment.isActive = true
+          AND assignment.assignedAt <= CURRENT_TIMESTAMP
+          AND (assignment.expiresAt IS NULL OR assignment.expiresAt > CURRENT_TIMESTAMP)
           AND profile.isActive = true
           AND profile.id = :profileId
         ORDER BY u.email ASC

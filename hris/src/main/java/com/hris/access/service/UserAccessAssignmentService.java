@@ -46,16 +46,17 @@ public class UserAccessAssignmentService {
     @Transactional
     public List<UserProfileSummaryDto> assignProfile(UUID userId, UUID profileId, UUID actorId) {
         ensureUser(userId);
+        Instant now = Instant.now();
         AccessProfile profile = accessProfileRepository.findById(profileId)
             .orElseThrow(() -> new EntityNotFoundException("Access profile not found"));
-        if (userProfileAssignmentRepository.existsByUserIdAndProfileIdAndIsActiveTrue(userId, profileId)) {
+        if (userProfileAssignmentRepository.findEffectiveByUserIdAndProfileId(userId, profileId, now).isPresent()) {
             throw new IllegalStateException("Access profile already assigned to user");
         }
         userProfileAssignmentRepository.save(UserProfileAssignment.builder()
             .userId(userId)
             .profileId(profile.getId())
             .assignedById(actorId)
-            .assignedAt(Instant.now())
+            .assignedAt(now)
             .isActive(true)
             .build());
         auditLogService.log(actorId, AuditAction.UPDATE, "user_profile_assignment", userId, null, profile.getCode());
@@ -64,11 +65,15 @@ public class UserAccessAssignmentService {
 
     @Transactional
     public void removeProfile(UUID userId, UUID profileId, UUID actorId) {
+        Instant now = Instant.now();
+        if (userId.equals(actorId) && userProfileAssignmentRepository.countEffectiveByUserId(userId, now) <= 1) {
+            throw new IllegalStateException("You cannot remove your last active access profile");
+        }
         UserProfileAssignment assignment = userProfileAssignmentRepository
-            .findByUserIdAndProfileIdAndIsActiveTrue(userId, profileId)
+            .findEffectiveByUserIdAndProfileId(userId, profileId, now)
             .orElseThrow(() -> new EntityNotFoundException("User profile assignment not found"));
         assignment.setActive(false);
-        assignment.setExpiresAt(Instant.now());
+        assignment.setExpiresAt(now);
         userProfileAssignmentRepository.save(assignment);
         auditLogService.log(actorId, AuditAction.DELETE, "user_profile_assignment", userId, profileId, null);
     }

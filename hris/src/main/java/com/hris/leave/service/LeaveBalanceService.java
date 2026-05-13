@@ -3,9 +3,7 @@ package com.hris.leave.service;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Employee;
-import com.hris.auth.entity.User;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.dto.LeaveBalanceDto;
 import com.hris.leave.dto.LeaveBalanceSummaryDto;
@@ -43,7 +41,6 @@ public class LeaveBalanceService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeavePolicyRepository leavePolicyRepository;
     private final EmployeeRepository employeeRepository;
-    private final UserRepository userRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final AuditLogService auditLogService;
     private final AccessScopeService accessScopeService;
@@ -86,19 +83,48 @@ public class LeaveBalanceService {
     @Transactional(readOnly = true)
     public List<LeaveBalanceSummaryDto> getVisibleBalances(UUID requesterId, UUID employeeId, String query, Integer year, Pageable pageable) {
         int targetYear = year != null ? year : LocalDate.now().getYear();
+        if (targetYear < 2000 || targetYear > 3000) {
+            throw new IllegalArgumentException("year must be between 2000 and 3000");
+        }
 
         if (employeeId != null) {
             Employee targetEmployee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
             assertLeaveBalanceVisibility(targetEmployee, requesterId);
         } else if (!accessScopeService.hasAnyPermissionName(requesterId,
-            "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE", "DASHBOARD_HR_VIEW")) {
+            "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")) {
             throw new AccessDeniedException("You are not allowed to browse leave balances");
         }
 
-        return leaveBalanceRepository.searchForYear(targetYear, employeeId, normalizeQuery(query), pageable).stream()
-            .map(this::toSummaryDto)
-            .toList();
+        List<UUID> visibleEmployeeIds = resolveVisibleEmployeeIds(requesterId, employeeId);
+        if (visibleEmployeeIds != null && visibleEmployeeIds.isEmpty()) {
+            return List.of();
+        }
+
+        if (visibleEmployeeIds == null) {
+            return leaveBalanceRepository.searchSummariesForYear(
+                    targetYear,
+                    employeeId,
+                    normalizeQuery(query),
+                    pageable)
+                .getContent();
+        }
+
+        if (employeeId != null) {
+            return leaveBalanceRepository.searchSummariesForYear(
+                    targetYear,
+                    employeeId,
+                    normalizeQuery(query),
+                    pageable)
+                .getContent();
+        }
+
+        return leaveBalanceRepository.searchSummariesForYearAndEmployeeIds(
+                targetYear,
+                visibleEmployeeIds,
+                normalizeQuery(query),
+                pageable)
+            .getContent();
     }
 
     @Transactional(readOnly = true)
@@ -196,32 +222,36 @@ public class LeaveBalanceService {
         );
     }
 
-    private LeaveBalanceSummaryDto toSummaryDto(LeaveBalance balance) {
-        Employee employee = employeeRepository.findById(balance.getEmployeeId())
-            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        User user = userRepository.findById(employee.getUserId())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        LeaveType leaveType = leaveTypeRepository.findById(balance.getLeaveTypeId()).orElse(null);
-        return new LeaveBalanceSummaryDto(
-            balance.getId(),
-            employee.getId(),
-            employee.getEmployeeCode(),
-            user.getId(),
-            user.getFirstName(),
-            user.getLastName(),
-            balance.getLeaveTypeId(),
-            leaveType != null ? leaveType.getCode() : null,
-            leaveType != null ? leaveType.getName() : null,
-            balance.getYear(),
-            balance.getTotalDays(),
-            balance.getUsedDays(),
-            balance.getPendingDays(),
-            balance.getCarryOverDays(),
-            balance.getAvailableDays()
-        );
-    }
-
     private String normalizeQuery(String query) {
         return query == null || query.isBlank() ? null : query.trim().toLowerCase();
+    }
+
+    private List<UUID> resolveVisibleEmployeeIds(UUID requesterId, UUID employeeId) {
+        if (employeeId != null) {
+            return List.of(employeeId);
+        }
+
+        if (accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")
+            || accessScopeService.hasGlobalBusinessRead(requesterId)) {
+            return null;
+        }
+
+        if (accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_SCOPED")) {
+            Employee requesterEmployee = accessScopeService.getEmployeeOrThrow(requesterId);
+            UUID departmentId = accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee)
+                .orElse(null);
+            if (departmentId == null) {
+                return List.of();
+            }
+            return employeeRepository.findByDepartmentId(departmentId).stream()
+                .map(Employee::getId)
+                .toList();
+        }
+
+        if (accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_OWN")) {
+            return List.of(accessScopeService.getEmployeeOrThrow(requesterId).getId());
+        }
+
+        throw new AccessDeniedException("You are not allowed to browse leave balances");
     }
 }

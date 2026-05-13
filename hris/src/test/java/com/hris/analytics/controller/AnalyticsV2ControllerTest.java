@@ -67,8 +67,7 @@ class AnalyticsV2ControllerTest {
             eq("ANALYTICS_READ_OWN"),
             eq("ANALYTICS_READ_SCOPED"),
             eq("ANALYTICS_READ_GLOBAL"),
-            eq("REPORT_READ"),
-            eq("ANALYTICS_READ"));
+            eq("REPORT_READ"));
         doNothing().when(analyticsScopeService).assertAccessible(userId, AnalyticsScopeType.EMPLOYEE, employeeId);
         when(analyticsQueryService.getSummary(any(), any(), eq(AnalyticsScopeType.EMPLOYEE), eq(employeeId)))
             .thenReturn(new AnalyticsSummaryDto(10, 2, 3, 1, 20, 0, 1));
@@ -87,8 +86,7 @@ class AnalyticsV2ControllerTest {
             eq("ANALYTICS_READ_OWN"),
             eq("ANALYTICS_READ_SCOPED"),
             eq("ANALYTICS_READ_GLOBAL"),
-            eq("REPORT_READ"),
-            eq("ANALYTICS_READ"));
+            eq("REPORT_READ"));
         verify(analyticsScopeService).assertAccessible(userId, AnalyticsScopeType.EMPLOYEE, employeeId);
     }
 
@@ -101,8 +99,7 @@ class AnalyticsV2ControllerTest {
             eq("ANALYTICS_READ_OWN"),
             eq("ANALYTICS_READ_SCOPED"),
             eq("ANALYTICS_READ_GLOBAL"),
-            eq("REPORT_READ"),
-            eq("ANALYTICS_READ"));
+            eq("REPORT_READ"));
         when(analyticsScopeService.getAvailableScopes(userId)).thenReturn(List.of(
             new AnalyticsScopeOptionDto(AnalyticsScopeType.EMPLOYEE, UUID.randomUUID(), "My analytics"),
             new AnalyticsScopeOptionDto(AnalyticsScopeType.GLOBAL, null, "Global")
@@ -124,8 +121,7 @@ class AnalyticsV2ControllerTest {
             eq("ANALYTICS_READ_OWN"),
             eq("ANALYTICS_READ_SCOPED"),
             eq("ANALYTICS_READ_GLOBAL"),
-            eq("REPORT_READ"),
-            eq("ANALYTICS_READ"));
+            eq("REPORT_READ"));
         when(analyticsQueryService.getDashboard(eq(userId), eq(null), eq(null), any(), any()))
             .thenReturn(new AnalyticsDashboardDto(AnalyticsScopeType.EMPLOYEE, userId, "My analytics", 1, 2, 0, 0, 12));
 
