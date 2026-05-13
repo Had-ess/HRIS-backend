@@ -59,8 +59,7 @@ public class DashboardController {
     public ResponseEntity<ApiResponse<DirectorDashboardDto>> getDirectorDashboard(Authentication authentication) {
         permissionAuthorizationService.authorizeAnyPermissionName(
             authentication,
-            "ANALYTICS_READ_GLOBAL",
-            "DASHBOARD_DIRECTOR_VIEW"
+            "ANALYTICS_READ_GLOBAL"
         );
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getDirectorDashboard()));
     }

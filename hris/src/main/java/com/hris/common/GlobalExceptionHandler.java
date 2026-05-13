@@ -8,14 +8,12 @@ import com.hris.common.exception.FileAttachmentValidationException;
 import com.hris.common.exception.InvalidAdminRequestStateException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidProjectAssignmentException;
-import com.hris.common.exception.InvalidRoleHierarchyException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.common.exception.KeycloakProvisioningException;
 import com.hris.common.exception.MissingDepartmentHeadException;
 import com.hris.common.exception.PermissionAlreadyAssignedException;
 import com.hris.common.exception.PermissionDeletionNotAllowedException;
-import com.hris.common.exception.RoleAlreadyAssignedToUserException;
 import com.hris.common.exception.StepAlreadyDecidedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -103,23 +101,9 @@ public class GlobalExceptionHandler {
             .body(ApiResponse.error(ex.getMessage()));
     }
 
-    @ExceptionHandler(InvalidRoleHierarchyException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidRoleHierarchy(
-            InvalidRoleHierarchyException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(ApiResponse.error(ex.getMessage()));
-    }
-
     @ExceptionHandler(PermissionAlreadyAssignedException.class)
     public ResponseEntity<ApiResponse<Void>> handlePermissionAlreadyAssigned(
             PermissionAlreadyAssignedException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(ApiResponse.error(ex.getMessage()));
-    }
-
-    @ExceptionHandler(RoleAlreadyAssignedToUserException.class)
-    public ResponseEntity<ApiResponse<Void>> handleRoleAlreadyAssignedToUser(
-            RoleAlreadyAssignedToUserException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
             .body(ApiResponse.error(ex.getMessage()));
     }

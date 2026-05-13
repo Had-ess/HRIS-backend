@@ -101,30 +101,17 @@ public class LeaveBalanceService {
             return List.of();
         }
 
+        String normalizedQuery = normalizeQuery(query);
+
         if (visibleEmployeeIds == null) {
-            return leaveBalanceRepository.searchSummariesForYear(
-                    targetYear,
-                    employeeId,
-                    normalizeQuery(query),
-                    pageable)
-                .getContent();
+            return searchVisibleSummaries(targetYear, employeeId, normalizedQuery, pageable);
         }
 
         if (employeeId != null) {
-            return leaveBalanceRepository.searchSummariesForYear(
-                    targetYear,
-                    employeeId,
-                    normalizeQuery(query),
-                    pageable)
-                .getContent();
+            return searchVisibleSummaries(targetYear, employeeId, normalizedQuery, pageable);
         }
 
-        return leaveBalanceRepository.searchSummariesForYearAndEmployeeIds(
-                targetYear,
-                visibleEmployeeIds,
-                normalizeQuery(query),
-                pageable)
-            .getContent();
+        return searchVisibleSummaries(targetYear, visibleEmployeeIds, normalizedQuery, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -224,6 +211,29 @@ public class LeaveBalanceService {
 
     private String normalizeQuery(String query) {
         return query == null || query.isBlank() ? null : query.trim().toLowerCase();
+    }
+
+    private List<LeaveBalanceSummaryDto> searchVisibleSummaries(
+            int year,
+            UUID employeeId,
+            String query,
+            Pageable pageable) {
+        if (query == null) {
+            return leaveBalanceRepository.searchSummariesForYear(year, employeeId, pageable).getContent();
+        }
+        return leaveBalanceRepository.searchSummariesForYearWithQuery(year, employeeId, query, pageable).getContent();
+    }
+
+    private List<LeaveBalanceSummaryDto> searchVisibleSummaries(
+            int year,
+            List<UUID> employeeIds,
+            String query,
+            Pageable pageable) {
+        if (query == null) {
+            return leaveBalanceRepository.searchSummariesForYearAndEmployeeIds(year, employeeIds, pageable).getContent();
+        }
+        return leaveBalanceRepository.searchSummariesForYearAndEmployeeIdsWithQuery(year, employeeIds, query, pageable)
+            .getContent();
     }
 
     private List<UUID> resolveVisibleEmployeeIds(UUID requesterId, UUID employeeId) {
