@@ -23,8 +23,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -124,5 +126,40 @@ class AccessResolutionServiceTest {
 
         assertThat(accessResolutionService.hasPermission(userId, "audit_log", "read")).isTrue();
         assertThat(accessResolutionService.hasPermissionName(userId, "AUDIT_LOG_READ")).isTrue();
+    }
+
+    // --- H1 regression: findByProfileIdIn must be called exactly once, not once per profile ---
+    // TODO (H1 integration): supplement this with a Hibernate Statistics test on a real DB to
+    //   assert PreparedStatement count <= 3 for a user with 50+ permissions across multiple profiles.
+
+    @Test
+    @DisplayName("hasPermission issues a single bulk fetch regardless of number of assigned profiles (H1)")
+    void hasPermission_singleBulkFetchForManyProfiles() {
+        UUID userId = UUID.randomUUID();
+        UUID profileId1 = UUID.randomUUID();
+        UUID profileId2 = UUID.randomUUID();
+        UUID profileId3 = UUID.randomUUID();
+
+        AccessProfile p1 = AccessProfile.builder().id(profileId1).code("P1").displayKey("p1").isActive(true).build();
+        AccessProfile p2 = AccessProfile.builder().id(profileId2).code("P2").displayKey("p2").isActive(true).build();
+        AccessProfile p3 = AccessProfile.builder().id(profileId3).code("P3").displayKey("p3").isActive(true).build();
+
+        Permission permission = Permission.builder()
+            .name("EMPLOYEE_READ").resource("EMPLOYEE").action("READ").scope("GLOBAL").isActive(true).build();
+
+        when(userProfileAssignmentRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
+            .thenReturn(List.of(
+                UserProfileAssignment.builder().profile(p1).profileId(profileId1).build(),
+                UserProfileAssignment.builder().profile(p2).profileId(profileId2).build(),
+                UserProfileAssignment.builder().profile(p3).profileId(profileId3).build()
+            ));
+        when(profilePermissionRepository.findByProfileIdIn(anyCollection()))
+            .thenReturn(List.of(ProfilePermission.builder().permission(permission).build()));
+
+        boolean result = accessResolutionService.hasPermission(userId, "EMPLOYEE", "READ");
+
+        assertThat(result).isTrue();
+        // The critical assertion: exactly ONE repository call for all profiles, not N=3 calls.
+        verify(profilePermissionRepository, times(1)).findByProfileIdIn(anyCollection());
     }
 }
