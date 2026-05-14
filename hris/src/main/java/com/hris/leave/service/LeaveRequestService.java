@@ -203,21 +203,14 @@ public class LeaveRequestService {
 
     @Transactional
     public void cancel(UUID requestId, UUID requesterId) {
-        LeaveRequest request = leaveRequestRepository.findById(requestId)
-            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
-
         Employee employee = employeeRepository.findByUserId(requesterId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-
-        if (!request.getEmployeeId().equals(employee.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Not your leave request");
-        }
 
         ApprovalWorkflow workflow = approvalWorkflowRepository
             .findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId)
             .orElse(null);
 
-        request = leaveRequestRepository.findByIdForUpdate(requestId)
+        LeaveRequest request = leaveRequestRepository.findByIdForUpdate(requestId)
             .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
 
         if (!request.getEmployeeId().equals(employee.getId())) {

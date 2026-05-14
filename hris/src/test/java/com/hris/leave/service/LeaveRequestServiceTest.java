@@ -430,7 +430,6 @@ class LeaveRequestServiceTest {
                 .status(StepStatus.PENDING)
                 .build();
 
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId))
@@ -468,7 +467,6 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.APPROVED)
                 .build();
 
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId))
                 .thenReturn(Optional.empty());
@@ -493,8 +491,10 @@ class LeaveRequestServiceTest {
                 .status(LeaveStatus.PENDING)
                 .build();
 
-            when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
+            when(approvalWorkflowRepository.findBySubjectTypeAndSubjectIdForUpdate("LEAVE", requestId))
+                .thenReturn(Optional.empty());
+            when(leaveRequestRepository.findByIdForUpdate(requestId)).thenReturn(Optional.of(request));
 
             assertThatThrownBy(() -> leaveRequestService.cancel(requestId, requesterId))
                 .isInstanceOf(AccessDeniedException.class)
