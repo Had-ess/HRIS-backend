@@ -20,6 +20,7 @@ import org.springframework.web.client.RestClient;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -45,6 +46,9 @@ public class KeycloakAdminClient {
 
     @Value("${keycloak.admin.client-secret:}")
     private String clientSecret;
+
+    private volatile String cachedToken;
+    private volatile Instant tokenExpiresAt;
 
     public String createUser(KeycloakAdminUserCreateRequest request) {
         String accessToken = obtainAccessToken();
@@ -179,7 +183,13 @@ public class KeycloakAdminClient {
         }
     }
 
-    private String obtainAccessToken() {
+    private synchronized String obtainAccessToken() {
+        if (cachedToken != null
+                && tokenExpiresAt != null
+                && Instant.now().isBefore(tokenExpiresAt.minusSeconds(5))) {
+            return cachedToken;
+        }
+
         if (clientId == null || clientId.isBlank() || clientSecret == null || clientSecret.isBlank()) {
             log.error(
                 "Keycloak admin client credentials are blank. serverUrl={}, realm={}, clientIdPresent={}, clientSecretPresent={}",
@@ -227,7 +237,10 @@ public class KeycloakAdminClient {
                     null
                 );
             }
-            return accessToken;
+            int expiresIn = body.get("expires_in") instanceof Number n ? n.intValue() : 60;
+            this.cachedToken = accessToken;
+            this.tokenExpiresAt = Instant.now().plusSeconds(expiresIn);
+            return this.cachedToken;
         } catch (KeycloakProvisioningException ex) {
             throw ex;
         } catch (ResourceAccessException ex) {
