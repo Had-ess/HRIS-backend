@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -47,6 +48,22 @@ public class SecurityConfig {
             )
             // Register JIT provisioning filter after JWT auth
             .addFilterAfter(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class);
+
+        http.headers(headers -> headers
+            .contentSecurityPolicy(csp -> csp.policyDirectives(
+                "default-src 'self'; " +
+                "script-src 'self'; " +
+                "style-src 'self' 'unsafe-inline'; " +
+                "img-src 'self' data: blob:; " +
+                "connect-src 'self'; " +
+                "frame-ancestors 'none'; " +
+                "base-uri 'self'; " +
+                "form-action 'self'"))
+            .referrerPolicy(ref -> ref.policy(
+                ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+            .permissionsPolicy(perm -> perm.policy(
+                "geolocation=(), camera=(), microphone=(), payment=(), usb=()"))
+        );
 
         return http.build();
     }
