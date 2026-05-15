@@ -11,7 +11,6 @@ import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.common.exception.EmailDeliveryException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +38,6 @@ class EmployeeOnboardingServiceTest {
     @Mock private EmployeeMapper employeeMapper;
     @Mock private EmployeeService employeeService;
     @Mock private AccountProvisioningService accountProvisioningService;
-    @Mock private EmployeeOnboardingEmailService employeeOnboardingEmailService;
     @Mock private AuditLogService auditLogService;
     @Mock private AnalyticsEventPublisher analyticsEventPublisher;
     @Mock private EmployeeHistoryService employeeHistoryService;
@@ -58,8 +56,6 @@ class EmployeeOnboardingServiceTest {
             "yasmine@demo.hris.local",
             "Yasmine",
             "Developer",
-            "Temp123!",
-            true,
             List.of(roleId),
             "EMP-900",
             LocalDate.of(2026, 4, 22),
@@ -114,13 +110,7 @@ class EmployeeOnboardingServiceTest {
         assertThat(result.userId()).isEqualTo(userId);
         verify(employeeHistoryService).recordHire(savedEmployee, actorId);
         verify(employeeService).initializeLeaveBalancesForNewEmployee(savedEmployee.getId());
-        verify(employeeOnboardingEmailService).sendCredentials(
-            dto.email(),
-            dto.firstName(),
-            dto.username(),
-            dto.password(),
-            true
-        );
+        verify(accountProvisioningService).provision(any(AccountProvisioningRequest.class), eq(actorId));
     }
 
     @Test
@@ -134,8 +124,6 @@ class EmployeeOnboardingServiceTest {
             "yasmine@demo.hris.local",
             "Yasmine",
             "Developer",
-            "Temp123!",
-            false,
             List.of(roleId),
             "EMP-900",
             LocalDate.of(2026, 4, 22),
@@ -168,8 +156,8 @@ class EmployeeOnboardingServiceTest {
     }
 
     @Test
-    @DisplayName("rolls back external account when onboarding email fails")
-    void rollsBackExternalAccountWhenOnboardingEmailFails() {
+    @DisplayName("rolls back external account when post-save step fails")
+    void rollsBackExternalAccountWhenPostSaveStepFails() {
         UUID actorId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
 
@@ -178,8 +166,6 @@ class EmployeeOnboardingServiceTest {
             "yasmine@demo.hris.local",
             "Yasmine",
             "Developer",
-            "Temp123!",
-            true,
             List.of(roleId),
             "EMP-900",
             LocalDate.of(2026, 4, 22),
@@ -192,7 +178,7 @@ class EmployeeOnboardingServiceTest {
 
         User provisionedUser = User.builder()
             .id(UUID.randomUUID())
-            .keycloakId("kc-user-email-failure")
+            .keycloakId("kc-user-post-save-failure")
             .email(dto.email())
             .firstName(dto.firstName())
             .lastName(dto.lastName())
@@ -214,14 +200,13 @@ class EmployeeOnboardingServiceTest {
         when(employeeRepository.findByEmployeeCode("EMP-900")).thenReturn(Optional.empty());
         when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(provisionedUser);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
-        doThrow(new EmailDeliveryException("Employee account could not be created because the onboarding email could not be sent.", null))
-            .when(employeeOnboardingEmailService)
-            .sendCredentials(dto.email(), dto.firstName(), dto.username(), dto.password(), true);
+        doThrow(new RuntimeException("History recording failed"))
+            .when(employeeHistoryService).recordHire(any(Employee.class), eq(actorId));
 
         assertThatThrownBy(() -> employeeOnboardingService.onboard(dto, actorId))
-            .isInstanceOf(EmailDeliveryException.class)
-            .hasMessage("Employee account could not be created because the onboarding email could not be sent.");
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("History recording failed");
 
-        verify(accountProvisioningService).rollbackExternalAccount("kc-user-email-failure");
+        verify(accountProvisioningService).rollbackExternalAccount("kc-user-post-save-failure");
     }
 }

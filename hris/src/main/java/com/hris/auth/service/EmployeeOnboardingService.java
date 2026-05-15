@@ -25,7 +25,6 @@ public class EmployeeOnboardingService {
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
     private final AccountProvisioningService accountProvisioningService;
-    private final EmployeeOnboardingEmailService employeeOnboardingEmailService;
     private final AuditLogService auditLogService;
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
@@ -45,8 +44,6 @@ public class EmployeeOnboardingService {
             dto.email(),
             dto.firstName(),
             dto.lastName(),
-            dto.password(),
-            dto.temporaryPassword() != null && dto.temporaryPassword(),
             dto.profileIds()
         ), actorId);
 
@@ -67,13 +64,6 @@ public class EmployeeOnboardingService {
             employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
             analyticsEventPublisher.publishEmployeeHireEvent(saved);
             auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
-            employeeOnboardingEmailService.sendCredentials(
-                dto.email().trim(),
-                dto.firstName().trim(),
-                dto.username().trim(),
-                dto.password(),
-                dto.temporaryPassword() != null && dto.temporaryPassword()
-            );
             return employeeMapper.toDto(saved);
         } catch (RuntimeException ex) {
             accountProvisioningService.rollbackExternalAccount(user.getKeycloakId());

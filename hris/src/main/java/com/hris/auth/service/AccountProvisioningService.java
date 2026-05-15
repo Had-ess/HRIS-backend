@@ -58,12 +58,16 @@ public class AccountProvisioningService {
             normalizedUsername,
             normalizedEmail,
             firstName,
-            lastName,
-            request.password(),
-            request.temporaryPassword()
+            lastName
         ));
 
         try {
+            keycloakAdminClient.sendExecuteActionsEmail(
+                keycloakUserId,
+                java.util.List.of("UPDATE_PASSWORD", "VERIFY_EMAIL"),
+                86400
+            );
+
             User saved = userRepository.save(User.builder()
                 .keycloakId(keycloakUserId)
                 .email(normalizedEmail)

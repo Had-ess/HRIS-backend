@@ -67,17 +67,7 @@ public class KeycloakAdminClient {
             throw unavailable("create user", "Keycloak is unavailable. Please retry later.", ex);
         }
 
-        String userId = extractUserId(location);
-        try {
-            setPassword(accessToken, userId, request.password(), request.temporaryPassword());
-            return userId;
-        } catch (KeycloakProvisioningException ex) {
-            rollbackCreatedUser(accessToken, userId, ex);
-            throw ex;
-        } catch (RuntimeException ex) {
-            rollbackCreatedUser(accessToken, userId, ex);
-            throw ex;
-        }
+        return extractUserId(location);
     }
 
     /**
@@ -189,31 +179,6 @@ public class KeycloakAdminClient {
         }
     }
 
-    private void setPassword(String accessToken, String userId, String password, boolean temporary) {
-        try {
-            restClient.put()
-                .uri(serverUrl + "/admin/realms/" + realm + "/users/" + userId + "/reset-password")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Map.of(
-                    "type", "password",
-                    "value", password,
-                    "temporary", temporary
-                ))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
-                    throw mapOperationFailure(
-                        "set password",
-                        clientResponse.getStatusCode(),
-                        readBody(clientResponse)
-                    );
-                })
-                .toBodilessEntity();
-        } catch (ResourceAccessException ex) {
-            throw unavailable("set password", "Keycloak is unavailable. Please retry later.", ex);
-        }
-    }
-
     private String obtainAccessToken() {
         if (clientId == null || clientId.isBlank() || clientSecret == null || clientSecret.isBlank()) {
             log.error(
@@ -307,7 +272,7 @@ public class KeycloakAdminClient {
             "firstName", request.firstName(),
             "lastName", request.lastName(),
             "enabled", true,
-            "requiredActions", request.temporaryPassword() ? List.of("UPDATE_PASSWORD") : List.of()
+            "requiredActions", List.of()
         );
     }
 

@@ -8,8 +8,6 @@ public record AccountProvisioningRequest(
     String email,
     String firstName,
     String lastName,
-    String password,
-    boolean temporaryPassword,
     List<UUID> profileIds
 ) {
 }

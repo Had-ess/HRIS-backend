@@ -63,8 +63,6 @@ public class AdminUserService {
             dto.email(),
             dto.firstName(),
             dto.lastName(),
-            dto.password(),
-            dto.temporaryPassword() != null && dto.temporaryPassword(),
             dto.profileIds()
         ), actorId);
         return toDto(saved);

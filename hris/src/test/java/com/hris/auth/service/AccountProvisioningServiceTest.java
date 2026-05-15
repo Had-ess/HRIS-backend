@@ -22,7 +22,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,8 +52,6 @@ class AccountProvisioningServiceTest {
             "new.user@demo.hris.local",
             "New",
             "User",
-            "Temp123!",
-            false,
             List.of(profileId)
         );
         AccessProfile profile = AccessProfile.builder()
@@ -91,8 +92,6 @@ class AccountProvisioningServiceTest {
             "new.user@demo.hris.local",
             "New",
             "User",
-            "Temp123!",
-            false,
             List.of(profileId)
         );
         AccessProfile profile = AccessProfile.builder()
@@ -112,5 +111,80 @@ class AccountProvisioningServiceTest {
             .hasMessage("Local save failed");
 
         verify(keycloakAdminClient).deleteUser("kc-user-123");
+    }
+
+    @Test
+    @DisplayName("sends activation email with UPDATE_PASSWORD and VERIFY_EMAIL after user creation (C2)")
+    void sendsActivationEmailAfterUserCreation() {
+        UUID profileId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
+
+        AccountProvisioningRequest request = new AccountProvisioningRequest(
+            "new.user",
+            "new.user@demo.hris.local",
+            "New",
+            "User",
+            List.of(profileId)
+        );
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("SELF_SERVICE")
+            .displayKey("profile.selfService")
+            .isActive(true)
+            .build();
+
+        when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
+        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
+        when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-abc");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        accountProvisioningService.provision(request, actorId);
+
+        verify(keycloakAdminClient).sendExecuteActionsEmail(
+            eq("kc-user-abc"),
+            eq(List.of("UPDATE_PASSWORD", "VERIFY_EMAIL")),
+            eq(86400)
+        );
+    }
+
+    @Test
+    @DisplayName("deletes created Keycloak user when activation email fails (C2 rollback)")
+    void deletesCreatedKeycloakUserWhenActivationEmailFails() {
+        UUID profileId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
+
+        AccountProvisioningRequest request = new AccountProvisioningRequest(
+            "new.user",
+            "new.user@demo.hris.local",
+            "New",
+            "User",
+            List.of(profileId)
+        );
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("SELF_SERVICE")
+            .displayKey("profile.selfService")
+            .isActive(true)
+            .build();
+
+        KeycloakProvisioningException emailFailure = new KeycloakProvisioningException(
+            HttpStatus.BAD_GATEWAY,
+            "Keycloak is unavailable. Please retry later.",
+            "send activation email",
+            null,
+            null,
+            null
+        );
+
+        when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
+        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
+        when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-abc");
+        doThrow(emailFailure).when(keycloakAdminClient).sendExecuteActionsEmail(any(), anyList(), anyInt());
+
+        assertThatThrownBy(() -> accountProvisioningService.provision(request, actorId))
+            .isSameAs(emailFailure);
+
+        verify(keycloakAdminClient).deleteUser("kc-user-abc");
+        verify(userRepository, never()).save(any(User.class));
     }
 }
