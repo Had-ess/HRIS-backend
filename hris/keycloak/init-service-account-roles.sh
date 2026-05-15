@@ -6,7 +6,7 @@ realm="hris"
 admin_user="${KEYCLOAK_ADMIN:-admin}"
 admin_password="${KEYCLOAK_ADMIN_PASSWORD:-admin}"
 
-/opt/keycloak/bin/kc.sh start-dev --import-realm &
+/opt/keycloak/bin/kc.sh start-dev --import-realm --health-enabled=true &
 kc_pid=$!
 
 cleanup() {
