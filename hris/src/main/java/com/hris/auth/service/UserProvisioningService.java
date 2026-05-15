@@ -21,9 +21,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserProvisioningService {
 
-    private static final String SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX = "KC_REPLACE_";
-    private static final String LEGACY_DEMO_KEYCLOAK_PLACEHOLDER_PREFIX = "KC_DEMO_";
-
     private final UserRepository userRepository;
 
     /**
@@ -85,6 +82,7 @@ public class UserProvisioningService {
         boolean changed = false;
         if (keycloakId != null && !keycloakId.equals(user.getKeycloakId())) {
             user.setKeycloakId(keycloakId);
+            user.setSeed(false);
             changed = true;
         }
         if (email != null && !email.equals(user.getEmail())) {
@@ -113,7 +111,6 @@ public class UserProvisioningService {
         return existingKeycloakId == null
             || existingKeycloakId.isBlank()
             || existingKeycloakId.equals(keycloakId)
-            || existingKeycloakId.startsWith(SEEDED_KEYCLOAK_PLACEHOLDER_PREFIX)
-            || existingKeycloakId.startsWith(LEGACY_DEMO_KEYCLOAK_PLACEHOLDER_PREFIX);
+            || user.isSeed();
     }
 }

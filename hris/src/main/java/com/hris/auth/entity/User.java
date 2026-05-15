@@ -41,6 +41,10 @@ public class User {
     @Builder.Default
     private boolean isActive = true;
 
+    @Column(name = "is_seed", nullable = false)
+    @Builder.Default
+    private boolean isSeed = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
