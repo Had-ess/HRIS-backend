@@ -1,3 +1,16 @@
+# =============================================================================
+# SECURITY NOTICE — DEVELOPMENT DEFAULTS
+# =============================================================================
+# This file contains placeholder defaults intended for local development only.
+# Before deploying to any non-local environment, ROTATE the following secrets:
+#   - spring.datasource.password           (default: hris_pass)
+#   - spring.rabbitmq.password             (default: hris_pass)
+#   - app.keycloak.admin-client-secret     (default: hris-backend-secret)
+#   - app.keycloak.admin-password          (default: admin)
+# Also rotate all demo user passwords in keycloak/realm-export.json
+# (Admin123!, etc.) before any non-local deployment.
+# =============================================================================
+
 spring:
   application:
     name: hris-backend
