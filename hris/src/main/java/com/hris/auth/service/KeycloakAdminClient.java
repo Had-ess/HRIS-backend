@@ -80,6 +80,36 @@ public class KeycloakAdminClient {
         }
     }
 
+    /**
+     * Triggers Keycloak to email the user a one-time link that, when clicked, walks
+     * them through the requested required-actions (e.g., setting a password and
+     * verifying their email). Used during HR onboarding to avoid handling
+     * cleartext passwords.
+     *
+     * @param userId          Keycloak user UUID
+     * @param actions         e.g. List.of("UPDATE_PASSWORD", "VERIFY_EMAIL")
+     * @param lifespanSeconds link validity window in seconds (e.g. 86400 = 24h)
+     */
+    public void sendExecuteActionsEmail(String userId, List<String> actions, int lifespanSeconds) {
+        String accessToken = obtainAccessToken();
+        URI uri = URI.create(serverUrl + "/admin/realms/" + realm + "/users/" + userId
+            + "/execute-actions-email?lifespan=" + lifespanSeconds);
+        try {
+            restClient.put()
+                .uri(uri)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(actions)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
+                    throw mapOperationFailure("send activation email", clientResponse.getStatusCode(), readBody(clientResponse));
+                })
+                .toBodilessEntity();
+        } catch (ResourceAccessException ex) {
+            throw unavailable("send activation email", "Keycloak is unavailable. Please retry later.", ex);
+        }
+    }
+
     public void deleteUser(String userId) {
         String accessToken = obtainAccessToken();
         deleteUser(accessToken, userId);
