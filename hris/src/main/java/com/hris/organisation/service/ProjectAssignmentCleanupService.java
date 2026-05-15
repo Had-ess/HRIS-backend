@@ -5,6 +5,7 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class ProjectAssignmentCleanupService {
     private final AuditLogService auditLogService;
 
     @Scheduled(cron = "0 0 2 * * *") // Daily at 2 AM
+    @SchedulerLock(name = "projectAssignmentCleanupJob", lockAtMostFor = "PT30M", lockAtLeastFor = "PT2M")
     @Transactional
     public void deactivateExpiredAssignments() {
         int deactivated = projectAssignmentRepository.deactivateExpired();

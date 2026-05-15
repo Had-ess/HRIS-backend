@@ -20,6 +20,7 @@ import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,6 +135,7 @@ public class LeaveBalanceService {
     }
 
     @Scheduled(cron = "0 0 3 1 1 *") // January 1st at 3 AM
+    @SchedulerLock(name = "leaveBalanceRolloverJob", lockAtMostFor = "PT2H", lockAtLeastFor = "PT5M")
     @Transactional
     public void rolloverBalances() {
         if (!leaveAcquisitionPolicyRepository.findAll().isEmpty()) {

@@ -15,6 +15,7 @@ import com.hris.leave.enums.LeaveStatus;
 import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class AnalyticsAggregationService {
     private final ApprovalStepRepository approvalStepRepository;
 
     @Scheduled(cron = "0 */15 * * * *")
+    @SchedulerLock(name = "analyticsAggregationJob", lockAtMostFor = "PT10M", lockAtLeastFor = "PT1M")
     @Transactional
     public void rebuildCurrentSnapshots() {
         LocalDate today = LocalDate.now();

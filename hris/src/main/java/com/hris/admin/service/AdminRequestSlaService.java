@@ -17,6 +17,7 @@ import com.hris.notification.service.TransactionalNotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +51,7 @@ public class AdminRequestSlaService {
      * Defaults to every 4 hours.
      */
     @Scheduled(cron = "${app.admin.sla-check.cron:0 0 */4 * * *}")
+    @SchedulerLock(name = "adminSlaCheckJob", lockAtMostFor = "PT30M", lockAtLeastFor = "PT2M")
     public void runScheduledSlaCheck() {
         if (!slaCheckEnabled) {
             return;
