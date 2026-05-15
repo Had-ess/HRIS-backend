@@ -39,6 +39,9 @@ public class LeaveRequestController {
     private final LeaveRequestQueryService leaveRequestQueryService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
+    // TODO(future): extract authorize()+getCurrentUserId() into an
+    // @AuthorizedActor argument resolver to reduce controller boilerplate.
+    // See L4 in HRIS_CODE_REVIEW.md for rationale.
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<LeaveRequestResponseDto>> create(
