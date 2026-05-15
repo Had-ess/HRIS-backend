@@ -20,6 +20,7 @@ public class NotificationEvent {
     @Column(name = "correlation_id") private UUID correlationId;
     @Column(name = "routing_key", nullable = false, length = 100) private String routingKey;
     @Column(name = "published_at", nullable = false) @Builder.Default private Instant publishedAt = Instant.now();
+    @Column(name = "delivered_at") private Instant deliveredAt;
 
     @Override public boolean equals(Object o) {
         if (this == o) return true;

@@ -4,6 +4,7 @@ import com.hris.config.RabbitMQConfig;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.repository.NotificationEventRepository;
 import jakarta.annotation.PostConstruct;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.MessageDeliveryMode;
@@ -49,10 +50,9 @@ public class NotificationPublisher {
     }
 
     public void publish(NotificationEvent event) {
+        // Persist event first — deliveredAt stays null until AMQP delivery confirmed
+        NotificationEvent saved = notificationEventRepository.save(event);
         try {
-            // Persist event first for audit trail
-            NotificationEvent saved = notificationEventRepository.save(event);
-            // Then publish to RabbitMQ
             CorrelationData correlationData = new CorrelationData(saved.getId().toString());
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
@@ -65,10 +65,13 @@ public class NotificationPublisher {
                 },
                 correlationData
             );
+            saved.setDeliveredAt(Instant.now());
+            notificationEventRepository.save(saved);
             log.debug("Published notification event {} with id {}", saved.getEventType(), saved.getId());
         } catch (Exception e) {
-            // Fire-and-forget: never let notification failures break business flows
-            log.error("CRITICAL: Failed to publish notification event: {}", event.getEventType(), e);
+            // Fire-and-forget: never let notification failures break business flows.
+            // deliveredAt remains null; the outbox worker will retry after 1 minute.
+            log.warn("Notification delivery failed, will be retried by outbox worker. eventId={}", saved.getId(), e);
         }
     }
 }
