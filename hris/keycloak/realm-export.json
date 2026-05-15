@@ -5,6 +5,7 @@
   "ssoSessionMaxLifespan": 1800,
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
+  "verifyEmail": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
