@@ -113,7 +113,7 @@ class LeaveAttachmentServiceTest {
 
         assertThatThrownBy(() -> service.upload(UUID.randomUUID(), file, UUID.randomUUID()))
             .isInstanceOf(FileAttachmentValidationException.class)
-            .hasMessage("Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+            .hasMessage("FILE_CONTENT_MISMATCH");
 
         verify(fileStorageService, never()).store(any(), any());
     }

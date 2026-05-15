@@ -78,8 +78,7 @@ public class AdminRequestAttachmentService {
             : "";
 
         if (!ALLOWED_ATTACHMENT_EXTENSIONS.contains(extension)) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+            throw new FileAttachmentValidationException("FILE_EXTENSION_NOT_ALLOWED");
         }
 
         if (file.getSize() > MAX_ATTACHMENT_SIZE_BYTES) {
@@ -89,22 +88,19 @@ public class AdminRequestAttachmentService {
 
         String detectedMimeType = detectAttachmentMimeType(file);
         if (!ALLOWED_ATTACHMENT_MIME_TYPES.contains(detectedMimeType)) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+            throw new FileAttachmentValidationException("FILE_CONTENT_MISMATCH");
         }
 
         String expectedMimeType = ATTACHMENT_MIME_TYPE_BY_EXTENSION.get(extension);
         if (!detectedMimeType.equals(expectedMimeType)) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+            throw new FileAttachmentValidationException("FILE_TYPE_MISMATCH");
         }
 
         String declaredContentType = file.getContentType();
         if (declaredContentType != null
             && !declaredContentType.isBlank()
             && !detectedMimeType.equals(declaredContentType.toLowerCase())) {
-            throw new FileAttachmentValidationException(
-                "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+            throw new FileAttachmentValidationException("FILE_CONTENT_MISMATCH");
         }
 
         return detectedMimeType;
@@ -126,8 +122,7 @@ public class AdminRequestAttachmentService {
             throw new FileAttachmentValidationException("Failed to read attachment content");
         }
 
-        throw new FileAttachmentValidationException(
-            "Unsupported attachment type. Allowed types: PDF, JPG, JPEG, PNG");
+        throw new FileAttachmentValidationException("FILE_CONTENT_MISMATCH");
     }
 
     private boolean startsWith(byte[] actual, byte[] expectedPrefix) {
