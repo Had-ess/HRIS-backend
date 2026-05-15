@@ -14,6 +14,13 @@ public class LeaveBalance {
     @Column(name = "employee_id", nullable = false) private UUID employeeId;
     @Column(name = "leave_type_id", nullable = false) private UUID leaveTypeId;
     @Column(nullable = false) private int year;
+
+    /**
+     * Leave days stored as integer — half-day and hourly leave not supported.
+     * To support fractional days, change to BigDecimal(7,2) and migrate the schema:
+     *   ALTER TABLE leave_balances ALTER COLUMN total_days TYPE NUMERIC(7,2);
+     *   (apply the same to used_days, pending_days, carry_over_days)
+     */
     @Column(name = "total_days", nullable = false) private int totalDays;
     @Column(name = "used_days", nullable = false) @Builder.Default private int usedDays = 0;
     @Column(name = "pending_days", nullable = false) @Builder.Default private int pendingDays = 0;
