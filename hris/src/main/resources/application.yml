@@ -91,9 +91,9 @@ spring:
     properties:
       mail:
         smtp:
-          auth: ${SPRING_MAIL_SMTP_AUTH:false}
+          auth: ${SPRING_MAIL_SMTP_AUTH:true}
           starttls:
-            enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:false}
+            enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:true}
 
 app:
   storage:

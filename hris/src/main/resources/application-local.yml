@@ -1,0 +1,8 @@
+spring:
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
