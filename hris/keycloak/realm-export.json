@@ -6,6 +6,16 @@
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "verifyEmail": true,
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "no-reply@hris.local",
+    "fromDisplayName": "HRIS",
+    "envelopeFrom": "no-reply@hris.local",
+    "auth": "false",
+    "starttls": "false",
+    "ssl": "false"
+  },
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
