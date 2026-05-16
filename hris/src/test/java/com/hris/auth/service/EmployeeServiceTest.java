@@ -208,6 +208,7 @@ class EmployeeServiceTest {
             departmentId,
             null,
             UUID.randomUUID(),
+            null,
             null
         );
     }
