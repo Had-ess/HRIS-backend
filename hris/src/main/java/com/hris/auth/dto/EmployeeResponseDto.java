@@ -1,8 +1,8 @@
 package com.hris.auth.dto;
 
+import com.hris.auth.enums.AccountStatus;
 import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
-import com.hris.auth.dto.UserResponseDto;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -18,7 +18,8 @@ public record EmployeeResponseDto(
     UUID departmentId,
     UUID supervisorEmployeeId,
     UUID workScheduleId,
-    UserResponseDto user
+    UserResponseDto user,
+    AccountStatus accountStatus
 ) {
     public EmployeeResponseDto(
             UUID id,
@@ -42,7 +43,8 @@ public record EmployeeResponseDto(
             departmentId,
             null,
             workScheduleId,
-            user
+            user,
+            null
         );
     }
 }

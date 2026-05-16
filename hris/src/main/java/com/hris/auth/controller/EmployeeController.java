@@ -75,4 +75,13 @@ public class EmployeeController {
         employeeService.delete(id, actorId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
+
+    @PostMapping("/{id}/resend-activation")
+    public ResponseEntity<ApiResponse<Void>> resendActivation(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "EMPLOYEE", "MANAGE");
+        employeeOnboardingService.resendActivationEmail(id);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
 }

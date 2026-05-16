@@ -10,11 +10,15 @@ import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,9 +26,11 @@ import java.util.UUID;
 public class EmployeeOnboardingService {
 
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
     private final AccountProvisioningService accountProvisioningService;
+    private final KeycloakAdminClient keycloakAdminClient;
     private final AuditLogService auditLogService;
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
@@ -69,5 +75,20 @@ public class EmployeeOnboardingService {
             accountProvisioningService.rollbackExternalAccount(user.getKeycloakId());
             throw ex;
         }
+    }
+
+    public void resendActivationEmail(UUID employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        User user = userRepository.findById(employee.getUserId())
+            .orElseThrow(() -> new EntityNotFoundException("User not found for employee"));
+        if (!user.isSeed()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ALREADY_ACTIVE");
+        }
+        keycloakAdminClient.sendExecuteActionsEmail(
+            user.getKeycloakId(),
+            List.of("UPDATE_PASSWORD", "VERIFY_EMAIL"),
+            86400
+        );
     }
 }
