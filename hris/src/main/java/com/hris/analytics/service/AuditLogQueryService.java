@@ -66,6 +66,35 @@ public class AuditLogQueryService {
         return toDtoPage(auditLogRepository.findAll(specification, pageable));
     }
 
+    @Transactional(readOnly = true)
+    public java.util.List<AuditLogDto> findForExport(
+            String resource,
+            AuditAction action,
+            LocalDate from,
+            LocalDate to) {
+        Specification<AuditLog> specification = Specification.where(null);
+        if (resource != null && !resource.isBlank()) {
+            specification = specification.and((root, query, cb) -> cb.equal(root.get("resource"), resource));
+        }
+        if (action != null) {
+            specification = specification.and((root, query, cb) -> cb.equal(root.get("action"), action));
+        }
+        if (from != null) {
+            specification = specification.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("timestamp"), from.atStartOfDay().toInstant(ZoneOffset.UTC)));
+        }
+        if (to != null) {
+            specification = specification.and((root, query, cb) ->
+                cb.lessThan(root.get("timestamp"), to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)));
+        }
+        org.springframework.data.domain.Pageable limited = org.springframework.data.domain.PageRequest.of(
+            0, 10_000,
+            org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "timestamp"));
+        java.util.List<AuditLog> logs = auditLogRepository.findAll(specification, limited).getContent();
+        java.util.Map<java.util.UUID, String> actorNames = resolveActorNames(logs);
+        return logs.stream().map(l -> toDto(l, actorNames)).toList();
+    }
+
     private Page<AuditLogDto> toDtoPage(Page<AuditLog> auditLogs) {
         Map<UUID, String> actorNames = resolveActorNames(auditLogs.getContent());
         return new PageImpl<>(
