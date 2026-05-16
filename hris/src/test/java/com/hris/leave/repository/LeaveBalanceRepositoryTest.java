@@ -95,7 +95,7 @@ class LeaveBalanceRepositoryTest {
             .carryOverDays(1)
             .build());
 
-        Page<LeaveBalanceSummaryDto> result = leaveBalanceRepository.searchSummariesForYear(
+        Page<LeaveBalanceSummaryDto> result = leaveBalanceRepository.searchSummariesForYearWithQuery(
             2026,
             null,
             "alice",
