@@ -4,7 +4,9 @@ import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.DepartmentCreateDto;
 import com.hris.auth.dto.DepartmentDto;
+import com.hris.auth.dto.OrgNodeDto;
 import com.hris.auth.entity.Department;
+import com.hris.auth.entity.Employee;
 import com.hris.auth.mapper.DepartmentMapper;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
@@ -130,6 +132,42 @@ public class DepartmentService {
         auditLogService.log(actorId, AuditAction.UPDATE, "department",
             saved.getId(), previous, saved);
         return toDto(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public OrgNodeDto buildHierarchy() {
+        List<Department> departments = departmentRepository.findAll();
+        long totalEmployees = employeeRepository.count();
+
+        List<OrgNodeDto> children = departments.stream()
+            .filter(Department::isActive)
+            .map(dept -> {
+                long headcount = employeeRepository.countByDepartmentId(dept.getId());
+                OrgNodeDto.HeadEmployeeDto headDto = null;
+                if (dept.getHeadEmployeeId() != null) {
+                    Employee head = employeeRepository.findById(dept.getHeadEmployeeId()).orElse(null);
+                    if (head != null) {
+                        headDto = new OrgNodeDto.HeadEmployeeDto(
+                            head.getId(),
+                            head.getUser() != null
+                                ? head.getUser().getFirstName() + " " + head.getUser().getLastName()
+                                : head.getId().toString(),
+                            head.getJobTitle()
+                        );
+                    }
+                }
+                return new OrgNodeDto(
+                    dept.getId().toString(),
+                    dept.getName(),
+                    dept.getCode(),
+                    headcount,
+                    headDto,
+                    List.of()
+                );
+            })
+            .toList();
+
+        return new OrgNodeDto("root", "ST2I", "ROOT", totalEmployees, null, children);
     }
 
     private void validateDeletion(UUID departmentId) {

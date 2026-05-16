@@ -2,6 +2,7 @@ package com.hris.auth.controller;
 
 import com.hris.auth.dto.DepartmentCreateDto;
 import com.hris.auth.dto.DepartmentDto;
+import com.hris.auth.dto.OrgNodeDto;
 import com.hris.auth.service.DepartmentService;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
@@ -76,5 +77,11 @@ public class DepartmentController {
         permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(departmentService.deactivate(id, userId)));
+    }
+
+    @GetMapping("/hierarchy")
+    public ResponseEntity<ApiResponse<OrgNodeDto>> getHierarchy(Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "READ");
+        return ResponseEntity.ok(ApiResponse.ok(departmentService.buildHierarchy()));
     }
 }
