@@ -3,6 +3,8 @@ package com.hris.approval.controller;
 import com.hris.approval.dto.ApprovalCommentDto;
 import com.hris.approval.dto.ApprovalDecisionDto;
 import com.hris.approval.dto.ApprovalStepResponseDto;
+import com.hris.approval.dto.BulkActionResultDto;
+import com.hris.approval.dto.BulkApproveRequestDto;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.service.ApprovalStepQueryService;
 import com.hris.approval.service.ApprovalStepService;
@@ -17,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import java.util.UUID;
 
@@ -59,5 +63,25 @@ public class ApprovalStepController {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         approvalStepService.reject(id, dto.comment(), userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    @PostMapping("/bulk-approve")
+    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'APPROVAL_STEP', 'DECIDE')")
+    public ResponseEntity<ApiResponse<BulkActionResultDto>> bulkApprove(
+            @Valid @RequestBody BulkApproveRequestDto dto,
+            Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(
+            approvalStepService.bulkApprove(dto.approvalIds(), userId)));
+    }
+
+    @PostMapping("/bulk-reject")
+    @PreAuthorize("@permissionAuthorizationService.hasPermission(authentication, 'APPROVAL_STEP', 'DECIDE')")
+    public ResponseEntity<ApiResponse<BulkActionResultDto>> bulkReject(
+            @Valid @RequestBody BulkApproveRequestDto dto,
+            Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(
+            approvalStepService.bulkReject(dto.approvalIds(), userId, dto.comment())));
     }
 }

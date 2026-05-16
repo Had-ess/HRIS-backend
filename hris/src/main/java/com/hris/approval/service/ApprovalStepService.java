@@ -93,6 +93,36 @@ public class ApprovalStepService {
         reject(stepId, comment, approverId);
     }
 
+    public com.hris.approval.dto.BulkActionResultDto bulkApprove(List<UUID> ids, UUID actorId) {
+        int succeeded = 0, failed = 0;
+        List<com.hris.approval.dto.BulkActionResultDto.BulkError> errors = new java.util.ArrayList<>();
+        for (UUID id : ids) {
+            try {
+                approve(id, null, actorId);
+                succeeded++;
+            } catch (Exception e) {
+                failed++;
+                errors.add(new com.hris.approval.dto.BulkActionResultDto.BulkError(id, e.getMessage()));
+            }
+        }
+        return new com.hris.approval.dto.BulkActionResultDto(succeeded, failed, errors);
+    }
+
+    public com.hris.approval.dto.BulkActionResultDto bulkReject(List<UUID> ids, UUID actorId, String comment) {
+        int succeeded = 0, failed = 0;
+        List<com.hris.approval.dto.BulkActionResultDto.BulkError> errors = new java.util.ArrayList<>();
+        for (UUID id : ids) {
+            try {
+                reject(id, comment, actorId);
+                succeeded++;
+            } catch (Exception e) {
+                failed++;
+                errors.add(new com.hris.approval.dto.BulkActionResultDto.BulkError(id, e.getMessage()));
+            }
+        }
+        return new com.hris.approval.dto.BulkActionResultDto(succeeded, failed, errors);
+    }
+
     private void validateStepOwnership(ApprovalStep step, UUID approverId) {
         if (!step.getApproverId().equals(approverId)) {
             throw new AccessDeniedException("You are not the assigned approver for this step");
