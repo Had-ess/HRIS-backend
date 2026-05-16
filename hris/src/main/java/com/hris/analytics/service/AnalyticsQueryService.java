@@ -12,7 +12,9 @@ import com.hris.analytics.dto.AnalyticsLeaveRequestReportDto;
 import com.hris.analytics.dto.AnalyticsScopeOptionDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
 import com.hris.analytics.dto.HeadcountMetricsSnapshotDto;
+import com.hris.analytics.dto.HeadcountTrendPointDto;
 import com.hris.analytics.dto.LeaveDistributionSnapshotDto;
+import com.hris.analytics.dto.LeaveMonthlyStatusPointDto;
 import com.hris.analytics.dto.LeaveMetricsSnapshotDto;
 import com.hris.analytics.dto.LeaveMetricsTimeseriesPointDto;
 import com.hris.analytics.dto.ProjectAbsenceFactDto;
@@ -875,6 +877,57 @@ public class AnalyticsQueryService {
                 rs.getInt("estimated_delay_days"),
                 com.hris.analytics.enums.RiskLevel.valueOf(rs.getString("risk_level"))
             ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<HeadcountTrendPointDto> getHeadcountTrend(int year) {
+        List<HeadcountTrendPointDto> result = new java.util.ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            LocalDate firstDay = LocalDate.of(year, month, 1);
+            LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+            long count = singleLong("""
+                SELECT COUNT(*)
+                FROM employees e
+                JOIN users u ON u.id = e.user_id
+                WHERE e.hire_date <= :lastDay
+                  AND (e.termination_date IS NULL OR e.termination_date >= :firstDay)
+                  AND u.is_active = true
+                """,
+                new MapSqlParameterSource()
+                    .addValue("firstDay", firstDay)
+                    .addValue("lastDay", lastDay));
+            result.add(new HeadcountTrendPointDto(month, count));
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveMonthlyStatusPointDto> getLeaveMonthlyStatus(int year) {
+        record Row(int month, String status, long count) {}
+        List<Row> rows = jdbcTemplate.query("""
+            SELECT EXTRACT(MONTH FROM created_at)::int AS month,
+                   status,
+                   COUNT(*) AS count
+            FROM leave_requests
+            WHERE EXTRACT(YEAR FROM created_at) = :year
+            GROUP BY month, status
+            ORDER BY month
+            """,
+            new MapSqlParameterSource().addValue("year", year),
+            (rs, rowNum) -> new Row(rs.getInt("month"), rs.getString("status"), rs.getLong("count")));
+
+        java.util.Map<Integer, long[]> byMonth = new java.util.TreeMap<>();
+        for (Row row : rows) {
+            byMonth.computeIfAbsent(row.month(), k -> new long[3]);
+            long[] counts = byMonth.get(row.month());
+            String s = row.status();
+            if ("APPROVED".equals(s)) counts[0] += row.count();
+            else if ("REJECTED".equals(s)) counts[1] += row.count();
+            else counts[2] += row.count();
+        }
+        return byMonth.entrySet().stream()
+            .map(e -> new LeaveMonthlyStatusPointDto(e.getKey(), e.getValue()[0], e.getValue()[1], e.getValue()[2]))
+            .toList();
     }
 
     private String resolveScopeLabel(UUID userId, AnalyticsScopeType scopeType, UUID scopeId) {
