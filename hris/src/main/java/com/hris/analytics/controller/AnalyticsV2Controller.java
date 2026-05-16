@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.List;
 import java.util.UUID;
 
@@ -112,6 +113,24 @@ public class AnalyticsV2Controller {
             analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
         }
         return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getDashboard(userId, scopeType, scopeId, from, to)));
+    }
+
+    @GetMapping("/headcount-trend")
+    public ResponseEntity<ApiResponse<List<HeadcountTrendPointDto>>> getHeadcountTrend(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int year) {
+        authorizeRead(authentication);
+        int resolvedYear = year > 0 ? year : Year.now().getValue();
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getHeadcountTrend(resolvedYear)));
+    }
+
+    @GetMapping("/leave-requests/monthly-status")
+    public ResponseEntity<ApiResponse<List<LeaveMonthlyStatusPointDto>>> getLeaveMonthlyStatus(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int year) {
+        authorizeRead(authentication);
+        int resolvedYear = year > 0 ? year : Year.now().getValue();
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getLeaveMonthlyStatus(resolvedYear)));
     }
 
     private UUID authorizeRead(Authentication authentication) {
