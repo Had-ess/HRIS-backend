@@ -19,6 +19,8 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     Optional<Project> findByCode(String code);
 
+    List<Project> findByStatus(ProjectStatus status);
+
     long countByStatus(ProjectStatus status);
 
     Page<Project> findByIdIn(Collection<UUID> ids, Pageable pageable);

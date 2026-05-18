@@ -130,7 +130,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2027, 6, 1),
                 LocalDate.of(2027, 6, 5),
                 UrgencyLevel.NORMAL,
-                "Family vacation"
+                "Family vacation",
+                false
             );
 
             LeaveBalance balance = LeaveBalance.builder()
@@ -199,7 +200,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2027, 6, 1),
                 LocalDate.of(2027, 6, 5),
                 UrgencyLevel.NORMAL,
-                "Family vacation"
+                "Family vacation",
+                false
             );
 
             LeaveBalance balance = LeaveBalance.builder()
@@ -274,7 +276,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 10),
                 UrgencyLevel.NORMAL,
-                null
+                null,
+                false
             );
 
             LeaveBalance balance = LeaveBalance.builder()
@@ -309,7 +312,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 5),
                 UrgencyLevel.NORMAL,
-                null
+                null,
+                false
             );
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.empty());
@@ -327,7 +331,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 5),
                 UrgencyLevel.NORMAL,
-                null
+                null,
+                false
             );
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
@@ -349,7 +354,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 7, 1),
                 LocalDate.of(2026, 7, 3),
                 UrgencyLevel.NORMAL,
-                "Vacation"
+                "Vacation",
+                false
             );
 
             LeaveBalance balance = LeaveBalance.builder()
@@ -392,7 +398,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 12, 30),
                 LocalDate.of(2027, 1, 2),
                 UrgencyLevel.NORMAL,
-                null
+                null,
+                false
             );
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));

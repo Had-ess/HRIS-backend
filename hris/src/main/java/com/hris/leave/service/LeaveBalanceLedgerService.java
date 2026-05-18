@@ -12,9 +12,12 @@ import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
+import com.hris.leave.dto.LeaveBalanceLedgerEntryDto;
+import com.hris.leave.dto.LeaveBalanceProjectionDto;
 import com.hris.leave.dto.LeaveBalanceTransactionDto;
 import com.hris.leave.entity.LeaveBalance;
 import com.hris.leave.entity.LeaveRequest;
+import com.hris.leave.enums.LeaveStatus;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.ledger.entity.LeaveBalanceTransaction;
 import com.hris.leave.ledger.entity.LeaveBalanceTransactionSourceType;
@@ -36,6 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,12 +55,91 @@ public class LeaveBalanceLedgerService {
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final com.hris.leave.repository.LeaveRequestRepository leaveRequestRepository;
 
     @Transactional(readOnly = true)
     public List<LeaveBalanceTransactionDto> getTransactions(UUID employeeId) {
         return transactionRepository.findByEmployeeIdOrderByOccurredAtDesc(employeeId).stream()
             .map(this::toDto)
             .toList();
+    }
+
+    /**
+     * Richer ledger view including leave type display names.
+     * Exposed via GET /api/leave-balances/me/ledger
+     */
+    @Transactional(readOnly = true)
+    public List<LeaveBalanceLedgerEntryDto> getLedgerForEmployee(UUID employeeId) {
+        // Build a lookup map of leaveTypeId -> LeaveType to avoid N+1
+        Map<UUID, LeaveType> typeMap = leaveTypeRepository.findAll().stream()
+            .collect(Collectors.toMap(LeaveType::getId, t -> t));
+        return transactionRepository.findByEmployeeIdOrderByOccurredAtDesc(employeeId).stream()
+            .map(tx -> {
+                LeaveType lt = typeMap.get(tx.getLeaveTypeId());
+                return new LeaveBalanceLedgerEntryDto(
+                    tx.getId(),
+                    tx.getLeaveTypeId(),
+                    lt != null ? lt.getCode() : null,
+                    lt != null ? lt.getName() : null,
+                    tx.getType(),
+                    tx.getAmount(),
+                    tx.getBalanceAfter(),
+                    tx.getSourceType(),
+                    tx.getSourceId(),
+                    tx.getComment(),
+                    tx.getOccurredAt()
+                );
+            })
+            .toList();
+    }
+
+    /**
+     * Forecasts leave balances through year-end.
+     * Exposed via GET /api/leave-balances/me/projection
+     */
+    @Transactional(readOnly = true)
+    public LeaveBalanceProjectionDto getProjection(UUID employeeId) {
+        int year = LocalDate.now().getYear();
+        LocalDate today = LocalDate.now();
+        LocalDate yearEnd = LocalDate.of(year, 12, 31);
+        int daysLeftInYear = (int) today.until(yearEnd).getDays();
+        int totalDaysInYear = LocalDate.of(year, 1, 1).isLeapYear() ? 366 : 365;
+        double yearFractionLeft = totalDaysInYear > 0 ? (double) daysLeftInYear / totalDaysInYear : 0;
+
+        Map<UUID, LeaveType> typeMap = leaveTypeRepository.findAll().stream()
+            .collect(Collectors.toMap(LeaveType::getId, t -> t));
+
+        List<LeaveBalance> balances = leaveBalanceRepository.findByEmployeeIdAndYear(employeeId, year);
+
+        // Pending days per leave type (PENDING or IN_APPROVAL requests)
+        List<LeaveRequest> pendingRequests = leaveRequestRepository.findByEmployeeId(employeeId).stream()
+            .filter(r -> r.getStatus() == LeaveStatus.PENDING || r.getStatus() == LeaveStatus.IN_APPROVAL)
+            .filter(r -> r.getStartDate() != null && r.getStartDate().getYear() == year)
+            .toList();
+
+        Map<UUID, Integer> pendingByType = pendingRequests.stream()
+            .collect(Collectors.groupingBy(
+                LeaveRequest::getLeaveTypeId,
+                Collectors.summingInt(LeaveRequest::getWorkingDays)
+            ));
+
+        List<LeaveBalanceProjectionDto.LeaveTypeProjection> projections = balances.stream().map(balance -> {
+            LeaveType lt = typeMap.get(balance.getLeaveTypeId());
+            // Rough accrual estimate: fraction of yearly total still to be earned
+            int estimatedAccrual = (int) Math.round(balance.getTotalDays() * yearFractionLeft);
+            int pendingDeductions = pendingByType.getOrDefault(balance.getLeaveTypeId(), 0);
+            int projectedBalance = balance.getAvailableDays() + estimatedAccrual - pendingDeductions;
+            return new LeaveBalanceProjectionDto.LeaveTypeProjection(
+                lt != null ? lt.getCode() : null,
+                lt != null ? lt.getName() : null,
+                balance.getAvailableDays(),
+                estimatedAccrual,
+                pendingDeductions,
+                projectedBalance
+            );
+        }).toList();
+
+        return new LeaveBalanceProjectionDto(year, projections);
     }
 
     @Transactional(readOnly = true)

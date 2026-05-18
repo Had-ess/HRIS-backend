@@ -14,7 +14,9 @@ public record EmployeeUpdateDto(
     ContractType contractType,
     UUID departmentId,
     UUID supervisorEmployeeId,
-    UUID workScheduleId
+    UUID workScheduleId,
+    String location,
+    String cin
 ) {
     public EmployeeUpdateDto(
             String employeeCode,
@@ -32,7 +34,9 @@ public record EmployeeUpdateDto(
             contractType,
             departmentId,
             null,
-            workScheduleId
+            workScheduleId,
+            null,
+            null
         );
     }
 }

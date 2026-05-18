@@ -20,7 +20,8 @@ public interface DepartmentMapper {
             department.isActive(),
             0L,
             0L,
-            0L
+            0L,
+            department.getOpenings()
         );
     }
 }

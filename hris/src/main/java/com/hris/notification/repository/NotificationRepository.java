@@ -1,6 +1,7 @@
 package com.hris.notification.repository;
 
 import com.hris.notification.entity.Notification;
+import com.hris.notification.enums.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,8 @@ import java.util.UUID;
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     Page<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
     Page<Notification> findByUserIdAndIsReadOrderByCreatedAtDesc(UUID userId, boolean isRead, Pageable pageable);
+    Page<Notification> findByUserIdAndTypeOrderByCreatedAtDesc(UUID userId, NotificationType type, Pageable pageable);
+    Page<Notification> findByUserIdAndTypeAndIsReadOrderByCreatedAtDesc(UUID userId, NotificationType type, boolean isRead, Pageable pageable);
     Optional<Notification> findByIdAndUserId(UUID id, UUID userId);
     long countByUserIdAndIsReadFalse(UUID userId);
     boolean existsByUserId(UUID userId);

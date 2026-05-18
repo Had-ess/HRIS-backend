@@ -10,5 +10,6 @@ public record CreateLeaveRequestDto(
     @NotNull LocalDate startDate,
     @NotNull LocalDate endDate,
     @NotNull UrgencyLevel urgencyLevel,
-    String comment
+    String comment,
+    boolean isHalfDay
 ) {}

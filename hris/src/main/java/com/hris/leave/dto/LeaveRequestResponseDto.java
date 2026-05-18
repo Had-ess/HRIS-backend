@@ -13,5 +13,6 @@ public record LeaveRequestResponseDto(
     LocalDate startDate, LocalDate endDate, int workingDays,
     UrgencyLevel urgencyLevel, LeaveStatus status,
     String comment, Instant submittedAt, boolean canUploadAttachment,
+    boolean isHalfDay,
     List<ApprovalStepResponseDto> approvalSteps
 ) {}

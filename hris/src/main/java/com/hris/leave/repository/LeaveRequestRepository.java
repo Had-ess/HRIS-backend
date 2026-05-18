@@ -107,4 +107,24 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
         @Param("employeeId") UUID employeeId,
         @Param("status") LeaveStatus status,
         Pageable pageable);
+
+    @Query("""
+        SELECT COUNT(lr) FROM LeaveRequest lr
+        WHERE lr.status = :status
+          AND lr.startDate <= :date
+          AND lr.endDate >= :date
+        """)
+    long countOnLeaveOnDate(@Param("date") LocalDate date, @Param("status") LeaveStatus status);
+
+    @Query("""
+        SELECT lt.name, lt.code, SUM(lr.workingDays)
+        FROM LeaveRequest lr
+        JOIN LeaveType lt ON lt.id = lr.leaveTypeId
+        WHERE YEAR(lr.startDate) = :year
+          AND lr.status = 'APPROVED'
+        GROUP BY lt.id, lt.name, lt.code
+        ORDER BY SUM(lr.workingDays) DESC
+        """)
+    List<Object[]> sumWorkingDaysByLeaveTypeForYear(@Param("year") int year);
 }
+

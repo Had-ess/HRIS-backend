@@ -117,6 +117,7 @@ class LeaveRequestControllerTest {
             request.getComment(),
             request.getSubmittedAt(),
             true,
+            false,
             List.of(new ApprovalStepResponseDto(
             UUID.randomUUID(),
             UUID.randomUUID(),
@@ -181,6 +182,7 @@ class LeaveRequestControllerTest {
             request.getComment(),
             request.getSubmittedAt(),
             true,
+            false,
             List.of()
         );
         LeaveTypeDto leaveTypeDto = new LeaveTypeDto(leaveTypeId, "SICK", "Sick Leave", true, true, true, true, null, null, null);

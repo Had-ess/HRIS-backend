@@ -3,6 +3,7 @@ package com.hris.notification.controller;
 import com.hris.common.ApiResponse;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.notification.dto.NotificationResponseDto;
+import com.hris.notification.enums.NotificationType;
 import com.hris.notification.service.NotificationService;
 import com.hris.support.TestAuthenticationFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -95,17 +96,20 @@ class NotificationControllerTest {
             "Title",
             "Body",
             "/projects/123",
+            null,
+            null,
             false,
             Instant.now()
         );
         NotificationController controller = new NotificationController(notificationService);
 
-        when(notificationService.getMyNotifications(eq(userId), eq(false), eq(PageRequest.of(0, 20))))
+        when(notificationService.getMyNotifications(eq(userId), eq(false), eq((NotificationType) null), eq(PageRequest.of(0, 20))))
             .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 20), 1));
 
         ResponseEntity<ApiResponse<com.hris.common.PageResponse<NotificationResponseDto>>> response =
             controller.getMyNotifications(
                 false,
+                null,
                 PageRequest.of(0, 20),
                 TestAuthenticationFactory.jwtAuthentication(userId, "EMPLOYEE")
             );

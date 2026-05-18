@@ -3,6 +3,7 @@ package com.hris.notification.service;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.notification.dto.NotificationResponseDto;
 import com.hris.notification.entity.Notification;
+import com.hris.notification.enums.NotificationType;
 import com.hris.notification.mapper.NotificationMapper;
 import com.hris.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,17 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
 
     @Transactional(readOnly = true)
-    public Page<NotificationResponseDto> getMyNotifications(UUID userId, Boolean isRead, Pageable pageable) {
-        Page<Notification> page = isRead != null
-            ? notificationRepository.findByUserIdAndIsReadOrderByCreatedAtDesc(userId, isRead, pageable)
-            : notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+    public Page<NotificationResponseDto> getMyNotifications(UUID userId, Boolean isRead, NotificationType type, Pageable pageable) {
+        Page<Notification> page;
+        if (type != null && isRead != null) {
+            page = notificationRepository.findByUserIdAndTypeAndIsReadOrderByCreatedAtDesc(userId, type, isRead, pageable);
+        } else if (type != null) {
+            page = notificationRepository.findByUserIdAndTypeOrderByCreatedAtDesc(userId, type, pageable);
+        } else if (isRead != null) {
+            page = notificationRepository.findByUserIdAndIsReadOrderByCreatedAtDesc(userId, isRead, pageable);
+        } else {
+            page = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        }
         return page.map(notificationMapper::toDto);
     }
 

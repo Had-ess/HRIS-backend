@@ -33,6 +33,10 @@ public class Department {
     @Builder.Default
     private boolean isActive = true;
 
+    @Column(name = "openings", nullable = false)
+    @Builder.Default
+    private int openings = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "head_employee_id", insertable = false, updatable = false)
     private Employee headEmployee;

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 
@@ -26,7 +27,9 @@ public record EmployeeCreateDto(
     @NotNull ContractType contractType,
     @NotNull UUID departmentId,
     UUID supervisorEmployeeId,
-    @NotNull UUID workScheduleId
+    @NotNull UUID workScheduleId,
+    String location,
+    @Pattern(regexp = "^[01][0-9]{7}$", message = "CIN must be 8 digits starting with 0 or 1") String cin
 ) {
     public EmployeeCreateDto(
             String username,
@@ -54,7 +57,9 @@ public record EmployeeCreateDto(
             contractType,
             departmentId,
             null,
-            workScheduleId
+            workScheduleId,
+            null,
+            null
         );
     }
 }

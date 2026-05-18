@@ -1,6 +1,7 @@
 package com.hris.analytics.entity;
 
 import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.enums.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -20,6 +21,7 @@ public class AuditLog {
     @Column(name = "ip_address", length = 45) private String ipAddress;
     @Column(name = "actor_type", length = 20) @Builder.Default private String actorType = "USER";
     @Column(nullable = false) @Builder.Default private Instant timestamp = Instant.now();
+    @Enumerated(EnumType.STRING) @Column(name = "risk_level", length = 20) private RiskLevel riskLevel;
 
     @Override public boolean equals(Object o) {
         if (this == o) return true;
