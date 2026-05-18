@@ -22,6 +22,7 @@ public class LeaveRequest {
     @Column(name = "start_date", nullable = false) private LocalDate startDate;
     @Column(name = "end_date", nullable = false) private LocalDate endDate;
     @Column(name = "working_days", nullable = false) private int workingDays;
+    @Column(name = "is_half_day", nullable = false) @Builder.Default private boolean isHalfDay = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "urgency_level", nullable = false, length = 50)

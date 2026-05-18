@@ -132,6 +132,8 @@ class EmployeeServiceTest {
             null,
             newDepartmentId,
             null,
+            null,
+            null,
             null
         ), actorId);
 
@@ -157,6 +159,8 @@ class EmployeeServiceTest {
             null,
             null,
             EmployeeStatus.TERMINATED,
+            null,
+            null,
             null,
             null,
             null,
@@ -208,6 +212,9 @@ class EmployeeServiceTest {
             departmentId,
             null,
             UUID.randomUUID(),
+            null,
+            null,
+            null,
             null,
             null
         );

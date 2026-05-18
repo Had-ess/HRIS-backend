@@ -19,7 +19,10 @@ public record EmployeeResponseDto(
     UUID supervisorEmployeeId,
     UUID workScheduleId,
     UserResponseDto user,
-    AccountStatus accountStatus
+    AccountStatus accountStatus,
+    String location,
+    String supervisorName,
+    String cin
 ) {
     public EmployeeResponseDto(
             UUID id,
@@ -44,6 +47,9 @@ public record EmployeeResponseDto(
             null,
             workScheduleId,
             user,
+            null,
+            null,
+            null,
             null
         );
     }

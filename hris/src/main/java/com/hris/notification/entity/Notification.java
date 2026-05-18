@@ -1,5 +1,6 @@
 package com.hris.notification.entity;
 
+import com.hris.notification.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -15,6 +16,8 @@ public class Notification {
     @Column(nullable = false, columnDefinition = "TEXT") private String body;
     @Column(name = "link_path", length = 500) private String linkPath;
     @Column(name = "event_id") private UUID eventId;
+    @Enumerated(EnumType.STRING) @Column(name = "type", length = 20) private NotificationType type;
+    @Column(name = "actor_display_name", length = 255) private String actorDisplayName;
     @Column(name = "is_read", nullable = false) @Builder.Default private boolean isRead = false;
     @Column(name = "created_at", nullable = false) @Builder.Default private Instant createdAt = Instant.now();
 

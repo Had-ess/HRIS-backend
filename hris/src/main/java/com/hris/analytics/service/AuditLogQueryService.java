@@ -117,7 +117,8 @@ public class AuditLogQueryService {
             auditLog.getPreviousState(),
             auditLog.getNewState(),
             auditLog.getIpAddress(),
-            auditLog.getTimestamp()
+            auditLog.getTimestamp(),
+            auditLog.getRiskLevel()
         );
     }
 

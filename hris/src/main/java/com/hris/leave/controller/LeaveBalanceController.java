@@ -3,14 +3,17 @@ package com.hris.leave.controller;
 import com.hris.common.ApiResponse;
 import com.hris.leave.dto.LeaveBalanceDto;
 import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
+import com.hris.leave.dto.LeaveBalanceLedgerEntryDto;
+import com.hris.leave.dto.LeaveBalanceProjectionDto;
 import com.hris.leave.dto.LeaveBalanceSummaryDto;
 import com.hris.leave.dto.LeaveBalanceTransactionDto;
+import com.hris.leave.service.LeaveBalanceLedgerService;
 import com.hris.leave.service.LeaveBalanceService;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,7 @@ import java.util.UUID;
 public class LeaveBalanceController {
 
     private final LeaveBalanceService leaveBalanceService;
+    private final LeaveBalanceLedgerService leaveBalanceLedgerService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     @GetMapping("/me")
@@ -31,6 +35,22 @@ public class LeaveBalanceController {
         permissionAuthorizationService.authorizePermissionName(auth, "LEAVE_BALANCE_READ_OWN");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.getMyBalances(userId)));
+    }
+
+    @GetMapping("/me/ledger")
+    public ResponseEntity<ApiResponse<List<LeaveBalanceLedgerEntryDto>>> getMyLedger(Authentication auth) {
+        permissionAuthorizationService.authorizePermissionName(auth, "LEAVE_BALANCE_READ_OWN");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        var employee = leaveBalanceService.resolveEmployeeByUserId(userId);
+        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceLedgerService.getLedgerForEmployee(employee.getId())));
+    }
+
+    @GetMapping("/me/projection")
+    public ResponseEntity<ApiResponse<LeaveBalanceProjectionDto>> getMyProjection(Authentication auth) {
+        permissionAuthorizationService.authorizePermissionName(auth, "LEAVE_BALANCE_READ_OWN");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        var employee = leaveBalanceService.resolveEmployeeByUserId(userId);
+        return ResponseEntity.ok(ApiResponse.ok(leaveBalanceLedgerService.getProjection(employee.getId())));
     }
 
     @GetMapping
@@ -101,3 +121,4 @@ public class LeaveBalanceController {
         return ResponseEntity.ok(ApiResponse.ok(leaveBalanceService.adjustBalance(employeeId, dto, requesterId)));
     }
 }
+

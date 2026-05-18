@@ -7,6 +7,7 @@ import com.hris.auth.repository.UserRepository;
 import com.hris.config.RabbitMQConfig;
 import com.hris.notification.entity.Notification;
 import com.hris.notification.entity.NotificationEvent;
+import com.hris.notification.enums.NotificationType;
 import com.hris.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -121,12 +122,17 @@ public class NotificationConsumer {
             String linkPath = extractLinkPath(event);
             log.debug("Resolved link path for event type={}: {}", event.getEventType(), linkPath);
 
+            NotificationType notifType = resolveNotificationType(event.getEventType());
+            String actorDisplayName = extractActorDisplayName(event.getEventType(), deserializeParams(event));
+
             Notification notification = Notification.builder()
                 .userId(user.getId())
                 .title(title)
                 .body(body)
                 .linkPath(linkPath)
                 .eventId(event.getId())
+                .type(notifType)
+                .actorDisplayName(actorDisplayName)
                 .isRead(false)
                 .createdAt(Instant.now())
                 .build();
@@ -238,5 +244,26 @@ public class NotificationConsumer {
             log.debug("Notification event does not expose a link path for {}", event.getEventType(), ex);
         }
         return null;
+    }
+
+    private NotificationType resolveNotificationType(com.hris.notification.enums.NotificationEventType eventType) {
+        return switch (eventType) {
+            case LEAVE_SUBMITTED, LEAVE_APPROVED, LEAVE_REJECTED, LEAVE_CANCELLED,
+                 LEAVE_BALANCE_ADJUSTED, LEAVE_ACCRUAL_APPLIED -> NotificationType.LEAVE;
+            case ADMIN_REQUEST_CREATED, ADMIN_REQUEST_SUBMITTED, ADMIN_REQUEST_IN_REVIEW,
+                 ADMIN_REQUEST_APPROVED, ADMIN_REQUEST_REJECTED, ADMIN_REQUEST_COMPLETED,
+                 ADMIN_REQUEST_CANCELLED, ADMIN_REQUEST_COMMENT_ADDED,
+                 ADMIN_REQUEST_ATTACHMENT_ADDED, ADMIN_REQUEST_RESPONSE_ATTACHMENT_ADDED,
+                 ADMIN_REQUEST_SLA_EXCEEDED -> NotificationType.REQUEST;
+            case PROJECT_ASSIGNED -> NotificationType.TEAM;
+        };
+    }
+
+    private String extractActorDisplayName(com.hris.notification.enums.NotificationEventType eventType, Object[] params) {
+        return switch (eventType) {
+            case LEAVE_SUBMITTED, LEAVE_APPROVED, LEAVE_REJECTED, LEAVE_CANCELLED ->
+                params.length > 0 ? String.valueOf(params[0]) : null;
+            default -> null;
+        };
     }
 }

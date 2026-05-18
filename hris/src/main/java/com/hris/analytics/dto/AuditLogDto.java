@@ -1,6 +1,7 @@
 package com.hris.analytics.dto;
 
 import com.hris.analytics.enums.AuditAction;
+import com.hris.analytics.enums.RiskLevel;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -15,5 +16,6 @@ public record AuditLogDto(
     String previousState,
     String newState,
     String ipAddress,
-    Instant timestamp
+    Instant timestamp,
+    RiskLevel riskLevel
 ) {}

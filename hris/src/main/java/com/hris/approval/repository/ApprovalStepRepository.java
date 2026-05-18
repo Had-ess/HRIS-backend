@@ -41,6 +41,7 @@ public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID
     @Query("SELECT s FROM ApprovalStep s WHERE s.id = :id")
     Optional<ApprovalStep> findByIdForUpdate(@Param("id") UUID id);
 
+
     long countByWorkflowIdAndStatus(UUID workflowId, StepStatus status);
 
     long countByApproverIdAndStatus(UUID approverId, StepStatus status);
@@ -48,4 +49,14 @@ public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID
     long countByStatus(StepStatus status);
 
     boolean existsByWorkflowIdAndStatus(UUID workflowId, StepStatus status);
+
+    @Query(value = """
+        SELECT step_order, 0, 0, COUNT(*)
+        FROM approval_steps
+        WHERE status IN ('APPROVED', 'REJECTED')
+          AND decided_at IS NOT NULL
+        GROUP BY step_order
+        ORDER BY step_order
+        """, nativeQuery = true)
+    List<Object[]> findCompletedStepTimingStats();
 }

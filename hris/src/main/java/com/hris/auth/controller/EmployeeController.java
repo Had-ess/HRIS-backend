@@ -56,6 +56,15 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.ok(employeeService.getById(id, actorId)));
     }
 
+    @GetMapping("/{id}/profile-summary")
+    public ResponseEntity<ApiResponse<com.hris.auth.dto.EmployeeProfileSummaryDto>> getProfileSummary(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "EMPLOYEE", "READ");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(employeeService.getProfileSummary(id, actorId)));
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<EmployeeResponseDto>> update(
             @PathVariable UUID id,

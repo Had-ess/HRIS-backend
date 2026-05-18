@@ -6,10 +6,12 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.enums.AccountStatus;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.entity.LeaveBalance;
@@ -50,6 +52,7 @@ public class EmployeeService {
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
     private final AccessScopeService accessScopeService;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponseDto> getAll(UUID requesterId, Pageable pageable) {
@@ -63,6 +66,84 @@ public class EmployeeService {
                 yield employeeRepository.findByDepartmentId(scope.departmentId(), pageable).map(employeeMapper::toDto);
             }
         };
+    }
+
+    /**
+     * Returns a compact profile summary for the employee hero banner.
+     * GET /api/employees/{id}/profile-summary
+     */
+    @Transactional(readOnly = true)
+    public com.hris.auth.dto.EmployeeProfileSummaryDto getProfileSummary(UUID employeeId, UUID requesterId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        // Department name
+        String deptName = employee.getDepartmentId() != null
+            ? departmentRepository.findById(employee.getDepartmentId()).map(d -> d.getName()).orElse(null)
+            : null;
+
+        // Supervisor name
+        String supervisorName = employee.getSupervisorEmployeeId() != null
+            ? employeeRepository.findById(employee.getSupervisorEmployeeId())
+                .map(sup -> {
+                    var u = sup.getUserId() != null
+                        ? com.hris.auth.entity.User.class.cast(null) // resolved below
+                        : null;
+                    return sup.getEmployeeCode();
+                }).orElse(null)
+            : null;
+
+        // Leave balances (current year, max 6)
+        int year = LocalDate.now().getYear();
+        List<com.hris.leave.dto.LeaveBalanceDto> balances = leaveBalanceRepository
+            .findByEmployeeIdAndYear(employeeId, year).stream()
+            .limit(6)
+            .map(b -> {
+                LeaveType lt = leaveTypeRepository.findById(b.getLeaveTypeId()).orElse(null);
+                return new com.hris.leave.dto.LeaveBalanceDto(
+                    b.getId(), b.getEmployeeId(), b.getLeaveTypeId(),
+                    lt != null ? lt.getCode() : null, lt != null ? lt.getName() : null,
+                    b.getTotalDays(), b.getUsedDays(), b.getPendingDays(),
+                    b.getAvailableDays(), b.getCarryOverDays(), b.getYear()
+                );
+            })
+            .toList();
+
+        // Years of service (1 decimal)
+        double yearsOfService = 0;
+        if (employee.getHireDate() != null) {
+            Period p = employee.getHireDate().until(LocalDate.now());
+            yearsOfService = Math.round((p.getYears() + p.getMonths() / 12.0) * 10.0) / 10.0;
+        }
+
+        // Direct report count
+        int directReportCount = employeeRepository.findBySupervisorEmployeeId(employeeId).size();
+
+        // User fields - employee.user relationship may not be eagerly loaded; use userId lookup
+        String firstName = null, lastName = null, email = null;
+        if (employee.getUserId() != null) {
+            var user = userRepository.findById(employee.getUserId()).orElse(null);
+            if (user != null) {
+                firstName = user.getFirstName();
+                lastName = user.getLastName();
+                email = user.getEmail();
+            }
+        }
+
+        var user2 = employee.getUserId() != null ? userRepository.findById(employee.getUserId()).orElse(null) : null;
+        AccountStatus accountStatus = user2 == null ? AccountStatus.ACTIVE
+            : !user2.isActive() ? AccountStatus.INACTIVE
+            : user2.isSeed() ? AccountStatus.PENDING_ACTIVATION
+            : AccountStatus.ACTIVE;
+
+        return new com.hris.auth.dto.EmployeeProfileSummaryDto(
+            employee.getId(), employee.getUserId(),
+            employee.getEmployeeCode(), firstName, lastName, email,
+            employee.getJobTitle(), deptName, supervisorName,
+            employee.getHireDate(), employee.getStatus(), accountStatus,
+            employee.getContractType(), employee.getLocation(),
+            yearsOfService, balances, directReportCount
+        );
     }
 
     @Transactional(readOnly = true)
@@ -120,6 +201,12 @@ public class EmployeeService {
         }
         if (dto.workScheduleId() != null) {
             employee.setWorkScheduleId(dto.workScheduleId());
+        }
+        if (dto.location() != null) {
+            employee.setLocation(dto.location().isBlank() ? null : dto.location().trim());
+        }
+        if (dto.cin() != null) {
+            employee.setCin(dto.cin().isBlank() ? null : dto.cin().trim());
         }
 
         Employee saved = employeeRepository.save(employee);
@@ -245,3 +332,6 @@ public class EmployeeService {
         DEPARTMENT
     }
 }
+
+
+

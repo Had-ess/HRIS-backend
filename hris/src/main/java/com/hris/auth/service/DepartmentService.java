@@ -197,7 +197,8 @@ public class DepartmentService {
             base.isActive(),
             employeeRepository.countByDepartmentId(base.id()),
             projectDepartmentRepository.countByDepartmentId(base.id()),
-            projectAssignmentRepository.countActiveByDepartmentId(base.id(), LocalDate.now())
+            projectAssignmentRepository.countActiveByDepartmentId(base.id(), LocalDate.now()),
+            department.getOpenings()
         );
     }
 

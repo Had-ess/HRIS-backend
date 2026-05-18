@@ -94,8 +94,12 @@ public class LeaveRequestService {
                 "Leave type '" + leaveType.getName() + "' requires a justification comment");
         }
 
-        int workingDays = workScheduleService.computeWorkingDays(
-            dto.startDate(), dto.endDate(), employee.getWorkScheduleId());
+        if (dto.isHalfDay() && !dto.startDate().equals(dto.endDate())) {
+            throw new IllegalArgumentException("Half-day leave must start and end on the same date");
+        }
+
+        int workingDays = dto.isHalfDay() ? 1
+            : workScheduleService.computeWorkingDays(dto.startDate(), dto.endDate(), employee.getWorkScheduleId());
 
         if (workingDays <= 0) {
             throw new IllegalArgumentException("No working days in the selected period");
@@ -118,6 +122,7 @@ public class LeaveRequestService {
             .status(LeaveStatus.PENDING)
             .comment(dto.comment())
             .submittedAt(Instant.now())
+            .isHalfDay(dto.isHalfDay())
             .build();
 
         LeaveRequest saved = leaveRequestRepository.save(request);

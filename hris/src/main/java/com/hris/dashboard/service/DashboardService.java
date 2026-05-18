@@ -43,7 +43,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -75,6 +78,8 @@ public class DashboardService {
     private final AccessScopeService accessScopeService;
     private final AnalyticsQueryService analyticsQueryService;
 
+    // ─── Employee ────────────────────────────────────────────────────────────
+
     @Transactional(readOnly = true)
     public EmployeeDashboardDto getEmployeeDashboard(UUID userId) {
         Employee employee = employeeRepository.findByUserId(userId)
@@ -94,6 +99,8 @@ public class DashboardService {
             mapAdminRequests(adminRequests)
         );
     }
+
+    // ─── Supervisor ───────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
     public SupervisorDashboardDto getSupervisorDashboard(UUID userId) {
@@ -126,18 +133,41 @@ public class DashboardService {
         );
     }
 
+    // ─── HR ───────────────────────────────────────────────────────────────────
+
     @Transactional(readOnly = true)
     public HrDashboardDto getHrDashboard() {
+        LocalDate today = LocalDate.now();
+
+        List<HrDashboardDto.MonthlyCountDto> headcountTrend = buildMonthlyHeadcountTrend(today);
+
+        // Leave distribution by type for current year
+        List<HrDashboardDto.LeaveTypeDistributionDto> leaveDistribution =
+            leaveRequestRepository.sumWorkingDaysByLeaveTypeForYear(today.getYear())
+                .stream()
+                .map(row -> new HrDashboardDto.LeaveTypeDistributionDto(
+                    (String) row[0], (String) row[1], ((Number) row[2]).longValue()))
+                .toList();
+
+        long onLeaveToday = leaveRequestRepository.countOnLeaveOnDate(today, LeaveStatus.APPROVED);
+        long onboardingCount = employeeRepository.countHiredAfter(today.minusDays(90));
+
         return new HrDashboardDto(
             approvalStepRepository.countByStatus(StepStatus.PENDING),
             adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES),
             employeeRepository.count(),
             departmentRepository.count(),
+            onLeaveToday,
+            onboardingCount,
             mapAdminRequests(
                 adminRequestRepository.findTop5ByStatusInOrderBySubmittedAtDesc(
-                    ACTIONABLE_ADMIN_REQUEST_STATUSES))
+                    ACTIONABLE_ADMIN_REQUEST_STATUSES)),
+            headcountTrend,
+            leaveDistribution
         );
     }
+
+    // ─── Director ─────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
@@ -148,6 +178,40 @@ public class DashboardService {
             AnalyticsScopeType.GLOBAL,
             null
         );
+
+        List<DirectorDashboardDto.HeadcountByDeptDto> headcountByDept =
+            departmentRepository.findAll().stream()
+                .map(dept -> new DirectorDashboardDto.HeadcountByDeptDto(
+                    dept.getName(),
+                    employeeRepository.countByDepartmentId(dept.getId())))
+                .filter(d -> d.count() > 0)
+                .sorted((a, b) -> Long.compare(b.count(), a.count()))
+                .limit(8)
+                .toList();
+
+        List<DirectorDashboardDto.ApprovalBottleneckDto> bottlenecks =
+            approvalStepRepository.findCompletedStepTimingStats()
+                .stream()
+                .map(row -> new DirectorDashboardDto.ApprovalBottleneckDto(
+                    "Step " + row[0],
+                    ((Number) row[0]).intValue(),
+                    ((Number) row[1]).doubleValue(),
+                    ((Number) row[2]).doubleValue(),
+                    ((Number) row[3]).longValue()))
+                .limit(4)
+                .toList();
+
+        List<DirectorDashboardDto.RiskSignalDto> riskSignals = List.of();
+
+        List<DirectorDashboardDto.ProjectUtilizationDto> projectUtilization =
+            projectRepository.findByStatus(ProjectStatus.ACTIVE).stream()
+                .map(p -> {
+                    long members = projectAssignmentRepository.findByProjectId(p.getId()).stream()
+                        .filter(a -> a.isActive()).count();
+                    return new DirectorDashboardDto.ProjectUtilizationDto(p.getName(), 0, members);
+                })
+                .limit(6)
+                .toList();
 
         return new DirectorDashboardDto(
             employeeRepository.count(),
@@ -161,8 +225,28 @@ public class DashboardService {
                 Math.toIntExact(leaveMetrics.rejectedCount()),
                 leaveMetrics.averageProcessingDays()
             ),
-            adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES)
+            adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES),
+            0.0,
+            leaveMetrics.averageProcessingDays(),
+            leaveMetrics.averageProcessingDays() * 24,
+            bottlenecks,
+            headcountByDept,
+            riskSignals,
+            projectUtilization
         );
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    private List<HrDashboardDto.MonthlyCountDto> buildMonthlyHeadcountTrend(LocalDate today) {
+        long total = employeeRepository.count();
+        ArrayList<HrDashboardDto.MonthlyCountDto> trend = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            LocalDate month = today.minusMonths(i);
+            String label = month.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+            trend.add(new HrDashboardDto.MonthlyCountDto(label, total));
+        }
+        return trend;
     }
 
     private List<LeaveBalanceSummaryDto> mapLeaveBalances(List<LeaveBalance> balances) {

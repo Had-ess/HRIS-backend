@@ -54,6 +54,12 @@ public class Employee {
     @Column(name = "work_schedule_id", nullable = false)
     private UUID workScheduleId;
 
+    @Column(name = "location", length = 100)
+    private String location;
+
+    @Column(name = "cin", length = 8)
+    private String cin;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;

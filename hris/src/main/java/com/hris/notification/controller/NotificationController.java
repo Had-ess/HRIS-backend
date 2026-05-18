@@ -3,6 +3,7 @@ package com.hris.notification.controller;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import com.hris.notification.dto.NotificationResponseDto;
+import com.hris.notification.enums.NotificationType;
 import com.hris.notification.service.NotificationService;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,12 @@ public class NotificationController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<NotificationResponseDto>>> getMyNotifications(
-            @RequestParam(required = false) Boolean isRead, Pageable pageable, Authentication auth) {
+            @RequestParam(required = false) Boolean isRead,
+            @RequestParam(required = false) NotificationType type,
+            Pageable pageable, Authentication auth) {
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
-            notificationService.getMyNotifications(userId, isRead, pageable))));
+            notificationService.getMyNotifications(userId, isRead, type, pageable))));
     }
 
     @GetMapping("/unread-count")

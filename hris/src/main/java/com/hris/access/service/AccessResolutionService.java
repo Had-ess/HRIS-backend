@@ -39,6 +39,12 @@ public class AccessResolutionService {
         "SETTINGS", "menu.section.settings"
     );
 
+    private static final Map<String, Integer> SECTION_ORDER = Map.of(
+        "WORKSPACE", 1,
+        "ADMINISTRATION", 2,
+        "SETTINGS", 3
+    );
+
     private final UserProfileAssignmentRepository userProfileAssignmentRepository;
     private final ProfilePermissionRepository profilePermissionRepository;
     private final ProfileMenuAccessRepository profileMenuAccessRepository;
@@ -180,6 +186,7 @@ public class AccessResolutionService {
                 SECTION_TRANSLATION_KEYS.getOrDefault(entry.getKey(), "menu.section." + entry.getKey().toLowerCase(Locale.ROOT)),
                 entry.getValue()
             ))
+            .sorted(Comparator.comparingInt(s -> SECTION_ORDER.getOrDefault(s.code(), 99)))
             .toList();
     }
 

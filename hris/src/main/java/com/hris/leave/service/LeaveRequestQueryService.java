@@ -95,6 +95,7 @@ public class LeaveRequestQueryService {
             request.getComment(),
             request.getSubmittedAt(),
             leaveRequestService.canUploadAttachment(request, requesterId),
+            request.isHalfDay(),
             approvalSteps
         );
     }

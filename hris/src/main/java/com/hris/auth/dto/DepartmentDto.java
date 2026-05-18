@@ -11,5 +11,6 @@ public record DepartmentDto(
     boolean isActive,
     long employeeCount,
     long projectCount,
-    long projectAssignmentCount
+    long projectAssignmentCount,
+    int openings
 ) {}

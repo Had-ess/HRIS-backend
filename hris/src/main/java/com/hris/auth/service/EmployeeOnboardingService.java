@@ -64,6 +64,8 @@ public class EmployeeOnboardingService {
                 .departmentId(dto.departmentId())
                 .supervisorEmployeeId(dto.supervisorEmployeeId())
                 .workScheduleId(dto.workScheduleId())
+                .location(dto.location() != null && !dto.location().isBlank() ? dto.location().trim() : null)
+                .cin(dto.cin() != null && !dto.cin().isBlank() ? dto.cin().trim() : null)
                 .build());
 
             employeeHistoryService.recordHire(saved, actorId);

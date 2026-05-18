@@ -48,7 +48,16 @@ public class LeaveBalanceService {
     private final LeaveBalanceLedgerService leaveBalanceLedgerService;
     private final LeaveAcquisitionPolicyRepository leaveAcquisitionPolicyRepository;
 
+    /**
+     * Resolves the Employee entity for the given Keycloak user ID.
+     * Used by controller endpoints that operate on the current user.
+     */
     @Transactional(readOnly = true)
+    public com.hris.auth.entity.Employee resolveEmployeeByUserId(UUID userId) {
+        return employeeRepository.findByUserId(userId)
+            .orElseThrow(() -> new com.hris.common.exception.EntityNotFoundException("Employee not found for user " + userId));
+    }
+
     public List<LeaveBalanceDto> getMyBalances(UUID userId) {
         Employee employee = employeeRepository.findByUserId(userId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));

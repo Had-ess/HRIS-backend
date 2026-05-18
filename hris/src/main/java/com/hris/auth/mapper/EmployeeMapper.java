@@ -15,6 +15,9 @@ public interface EmployeeMapper {
     @Mapping(target = "workScheduleId", source = "workScheduleId")
     @Mapping(target = "user", source = "user")
     @Mapping(target = "accountStatus", expression = "java(computeAccountStatus(employee.getUser()))")
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "supervisorName", expression = "java(computeSupervisorName(employee))")
+    @Mapping(target = "cin", source = "cin")
     EmployeeResponseDto toDto(Employee employee);
 
     default AccountStatus computeAccountStatus(User user) {
@@ -22,5 +25,16 @@ public interface EmployeeMapper {
         if (!user.isActive()) return AccountStatus.INACTIVE;
         if (user.isSeed()) return AccountStatus.PENDING_ACTIVATION;
         return AccountStatus.ACTIVE;
+    }
+
+    default String computeSupervisorName(Employee employee) {
+        Employee supervisor = employee.getSupervisor();
+        if (supervisor == null) return null;
+        User supervisorUser = supervisor.getUser();
+        if (supervisorUser == null) return null;
+        String firstName = supervisorUser.getFirstName() != null ? supervisorUser.getFirstName() : "";
+        String lastName = supervisorUser.getLastName() != null ? supervisorUser.getLastName() : "";
+        String name = (firstName + " " + lastName).trim();
+        return name.isEmpty() ? null : name;
     }
 }
