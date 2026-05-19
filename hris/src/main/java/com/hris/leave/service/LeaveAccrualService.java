@@ -128,20 +128,28 @@ public class LeaveAccrualService {
             return 0;
         }
 
-        int accruedThisYear = ledgerService.getTransactions(employee.getId()).stream()
+        BigDecimal accruedThisYear = ledgerService.getTransactions(employee.getId()).stream()
             .filter(tx -> tx.leaveTypeId().equals(policy.getLeaveTypeId()))
             .filter(tx -> tx.type() == com.hris.leave.ledger.entity.LeaveBalanceTransactionType.ACCRUAL)
             .filter(tx -> tx.occurredAt().atZone(ZoneOffset.UTC).getYear() == asOfDate.getYear())
-            .mapToInt(com.hris.leave.dto.LeaveBalanceTransactionDto::amount)
-            .sum();
+            .map(com.hris.leave.dto.LeaveBalanceTransactionDto::amount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (policy.getAnnualQuota() != null) {
-            amount = Math.min(amount, Math.max(policy.getAnnualQuota() - accruedThisYear, 0));
+            int remainingQuota = BigDecimal.valueOf(policy.getAnnualQuota())
+                .subtract(accruedThisYear)
+                .max(BigDecimal.ZERO)
+                .intValue();
+            amount = Math.min(amount, remainingQuota);
         }
 
         if (policy.getDayCap() != null) {
-            int available = ledgerService.getAvailableBalance(employee.getId(), leaveType.getId(), asOfDate.getYear());
-            amount = Math.min(amount, Math.max(policy.getDayCap() - available, 0));
+            BigDecimal available = ledgerService.getAvailableBalance(employee.getId(), leaveType.getId(), asOfDate.getYear());
+            int remainingCap = BigDecimal.valueOf(policy.getDayCap())
+                .subtract(available)
+                .max(BigDecimal.ZERO)
+                .intValue();
+            amount = Math.min(amount, remainingCap);
         }
 
         if (amount <= 0) {
@@ -152,7 +160,7 @@ public class LeaveAccrualService {
             employee,
             leaveType,
             asOfDate.getYear(),
-            amount,
+            BigDecimal.valueOf(amount),
             policy.getId(),
             actorId,
             "Scheduled accrual for " + policy.getCode(),

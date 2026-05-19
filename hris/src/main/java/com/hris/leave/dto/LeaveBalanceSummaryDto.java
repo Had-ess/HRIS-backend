@@ -1,5 +1,6 @@
 package com.hris.leave.dto;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record LeaveBalanceSummaryDto(
@@ -13,10 +14,10 @@ public record LeaveBalanceSummaryDto(
     String leaveTypeCode,
     String leaveTypeName,
     int year,
-    int totalDays,
-    int usedDays,
-    int pendingDays,
-    int carryOverDays,
-    int availableDays
+    BigDecimal totalDays,
+    BigDecimal usedDays,
+    BigDecimal pendingDays,
+    BigDecimal carryOverDays,
+    BigDecimal availableDays
 ) {
 }

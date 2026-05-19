@@ -2,6 +2,7 @@ package com.hris.leave.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -15,41 +16,34 @@ public class LeaveBalance {
     @Column(name = "leave_type_id", nullable = false) private UUID leaveTypeId;
     @Column(nullable = false) private int year;
 
-    /**
-     * Leave days stored as integer — half-day and hourly leave not supported.
-     * To support fractional days, change to BigDecimal(7,2) and migrate the schema:
-     *   ALTER TABLE leave_balances ALTER COLUMN total_days TYPE NUMERIC(7,2);
-     *   (apply the same to used_days, pending_days, carry_over_days)
-     */
-    @Column(name = "total_days", nullable = false) private int totalDays;
-    @Column(name = "used_days", nullable = false) @Builder.Default private int usedDays = 0;
-    @Column(name = "pending_days", nullable = false) @Builder.Default private int pendingDays = 0;
-    @Column(name = "carry_over_days", nullable = false) @Builder.Default private int carryOverDays = 0;
+    @Column(name = "total_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal totalDays = BigDecimal.ZERO;
+    @Column(name = "used_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal usedDays = BigDecimal.ZERO;
+    @Column(name = "pending_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal pendingDays = BigDecimal.ZERO;
+    @Column(name = "carry_over_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal carryOverDays = BigDecimal.ZERO;
     @Version private Integer version;
 
-    public int getAvailableDays() {
-        return totalDays + carryOverDays - usedDays - pendingDays;
+    public BigDecimal getAvailableDays() {
+        return totalDays.add(carryOverDays).subtract(usedDays).subtract(pendingDays);
     }
 
-    public void adjustTotalDays(int amount) {
-        this.totalDays += amount;
+    public void adjustTotalDays(BigDecimal amount) {
+        this.totalDays = this.totalDays.add(amount);
     }
 
-    public void deductDays(int n) {
-        if (n <= 0) throw new IllegalArgumentException("Deduction must be positive");
-        this.pendingDays += n;
+    public void deductDays(BigDecimal amount) {
+        if (amount.signum() <= 0) throw new IllegalArgumentException("Deduction must be positive");
+        this.pendingDays = this.pendingDays.add(amount);
     }
 
-    // GAP-B-35: Guard against going below zero
-    public void restoreDays(int n) {
-        if (n <= 0) throw new IllegalArgumentException("Restoration must be positive");
-        this.pendingDays = Math.max(0, this.pendingDays - n);
+    public void restoreDays(BigDecimal amount) {
+        if (amount.signum() <= 0) throw new IllegalArgumentException("Restoration must be positive");
+        this.pendingDays = this.pendingDays.subtract(amount).max(BigDecimal.ZERO);
     }
 
-    public void confirmUsage(int n) {
-        if (n <= 0) throw new IllegalArgumentException("Confirmation must be positive");
-        this.pendingDays = Math.max(0, this.pendingDays - n);
-        this.usedDays += n;
+    public void confirmUsage(BigDecimal amount) {
+        if (amount.signum() <= 0) throw new IllegalArgumentException("Confirmation must be positive");
+        this.pendingDays = this.pendingDays.subtract(amount).max(BigDecimal.ZERO);
+        this.usedDays = this.usedDays.add(amount);
     }
 
     @Override public boolean equals(Object o) {

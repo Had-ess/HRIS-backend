@@ -1,12 +1,15 @@
 package com.hris.leave.entity;
 
 import com.hris.leave.enums.LeaveStatus;
+import com.hris.leave.enums.PartialLeaveMode;
 import com.hris.leave.enums.UrgencyLevel;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,6 +26,15 @@ public class LeaveRequest {
     @Column(name = "end_date", nullable = false) private LocalDate endDate;
     @Column(name = "working_days", nullable = false) private int workingDays;
     @Column(name = "is_half_day", nullable = false) @Builder.Default private boolean isHalfDay = false;
+    @Column(name = "duration_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal durationDays = BigDecimal.ZERO;
+    @Column(name = "duration_hours", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal durationHours = BigDecimal.ZERO;
+    @Column(name = "start_time") private LocalTime startTime;
+    @Column(name = "end_time") private LocalTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "partial_mode", nullable = false, length = 50)
+    @Builder.Default
+    private PartialLeaveMode partialMode = PartialLeaveMode.FULL_DAY;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "urgency_level", nullable = false, length = 50)

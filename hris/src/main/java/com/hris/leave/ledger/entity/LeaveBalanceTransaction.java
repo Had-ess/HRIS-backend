@@ -3,6 +3,7 @@ package com.hris.leave.ledger.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,11 +31,11 @@ public class LeaveBalanceTransaction {
     @Column(name = "transaction_type", nullable = false, length = 80)
     private LeaveBalanceTransactionType type;
 
-    @Column(nullable = false)
-    private int amount;
+    @Column(nullable = false, precision = 10, scale = 3)
+    private BigDecimal amount;
 
-    @Column(name = "balance_after", nullable = false)
-    private int balanceAfter;
+    @Column(name = "balance_after", nullable = false, precision = 10, scale = 3)
+    private BigDecimal balanceAfter;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "source_type", nullable = false, length = 80)

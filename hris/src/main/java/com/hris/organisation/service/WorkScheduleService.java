@@ -42,20 +42,9 @@ public class WorkScheduleService {
 
     @Transactional(readOnly = true)
     public int computeWorkingDays(LocalDate start, LocalDate end, UUID workScheduleId) {
-        WorkSchedule schedule = workScheduleRepository.findById(workScheduleId)
-            .orElseThrow(() -> new EntityNotFoundException("WorkSchedule not found"));
-
+        WorkSchedule schedule = getSchedule(workScheduleId);
         Set<DayOfWeek> workingDaysSet = schedule.getWorkingDaysSet();
-
-        Set<LocalDate> holidayDates = enterpriseSettingsRepository.findFirstBySingletonKeyTrue()
-            .filter(settings -> settings.getActiveCalendarId() != null)
-            .map(settings -> hrHolidayRepository.findByCalendarIdAndDateBetween(settings.getActiveCalendarId(), start, end).stream()
-                .map(com.hris.settings.calendar.entity.HrHoliday::getDate)
-                .collect(Collectors.toSet()))
-            .orElseGet(() -> {
-                List<PublicHoliday> holidays = publicHolidayRepository.findByDateBetween(start, end);
-                return holidays.stream().map(PublicHoliday::getDate).collect(Collectors.toSet());
-            });
+        Set<LocalDate> holidayDates = resolveHolidayDates(start, end);
 
         int count = 0;
         LocalDate current = start;
@@ -69,5 +58,33 @@ public class WorkScheduleService {
         }
 
         return count;
+    }
+
+    @Transactional(readOnly = true)
+    public int getHoursPerDay(UUID workScheduleId) {
+        return getSchedule(workScheduleId).getHoursPerDay();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isWorkingDay(LocalDate date, UUID workScheduleId) {
+        WorkSchedule schedule = getSchedule(workScheduleId);
+        return schedule.getWorkingDaysSet().contains(date.getDayOfWeek()) && !resolveHolidayDates(date, date).contains(date);
+    }
+
+    private WorkSchedule getSchedule(UUID workScheduleId) {
+        return workScheduleRepository.findById(workScheduleId)
+            .orElseThrow(() -> new EntityNotFoundException("WorkSchedule not found"));
+    }
+
+    private Set<LocalDate> resolveHolidayDates(LocalDate start, LocalDate end) {
+        return enterpriseSettingsRepository.findFirstBySingletonKeyTrue()
+            .filter(settings -> settings.getActiveCalendarId() != null)
+            .map(settings -> hrHolidayRepository.findByCalendarIdAndDateBetween(settings.getActiveCalendarId(), start, end).stream()
+                .map(com.hris.settings.calendar.entity.HrHoliday::getDate)
+                .collect(Collectors.toSet()))
+            .orElseGet(() -> {
+                List<PublicHoliday> holidays = publicHolidayRepository.findByDateBetween(start, end);
+                return holidays.stream().map(PublicHoliday::getDate).collect(Collectors.toSet());
+            });
     }
 }

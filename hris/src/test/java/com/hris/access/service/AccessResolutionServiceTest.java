@@ -100,6 +100,58 @@ class AccessResolutionServiceTest {
     }
 
     @Test
+    @DisplayName("resolves ST2I People navigation sections in product order")
+    void resolvesPeopleNavigationSectionsInProductOrder() {
+        UUID userId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
+        UUID dashboardMenuId = UUID.randomUUID();
+        UUID leaveMenuId = UUID.randomUUID();
+
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("HR_CONSOLE")
+            .displayKey("profile.hrConsole")
+            .isActive(true)
+            .build();
+        MenuItem dashboardMenu = MenuItem.builder()
+            .id(dashboardMenuId)
+            .code("menu.workspace.dashboard")
+            .translationKey("menu.workspace.dashboard")
+            .sectionCode("WORKSPACE")
+            .route("/dashboard")
+            .icon("home")
+            .displayOrder(10)
+            .isActive(true)
+            .build();
+        MenuItem leaveMenu = MenuItem.builder()
+            .id(leaveMenuId)
+            .code("menu.timeOff.leaveRequests")
+            .translationKey("menu.timeOff.leaveRequests")
+            .sectionCode("TIME_OFF")
+            .route("/leave")
+            .icon("calendar")
+            .displayOrder(10)
+            .isActive(true)
+            .build();
+
+        when(userProfileAssignmentRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
+            .thenReturn(List.of(UserProfileAssignment.builder().profile(profile).profileId(profileId).build()));
+        when(profileMenuAccessRepository.findByProfileIdIn(List.of(profileId)))
+            .thenReturn(List.of(
+                ProfileMenuAccess.builder().menuItemId(leaveMenuId).build(),
+                ProfileMenuAccess.builder().menuItemId(dashboardMenuId).build()
+            ));
+        when(menuItemRepository.findByIdIn(anyCollection())).thenReturn(List.of(leaveMenu, dashboardMenu));
+
+        var navigation = accessResolutionService.resolveNavigation(userId);
+
+        assertThat(navigation).extracting(section -> section.code())
+            .containsExactly("WORKSPACE", "TIME_OFF");
+        assertThat(navigation).extracting(section -> section.translationKey())
+            .containsExactly("menu.section.workspace", "menu.section.timeOff");
+    }
+
+    @Test
     @DisplayName("matches permissions by resource and action")
     void matchesPermissionsByResourceAndAction() {
         UUID userId = UUID.randomUUID();

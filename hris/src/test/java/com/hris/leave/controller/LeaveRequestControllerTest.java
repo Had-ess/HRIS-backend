@@ -4,6 +4,7 @@ import com.hris.approval.dto.ApprovalStepResponseDto;
 import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
 import com.hris.approval.service.ApprovalViewService;
+import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.dto.LeaveTypeDto;
@@ -79,6 +80,10 @@ class LeaveRequestControllerTest {
 
     @MockBean
     private ApprovalViewService approvalViewService;
+
+    @MockBean
+    private EmployeeRepository employeeRepository;
+
     @MockBean
     private PermissionAuthorizationService permissionAuthorizationService;
 

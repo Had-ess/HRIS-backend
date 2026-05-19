@@ -29,6 +29,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -103,8 +104,8 @@ public class EmployeeService {
                 return new com.hris.leave.dto.LeaveBalanceDto(
                     b.getId(), b.getEmployeeId(), b.getLeaveTypeId(),
                     lt != null ? lt.getCode() : null, lt != null ? lt.getName() : null,
-                    b.getTotalDays(), b.getUsedDays(), b.getPendingDays(),
-                    b.getAvailableDays(), b.getCarryOverDays(), b.getYear()
+                    b.getYear(), b.getTotalDays(), b.getUsedDays(), b.getPendingDays(),
+                    b.getCarryOverDays(), b.getAvailableDays()
                 );
             })
             .toList();
@@ -284,10 +285,10 @@ public class EmployeeService {
                     .employeeId(employeeId)
                     .leaveTypeId(type.getId())
                     .year(currentYear)
-                    .totalDays(policy.get().getMaxDaysPerYear())
-                    .usedDays(0)
-                    .pendingDays(0)
-                    .carryOverDays(0)
+                    .totalDays(BigDecimal.valueOf(policy.get().getMaxDaysPerYear()))
+                    .usedDays(BigDecimal.ZERO)
+                    .pendingDays(BigDecimal.ZERO)
+                    .carryOverDays(BigDecimal.ZERO)
                     .build();
                 leaveBalanceRepository.save(balance);
             }
