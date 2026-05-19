@@ -95,10 +95,10 @@ class LeaveBalanceRepositoryTest {
             .employeeId(employee.getId())
             .leaveTypeId(leaveType.getId())
             .year(2026)
-            .totalDays(20)
-            .usedDays(3)
-            .pendingDays(2)
-            .carryOverDays(1)
+            .totalDays(java.math.BigDecimal.valueOf(20))
+            .usedDays(java.math.BigDecimal.valueOf(3))
+            .pendingDays(java.math.BigDecimal.valueOf(2))
+            .carryOverDays(java.math.BigDecimal.valueOf(1))
             .build());
 
         Page<LeaveBalanceSummaryDto> result = leaveBalanceRepository.searchSummariesForYearWithQuery(

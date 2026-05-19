@@ -73,11 +73,11 @@ class LeaveBalanceControllerTest {
                 "ANNUAL",
                 "Annual Leave",
                 2026,
-                20,
-                3,
-                2,
-                0,
-                15
+                java.math.BigDecimal.valueOf(20),
+                java.math.BigDecimal.valueOf(3),
+                java.math.BigDecimal.valueOf(2),
+                java.math.BigDecimal.ZERO,
+                java.math.BigDecimal.valueOf(15)
             )
         ));
 

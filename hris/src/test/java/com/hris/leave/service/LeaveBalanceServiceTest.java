@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -75,7 +76,8 @@ class LeaveBalanceServiceTest {
         Employee requesterEmployee = Employee.builder().id(requesterEmployeeId).departmentId(departmentId).build();
         LeaveBalanceSummaryDto summary = new LeaveBalanceSummaryDto(
             UUID.randomUUID(), employeeOneId, "E-01", UUID.randomUUID(), "Alice", "Doe",
-            UUID.randomUUID(), "ANNUAL", "Annual Leave", 2026, 20, 3, 1, 0, 16);
+            UUID.randomUUID(), "ANNUAL", "Annual Leave", 2026,
+            BigDecimal.valueOf(20), BigDecimal.valueOf(3), BigDecimal.valueOf(1), BigDecimal.ZERO, BigDecimal.valueOf(16));
 
         when(accessScopeService.hasAnyPermissionName(requesterId,
             "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")).thenReturn(true);
@@ -108,7 +110,8 @@ class LeaveBalanceServiceTest {
         Employee requesterEmployee = Employee.builder().id(employeeId).build();
         LeaveBalanceSummaryDto summary = new LeaveBalanceSummaryDto(
             UUID.randomUUID(), employeeId, "E-01", requesterId, "Alice", "Doe",
-            UUID.randomUUID(), "ANNUAL", "Annual Leave", 2026, 20, 3, 1, 0, 16);
+            UUID.randomUUID(), "ANNUAL", "Annual Leave", 2026,
+            BigDecimal.valueOf(20), BigDecimal.valueOf(3), BigDecimal.valueOf(1), BigDecimal.ZERO, BigDecimal.valueOf(16));
 
         when(accessScopeService.hasAnyPermissionName(requesterId,
             "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")).thenReturn(true);
@@ -174,6 +177,6 @@ class LeaveBalanceServiceTest {
 
         assertThat(result).hasSize(2);
         assertThat(result).extracting(LeaveBalanceDto::leaveTypeCode).containsExactly("ANNUAL", "SICK");
-        assertThat(result).allMatch(balance -> balance.totalDays() == 0 && balance.availableDays() == 0);
+        assertThat(result).allMatch(balance -> balance.totalDays().compareTo(BigDecimal.ZERO) == 0 && balance.availableDays().compareTo(BigDecimal.ZERO) == 0);
     }
 }
