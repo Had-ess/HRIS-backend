@@ -1,6 +1,8 @@
 package com.hris.analytics.controller;
 
 import com.hris.analytics.dto.AnalyticsDashboardDto;
+import com.hris.analytics.dto.AnalyticsOverviewDto;
+import com.hris.analytics.dto.AnalyticsOverviewKpiDto;
 import com.hris.analytics.dto.AnalyticsScopeOptionDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
 import com.hris.analytics.enums.AnalyticsScopeType;
@@ -130,6 +132,43 @@ class AnalyticsV2ControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.scopeType").value("EMPLOYEE"))
             .andExpect(jsonPath("$.data.availableBalanceDays").value(12));
+    }
+
+    @Test
+    @DisplayName("overview endpoint enforces permission and scope before returning consolidated module data")
+    void overviewEndpointEnforcesPermissionAndScope() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID departmentId = UUID.randomUUID();
+
+        doNothing().when(permissionAuthorizationService).authorizeAnyPermissionName(any(),
+            eq("ANALYTICS_READ_OWN"),
+            eq("ANALYTICS_READ_SCOPED"),
+            eq("ANALYTICS_READ_GLOBAL"),
+            eq("REPORT_READ"));
+        doNothing().when(analyticsScopeService).assertAccessible(userId, AnalyticsScopeType.DEPARTMENT, departmentId);
+        when(analyticsQueryService.getOverview(eq(userId), eq(AnalyticsScopeType.DEPARTMENT), eq(departmentId), any(), any()))
+            .thenReturn(new AnalyticsOverviewDto(
+                AnalyticsScopeType.DEPARTMENT,
+                departmentId,
+                "Engineering",
+                List.of(new AnalyticsOverviewKpiDto("headcount", "Headcount", "105", "+22% YoY", "people", "positive")),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+            ));
+
+        mockMvc.perform(get("/api/analytics/v2/overview")
+                .with(TestAuthenticationFactory.jwtRequest(userId, "HR_ADMIN"))
+                .param("scopeType", "DEPARTMENT")
+                .param("scopeId", departmentId.toString())
+                .param("from", "2026-05-01")
+                .param("to", "2026-05-31"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.scopeLabel").value("Engineering"))
+            .andExpect(jsonPath("$.data.kpis[0].key").value("headcount"));
+
+        verify(analyticsScopeService).assertAccessible(userId, AnalyticsScopeType.DEPARTMENT, departmentId);
     }
 
     @TestConfiguration

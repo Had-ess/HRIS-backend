@@ -54,12 +54,12 @@ public class LeaveAcquisitionPolicyService {
 
     @Transactional
     public LeaveAcquisitionPolicyDto create(LeaveAcquisitionPolicyMutationDto dto, UUID actorId) {
-        LeaveType leaveType = resolveTrackedLeaveType(dto.leaveTypeId());
+        LeaveType leaveType = resolveOptionalTrackedLeaveType(dto.leaveTypeId());
         validate(dto, null);
         LeaveAcquisitionPolicy policy = repository.save(LeaveAcquisitionPolicy.builder()
             .code(dto.code().trim().toUpperCase(Locale.ROOT))
             .name(dto.name().trim())
-            .leaveTypeId(leaveType.getId())
+            .leaveTypeId(leaveType != null ? leaveType.getId() : null)
             .frequency(dto.frequency())
             .monthlyRate(dto.monthlyRate())
             .annualQuota(dto.annualQuota())
@@ -79,11 +79,11 @@ public class LeaveAcquisitionPolicyService {
     public LeaveAcquisitionPolicyDto update(UUID id, LeaveAcquisitionPolicyMutationDto dto, UUID actorId) {
         LeaveAcquisitionPolicy policy = findPolicy(id);
         LeaveAcquisitionPolicy previous = copy(policy);
-        LeaveType leaveType = resolveTrackedLeaveType(dto.leaveTypeId());
+        LeaveType leaveType = resolveOptionalTrackedLeaveType(dto.leaveTypeId());
         validate(dto, id);
         policy.setCode(dto.code().trim().toUpperCase(Locale.ROOT));
         policy.setName(dto.name().trim());
-        policy.setLeaveTypeId(leaveType.getId());
+        policy.setLeaveTypeId(leaveType != null ? leaveType.getId() : null);
         policy.setFrequency(dto.frequency());
         policy.setMonthlyRate(dto.monthlyRate());
         policy.setAnnualQuota(dto.annualQuota());
@@ -113,7 +113,10 @@ public class LeaveAcquisitionPolicyService {
             .orElseThrow(() -> new EntityNotFoundException("Leave acquisition policy not found"));
     }
 
-    private LeaveType resolveTrackedLeaveType(UUID leaveTypeId) {
+    private LeaveType resolveOptionalTrackedLeaveType(UUID leaveTypeId) {
+        if (leaveTypeId == null) {
+            return null;
+        }
         LeaveType leaveType = leaveTypeRepository.findById(leaveTypeId)
             .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
         if (!leaveType.isBalanceTracked()) {
@@ -144,7 +147,9 @@ public class LeaveAcquisitionPolicyService {
     }
 
     private LeaveAcquisitionPolicyDto toDto(LeaveAcquisitionPolicy policy) {
-        LeaveType leaveType = leaveTypeRepository.findById(policy.getLeaveTypeId()).orElse(null);
+        LeaveType leaveType = policy.getLeaveTypeId() == null
+            ? null
+            : leaveTypeRepository.findById(policy.getLeaveTypeId()).orElse(null);
         return toDto(policy, leaveType);
     }
 

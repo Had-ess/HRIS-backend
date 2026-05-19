@@ -122,6 +122,9 @@ public class LeaveAccrualService {
 
     @Transactional
     public int applyAccrualForPolicy(Employee employee, LeaveAcquisitionPolicy policy, LocalDate asOfDate, UUID actorId) {
+        if (policy.getLeaveTypeId() == null) {
+            return 0;
+        }
         LeaveType leaveType = leaveTypeRepository.findById(policy.getLeaveTypeId()).orElseThrow();
         int amount = calculateAccrualForPolicy(employee, policy, asOfDate);
         if (amount <= 0) {

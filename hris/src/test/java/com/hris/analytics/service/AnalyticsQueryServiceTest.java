@@ -3,6 +3,7 @@ package com.hris.analytics.service;
 import com.hris.analytics.dto.AnalyticsAdminRequestReportDto;
 import com.hris.analytics.dto.AnalyticsCountDto;
 import com.hris.analytics.dto.AnalyticsDateCountDto;
+import com.hris.analytics.dto.AnalyticsOverviewDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
 import com.hris.analytics.enums.AnalyticsScopeType;
 import java.time.LocalDate;
@@ -87,5 +88,55 @@ class AnalyticsQueryServiceTest {
         assertThat(result.byStatus()).hasSize(1);
         assertThat(result.byType()).hasSize(1);
         assertThat(result.overTime()).hasSize(1);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    @DisplayName("overview aggregates dashboard KPIs headcount distribution bottlenecks and leave reasons")
+    void overviewAggregatesScreenshotDashboardSections() {
+        UUID userId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
+        when(analyticsScopeService.getDefaultScope(userId))
+            .thenReturn(new com.hris.analytics.dto.AnalyticsScopeOptionDto(AnalyticsScopeType.EMPLOYEE, employeeId, "My analytics"));
+        when(jdbcTemplate.queryForObject(any(String.class), any(MapSqlParameterSource.class), eq(Long.class)))
+            .thenReturn(
+                105L,
+                96L, 98L, 99L, 100L, 101L, 102L, 103L, 104L, 105L, 105L, 106L, 107L,
+                837L,
+                14L,
+                1200L,
+                816L
+            );
+        when(jdbcTemplate.query(any(String.class), any(MapSqlParameterSource.class), any(RowMapper.class)))
+            .thenReturn(
+                List.of(
+                    new AnalyticsCountDto("ANNUAL", "Annual leave", 412L),
+                    new AnalyticsCountDto("SICK", "Sick leave", 425L)
+                ),
+                List.of(new com.hris.analytics.dto.AnalyticsApprovalBottleneckDto(employeeId, "Direct manager", 8L, 6.2, 0L)),
+                List.of(new AnalyticsCountDto("family vacation", "Family vacation", 142L))
+            );
+
+        AnalyticsOverviewDto result = analyticsQueryService.getOverview(
+            userId,
+            null,
+            null,
+            LocalDate.of(2026, 5, 1),
+            LocalDate.of(2026, 5, 31)
+        );
+
+        assertThat(result.scopeLabel()).isEqualTo("My analytics");
+        assertThat(result.kpis()).extracting("key")
+            .containsExactly("headcount", "totalLeaveDays", "averageUtilization", "openRequests");
+        assertThat(result.kpis().get(0).value()).isEqualTo("105");
+        assertThat(result.kpis().get(1).value()).isEqualTo("837");
+        assertThat(result.kpis().get(3).value()).isEqualTo("14");
+        assertThat(result.headcountTrend()).hasSize(12);
+        assertThat(result.leaveByType()).first().extracting("label", "days", "percentage")
+            .containsExactly("Annual leave", 412L, 49);
+        assertThat(result.approvalBottlenecks()).first().extracting("label", "value", "detail")
+            .containsExactly("Direct manager", 8L, "6.2h avg");
+        assertThat(result.topLeaveReasons()).first().extracting("label", "value", "percentage")
+            .containsExactly("Family vacation", 142L, 100);
     }
 }

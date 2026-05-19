@@ -7,12 +7,12 @@ import com.hris.leave.acquisition.dto.LeaveAcquisitionPolicyDto;
 import com.hris.leave.dto.LeaveAccrualRunDto;
 import com.hris.leave.service.LeaveAccrualService;
 import com.hris.leave.service.LeaveAcquisitionPolicyService;
+import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,8 +47,8 @@ public class LeaveAccrualRunController {
 
     @PostMapping("/run-due")
     @PreAuthorize("@permissionAuthorizationService.hasPermissionName(authentication, 'ACCRUAL_RUN_MANAGE')")
-    public ResponseEntity<ApiResponse<LeaveAccrualRunDto>> runDuePolicies(@AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+    public ResponseEntity<ApiResponse<LeaveAccrualRunDto>> runDuePolicies(Authentication authentication) {
+        UUID userId = SecurityUtils.getCurrentUserId(authentication);
         LeaveAccrualRunDto result = leaveAccrualService.runDuePoliciesWithTracking(
             LocalDate.now(), userId, ActorType.USER);
         return ResponseEntity.ok(ApiResponse.ok(result));

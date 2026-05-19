@@ -106,6 +106,75 @@ class LeaveAcquisitionPolicyServiceTest {
         assertThat(result.negativeBalanceAllowed()).isFalse();
     }
 
+    @Test
+    @DisplayName("create allows accrual type without linked leave type")
+    void createAllowsNullLeaveType() {
+        when(repository.existsByCode("GENERAL_MONTHLY")).thenReturn(false);
+        when(repository.save(any(LeaveAcquisitionPolicy.class))).thenAnswer(invocation -> {
+            LeaveAcquisitionPolicy saved = invocation.getArgument(0);
+            saved.setId(UUID.randomUUID());
+            return saved;
+        });
+
+        var result = service.create(new LeaveAcquisitionPolicyMutationDto(
+            "GENERAL_MONTHLY",
+            "General monthly accrual",
+            null,
+            AcquisitionFrequency.MONTHLY,
+            1,
+            12,
+            null,
+            1,
+            false,
+            false,
+            LocalDate.of(2026, 1, 1),
+            null,
+            true
+        ), UUID.randomUUID());
+
+        assertThat(result.leaveTypeId()).isNull();
+        assertThat(result.leaveTypeCode()).isNull();
+        assertThat(result.leaveTypeName()).isNull();
+    }
+
+    @Test
+    @DisplayName("update can clear linked leave type")
+    void updateCanClearLeaveType() {
+        UUID policyId = UUID.randomUUID();
+        LeaveAcquisitionPolicy existing = LeaveAcquisitionPolicy.builder()
+            .id(policyId)
+            .code("ANNUAL_MONTHLY")
+            .name("Annual monthly")
+            .leaveTypeId(UUID.randomUUID())
+            .frequency(AcquisitionFrequency.MONTHLY)
+            .monthlyRate(2)
+            .acquisitionDay(25)
+            .startDate(LocalDate.of(2026, 1, 1))
+            .active(true)
+            .build();
+        when(repository.findById(policyId)).thenReturn(Optional.of(existing));
+        when(repository.existsByCode("GENERAL_MONTHLY")).thenReturn(false);
+        when(repository.save(any(LeaveAcquisitionPolicy.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.update(policyId, new LeaveAcquisitionPolicyMutationDto(
+            "GENERAL_MONTHLY",
+            "General monthly accrual",
+            null,
+            AcquisitionFrequency.MONTHLY,
+            1,
+            12,
+            null,
+            1,
+            false,
+            false,
+            LocalDate.of(2026, 1, 1),
+            null,
+            true
+        ), UUID.randomUUID());
+
+        assertThat(result.leaveTypeId()).isNull();
+    }
+
     private LeaveAcquisitionPolicyMutationDto baseDto(UUID leaveTypeId) {
         return new LeaveAcquisitionPolicyMutationDto(
             "ANNUAL_MONTHLY",
