@@ -21,10 +21,13 @@ import com.hris.common.exception.InsufficientLeaveBalanceException;
 import com.hris.common.exception.InvalidLeavePeriodException;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.dto.CreateLeaveRequestDto;
+import com.hris.leave.dto.LeaveRequestPreviewDto;
+import com.hris.leave.dto.LeaveRequestPreviewRequestDto;
 import com.hris.leave.entity.FileAttachment;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.enums.LeaveStatus;
+import com.hris.leave.enums.PartialLeaveMode;
 import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeaveRequestRepository;
@@ -45,6 +48,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalTime;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -55,6 +61,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class LeaveRequestService {
+    private static final BigDecimal HALF_DAY_RATIO = new BigDecimal("0.5");
+    private static final BigDecimal SIXTY = new BigDecimal("60");
 
     private final LeaveRequestRepository leaveRequestRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
@@ -66,6 +74,7 @@ public class LeaveRequestService {
     private final WorkScheduleService workScheduleService;
     private final LeaveAttachmentService leaveAttachmentService;
     private final LeaveApprovalWorkflowService leaveApprovalWorkflowService;
+    private final LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
     private final TransactionalNotificationPublisher notificationPublisher;
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final AuditLogService auditLogService;
@@ -79,11 +88,7 @@ public class LeaveRequestService {
     public LeaveRequest create(CreateLeaveRequestDto dto, UUID requesterId) {
         Employee employee = employeeRepository.findByUserId(requesterId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        int balanceYear = validateAndResolveBalanceYear(dto.startDate(), dto.endDate());
-
-        if (dto.endDate().isBefore(dto.startDate())) {
-            throw new InvalidLeavePeriodException("Leave request end date must be on or after start date");
-        }
+        validateAndResolveBalanceYear(dto.startDate(), dto.endDate());
 
         LeaveType leaveType = leaveTypeRepository.findById(dto.leaveTypeId())
             .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
@@ -94,40 +99,29 @@ public class LeaveRequestService {
                 "Leave type '" + leaveType.getName() + "' requires a justification comment");
         }
 
-        if (dto.isHalfDay() && !dto.startDate().equals(dto.endDate())) {
-            throw new IllegalArgumentException("Half-day leave must start and end on the same date");
-        }
-
-        int workingDays = dto.isHalfDay() ? 1
-            : workScheduleService.computeWorkingDays(dto.startDate(), dto.endDate(), employee.getWorkScheduleId());
-
-        if (workingDays <= 0) {
-            throw new IllegalArgumentException("No working days in the selected period");
-        }
-
-        if (leaveType.isBalanceTracked()) {
-            leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                    employee.getId(), dto.leaveTypeId(), balanceYear)
-                .orElseThrow(() -> new InsufficientLeaveBalanceException(
-                    "No balance found for this leave type"));
-        }
+        LeaveComputation computation = computeLeave(employee, leaveType, dto.startDate(), dto.endDate(), dto.startTime(), dto.endTime(), resolveMode(dto));
 
         LeaveRequest request = LeaveRequest.builder()
             .employeeId(employee.getId())
             .leaveTypeId(dto.leaveTypeId())
             .startDate(dto.startDate())
             .endDate(dto.endDate())
-            .workingDays(workingDays)
+            .workingDays(computation.workingDays())
+            .durationDays(computation.durationDays())
+            .durationHours(computation.durationHours())
+            .startTime(dto.startTime())
+            .endTime(dto.endTime())
+            .partialMode(computation.partialMode())
             .urgencyLevel(dto.urgencyLevel())
             .status(LeaveStatus.PENDING)
             .comment(dto.comment())
             .submittedAt(Instant.now())
-            .isHalfDay(dto.isHalfDay())
+            .isHalfDay(computation.partialMode() == PartialLeaveMode.HALF_DAY)
             .build();
 
         LeaveRequest saved = leaveRequestRepository.save(request);
 
-        leaveBalanceLedgerService.reserveForLeaveRequest(employee, leaveType, saved, workingDays, requesterId);
+        leaveBalanceLedgerService.reserveForLeaveRequest(employee, leaveType, saved, computation.durationDays(), requesterId);
 
         LeaveApprovalWorkflowService.InstantiatedWorkflow instantiatedWorkflow =
             leaveApprovalWorkflowService.instantiate(saved, employee, leaveType);
@@ -154,6 +148,42 @@ public class LeaveRequestService {
             saved.getId(), null, saved);
 
         return saved;
+    }
+
+    @Transactional(readOnly = true)
+    public LeaveRequestPreviewDto preview(LeaveRequestPreviewRequestDto dto, UUID requesterId) {
+        Employee employee = employeeRepository.findByUserId(requesterId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        LeaveType leaveType = leaveTypeRepository.findById(dto.leaveTypeId())
+            .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
+
+        LeaveComputation computation = computeLeave(
+            employee,
+            leaveType,
+            dto.startDate(),
+            dto.endDate(),
+            dto.startTime(),
+            dto.endTime(),
+            dto.partialMode()
+        );
+
+        BigDecimal currentBalance = leaveType.isBalanceTracked()
+            ? leaveBalanceLedgerService.getAvailableBalance(employee.getId(), leaveType.getId(), dto.startDate().getYear())
+            : null;
+        BigDecimal projectedBalance = currentBalance != null ? currentBalance.subtract(computation.durationDays()) : null;
+        boolean sufficientBalance = currentBalance == null || projectedBalance.compareTo(BigDecimal.ZERO) >= 0
+            || isNegativeBalanceAllowed(leaveType.getId(), dto.startDate());
+
+        return new LeaveRequestPreviewDto(
+            computation.durationDays(),
+            computation.durationHours(),
+            computation.workingDays(),
+            currentBalance,
+            projectedBalance,
+            sufficientBalance,
+            workScheduleService.getHoursPerDay(employee.getWorkScheduleId()),
+            computation.warnings()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -288,6 +318,11 @@ public class LeaveRequestService {
             .startDate(request.getStartDate())
             .endDate(request.getEndDate())
             .workingDays(request.getWorkingDays())
+            .durationDays(request.getDurationDays())
+            .durationHours(request.getDurationHours())
+            .startTime(request.getStartTime())
+            .endTime(request.getEndTime())
+            .partialMode(request.getPartialMode())
             .urgencyLevel(request.getUrgencyLevel())
             .status(request.getStatus())
             .comment(request.getComment())
@@ -600,10 +635,80 @@ public class LeaveRequestService {
     }
 
     private int validateAndResolveBalanceYear(LocalDate startDate, LocalDate endDate) {
+        if (endDate.isBefore(startDate)) {
+            throw new InvalidLeavePeriodException("Leave request end date must be on or after start date");
+        }
         if (startDate.getYear() != endDate.getYear()) {
             throw new InvalidLeavePeriodException("Leave request cannot span multiple calendar years");
         }
         return startDate.getYear();
+    }
+
+    private PartialLeaveMode resolveMode(CreateLeaveRequestDto dto) {
+        if (dto.partialMode() != null) {
+            return dto.partialMode();
+        }
+        return dto.isHalfDay() ? PartialLeaveMode.HALF_DAY : PartialLeaveMode.FULL_DAY;
+    }
+
+    private boolean isNegativeBalanceAllowed(UUID leaveTypeId, LocalDate date) {
+        var policy = leaveAcquisitionPolicyService.resolveEffectivePolicy(leaveTypeId, date);
+        return policy != null && policy.isNegativeBalanceAllowed();
+    }
+
+    private LeaveComputation computeLeave(
+            Employee employee,
+            LeaveType leaveType,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalTime startTime,
+            LocalTime endTime,
+            PartialLeaveMode mode) {
+        validateAndResolveBalanceYear(startDate, endDate);
+
+        if (mode == PartialLeaveMode.HALF_DAY && !startDate.equals(endDate)) {
+            throw new IllegalArgumentException("Half-day leave must start and end on the same date");
+        }
+        if (mode == PartialLeaveMode.CUSTOM_HOURS && !startDate.equals(endDate)) {
+            throw new IllegalArgumentException("Custom hours leave must start and end on the same date");
+        }
+
+        int workingDays = workScheduleService.computeWorkingDays(startDate, endDate, employee.getWorkScheduleId());
+        if (workingDays <= 0) {
+            throw new IllegalArgumentException("No working time in the selected period");
+        }
+
+        int hoursPerDay = workScheduleService.getHoursPerDay(employee.getWorkScheduleId());
+        List<String> warnings = new java.util.ArrayList<>();
+
+        if (mode == PartialLeaveMode.HALF_DAY) {
+            BigDecimal durationHours = BigDecimal.valueOf(hoursPerDay).multiply(HALF_DAY_RATIO).setScale(3, RoundingMode.HALF_UP);
+            return new LeaveComputation(1, HALF_DAY_RATIO.setScale(3, RoundingMode.HALF_UP), durationHours, PartialLeaveMode.HALF_DAY, warnings);
+        }
+
+        if (mode == PartialLeaveMode.CUSTOM_HOURS) {
+            if (startTime == null || endTime == null) {
+                throw new IllegalArgumentException("Start time and end time are required for custom hours");
+            }
+            if (!workScheduleService.isWorkingDay(startDate, employee.getWorkScheduleId())) {
+                throw new IllegalArgumentException("Selected day is not a working day");
+            }
+            if (!endTime.isAfter(startTime)) {
+                throw new IllegalArgumentException("End time must be after start time");
+            }
+            long minutes = java.time.Duration.between(startTime, endTime).toMinutes();
+            BigDecimal durationHours = BigDecimal.valueOf(minutes).divide(SIXTY, 3, RoundingMode.HALF_UP);
+            if (durationHours.compareTo(BigDecimal.valueOf(hoursPerDay)) > 0) {
+                throw new IllegalArgumentException("Custom hour range exceeds configured workday hours");
+            }
+            BigDecimal durationDays = durationHours.divide(BigDecimal.valueOf(hoursPerDay), 3, RoundingMode.HALF_UP);
+            warnings.add("CUSTOM_HOURS_SINGLE_DAY_ONLY");
+            return new LeaveComputation(1, durationDays, durationHours, PartialLeaveMode.CUSTOM_HOURS, warnings);
+        }
+
+        BigDecimal durationDays = BigDecimal.valueOf(workingDays).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal durationHours = durationDays.multiply(BigDecimal.valueOf(hoursPerDay)).setScale(3, RoundingMode.HALF_UP);
+        return new LeaveComputation(workingDays, durationDays, durationHours, PartialLeaveMode.FULL_DAY, warnings);
     }
 
     private ProjectAssignment resolvePrimaryAssignment(UUID employeeId, LocalDate startDate, LocalDate endDate) {
@@ -628,6 +733,15 @@ public class LeaveRequestService {
     private enum LeaveVisibilityScopeType {
         GLOBAL,
         DEPARTMENT
+    }
+
+    private record LeaveComputation(
+        int workingDays,
+        BigDecimal durationDays,
+        BigDecimal durationHours,
+        PartialLeaveMode partialMode,
+        List<String> warnings
+    ) {
     }
 
 }

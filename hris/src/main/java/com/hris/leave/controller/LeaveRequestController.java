@@ -4,6 +4,8 @@ import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
 import com.hris.leave.dto.CreateLeaveRequestDto;
 import com.hris.leave.dto.FileAttachmentDto;
+import com.hris.leave.dto.LeaveRequestPreviewDto;
+import com.hris.leave.dto.LeaveRequestPreviewRequestDto;
 import com.hris.leave.dto.LeaveRequestResponseDto;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.enums.LeaveStatus;
@@ -50,6 +52,15 @@ public class LeaveRequestController {
         LeaveRequest request = leaveRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(leaveRequestQueryService.toDto(request, userId)));
+    }
+
+    @PostMapping("/preview")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<LeaveRequestPreviewDto>> preview(
+            @Valid @RequestBody LeaveRequestPreviewRequestDto dto,
+            Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(leaveRequestService.preview(dto, userId)));
     }
 
     @GetMapping

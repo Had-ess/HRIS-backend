@@ -4,7 +4,9 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.leave.acquisition.repository.LeaveAcquisitionPolicyRepository;
+import com.hris.leave.dto.LeaveBalanceDto;
 import com.hris.leave.dto.LeaveBalanceSummaryDto;
+import com.hris.leave.entity.LeaveType;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
@@ -146,5 +148,32 @@ class LeaveBalanceServiceTest {
             requesterId, null, null, 2026, PageRequest.of(0, 20)))
             .isInstanceOf(AccessDeniedException.class)
             .hasMessage("You are not allowed to browse leave balances");
+    }
+
+    @Test
+    @DisplayName("getMyBalances includes zero-value entries for active tracked leave types without balances")
+    void getMyBalancesIncludesTrackedTypesWithoutStoredBalance() {
+        UUID userId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
+        UUID annualId = UUID.randomUUID();
+        UUID sickId = UUID.randomUUID();
+
+        when(employeeRepository.findByUserId(userId)).thenReturn(Optional.of(Employee.builder().id(employeeId).build()));
+        when(leaveBalanceRepository.findByEmployeeIdAndYear(eq(employeeId), any(Integer.class))).thenReturn(List.of());
+        when(leaveTypeRepository.findByIsActiveTrue()).thenReturn(List.of(
+            LeaveType.builder().id(annualId).code("ANNUAL").name("Annual Leave").balanceTracked(true).isActive(true).build(),
+            LeaveType.builder().id(sickId).code("SICK").name("Sick Leave").balanceTracked(true).isActive(true).build(),
+            LeaveType.builder().id(UUID.randomUUID()).code("UNPAID").name("Unpaid Leave").balanceTracked(false).isActive(true).build()
+        ));
+        when(leaveTypeRepository.findAllById(any())).thenReturn(List.of(
+            LeaveType.builder().id(annualId).code("ANNUAL").name("Annual Leave").build(),
+            LeaveType.builder().id(sickId).code("SICK").name("Sick Leave").build()
+        ));
+
+        List<LeaveBalanceDto> result = leaveBalanceService.getMyBalances(userId);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(LeaveBalanceDto::leaveTypeCode).containsExactly("ANNUAL", "SICK");
+        assertThat(result).allMatch(balance -> balance.totalDays() == 0 && balance.availableDays() == 0);
     }
 }

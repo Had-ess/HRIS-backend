@@ -69,7 +69,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO approval_workflows (id, subject_type, subject_id, status, created_at, completed_at, version)
-VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0401', 'LEAVE_REQUEST', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0401', 'IN_PROGRESS', NOW() - INTERVAL '1 day', NULL, 0)
+VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0401', 'LEAVE', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0401', 'IN_PROGRESS', NOW() - INTERVAL '1 day', NULL, 0)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO approval_steps (id, workflow_id, approver_id, step_order, status, context, source_type, approver_level, routing_snapshot, comment, decided_at, version)

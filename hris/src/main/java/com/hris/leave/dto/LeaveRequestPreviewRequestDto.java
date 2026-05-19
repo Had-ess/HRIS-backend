@@ -1,20 +1,18 @@
 package com.hris.leave.dto;
 
-import com.hris.leave.enums.UrgencyLevel;
+import com.hris.leave.enums.PartialLeaveMode;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
-import com.hris.leave.enums.PartialLeaveMode;
 
-public record CreateLeaveRequestDto(
+public record LeaveRequestPreviewRequestDto(
     @NotNull UUID leaveTypeId,
     @NotNull LocalDate startDate,
     @NotNull LocalDate endDate,
-    @NotNull UrgencyLevel urgencyLevel,
-    String comment,
-    boolean isHalfDay,
     LocalTime startTime,
     LocalTime endTime,
-    PartialLeaveMode partialMode
-) {}
+    @NotNull PartialLeaveMode partialMode
+) {
+}

@@ -35,14 +35,24 @@ public class AccessResolutionService {
 
     private static final Map<String, String> SECTION_TRANSLATION_KEYS = Map.of(
         "WORKSPACE", "menu.section.workspace",
+        "TIME_OFF", "menu.section.timeOff",
+        "REQUESTS", "menu.section.requests",
+        "PEOPLE", "menu.section.people",
+        "INSIGHTS", "menu.section.insights",
+        "CONFIGURATION", "menu.section.configuration",
         "ADMINISTRATION", "menu.section.administration",
         "SETTINGS", "menu.section.settings"
     );
 
     private static final Map<String, Integer> SECTION_ORDER = Map.of(
         "WORKSPACE", 1,
-        "ADMINISTRATION", 2,
-        "SETTINGS", 3
+        "TIME_OFF", 2,
+        "REQUESTS", 3,
+        "PEOPLE", 4,
+        "INSIGHTS", 5,
+        "CONFIGURATION", 6,
+        "ADMINISTRATION", 7,
+        "SETTINGS", 8
     );
 
     private final UserProfileAssignmentRepository userProfileAssignmentRepository;

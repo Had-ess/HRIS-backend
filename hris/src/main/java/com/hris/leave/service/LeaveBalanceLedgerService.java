@@ -33,8 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,10 +109,15 @@ public class LeaveBalanceLedgerService {
         int totalDaysInYear = LocalDate.of(year, 1, 1).isLeapYear() ? 366 : 365;
         double yearFractionLeft = totalDaysInYear > 0 ? (double) daysLeftInYear / totalDaysInYear : 0;
 
-        Map<UUID, LeaveType> typeMap = leaveTypeRepository.findAll().stream()
+        List<LeaveType> trackedTypes = leaveTypeRepository.findByIsActiveTrue().stream()
+            .filter(LeaveType::isBalanceTracked)
+            .sorted(Comparator.comparing(LeaveType::getCode, String.CASE_INSENSITIVE_ORDER))
+            .toList();
+        Map<UUID, LeaveType> typeMap = trackedTypes.stream()
             .collect(Collectors.toMap(LeaveType::getId, t -> t));
 
-        List<LeaveBalance> balances = leaveBalanceRepository.findByEmployeeIdAndYear(employeeId, year);
+        Map<UUID, LeaveBalance> balancesByType = leaveBalanceRepository.findByEmployeeIdAndYear(employeeId, year).stream()
+            .collect(Collectors.toMap(LeaveBalance::getLeaveTypeId, balance -> balance));
 
         // Pending days per leave type (PENDING or IN_APPROVAL requests)
         List<LeaveRequest> pendingRequests = leaveRequestRepository.findByEmployeeId(employeeId).stream()
@@ -117,21 +125,33 @@ public class LeaveBalanceLedgerService {
             .filter(r -> r.getStartDate() != null && r.getStartDate().getYear() == year)
             .toList();
 
-        Map<UUID, Integer> pendingByType = pendingRequests.stream()
+        Map<UUID, BigDecimal> pendingByType = pendingRequests.stream()
             .collect(Collectors.groupingBy(
                 LeaveRequest::getLeaveTypeId,
-                Collectors.summingInt(LeaveRequest::getWorkingDays)
+                Collectors.reducing(BigDecimal.ZERO, LeaveRequest::getDurationDays, BigDecimal::add)
             ));
 
-        List<LeaveBalanceProjectionDto.LeaveTypeProjection> projections = balances.stream().map(balance -> {
-            LeaveType lt = typeMap.get(balance.getLeaveTypeId());
-            // Rough accrual estimate: fraction of yearly total still to be earned
-            int estimatedAccrual = (int) Math.round(balance.getTotalDays() * yearFractionLeft);
-            int pendingDeductions = pendingByType.getOrDefault(balance.getLeaveTypeId(), 0);
-            int projectedBalance = balance.getAvailableDays() + estimatedAccrual - pendingDeductions;
+        List<LeaveBalanceProjectionDto.LeaveTypeProjection> projections = trackedTypes.stream().map(leaveType -> {
+            LeaveBalance balance = balancesByType.getOrDefault(
+                leaveType.getId(),
+                LeaveBalance.builder()
+                    .employeeId(employeeId)
+                    .leaveTypeId(leaveType.getId())
+                    .year(year)
+                    .totalDays(BigDecimal.ZERO)
+                    .usedDays(BigDecimal.ZERO)
+                    .pendingDays(BigDecimal.ZERO)
+                    .carryOverDays(BigDecimal.ZERO)
+                    .build()
+            );
+            BigDecimal estimatedAccrual = balance.getTotalDays()
+                .multiply(BigDecimal.valueOf(yearFractionLeft))
+                .setScale(3, RoundingMode.HALF_UP);
+            BigDecimal pendingDeductions = pendingByType.getOrDefault(leaveType.getId(), BigDecimal.ZERO);
+            BigDecimal projectedBalance = balance.getAvailableDays().add(estimatedAccrual).subtract(pendingDeductions);
             return new LeaveBalanceProjectionDto.LeaveTypeProjection(
-                lt != null ? lt.getCode() : null,
-                lt != null ? lt.getName() : null,
+                leaveType.getCode(),
+                leaveType.getName(),
                 balance.getAvailableDays(),
                 estimatedAccrual,
                 pendingDeductions,
@@ -143,10 +163,10 @@ public class LeaveBalanceLedgerService {
     }
 
     @Transactional(readOnly = true)
-    public int getAvailableBalance(UUID employeeId, UUID leaveTypeId, int year) {
+    public BigDecimal getAvailableBalance(UUID employeeId, UUID leaveTypeId, int year) {
         return leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(employeeId, leaveTypeId, year)
             .map(LeaveBalance::getAvailableDays)
-            .orElse(0);
+            .orElse(BigDecimal.ZERO);
     }
 
     @Transactional
@@ -155,12 +175,12 @@ public class LeaveBalanceLedgerService {
             .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
         int year = LocalDate.now().getYear();
         LeaveBalance balance = getOrCreateBalanceForUpdate(employeeId, leaveType.getId(), year);
-        balance.adjustTotalDays(dto.amount());
+        balance.adjustTotalDays(BigDecimal.valueOf(dto.amount()));
         leaveBalanceRepository.save(balance);
         recordTransaction(
             balance,
             LeaveBalanceTransactionType.MANUAL_ADJUSTMENT,
-            dto.amount(),
+            BigDecimal.valueOf(dto.amount()),
             LeaveBalanceTransactionSourceType.MANUAL_ADJUSTMENT,
             null,
             dto.comment(),
@@ -175,7 +195,7 @@ public class LeaveBalanceLedgerService {
         return balance;
     }
 
-    private void publishBalanceAdjustedNotification(UUID employeeId, LeaveType leaveType, int adjustmentAmount, int newBalance) {
+    private void publishBalanceAdjustedNotification(UUID employeeId, LeaveType leaveType, int adjustmentAmount, BigDecimal newBalance) {
         try {
             Employee employee = employeeRepository.findById(employeeId).orElse(null);
             if (employee == null) return;
@@ -204,15 +224,15 @@ public class LeaveBalanceLedgerService {
     }
 
     @Transactional
-    public LeaveBalance reserveForLeaveRequest(Employee employee, LeaveType leaveType, LeaveRequest request, int amount, UUID actorId) {
+    public LeaveBalance reserveForLeaveRequest(Employee employee, LeaveType leaveType, LeaveRequest request, BigDecimal amount, UUID actorId) {
         if (!leaveType.isBalanceTracked()) {
             return null;
         }
         LeaveBalance balance = getOrCreateBalanceForUpdate(employee.getId(), leaveType.getId(), request.getStartDate().getYear());
         boolean negativeAllowed = isNegativeBalanceAllowed(leaveType.getId(), request.getStartDate());
-        if (!negativeAllowed && balance.getAvailableDays() < amount) {
+        if (!negativeAllowed && balance.getAvailableDays().compareTo(amount) < 0) {
             throw new InsufficientLeaveBalanceException(
-                String.format("Insufficient balance. Available: %d, Requested: %d", balance.getAvailableDays(), amount)
+                String.format("Insufficient balance. Available: %s, Requested: %s", balance.getAvailableDays(), amount)
             );
         }
         balance.deductDays(amount);
@@ -242,12 +262,12 @@ public class LeaveBalanceLedgerService {
             request.getLeaveTypeId(),
             request.getStartDate().getYear()
         );
-        balance.confirmUsage(request.getWorkingDays());
+        balance.confirmUsage(request.getDurationDays());
         leaveBalanceRepository.save(balance);
         recordTransaction(
             balance,
             LeaveBalanceTransactionType.REQUEST_APPROVAL_CONFIRMATION,
-            request.getWorkingDays(),
+            request.getDurationDays(),
             LeaveBalanceTransactionSourceType.LEAVE_REQUEST,
             request.getId(),
             "Leave request approved",
@@ -271,7 +291,7 @@ public class LeaveBalanceLedgerService {
             Employee employee,
             LeaveType leaveType,
             int year,
-            int amount,
+            BigDecimal amount,
             UUID sourceId,
             UUID actorId,
             String comment,
@@ -303,12 +323,12 @@ public class LeaveBalanceLedgerService {
             request.getLeaveTypeId(),
             request.getStartDate().getYear()
         );
-        balance.restoreDays(request.getWorkingDays());
+        balance.restoreDays(request.getDurationDays());
         leaveBalanceRepository.save(balance);
         recordTransaction(
             balance,
             type,
-            request.getWorkingDays(),
+            request.getDurationDays(),
             LeaveBalanceTransactionSourceType.LEAVE_REQUEST,
             request.getId(),
             comment,
@@ -320,7 +340,7 @@ public class LeaveBalanceLedgerService {
     private LeaveBalanceTransaction recordTransaction(
             LeaveBalance balance,
             LeaveBalanceTransactionType type,
-            int amount,
+            BigDecimal amount,
             LeaveBalanceTransactionSourceType sourceType,
             UUID sourceId,
             String comment,
@@ -346,10 +366,10 @@ public class LeaveBalanceLedgerService {
                 .employeeId(employeeId)
                 .leaveTypeId(leaveTypeId)
                 .year(year)
-                .totalDays(0)
-                .usedDays(0)
-                .pendingDays(0)
-                .carryOverDays(0)
+                .totalDays(BigDecimal.ZERO)
+                .usedDays(BigDecimal.ZERO)
+                .pendingDays(BigDecimal.ZERO)
+                .carryOverDays(BigDecimal.ZERO)
                 .build()));
     }
 

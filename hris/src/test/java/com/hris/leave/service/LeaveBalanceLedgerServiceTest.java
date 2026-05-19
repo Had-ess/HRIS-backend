@@ -6,6 +6,7 @@ import com.hris.auth.entity.Employee;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
+import com.hris.leave.dto.LeaveBalanceProjectionDto;
 import com.hris.leave.entity.LeaveBalance;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
@@ -15,6 +16,7 @@ import com.hris.leave.ledger.repository.LeaveBalanceTransactionRepository;
 import com.hris.leave.acquisition.entity.AcquisitionFrequency;
 import com.hris.leave.acquisition.entity.LeaveAcquisitionPolicy;
 import com.hris.leave.repository.LeaveBalanceRepository;
+import com.hris.leave.repository.LeaveRequestRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.service.TransactionalNotificationPublisher;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +51,7 @@ class LeaveBalanceLedgerServiceTest {
     @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
     @Mock private ObjectMapper objectMapper;
+    @Mock private LeaveRequestRepository leaveRequestRepository;
 
     @InjectMocks
     private LeaveBalanceLedgerService service;
@@ -162,5 +166,29 @@ class LeaveBalanceLedgerServiceTest {
 
         assertThat(result.getTotalDays()).isEqualTo(7);
         verify(transactionRepository).save(any(LeaveBalanceTransaction.class));
+    }
+
+    @Test
+    @DisplayName("projection includes active tracked leave types without stored balances")
+    void getProjectionIncludesTrackedTypesWithoutBalances() {
+        UUID employeeId = UUID.randomUUID();
+        UUID annualId = UUID.randomUUID();
+        UUID sickId = UUID.randomUUID();
+
+        when(leaveTypeRepository.findByIsActiveTrue()).thenReturn(List.of(
+            LeaveType.builder().id(annualId).code("ANNUAL").name("Annual Leave").balanceTracked(true).isActive(true).build(),
+            LeaveType.builder().id(sickId).code("SICK").name("Sick Leave").balanceTracked(true).isActive(true).build(),
+            LeaveType.builder().id(UUID.randomUUID()).code("UNPAID").name("Unpaid Leave").balanceTracked(false).isActive(true).build()
+        ));
+        when(leaveBalanceRepository.findByEmployeeIdAndYear(eq(employeeId), any(Integer.class))).thenReturn(List.of());
+        when(leaveRequestRepository.findByEmployeeId(employeeId)).thenReturn(List.of());
+
+        LeaveBalanceProjectionDto projection = service.getProjection(employeeId);
+
+        assertThat(projection.projections()).hasSize(2);
+        assertThat(projection.projections())
+            .extracting(LeaveBalanceProjectionDto.LeaveTypeProjection::leaveTypeCode)
+            .containsExactly("ANNUAL", "SICK");
+        assertThat(projection.projections()).allMatch(item -> item.currentBalance() == 0 && item.projectedBalance() == 0);
     }
 }

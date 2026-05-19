@@ -1,5 +1,6 @@
 package com.hris.leave.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -13,13 +14,9 @@ public record LeaveBalanceProjectionDto(
     public record LeaveTypeProjection(
         String leaveTypeCode,
         String leaveTypeName,
-        /** Current available days */
-        int currentBalance,
-        /** Estimated accruals remaining through year-end */
-        int estimatedAccrual,
-        /** Approved + pending leave days not yet deducted */
-        int pendingDeductions,
-        /** Projected balance = current + estimated accrual - pending */
-        int projectedBalance
+        BigDecimal currentBalance,
+        BigDecimal estimatedAccrual,
+        BigDecimal pendingDeductions,
+        BigDecimal projectedBalance
     ) {}
 }

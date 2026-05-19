@@ -26,8 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,8 +64,7 @@ public class LeaveBalanceService {
         Employee employee = employeeRepository.findByUserId(userId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(
-            employee.getId(), LocalDate.now().getYear()));
+        return getBalanceDtosForEmployeeYear(employee.getId(), LocalDate.now().getYear());
     }
 
     @Transactional(readOnly = true)
@@ -71,8 +72,7 @@ public class LeaveBalanceService {
         Employee targetEmployee = employeeRepository.findById(employeeId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         assertLeaveBalanceVisibility(targetEmployee, requesterId);
-        return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(
-            employeeId, LocalDate.now().getYear()));
+        return getBalanceDtosForEmployeeYear(employeeId, LocalDate.now().getYear());
     }
 
     private void assertLeaveBalanceVisibility(Employee targetEmployee, UUID requesterId) {
@@ -140,7 +140,36 @@ public class LeaveBalanceService {
             throw new AccessDeniedException("You are not allowed to adjust leave balances");
         }
         leaveBalanceLedgerService.adjustBalance(employee.getId(), dto, requesterId);
-        return toBalanceDtos(leaveBalanceRepository.findByEmployeeIdAndYear(employeeId, LocalDate.now().getYear()));
+        return getBalanceDtosForEmployeeYear(employeeId, LocalDate.now().getYear());
+    }
+
+    private List<LeaveBalanceDto> getBalanceDtosForEmployeeYear(UUID employeeId, int year) {
+        List<LeaveBalance> existingBalances = leaveBalanceRepository.findByEmployeeIdAndYear(employeeId, year);
+        Map<UUID, LeaveBalance> balancesByTypeId = existingBalances.stream()
+            .collect(Collectors.toMap(LeaveBalance::getLeaveTypeId, Function.identity()));
+
+        List<LeaveType> trackedTypes = leaveTypeRepository.findByIsActiveTrue().stream()
+            .filter(LeaveType::isBalanceTracked)
+            .sorted((left, right) -> left.getCode().compareToIgnoreCase(right.getCode()))
+            .toList();
+
+        List<LeaveBalance> balancesToDisplay = new ArrayList<>();
+        for (LeaveType leaveType : trackedTypes) {
+            balancesToDisplay.add(balancesByTypeId.getOrDefault(
+                leaveType.getId(),
+                LeaveBalance.builder()
+                    .employeeId(employeeId)
+                    .leaveTypeId(leaveType.getId())
+                    .year(year)
+                    .totalDays(BigDecimal.ZERO)
+                    .usedDays(BigDecimal.ZERO)
+                    .pendingDays(BigDecimal.ZERO)
+                    .carryOverDays(BigDecimal.ZERO)
+                    .build()
+            ));
+        }
+
+        return toBalanceDtos(balancesToDisplay);
     }
 
     @Scheduled(cron = "0 0 3 1 1 *") // January 1st at 3 AM
@@ -168,19 +197,18 @@ public class LeaveBalanceService {
 
             if (policy == null) continue;
 
-            int carryOver = Math.min(
-                prevBalance.getTotalDays() - prevBalance.getUsedDays(),
-                policy.getCarryOverDays()
-            );
+            BigDecimal carryOver = prevBalance.getTotalDays()
+                .subtract(prevBalance.getUsedDays())
+                .min(BigDecimal.valueOf(policy.getCarryOverDays()));
 
             LeaveBalance newBalance = LeaveBalance.builder()
                 .employeeId(prevBalance.getEmployeeId())
                 .leaveTypeId(prevBalance.getLeaveTypeId())
                 .year(currentYear)
-                .totalDays(policy.getMaxDaysPerYear())
-                .usedDays(0)
-                .pendingDays(0)
-                .carryOverDays(Math.max(carryOver, 0))
+                .totalDays(BigDecimal.valueOf(policy.getMaxDaysPerYear()))
+                .usedDays(BigDecimal.ZERO)
+                .pendingDays(BigDecimal.ZERO)
+                .carryOverDays(carryOver.max(BigDecimal.ZERO))
                 .build();
 
             leaveBalanceRepository.save(newBalance);
