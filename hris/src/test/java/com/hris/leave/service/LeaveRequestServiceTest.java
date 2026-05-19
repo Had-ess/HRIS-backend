@@ -43,6 +43,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -131,16 +132,17 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2027, 6, 5),
                 UrgencyLevel.NORMAL,
                 "Family vacation",
-                false
+                false,
+                null, null, null
             );
 
             LeaveBalance balance = LeaveBalance.builder()
                 .employeeId(employeeId)
                 .leaveTypeId(leaveTypeId)
                 .year(2027)
-                .totalDays(20)
-                .usedDays(0)
-                .pendingDays(0)
+                .totalDays(BigDecimal.valueOf(20))
+                .usedDays(BigDecimal.ZERO)
+                .pendingDays(BigDecimal.ZERO)
                 .build();
 
             UUID savedRequestId = UUID.randomUUID();
@@ -201,16 +203,17 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2027, 6, 5),
                 UrgencyLevel.NORMAL,
                 "Family vacation",
-                false
+                false,
+                null, null, null
             );
 
             LeaveBalance balance = LeaveBalance.builder()
                 .employeeId(employeeId)
                 .leaveTypeId(leaveTypeId)
                 .year(2027)
-                .totalDays(20)
-                .usedDays(0)
-                .pendingDays(0)
+                .totalDays(BigDecimal.valueOf(20))
+                .usedDays(BigDecimal.ZERO)
+                .pendingDays(BigDecimal.ZERO)
                 .build();
 
             UUID savedRequestId = UUID.randomUUID();
@@ -265,7 +268,7 @@ class LeaveRequestServiceTest {
             verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
                 employeeId, leaveTypeId, 2027);
             verify(leaveBalanceLedgerService).reserveForLeaveRequest(
-                employee, leaveType, result, 5, requesterId);
+                employee, leaveType, result, BigDecimal.valueOf(5), requesterId);
         }
 
         @Test
@@ -277,16 +280,17 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 6, 10),
                 UrgencyLevel.NORMAL,
                 null,
-                false
+                false,
+                null, null, null
             );
 
             LeaveBalance balance = LeaveBalance.builder()
                 .employeeId(employeeId)
                 .leaveTypeId(leaveTypeId)
                 .year(2026)
-                .totalDays(3)
-                .usedDays(0)
-                .pendingDays(0)
+                .totalDays(BigDecimal.valueOf(3))
+                .usedDays(BigDecimal.ZERO)
+                .pendingDays(BigDecimal.ZERO)
                 .build();
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
@@ -296,7 +300,7 @@ class LeaveRequestServiceTest {
                 employeeId, leaveTypeId, 2026)).thenReturn(Optional.of(balance));
             when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(leaveBalanceLedgerService.reserveForLeaveRequest(
-                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(8), eq(requesterId)))
+                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(BigDecimal.valueOf(8)), eq(requesterId)))
                 .thenThrow(new InsufficientLeaveBalanceException("Insufficient balance"));
 
             assertThatThrownBy(() -> leaveRequestService.create(dto, requesterId))
@@ -313,7 +317,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 6, 5),
                 UrgencyLevel.NORMAL,
                 null,
-                false
+                false,
+                null, null, null
             );
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.empty());
@@ -332,7 +337,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 6, 5),
                 UrgencyLevel.NORMAL,
                 null,
-                false
+                false,
+                null, null, null
             );
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
@@ -355,16 +361,17 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2026, 7, 3),
                 UrgencyLevel.NORMAL,
                 "Vacation",
-                false
+                false,
+                null, null, null
             );
 
             LeaveBalance balance = LeaveBalance.builder()
                 .employeeId(employeeId)
                 .leaveTypeId(leaveTypeId)
                 .year(2026)
-                .totalDays(20)
-                .usedDays(0)
-                .pendingDays(0)
+                .totalDays(BigDecimal.valueOf(20))
+                .usedDays(BigDecimal.ZERO)
+                .pendingDays(BigDecimal.ZERO)
                 .build();
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
@@ -378,7 +385,7 @@ class LeaveRequestServiceTest {
                 return request;
             });
             when(leaveBalanceLedgerService.reserveForLeaveRequest(
-                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(3), eq(requesterId)))
+                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(BigDecimal.valueOf(3)), eq(requesterId)))
                 .thenReturn(balance);
             when(leaveApprovalWorkflowService.instantiate(any(), eq(employee), eq(leaveType)))
                 .thenThrow(new InvalidWorkflowStateException("No approvers could be resolved for this leave request"));
@@ -399,7 +406,8 @@ class LeaveRequestServiceTest {
                 LocalDate.of(2027, 1, 2),
                 UrgencyLevel.NORMAL,
                 null,
-                false
+                false,
+                null, null, null
             );
 
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));

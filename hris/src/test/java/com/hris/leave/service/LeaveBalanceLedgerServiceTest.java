@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -68,10 +69,10 @@ class LeaveBalanceLedgerServiceTest {
             .employeeId(employeeId)
             .leaveTypeId(leaveTypeId)
             .year(LocalDate.now().getYear())
-            .totalDays(10)
-            .usedDays(0)
-            .pendingDays(0)
-            .carryOverDays(0)
+            .totalDays(BigDecimal.valueOf(10))
+            .usedDays(BigDecimal.ZERO)
+            .pendingDays(BigDecimal.ZERO)
+            .carryOverDays(BigDecimal.ZERO)
             .build();
 
         when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
@@ -85,7 +86,7 @@ class LeaveBalanceLedgerServiceTest {
             actorId
         );
 
-        assertThat(result.getTotalDays()).isEqualTo(13);
+        assertThat(result.getTotalDays()).isEqualByComparingTo(BigDecimal.valueOf(13));
         verify(transactionRepository).save(any(LeaveBalanceTransaction.class));
     }
 
@@ -107,9 +108,9 @@ class LeaveBalanceLedgerServiceTest {
             .employeeId(employeeId)
             .leaveTypeId(leaveTypeId)
             .year(2026)
-            .totalDays(0)
-            .usedDays(0)
-            .pendingDays(0)
+            .totalDays(BigDecimal.ZERO)
+            .usedDays(BigDecimal.ZERO)
+            .pendingDays(BigDecimal.ZERO)
             .build();
 
         when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYearForUpdate(employeeId, leaveTypeId, 2026))
@@ -127,10 +128,10 @@ class LeaveBalanceLedgerServiceTest {
                 .build());
         when(transactionRepository.save(any(LeaveBalanceTransaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        LeaveBalance result = service.reserveForLeaveRequest(employee, leaveType, request, 3, UUID.randomUUID());
+        LeaveBalance result = service.reserveForLeaveRequest(employee, leaveType, request, BigDecimal.valueOf(3), UUID.randomUUID());
 
-        assertThat(result.getPendingDays()).isEqualTo(3);
-        assertThat(result.getAvailableDays()).isEqualTo(-3);
+        assertThat(result.getPendingDays()).isEqualByComparingTo(BigDecimal.valueOf(3));
+        assertThat(result.getAvailableDays()).isEqualByComparingTo(BigDecimal.valueOf(-3));
     }
 
     @Test
@@ -144,9 +145,9 @@ class LeaveBalanceLedgerServiceTest {
             .employeeId(employeeId)
             .leaveTypeId(leaveTypeId)
             .year(2026)
-            .totalDays(5)
-            .usedDays(0)
-            .pendingDays(0)
+            .totalDays(BigDecimal.valueOf(5))
+            .usedDays(BigDecimal.ZERO)
+            .pendingDays(BigDecimal.ZERO)
             .build();
 
         when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYearForUpdate(employeeId, leaveTypeId, 2026))
@@ -157,14 +158,14 @@ class LeaveBalanceLedgerServiceTest {
             employee,
             leaveType,
             2026,
-            2,
+            BigDecimal.valueOf(2),
             UUID.randomUUID(),
             null,
             "Monthly accrual",
             Instant.parse("2026-06-25T00:00:00Z")
         );
 
-        assertThat(result.getTotalDays()).isEqualTo(7);
+        assertThat(result.getTotalDays()).isEqualByComparingTo(BigDecimal.valueOf(7));
         verify(transactionRepository).save(any(LeaveBalanceTransaction.class));
     }
 
@@ -189,6 +190,6 @@ class LeaveBalanceLedgerServiceTest {
         assertThat(projection.projections())
             .extracting(LeaveBalanceProjectionDto.LeaveTypeProjection::leaveTypeCode)
             .containsExactly("ANNUAL", "SICK");
-        assertThat(projection.projections()).allMatch(item -> item.currentBalance() == 0 && item.projectedBalance() == 0);
+        assertThat(projection.projections()).allMatch(item -> item.currentBalance().compareTo(BigDecimal.ZERO) == 0 && item.projectedBalance().compareTo(BigDecimal.ZERO) == 0);
     }
 }

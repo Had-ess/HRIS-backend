@@ -98,8 +98,8 @@ class LeaveAccrualServiceTest {
                 employee.getId(),
                 leaveTypeId,
                 LeaveBalanceTransactionType.ACCRUAL,
-                10,
-                10,
+                java.math.BigDecimal.valueOf(10),
+                java.math.BigDecimal.valueOf(10),
                 LeaveBalanceTransactionSourceType.ACQUISITION_POLICY,
                 policy.getId(),
                 "Earlier accrual",
@@ -107,7 +107,7 @@ class LeaveAccrualServiceTest {
                 Instant.parse("2026-02-25T00:00:00Z")
             )
         ));
-        when(ledgerService.getAvailableBalance(employee.getId(), leaveTypeId, 2026)).thenReturn(9);
+        when(ledgerService.getAvailableBalance(employee.getId(), leaveTypeId, 2026)).thenReturn(java.math.BigDecimal.valueOf(9));
 
         int applied = service.applyAccrualForPolicy(employee, policy, LocalDate.of(2026, 6, 25), actorId);
 
@@ -116,7 +116,7 @@ class LeaveAccrualServiceTest {
             eq(employee),
             any(LeaveType.class),
             eq(2026),
-            eq(1),
+            eq(java.math.BigDecimal.valueOf(1)),
             eq(policy.getId()),
             eq(actorId),
             eq("Scheduled accrual for ANNUAL_MONTHLY"),
