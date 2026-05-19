@@ -13,7 +13,7 @@ import java.util.UUID;
 public record LeaveAcquisitionPolicyMutationDto(
     @NotBlank @Size(max = 80) String code,
     @NotBlank @Size(max = 255) String name,
-    @NotNull UUID leaveTypeId,
+    UUID leaveTypeId,
     @NotNull AcquisitionFrequency frequency,
     @Min(0) Integer monthlyRate,
     @Min(0) Integer annualQuota,

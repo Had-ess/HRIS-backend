@@ -29,7 +29,7 @@ public class LeaveAcquisitionPolicy {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(name = "leave_type_id", nullable = false)
+    @Column(name = "leave_type_id")
     private UUID leaveTypeId;
 
     @Enumerated(EnumType.STRING)

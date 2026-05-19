@@ -9,6 +9,11 @@ import com.hris.analytics.dto.AnalyticsDateCountDto;
 import com.hris.analytics.dto.AnalyticsLeaveBalanceBreakdownDto;
 import com.hris.analytics.dto.AnalyticsLeaveBalanceReportDto;
 import com.hris.analytics.dto.AnalyticsLeaveRequestReportDto;
+import com.hris.analytics.dto.AnalyticsLeaveTypeOverviewDto;
+import com.hris.analytics.dto.AnalyticsOverviewBreakdownDto;
+import com.hris.analytics.dto.AnalyticsOverviewDto;
+import com.hris.analytics.dto.AnalyticsOverviewKpiDto;
+import com.hris.analytics.dto.AnalyticsOverviewSeriesPointDto;
 import com.hris.analytics.dto.AnalyticsScopeOptionDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
 import com.hris.analytics.dto.HeadcountMetricsSnapshotDto;
@@ -25,6 +30,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -695,6 +701,101 @@ public class AnalyticsQueryService {
     }
 
     @Transactional(readOnly = true)
+    public AnalyticsOverviewDto getOverview(UUID userId, AnalyticsScopeType scopeType, UUID scopeId, LocalDate from, LocalDate to) {
+        AnalyticsScopeOptionDto scope = scopeType == null
+            ? analyticsScopeService.getDefaultScope(userId)
+            : new AnalyticsScopeOptionDto(scopeType, scopeId, resolveScopeLabel(userId, scopeType, scopeId));
+
+        LocalDate normalizedFrom = normalizeFrom(from, to);
+        LocalDate normalizedTo = normalizeTo(from, to);
+        MapSqlParameterSource params = params(scope.scopeType(), scope.scopeId(), normalizedFrom, normalizedTo);
+        String scopeClause = scopeCondition(scope.scopeType(), "e.id");
+
+        long headcount = singleLong("""
+            SELECT COUNT(DISTINCT e.id)
+            FROM employees e
+            WHERE %s
+              AND e.hire_date <= :toDate
+              AND (e.termination_date IS NULL OR e.termination_date >= :fromDate)
+            """.formatted(scopeClause),
+            copy(params).addValue("fromDate", normalizedFrom).addValue("toDate", normalizedTo));
+
+        List<AnalyticsOverviewSeriesPointDto> headcountTrend = buildHeadcountOverviewTrend(
+            scope.scopeType(),
+            scope.scopeId(),
+            normalizedTo.minusMonths(11).withDayOfMonth(1),
+            normalizedTo
+        );
+
+        long totalLeaveDays = singleLong("""
+            SELECT COALESCE(SUM(lr.working_days), 0)
+            FROM leave_requests lr
+            JOIN employees e ON e.id = lr.employee_id
+            WHERE %s
+              AND lr.submitted_at >= :fromAt
+              AND lr.submitted_at < :toExclusiveAt
+              AND lr.status <> 'CANCELLED'
+            """.formatted(scopeClause), params);
+
+        long openRequests = singleLong("""
+            SELECT COUNT(*)
+            FROM (
+                SELECT lr.id
+                FROM leave_requests lr
+                JOIN employees e ON e.id = lr.employee_id
+                WHERE %s
+                  AND lr.submitted_at >= :fromAt
+                  AND lr.submitted_at < :toExclusiveAt
+                  AND lr.status IN ('PENDING', 'IN_APPROVAL')
+                UNION ALL
+                SELECT ar.id
+                FROM admin_requests ar
+                JOIN employees e ON e.id = ar.requester_employee_id
+                WHERE %s
+                  AND ar.created_at >= :fromAt
+                  AND ar.created_at < :toExclusiveAt
+                  AND ar.status IN ('SUBMITTED', 'IN_REVIEW', 'APPROVED')
+            ) open_items
+            """.formatted(scopeClause, scopeClause), params);
+
+        long annualQuotaDays = singleLong("""
+            SELECT COALESCE(SUM(lb.total_days + lb.carry_over_days), 0)
+            FROM leave_balances lb
+            JOIN employees e ON e.id = lb.employee_id
+            WHERE %s
+              AND lb.year = :balanceYear
+            """.formatted(scopeClause), params);
+        long usedAndReservedDays = singleLong("""
+            SELECT COALESCE(SUM(lb.used_days + lb.pending_days), 0)
+            FROM leave_balances lb
+            JOIN employees e ON e.id = lb.employee_id
+            WHERE %s
+              AND lb.year = :balanceYear
+            """.formatted(scopeClause), params);
+        int utilization = annualQuotaDays <= 0 ? 0 : (int) Math.round((usedAndReservedDays * 100.0) / annualQuotaDays);
+
+        List<AnalyticsLeaveTypeOverviewDto> leaveByType = buildLeaveTypeOverview(params, scopeClause);
+        List<AnalyticsOverviewBreakdownDto> bottlenecks = buildApprovalOverview(params, scopeClause);
+        List<AnalyticsOverviewBreakdownDto> leaveReasons = buildLeaveReasonOverview(params, scopeClause);
+
+        return new AnalyticsOverviewDto(
+            scope.scopeType(),
+            scope.scopeId(),
+            scope.label(),
+            List.of(
+                new AnalyticsOverviewKpiDto("headcount", "Headcount", Long.toString(headcount), trendDelta(headcountTrend), "people", "positive"),
+                new AnalyticsOverviewKpiDto("totalLeaveDays", "Total leave days", Long.toString(totalLeaveDays), "YTD", "calendar", "neutral"),
+                new AnalyticsOverviewKpiDto("averageUtilization", "Avg utilization", utilization + "%", "of annual quota", "briefcase", "neutral"),
+                new AnalyticsOverviewKpiDto("openRequests", "Open requests", Long.toString(openRequests), "+ " + openRequests, "inbox", "positive")
+            ),
+            headcountTrend,
+            leaveByType,
+            bottlenecks,
+            leaveReasons
+        );
+    }
+
+    @Transactional(readOnly = true)
     public LeaveMetricsSnapshotDto getLeaveMetrics(LocalDate from, LocalDate to, AnalyticsScopeType scopeType, UUID scopeId) {
         AnalyticsLeaveRequestReportDto report = getLeaveRequests(from, to, scopeType, scopeId);
         return new LeaveMetricsSnapshotDto(
@@ -899,6 +1000,153 @@ public class AnalyticsQueryService {
             result.add(new HeadcountTrendPointDto(month, count));
         }
         return result;
+    }
+
+    private List<AnalyticsOverviewSeriesPointDto> buildHeadcountOverviewTrend(
+            AnalyticsScopeType scopeType,
+            UUID scopeId,
+            LocalDate firstMonth,
+            LocalDate to) {
+        return IntStream.range(0, 12)
+            .mapToObj(firstMonth::plusMonths)
+            .map(month -> {
+                LocalDate firstDay = month.withDayOfMonth(1);
+                LocalDate lastDay = month.withDayOfMonth(month.lengthOfMonth());
+                MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("firstDay", firstDay)
+                    .addValue("lastDay", lastDay)
+                    .addValue("toExclusiveAt", Timestamp.from(to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)))
+                    .addValue("fromAt", Timestamp.from(firstDay.atStartOfDay().toInstant(ZoneOffset.UTC)))
+                    .addValue("balanceYear", to.getYear());
+                if (scopeId != null) {
+                    params.addValue("scopeId", scopeId);
+                }
+                long count = singleLong("""
+                    SELECT COUNT(DISTINCT e.id)
+                    FROM employees e
+                    JOIN users u ON u.id = e.user_id
+                    WHERE %s
+                      AND e.hire_date <= :lastDay
+                      AND (e.termination_date IS NULL OR e.termination_date >= :firstDay)
+                      AND u.is_active = true
+                    """.formatted(scopeCondition(scopeType, "e.id")), params);
+                return new AnalyticsOverviewSeriesPointDto(monthLabel(month), count);
+            })
+            .toList();
+    }
+
+    private List<AnalyticsLeaveTypeOverviewDto> buildLeaveTypeOverview(MapSqlParameterSource params, String scopeClause) {
+        List<AnalyticsCountDto> rows = jdbcTemplate.query("""
+            SELECT COALESCE(lt.code, lt.name) AS key,
+                   lt.name AS label,
+                   COALESCE(SUM(lr.working_days), 0) AS value
+            FROM leave_requests lr
+            JOIN employees e ON e.id = lr.employee_id
+            JOIN leave_types lt ON lt.id = lr.leave_type_id
+            WHERE %s
+              AND lr.submitted_at >= :fromAt
+              AND lr.submitted_at < :toExclusiveAt
+              AND lr.status <> 'CANCELLED'
+            GROUP BY lt.code, lt.name
+            ORDER BY value DESC, lt.name ASC
+            LIMIT 6
+            """.formatted(scopeClause), params, (rs, rowNum) ->
+            new AnalyticsCountDto(rs.getString("key"), rs.getString("label"), rs.getLong("value")));
+        long total = rows.stream().mapToLong(AnalyticsCountDto::value).sum();
+        List<String> colors = List.of("#2f75dc", "#f59e0b", "#0ea5e9", "#38bdf8", "#22c55e", "#64748b");
+        return IntStream.range(0, rows.size())
+            .mapToObj(i -> new AnalyticsLeaveTypeOverviewDto(
+                rows.get(i).key(),
+                rows.get(i).label(),
+                rows.get(i).value(),
+                percentage(rows.get(i).value(), total),
+                colors.get(i % colors.size())
+            ))
+            .toList();
+    }
+
+    private List<AnalyticsOverviewBreakdownDto> buildApprovalOverview(MapSqlParameterSource params, String scopeClause) {
+        List<AnalyticsApprovalBottleneckDto> rows = jdbcTemplate.query("""
+            SELECT aps.approver_id AS approver_user_id,
+                   COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))), ''), u.email, 'Unassigned') AS approver_name,
+                   SUM(CASE WHEN aps.status = 'PENDING' THEN 1 ELSE 0 END) AS pending_count,
+                   AVG(CASE WHEN aps.decided_at IS NOT NULL THEN EXTRACT(EPOCH FROM (aps.decided_at - aw.created_at)) / 3600.0 END) AS average_decision_hours,
+                   SUM(CASE WHEN aps.status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected_count
+            FROM approval_steps aps
+            JOIN approval_workflows aw ON aw.id = aps.workflow_id
+            JOIN leave_requests lr ON aw.subject_type = 'LEAVE_REQUEST' AND aw.subject_id = lr.id
+            JOIN employees e ON e.id = lr.employee_id
+            LEFT JOIN users u ON u.id = aps.approver_id
+            WHERE %s
+              AND aw.created_at >= :fromAt
+              AND aw.created_at < :toExclusiveAt
+            GROUP BY aps.approver_id, approver_name
+            ORDER BY pending_count DESC, average_decision_hours DESC NULLS LAST, approver_name ASC
+            LIMIT 4
+            """.formatted(scopeClause), params, (rs, rowNum) ->
+            new AnalyticsApprovalBottleneckDto(
+                rs.getObject("approver_user_id", UUID.class),
+                rs.getString("approver_name"),
+                rs.getLong("pending_count"),
+                rs.getDouble("average_decision_hours"),
+                rs.getLong("rejected_count")
+            ));
+        long max = Math.max(1, rows.stream().mapToLong(AnalyticsApprovalBottleneckDto::pendingCount).max().orElse(1));
+        return rows.stream()
+            .map(row -> new AnalyticsOverviewBreakdownDto(
+                row.approverUserId() == null ? row.approverName() : row.approverUserId().toString(),
+                row.approverName(),
+                row.pendingCount(),
+                percentage(row.pendingCount(), max),
+                String.format(java.util.Locale.US, "%.1fh avg", row.averageDecisionHours())
+            ))
+            .toList();
+    }
+
+    private List<AnalyticsOverviewBreakdownDto> buildLeaveReasonOverview(MapSqlParameterSource params, String scopeClause) {
+        List<AnalyticsCountDto> rows = jdbcTemplate.query("""
+            SELECT LOWER(COALESCE(NULLIF(TRIM(lr.comment), ''), lt.name)) AS key,
+                   COALESCE(NULLIF(TRIM(lr.comment), ''), lt.name) AS label,
+                   COUNT(*) AS value
+            FROM leave_requests lr
+            JOIN employees e ON e.id = lr.employee_id
+            JOIN leave_types lt ON lt.id = lr.leave_type_id
+            WHERE %s
+              AND lr.submitted_at >= :fromAt
+              AND lr.submitted_at < :toExclusiveAt
+            GROUP BY key, label
+            ORDER BY value DESC, label ASC
+            LIMIT 4
+            """.formatted(scopeClause), params, (rs, rowNum) ->
+            new AnalyticsCountDto(rs.getString("key"), rs.getString("label"), rs.getLong("value")));
+        long total = rows.stream().mapToLong(AnalyticsCountDto::value).sum();
+        return rows.stream()
+            .map(row -> new AnalyticsOverviewBreakdownDto(
+                row.key(),
+                row.label(),
+                row.value(),
+                percentage(row.value(), total),
+                row.value() + " requests"
+            ))
+            .toList();
+    }
+
+    private int percentage(long value, long total) {
+        return total <= 0 ? 0 : (int) Math.round((value * 100.0) / total);
+    }
+
+    private String trendDelta(List<AnalyticsOverviewSeriesPointDto> trend) {
+        if (trend.size() < 2) {
+            return "+0% YoY";
+        }
+        long first = trend.get(0).value();
+        long last = trend.get(trend.size() - 1).value();
+        int delta = first <= 0 ? 0 : (int) Math.round(((last - first) * 100.0) / first);
+        return (delta >= 0 ? "+ " : "- ") + Math.abs(delta) + "% YoY";
+    }
+
+    private String monthLabel(LocalDate month) {
+        return month.getMonth().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.ENGLISH);
     }
 
     @Transactional(readOnly = true)

@@ -115,6 +115,20 @@ public class AnalyticsV2Controller {
         return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getDashboard(userId, scopeType, scopeId, from, to)));
     }
 
+    @GetMapping("/overview")
+    public ResponseEntity<ApiResponse<AnalyticsOverviewDto>> getOverview(
+            Authentication authentication,
+            @RequestParam(required = false) AnalyticsScopeType scopeType,
+            @RequestParam(required = false) UUID scopeId,
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        UUID userId = authorizeRead(authentication);
+        if (scopeType != null) {
+            analyticsScopeService.assertAccessible(userId, scopeType, scopeId);
+        }
+        return ResponseEntity.ok(ApiResponse.ok(analyticsQueryService.getOverview(userId, scopeType, scopeId, from, to)));
+    }
+
     @GetMapping("/headcount-trend")
     public ResponseEntity<ApiResponse<List<HeadcountTrendPointDto>>> getHeadcountTrend(
             Authentication authentication,
