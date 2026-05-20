@@ -100,18 +100,6 @@ SET head_employee_id = CASE code
 END
 WHERE code IN ('ENG', 'OPS', 'HR', 'IT', 'FIN', 'PROD', 'MKT', 'LEGAL', 'DATA', 'SALES');
 
-INSERT INTO teams (id, code, department_id, name, supervisor_employee_id, is_active)
-VALUES
-    ('66666666-6666-6666-6666-666666666405', 'PROD_CORE', (SELECT id FROM departments WHERE code = 'PROD'), 'Product Core', (SELECT id FROM employees WHERE employee_code = 'EMP-002'), TRUE),
-    ('66666666-6666-6666-6666-666666666406', 'DATA_LAKE', (SELECT id FROM departments WHERE code = 'DATA'), 'Data Lake', (SELECT id FROM employees WHERE employee_code = 'EMP-004'), TRUE),
-    ('66666666-6666-6666-6666-666666666407', 'LEGAL_COMPLIANCE', (SELECT id FROM departments WHERE code = 'LEGAL'), 'Legal Compliance', (SELECT id FROM employees WHERE employee_code = 'EMP-LEGAL'), TRUE),
-    ('66666666-6666-6666-6666-666666666408', 'OPS_SUPPORT', (SELECT id FROM departments WHERE code = 'OPS'), 'Operations Support', (SELECT id FROM employees WHERE employee_code = 'EMP-003'), TRUE)
-ON CONFLICT (code) DO UPDATE
-SET department_id = EXCLUDED.department_id,
-    name = EXCLUDED.name,
-    supervisor_employee_id = EXCLUDED.supervisor_employee_id,
-    is_active = EXCLUDED.is_active;
-
 INSERT INTO projects (id, name, code, status, start_date, end_date)
 VALUES
     ('77777777-7777-7777-7777-777777777404', 'Atlas Platform Migration', 'P-ATLAS', 'ACTIVE', CURRENT_DATE - INTERVAL '120 days', CURRENT_DATE + INTERVAL '120 days'),
@@ -124,6 +112,19 @@ SET name = EXCLUDED.name,
     status = EXCLUDED.status,
     start_date = EXCLUDED.start_date,
     end_date = EXCLUDED.end_date;
+
+INSERT INTO teams (id, code, department_id, project_id, name, supervisor_employee_id, is_active)
+VALUES
+    ('66666666-6666-6666-6666-666666666405', 'PROD_CORE', (SELECT id FROM departments WHERE code = 'PROD'), (SELECT id FROM projects WHERE code = 'P-MOBILE3'), 'Product Core', (SELECT id FROM employees WHERE employee_code = 'EMP-002'), TRUE),
+    ('66666666-6666-6666-6666-666666666406', 'DATA_LAKE', (SELECT id FROM departments WHERE code = 'DATA'), (SELECT id FROM projects WHERE code = 'P-DATALAKE'), 'Data Lake', (SELECT id FROM employees WHERE employee_code = 'EMP-004'), TRUE),
+    ('66666666-6666-6666-6666-666666666407', 'LEGAL_COMPLIANCE', (SELECT id FROM departments WHERE code = 'LEGAL'), (SELECT id FROM projects WHERE code = 'P-ISO27001'), 'Legal Compliance', (SELECT id FROM employees WHERE employee_code = 'EMP-LEGAL'), TRUE),
+    ('66666666-6666-6666-6666-666666666408', 'OPS_SUPPORT', (SELECT id FROM departments WHERE code = 'OPS'), (SELECT id FROM projects WHERE code = 'P-BRAND26'), 'Operations Support', (SELECT id FROM employees WHERE employee_code = 'EMP-003'), TRUE)
+ON CONFLICT (code) DO UPDATE
+SET department_id = EXCLUDED.department_id,
+    project_id = EXCLUDED.project_id,
+    name = EXCLUDED.name,
+    supervisor_employee_id = EXCLUDED.supervisor_employee_id,
+    is_active = EXCLUDED.is_active;
 
 INSERT INTO team_project_links (team_id, project_id, start_date, end_date, is_active)
 VALUES
@@ -194,13 +195,13 @@ VALUES
     ('15151515-1515-1515-1515-151515151507', (SELECT id FROM employees WHERE employee_code = 'EMP-LEGAL'), (SELECT id FROM leave_types WHERE code = 'ANNUAL'), 'MANUAL_ADJUSTMENT', 1, 21, 'MANUAL_ADJUSTMENT', NULL, 'HR manual correction', (SELECT id FROM users WHERE email = 'hr.admin@demo.hris.local'), NOW() - INTERVAL '12 days')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO leave_requests (id, employee_id, leave_type_id, start_date, end_date, working_days, urgency_level, status, comment, submitted_at, version, is_half_day)
+INSERT INTO leave_requests (id, employee_id, leave_type_id, start_date, end_date, working_days, duration_days, urgency_level, status, comment, submitted_at, version, is_half_day, partial_mode)
 VALUES
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0406', (SELECT id FROM employees WHERE employee_code = 'EMP-QA'), (SELECT id FROM leave_types WHERE code = 'ANNUAL'), CURRENT_DATE + 6, CURRENT_DATE + 10, 5, 'NORMAL', 'PENDING', 'Family trip to Hammamet', NOW() - INTERVAL '3 days', 0, FALSE),
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0407', (SELECT id FROM employees WHERE employee_code = 'EMP-002'), (SELECT id FROM leave_types WHERE code = 'PATERNITY'), CURRENT_DATE + 14, CURRENT_DATE + 20, 7, 'URGENT', 'IN_APPROVAL', 'Birth of child', NOW() - INTERVAL '2 days', 0, FALSE),
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0408', (SELECT id FROM employees WHERE employee_code = 'EMP-LEGAL'), (SELECT id FROM leave_types WHERE code = 'EXCEPTIONAL'), CURRENT_DATE + 2, CURRENT_DATE + 2, 1, 'NORMAL', 'APPROVED', 'Administrative appointment', NOW() - INTERVAL '7 days', 0, TRUE),
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0409', (SELECT id FROM employees WHERE employee_code = 'EMP-FINV'), (SELECT id FROM leave_types WHERE code = 'SICK'), CURRENT_DATE - 4, CURRENT_DATE - 3, 2, 'URGENT', 'APPROVED', 'Medical leave', NOW() - INTERVAL '5 days', 0, FALSE),
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0410', (SELECT id FROM employees WHERE employee_code = 'EMP-003'), (SELECT id FROM leave_types WHERE code = 'UNPAID'), CURRENT_DATE + 25, CURRENT_DATE + 35, 8, 'NORMAL', 'REJECTED', 'Extended personal leave', NOW() - INTERVAL '6 days', 0, FALSE)
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0406', (SELECT id FROM employees WHERE employee_code = 'EMP-QA'), (SELECT id FROM leave_types WHERE code = 'ANNUAL'), CURRENT_DATE + 6, CURRENT_DATE + 10, 5, 5, 'NORMAL', 'PENDING', 'Family trip to Hammamet', NOW() - INTERVAL '3 days', 0, FALSE, 'FULL_DAY'),
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0407', (SELECT id FROM employees WHERE employee_code = 'EMP-002'), (SELECT id FROM leave_types WHERE code = 'PATERNITY'), CURRENT_DATE + 14, CURRENT_DATE + 20, 7, 7, 'URGENT', 'IN_APPROVAL', 'Birth of child', NOW() - INTERVAL '2 days', 0, FALSE, 'FULL_DAY'),
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0408', (SELECT id FROM employees WHERE employee_code = 'EMP-LEGAL'), (SELECT id FROM leave_types WHERE code = 'EXCEPTIONAL'), CURRENT_DATE + 2, CURRENT_DATE + 2, 1, 1, 'NORMAL', 'APPROVED', 'Administrative appointment', NOW() - INTERVAL '7 days', 0, TRUE, 'HALF_DAY'),
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0409', (SELECT id FROM employees WHERE employee_code = 'EMP-FINV'), (SELECT id FROM leave_types WHERE code = 'SICK'), CURRENT_DATE - 4, CURRENT_DATE - 3, 2, 2, 'URGENT', 'APPROVED', 'Medical leave', NOW() - INTERVAL '5 days', 0, FALSE, 'FULL_DAY'),
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0410', (SELECT id FROM employees WHERE employee_code = 'EMP-003'), (SELECT id FROM leave_types WHERE code = 'UNPAID'), CURRENT_DATE + 25, CURRENT_DATE + 35, 8, 8, 'NORMAL', 'REJECTED', 'Extended personal leave', NOW() - INTERVAL '6 days', 0, FALSE, 'FULL_DAY')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO approval_workflows (id, subject_type, subject_id, status, created_at, completed_at, version)
