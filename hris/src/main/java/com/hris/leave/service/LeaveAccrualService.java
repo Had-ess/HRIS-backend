@@ -261,7 +261,7 @@ public class LeaveAccrualService {
             params.put("policiesProcessed", run.getPoliciesProcessed());
             params.put("transactionsCreated", run.getTransactionsCreated());
             params.put("runDate", run.getRunDate().toString());
-            params.put("linkPath", "/settings/accrual-runs");
+            params.put("linkPath", "/settings/accrual-history");
             String paramsJson = objectMapper.writeValueAsString(params);
 
             for (User user : hrUsers) {
