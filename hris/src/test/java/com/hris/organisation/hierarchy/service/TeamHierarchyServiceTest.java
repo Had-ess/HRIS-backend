@@ -75,6 +75,7 @@ class TeamHierarchyServiceTest {
                 .code("ENG_PLATFORM")
                 .name("Engineering Platform")
                 .departmentId(UUID.randomUUID())
+                .projectId(UUID.randomUUID())
                 .supervisorEmployeeId(headEmployeeId)
                 .isActive(true)
                 .build()

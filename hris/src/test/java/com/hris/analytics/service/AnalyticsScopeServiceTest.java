@@ -75,7 +75,7 @@ class AnalyticsScopeServiceTest {
             Department.builder().id(departmentId).name("Operations").isActive(true).build()
         ));
         when(teamRepository.findBySupervisorEmployeeIdAndIsActiveTrue(employeeId)).thenReturn(List.of(
-            Team.builder().id(teamId).name("North Team").isActive(true).build()
+            Team.builder().id(teamId).projectId(UUID.randomUUID()).name("North Team").isActive(true).build()
         ));
 
         List<AnalyticsScopeOptionDto> scopes = analyticsScopeService.getAvailableScopes(userId);
@@ -104,7 +104,7 @@ class AnalyticsScopeServiceTest {
             Department.builder().id(UUID.randomUUID()).code("OPS").name("Operations").isActive(true).build()
         ));
         when(teamRepository.findAll()).thenReturn(List.of(
-            Team.builder().id(UUID.randomUUID()).code("NORTH").name("North Team").isActive(true).build()
+            Team.builder().id(UUID.randomUUID()).code("NORTH").projectId(UUID.randomUUID()).name("North Team").isActive(true).build()
         ));
         when(leaveTypeRepository.findAll()).thenReturn(List.of(
             LeaveType.builder().id(leaveTypeId).code("ANNUAL").name("Annual Leave").isActive(true).balanceTracked(true).build()

@@ -24,6 +24,9 @@ public class Team {
     @Column(name = "department_id", nullable = false)
     private UUID departmentId;
 
+    @Column(name = "project_id", nullable = false)
+    private UUID projectId;
+
     @Column(nullable = false, length = 255)
     private String name;
 
