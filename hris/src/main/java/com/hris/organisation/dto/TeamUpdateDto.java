@@ -6,6 +6,7 @@ public record TeamUpdateDto(
     String code,
     String name,
     UUID departmentId,
+    UUID projectId,
     UUID supervisorEmployeeId,
     Boolean active
 ) {

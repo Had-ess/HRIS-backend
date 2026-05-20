@@ -212,6 +212,7 @@ public class ProjectService {
             .id(UUID.randomUUID())
             .code(buildTeamCode(project, dto))
             .departmentId(dto.departmentId())
+            .projectId(projectId)
             .name(dto.name().trim())
             .supervisorEmployeeId(dto.supervisorEmployeeId())
             .isActive(true)

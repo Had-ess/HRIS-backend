@@ -14,7 +14,9 @@ import com.hris.common.exception.EntityNotFoundException;
 import com.hris.organisation.dto.TeamCreateDto;
 import com.hris.organisation.dto.TeamDto;
 import com.hris.organisation.dto.TeamUpdateDto;
+import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.Team;
+import com.hris.organisation.repository.ProjectRepository;
 import com.hris.organisation.repository.TeamRepository;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ import java.util.UUID;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final ProjectRepository projectRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
@@ -53,12 +56,13 @@ public class TeamService {
 
     @Transactional
     public TeamDto create(TeamCreateDto dto, UUID actorId) {
-        validate(dto.code(), dto.name(), dto.departmentId(), dto.supervisorEmployeeId(), null);
+        validate(dto.code(), dto.name(), dto.departmentId(), dto.projectId(), dto.supervisorEmployeeId(), null);
         Team team = Team.builder()
             .id(UUID.randomUUID())
             .code(normalizeCode(dto.code()))
             .name(dto.name().trim())
             .departmentId(dto.departmentId())
+            .projectId(dto.projectId())
             .supervisorEmployeeId(dto.supervisorEmployeeId())
             .isActive(true)
             .build();
@@ -73,9 +77,10 @@ public class TeamService {
         String nextCode = dto.code() != null ? dto.code() : existing.getCode();
         String nextName = dto.name() != null ? dto.name() : existing.getName();
         UUID nextDepartmentId = dto.departmentId() != null ? dto.departmentId() : existing.getDepartmentId();
+        UUID nextProjectId = dto.projectId() != null ? dto.projectId() : existing.getProjectId();
         UUID nextSupervisorEmployeeId = dto.supervisorEmployeeId() != null ? dto.supervisorEmployeeId() : existing.getSupervisorEmployeeId();
 
-        validate(nextCode, nextName, nextDepartmentId, nextSupervisorEmployeeId, id);
+        validate(nextCode, nextName, nextDepartmentId, nextProjectId, nextSupervisorEmployeeId, id);
         Map<String, Object> previous = snapshot(existing);
         if (dto.code() != null) {
             existing.setCode(normalizeCode(dto.code()));
@@ -85,6 +90,9 @@ public class TeamService {
         }
         if (dto.departmentId() != null) {
             existing.setDepartmentId(dto.departmentId());
+        }
+        if (dto.projectId() != null) {
+            existing.setProjectId(dto.projectId());
         }
         if (dto.supervisorEmployeeId() != null) {
             existing.setSupervisorEmployeeId(dto.supervisorEmployeeId());
@@ -110,6 +118,7 @@ public class TeamService {
             String code,
             String name,
             UUID departmentId,
+            UUID projectId,
             UUID supervisorEmployeeId,
             UUID currentId) {
         if (code == null || code.isBlank()) {
@@ -124,6 +133,12 @@ public class TeamService {
         if (duplicateCode) {
             throw new IllegalStateException("Team code must be unique");
         }
+
+        if (projectId == null) {
+            throw new IllegalArgumentException("Team project is required");
+        }
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
         Department department = departmentRepository.findById(departmentId)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -148,6 +163,8 @@ public class TeamService {
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
         Employee supervisor = employeeRepository.findById(team.getSupervisorEmployeeId())
             .orElseThrow(() -> new EntityNotFoundException("Supervisor not found"));
+        Project project = projectRepository.findById(team.getProjectId())
+            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
         return new TeamDto(
             team.getId(),
@@ -156,6 +173,9 @@ public class TeamService {
             department.getId(),
             department.getName(),
             department.getCode(),
+            project.getId(),
+            project.getName(),
+            project.getCode(),
             supervisor.getId(),
             supervisor.getEmployeeCode(),
             resolveEmployeeName(supervisor),
@@ -179,6 +199,7 @@ public class TeamService {
         state.put("code", team.getCode());
         state.put("name", team.getName());
         state.put("departmentId", team.getDepartmentId());
+        state.put("projectId", team.getProjectId());
         state.put("supervisorEmployeeId", team.getSupervisorEmployeeId());
         state.put("active", team.isActive());
         return state;

@@ -25,20 +25,16 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
     @Query("""
         select t
         from Team t
-        join TeamProjectLink tpl on tpl.teamId = t.id
-        where tpl.projectId = :projectId
-          and tpl.isActive = true
+        where t.projectId = :projectId
           and t.isActive = true
         order by t.name asc
         """)
     List<Team> findActiveByProjectId(@Param("projectId") UUID projectId);
 
     @Query("""
-        select distinct tpl.projectId
-        from TeamProjectLink tpl
-        join Team t on t.id = tpl.teamId
+        select distinct t.projectId
+        from Team t
         where t.supervisorEmployeeId = :supervisorEmployeeId
-          and tpl.isActive = true
           and t.isActive = true
         """)
     List<UUID> findProjectIdsBySupervisorEmployeeId(@Param("supervisorEmployeeId") UUID supervisorEmployeeId);

@@ -63,7 +63,7 @@ class TeamControllerTest {
     void getTeamsReturnsPagedTeams() throws Exception {
         UUID teamId = UUID.randomUUID();
         when(teamService.getAll(any(), any())).thenReturn(new PageResponse<>(
-            List.of(new TeamDto(teamId, "ENG", "Engineering", UUID.randomUUID(), "Technology", "TECH", UUID.randomUUID(), "E001", "Alice Head", true)),
+            List.of(new TeamDto(teamId, "ENG", "Engineering", UUID.randomUUID(), "Technology", "TECH", UUID.randomUUID(), "Atlas Platform Migration", "ATLAS", UUID.randomUUID(), "E001", "Alice Head", true)),
             0, 20, 1, 1, true, true
         ));
 
@@ -87,6 +87,7 @@ class TeamControllerTest {
                       "code": "ENG",
                       "name": "Engineering",
                       "departmentId": "11111111-1111-1111-1111-111111111111",
+                      "projectId": "77777777-7777-7777-7777-777777777404",
                       "supervisorEmployeeId": "22222222-2222-2222-2222-222222222222"
                     }
                     """))

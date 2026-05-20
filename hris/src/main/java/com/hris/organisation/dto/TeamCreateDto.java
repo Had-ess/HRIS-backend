@@ -9,6 +9,7 @@ public record TeamCreateDto(
     @NotBlank String code,
     @NotBlank String name,
     @NotNull UUID departmentId,
+    @NotNull UUID projectId,
     @NotNull UUID supervisorEmployeeId
 ) {
 }
