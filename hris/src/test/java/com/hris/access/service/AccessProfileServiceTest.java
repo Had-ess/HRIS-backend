@@ -1,6 +1,7 @@
 package com.hris.access.service;
 
 import com.hris.access.entity.AccessProfile;
+import com.hris.access.dto.AccessProfileUpdateDto;
 import com.hris.access.entity.MenuItem;
 import com.hris.access.entity.ProfileMenuAccess;
 import com.hris.access.entity.ProfilePermission;
@@ -55,6 +56,38 @@ class AccessProfileServiceTest {
 
     @InjectMocks
     private AccessProfileService accessProfileService;
+
+    @Test
+    @DisplayName("update modifies editable access profile metadata")
+    void updateModifiesEditableProfileMetadata() {
+        UUID actorId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("OLD_PROFILE")
+            .displayKey("profile.old")
+            .descriptionKey("profile.old.description")
+            .isActive(true)
+            .build();
+
+        when(accessProfileRepository.findById(profileId)).thenReturn(Optional.of(profile));
+        when(accessProfileRepository.existsByCodeIgnoreCaseAndIdNot("NEW_PROFILE", profileId)).thenReturn(false);
+        when(accessProfileRepository.save(profile)).thenReturn(profile);
+        when(userProfileAssignmentRepository.countByProfileIdAndIsActiveTrue(profileId)).thenReturn(0L);
+
+        var result = accessProfileService.update(
+            profileId,
+            new AccessProfileUpdateDto(" new_profile ", "profile.new", "", false),
+            actorId
+        );
+
+        assertThat(result.code()).isEqualTo("NEW_PROFILE");
+        assertThat(result.displayKey()).isEqualTo("profile.new");
+        assertThat(result.descriptionKey()).isNull();
+        assertThat(result.active()).isFalse();
+        verify(accessProfileRepository).save(profile);
+        verify(auditLogService).log(eq(actorId), any(), eq("access_profile"), eq(profileId), any(), any());
+    }
 
     @Test
     @DisplayName("assignPermissions replaces profile permission assignments")
