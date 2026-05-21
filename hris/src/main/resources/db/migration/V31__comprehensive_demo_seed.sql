@@ -299,7 +299,7 @@ VALUES
     ('22222222-aaaa-bbbb-cccc-000000000009', CURRENT_DATE, (SELECT id FROM employees WHERE employee_code = 'EMP-QA'), (SELECT id FROM departments WHERE code = 'ENG'), (SELECT id FROM teams WHERE code = 'ENG_PLATFORM'), 'ACTIVE', TRUE),
     ('22222222-aaaa-bbbb-cccc-000000000010', CURRENT_DATE, (SELECT id FROM employees WHERE employee_code = 'EMP-LEGAL'), (SELECT id FROM departments WHERE code = 'LEGAL'), (SELECT id FROM teams WHERE code = 'LEGAL_COMPLIANCE'), 'ACTIVE', TRUE),
     ('22222222-aaaa-bbbb-cccc-000000000011', CURRENT_DATE, (SELECT id FROM employees WHERE employee_code = 'EMP-FINV'), (SELECT id FROM departments WHERE code = 'FIN'), NULL, 'ACTIVE', TRUE)
-ON CONFLICT (snapshot_date, employee_id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO analytics_project_absence_facts (id, snapshot_date, project_id, team_id, absent_employees, absence_days, affected_members, estimated_delay_days, risk_level)
 VALUES
@@ -313,14 +313,14 @@ VALUES
     ('24242424-2424-2424-2424-242424242401', CURRENT_DATE, 'GLOBAL', NULL, 10, 5, 1, 4, 2.40),
     ('24242424-2424-2424-2424-242424242402', CURRENT_DATE, 'DEPARTMENT', (SELECT id FROM departments WHERE code = 'ENG'), 4, 2, 0, 2, 1.80),
     ('24242424-2424-2424-2424-242424242403', CURRENT_DATE, 'TEAM', (SELECT id FROM teams WHERE code = 'ENG_PLATFORM'), 3, 1, 0, 2, 1.50)
-ON CONFLICT (snapshot_date, scope_type, scope_id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO analytics_headcount_metrics_snapshots (id, snapshot_date, scope_type, scope_id, total_employees, active_employees, new_hires, terminated_employees)
 VALUES
     ('25252525-2525-2525-2525-252525252501', CURRENT_DATE, 'GLOBAL', NULL, 11, 11, 2, 0),
     ('25252525-2525-2525-2525-252525252502', CURRENT_DATE, 'DEPARTMENT', (SELECT id FROM departments WHERE code = 'ENG'), 4, 4, 1, 0),
     ('25252525-2525-2525-2525-252525252503', CURRENT_DATE, 'DEPARTMENT', (SELECT id FROM departments WHERE code = 'OPS'), 3, 3, 1, 0)
-ON CONFLICT (snapshot_date, scope_type, scope_id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO analytics_leave_distribution_snapshots (id, snapshot_date, scope_type, scope_id, leave_type_id, request_count, total_days)
 VALUES
@@ -328,14 +328,14 @@ VALUES
     ('26262626-2626-2626-2626-262626262602', CURRENT_DATE, 'GLOBAL', NULL, (SELECT id FROM leave_types WHERE code = 'SICK'), 2, 4),
     ('26262626-2626-2626-2626-262626262603', CURRENT_DATE, 'GLOBAL', NULL, (SELECT id FROM leave_types WHERE code = 'PATERNITY'), 1, 7),
     ('26262626-2626-2626-2626-262626262604', CURRENT_DATE, 'DEPARTMENT', (SELECT id FROM departments WHERE code = 'ENG'), (SELECT id FROM leave_types WHERE code = 'ANNUAL'), 2, 8)
-ON CONFLICT (snapshot_date, scope_type, scope_id, leave_type_id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO analytics_approval_bottleneck_snapshots (id, snapshot_date, scope_type, scope_id, source_type, approver_level, pending_count, average_decision_days, rejection_rate)
 VALUES
     ('27272727-2727-2727-2727-272727272701', CURRENT_DATE, 'GLOBAL', NULL, 'TEAM_CHAIN', 1, 3, 1.80, 0.10),
     ('27272727-2727-2727-2727-272727272702', CURRENT_DATE, 'GLOBAL', NULL, 'TEAM_CHAIN', 2, 1, 2.60, 0.00),
     ('27272727-2727-2727-2727-272727272703', CURRENT_DATE, 'DEPARTMENT', (SELECT id FROM departments WHERE code = 'ENG'), 'TEAM_CHAIN', 1, 2, 1.20, 0.00)
-ON CONFLICT (snapshot_date, scope_type, scope_id, source_type, approver_level) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO user_profile_assignments (user_id, profile_id, assigned_at, assigned_by_id, is_active)
 SELECT seed.user_id, ap.id, seed.assigned_at, seed.assigned_by_id, TRUE

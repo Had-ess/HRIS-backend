@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -62,24 +63,20 @@ public class AccountProvisioningService {
         ));
 
         try {
-            keycloakAdminClient.sendExecuteActionsEmail(
-                keycloakUserId,
-                java.util.List.of("UPDATE_PASSWORD", "VERIFY_EMAIL"),
-                86400
-            );
-
-            User saved = userRepository.save(User.builder()
+            User saved = Objects.requireNonNull(userRepository.save(User.builder()
                 .keycloakId(keycloakUserId)
                 .email(normalizedEmail)
                 .firstName(firstName)
                 .lastName(lastName)
                 .localePreference("fr")
                 .isActive(true)
-                .build());
+                .build()), "User provisioning failed: persistence returned null");
 
             for (AccessProfile profile : profiles) {
                 userAccessAssignmentService.assignProfile(saved.getId(), profile.getId(), actorId);
             }
+
+            sendActivationEmailIfPossible(keycloakUserId);
 
             auditLogService.log(actorId, AuditAction.CREATE, "user", saved.getId(), null, saved);
             return saved;
@@ -105,5 +102,19 @@ public class AccountProvisioningService {
 
     private String normalizeUsername(String username) {
         return username.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void sendActivationEmailIfPossible(String keycloakUserId) {
+        try {
+            keycloakAdminClient.sendExecuteActionsEmail(
+                keycloakUserId,
+                java.util.List.of("UPDATE_PASSWORD", "VERIFY_EMAIL"),
+                86400
+            );
+        } catch (KeycloakProvisioningException ex) {
+            // Do not fail user provisioning if SMTP/email delivery in Keycloak is unavailable.
+            // Account provisioning and local consistency should remain successful.
+            log.warn("Activation email could not be sent for Keycloak user {}: {}", keycloakUserId, ex.getMessage());
+        }
     }
 }

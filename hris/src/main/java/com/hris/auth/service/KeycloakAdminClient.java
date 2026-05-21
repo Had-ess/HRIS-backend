@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -69,6 +71,14 @@ public class KeycloakAdminClient {
                 .getLocation();
         } catch (ResourceAccessException ex) {
             throw unavailable("create user", "Keycloak is unavailable. Please retry later.", ex);
+        } catch (KeycloakProvisioningException ex) {
+            if (ex.getResponseStatus() == HttpStatus.CONFLICT) {
+                String existingUserId = findUserIdByUsernameOrEmail(accessToken, request.username(), request.email());
+                if (existingUserId != null && !existingUserId.isBlank()) {
+                    return existingUserId;
+                }
+            }
+            throw ex;
         }
 
         return extractUserId(location);
@@ -268,6 +278,60 @@ public class KeycloakAdminClient {
             throw new IllegalStateException("Unable to extract created Keycloak user ID");
         }
         return path.substring(slash + 1);
+    }
+
+    private String findUserIdByUsernameOrEmail(String accessToken, String username, String email) {
+        String byUsername = findUserIdByQuery(accessToken, username);
+        if (byUsername != null) {
+            return byUsername;
+        }
+        String byEmail = findUserIdByQuery(accessToken, email);
+        if (byEmail != null) {
+            return byEmail;
+        }
+        return null;
+    }
+
+    private String findUserIdByQuery(String accessToken, String query) {
+        if (query == null || query.isBlank()) {
+            return null;
+        }
+        try {
+            List<Map<String, Object>> users = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path(serverUrl + "/admin/realms/" + realm + "/users")
+                    .queryParam("search", query)
+                    .queryParam("exact", "true")
+                    .build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (clientRequest, clientResponse) -> {
+                    throw mapOperationFailure(
+                        "find user",
+                        clientResponse.getStatusCode(),
+                        readBody(clientResponse)
+                    );
+                })
+                .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+
+            if (users == null) {
+                return null;
+            }
+            return users.stream()
+                .filter(Objects::nonNull)
+                .filter(user -> query.equalsIgnoreCase(stringValue(user.get("username")))
+                    || query.equalsIgnoreCase(stringValue(user.get("email"))))
+                .map(user -> stringValue(user.get("id")))
+                .filter(id -> id != null && !id.isBlank())
+                .findFirst()
+                .orElse(null);
+        } catch (ResourceAccessException ex) {
+            throw unavailable("find user", "Keycloak is unavailable. Please retry later.", ex);
+        }
+    }
+
+    private String stringValue(Object value) {
+        return value == null ? null : value.toString();
     }
 
     private void rollbackCreatedUser(String accessToken, String userId, RuntimeException cause) {

@@ -148,8 +148,8 @@ class AccountProvisioningServiceTest {
     }
 
     @Test
-    @DisplayName("deletes created Keycloak user when activation email fails (C2 rollback)")
-    void deletesCreatedKeycloakUserWhenActivationEmailFails() {
+    @DisplayName("keeps local user creation successful when activation email fails")
+    void keepsLocalUserCreationSuccessfulWhenActivationEmailFails() {
         UUID profileId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
 
@@ -179,12 +179,12 @@ class AccountProvisioningServiceTest {
         when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
         when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
         when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-abc");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         doThrow(emailFailure).when(keycloakAdminClient).sendExecuteActionsEmail(any(), anyList(), anyInt());
 
-        assertThatThrownBy(() -> accountProvisioningService.provision(request, actorId))
-            .isSameAs(emailFailure);
+        accountProvisioningService.provision(request, actorId);
 
-        verify(keycloakAdminClient).deleteUser("kc-user-abc");
-        verify(userRepository, never()).save(any(User.class));
+        verify(keycloakAdminClient, never()).deleteUser("kc-user-abc");
+        verify(userRepository).save(any(User.class));
     }
 }
