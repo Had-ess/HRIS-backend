@@ -5,9 +5,6 @@ import com.hris.admin.entity.AdminRequestType;
 import com.hris.admin.enums.AdminRequestStatus;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.admin.repository.AdminRequestTypeRepository;
-import com.hris.analytics.dto.AnalyticsLeaveRequestReportDto;
-import com.hris.analytics.enums.AnalyticsScopeType;
-import com.hris.analytics.service.AnalyticsQueryService;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
 import com.hris.approval.enums.StepStatus;
@@ -43,6 +40,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.Instant;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,6 @@ public class DashboardService {
     private final ProjectRepository projectRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final AccessScopeService accessScopeService;
-    private final AnalyticsQueryService analyticsQueryService;
 
     // ─── Employee ────────────────────────────────────────────────────────────
 
@@ -172,12 +170,12 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
         LocalDate today = LocalDate.now();
-        AnalyticsLeaveRequestReportDto leaveMetrics = analyticsQueryService.getLeaveRequests(
-            today.withDayOfMonth(1),
-            today,
-            AnalyticsScopeType.GLOBAL,
-            null
-        );
+        Instant from = today.withDayOfMonth(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant toExclusive = today.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long totalRequests = leaveRequestRepository.countSubmittedBetween(from, toExclusive);
+        long approvedCount = leaveRequestRepository.countSubmittedBetweenByStatus(from, toExclusive, LeaveStatus.APPROVED);
+        long rejectedCount = leaveRequestRepository.countSubmittedBetweenByStatus(from, toExclusive, LeaveStatus.REJECTED);
+        double avgProcessingDays = leaveRequestRepository.averageProcessingDaysBetween(from, toExclusive);
 
         List<DirectorDashboardDto.HeadcountByDeptDto> headcountByDept =
             departmentRepository.findAll().stream()
@@ -206,8 +204,7 @@ public class DashboardService {
         List<DirectorDashboardDto.ProjectUtilizationDto> projectUtilization =
             projectRepository.findByStatus(ProjectStatus.ACTIVE).stream()
                 .map(p -> {
-                    long members = projectAssignmentRepository.findByProjectId(p.getId()).stream()
-                        .filter(a -> a.isActive()).count();
+                    long members = projectAssignmentRepository.countActiveByProjectId(p.getId());
                     return new DirectorDashboardDto.ProjectUtilizationDto(p.getName(), 0, members);
                 })
                 .limit(6)
@@ -220,15 +217,15 @@ public class DashboardService {
             approvalStepRepository.countByStatus(StepStatus.PENDING),
             new LeaveMetricsSummaryDto(
                 today.withDayOfMonth(1) + " - " + today,
-                Math.toIntExact(leaveMetrics.totalRequests()),
-                Math.toIntExact(leaveMetrics.approvedCount()),
-                Math.toIntExact(leaveMetrics.rejectedCount()),
-                leaveMetrics.averageProcessingDays()
+                Math.toIntExact(totalRequests),
+                Math.toIntExact(approvedCount),
+                Math.toIntExact(rejectedCount),
+                avgProcessingDays
             ),
             adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES),
             0.0,
-            leaveMetrics.averageProcessingDays(),
-            leaveMetrics.averageProcessingDays() * 24,
+            avgProcessingDays,
+            avgProcessingDays * 24,
             bottlenecks,
             headcountByDept,
             riskSignals,
