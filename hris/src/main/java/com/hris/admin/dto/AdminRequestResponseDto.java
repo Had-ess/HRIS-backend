@@ -11,6 +11,7 @@ public record AdminRequestResponseDto(
     UUID requesterUserId,
     String requesterName,
     UUID typeId,
+    String typeCode,
     String typeName,
     String subject,
     String description,

@@ -37,10 +37,10 @@ public class AdminRequestQueryService {
 
     @Transactional(readOnly = true)
     public Page<AdminRequestResponseDto> toDtoPage(Page<AdminRequest> requests, boolean includeInternalComments) {
-        Map<UUID, String> typeNames = resolveTypeNames(
+        Map<UUID, AdminRequestType> types = resolveTypes(
             requests.getContent().stream().map(AdminRequest::getTypeId).toList());
         Map<UUID, String> userNames = resolveUserNames(requests.getContent());
-        return requests.map(request -> toDto(request, includeInternalComments, typeNames, userNames));
+        return requests.map(request -> toDto(request, includeInternalComments, types, userNames));
     }
 
     @Transactional(readOnly = true)
@@ -48,7 +48,7 @@ public class AdminRequestQueryService {
         return toDto(
             request,
             includeInternalComments,
-            resolveTypeNames(List.of(request.getTypeId())),
+            resolveTypes(List.of(request.getTypeId())),
             resolveUserNames(List.of(request))
         );
     }
@@ -56,7 +56,7 @@ public class AdminRequestQueryService {
     private AdminRequestResponseDto toDto(
             AdminRequest request,
             boolean includeInternalComments,
-            Map<UUID, String> typeNames,
+            Map<UUID, AdminRequestType> types,
             Map<UUID, String> userNames) {
         List<AdminRequestAttachmentDto> attachments = attachmentRepository
             .findByAdminRequestIdOrderByUploadedAtAsc(request.getId())
@@ -71,6 +71,7 @@ public class AdminRequestQueryService {
             .map(comment -> toCommentDto(comment, userNames))
             .toList();
 
+        AdminRequestType type = types.get(request.getTypeId());
         return new AdminRequestResponseDto(
             request.getId(),
             request.getRequestNumber(),
@@ -78,7 +79,8 @@ public class AdminRequestQueryService {
             request.getRequesterUserId(),
             userNames.get(request.getRequesterUserId()),
             request.getTypeId(),
-            typeNames.get(request.getTypeId()),
+            type != null ? type.getCode() : null,
+            type != null ? type.getName() : null,
             request.getSubject(),
             request.getDescription(),
             request.getStatus(),
@@ -124,9 +126,9 @@ public class AdminRequestQueryService {
         );
     }
 
-    private Map<UUID, String> resolveTypeNames(Collection<UUID> typeIds) {
+    private Map<UUID, AdminRequestType> resolveTypes(Collection<UUID> typeIds) {
         return adminRequestTypeRepository.findAllById(typeIds).stream()
-            .collect(java.util.stream.Collectors.toMap(AdminRequestType::getId, AdminRequestType::getName));
+            .collect(java.util.stream.Collectors.toMap(AdminRequestType::getId, t -> t));
     }
 
     private Map<UUID, String> resolveUserNames(Collection<AdminRequest> requests) {
