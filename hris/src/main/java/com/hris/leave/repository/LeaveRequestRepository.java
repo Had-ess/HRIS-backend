@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,5 +127,36 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
         ORDER BY SUM(lr.workingDays) DESC
         """)
     List<Object[]> sumWorkingDaysByLeaveTypeForYear(@Param("year") int year);
+
+    @Query("""
+        SELECT COUNT(lr)
+        FROM LeaveRequest lr
+        WHERE lr.submittedAt >= :from
+          AND lr.submittedAt < :to
+        """)
+    long countSubmittedBetween(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("""
+        SELECT COUNT(lr)
+        FROM LeaveRequest lr
+        WHERE lr.submittedAt >= :from
+          AND lr.submittedAt < :to
+          AND lr.status = :status
+        """)
+    long countSubmittedBetweenByStatus(
+        @Param("from") Instant from,
+        @Param("to") Instant to,
+        @Param("status") LeaveStatus status
+    );
+
+    @Query(value = """
+        SELECT COALESCE(AVG(alf.approval_duration_days), 0)
+        FROM leave_requests lr
+        LEFT JOIN analytics_leave_facts alf ON alf.leave_request_id = lr.id
+        WHERE lr.submitted_at >= :from
+          AND lr.submitted_at < :to
+          AND lr.status IN ('APPROVED', 'REJECTED')
+        """, nativeQuery = true)
+    double averageProcessingDaysBetween(@Param("from") Instant from, @Param("to") Instant to);
 }
 
