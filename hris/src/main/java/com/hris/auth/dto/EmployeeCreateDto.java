@@ -15,14 +15,16 @@ import java.util.List;
 import java.util.UUID;
 
 public record EmployeeCreateDto(
-    @NotBlank String username,
-    @NotBlank @Email String email,
+    @NotBlank @Size(max = 255) String username,
+    @NotBlank @Email @Size(max = 255) String email,
     @NotBlank @Size(max = 255) String firstName,
     @NotBlank @Size(max = 255) String lastName,
     @NotEmpty List<UUID> profileIds,
-    @NotBlank String employeeCode,
+    @NotBlank @Size(max = 50, message = "Employee code must be at most 50 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Employee code may only contain letters, digits, _ and -")
+    String employeeCode,
     @NotNull LocalDate hireDate,
-    @NotBlank String jobTitle,
+    @NotBlank @Size(max = 255) String jobTitle,
     @NotNull EmployeeStatus status,
     @NotNull ContractType contractType,
     @NotNull UUID departmentId,
