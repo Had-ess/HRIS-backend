@@ -167,6 +167,7 @@ class AdminRequestControllerTest {
             requesterUserId,
             "Jane Requester",
             UUID.randomUUID(),
+            "CERT_WORK",
             "Certificate",
             "Need document",
             "Please issue it",
