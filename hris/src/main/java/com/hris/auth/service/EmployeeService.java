@@ -48,7 +48,7 @@ public class EmployeeService {
     private final LeaveRequestRepository leaveRequestRepository;
     private final DepartmentRepository departmentRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
-    private final AdminUserService adminUserService;
+    private final UserDeletionService userDeletionService;
     private final AuditLogService auditLogService;
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
@@ -261,7 +261,7 @@ public class EmployeeService {
         leaveBalanceRepository.deleteByEmployeeId(employee.getId());
         employeeRepository.delete(employee);
         employeeRepository.flush();
-        adminUserService.delete(employee.getUserId(), actorId);
+        userDeletionService.deleteUser(employee.getUserId(), actorId);
         auditLogService.log(actorId, AuditAction.DELETE, "employee",
             employee.getId(), employee, null);
     }

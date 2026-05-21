@@ -45,7 +45,7 @@ class EmployeeServiceTest {
     @Mock private LeaveRequestRepository leaveRequestRepository;
     @Mock private DepartmentRepository departmentRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
-    @Mock private AdminUserService adminUserService;
+    @Mock private UserDeletionService userDeletionService;
     @Mock private AuditLogService auditLogService;
     @Mock private AnalyticsEventPublisher analyticsEventPublisher;
     @Mock private EmployeeHistoryService employeeHistoryService;
@@ -71,7 +71,7 @@ class EmployeeServiceTest {
         verify(leaveBalanceRepository).deleteByEmployeeId(employeeId);
         verify(employeeRepository).delete(employee);
         verify(employeeRepository).flush();
-        verify(adminUserService).delete(employee.getUserId(), actorId);
+        verify(userDeletionService).deleteUser(employee.getUserId(), actorId);
     }
 
     @Test
@@ -89,7 +89,7 @@ class EmployeeServiceTest {
             .hasMessage("Only terminated employees can be deleted");
 
         verify(employeeRepository, never()).delete(employee);
-        verify(adminUserService, never()).delete(employee.getUserId(), actorId);
+        verify(userDeletionService, never()).deleteUser(employee.getUserId(), actorId);
     }
 
     @Test
@@ -108,7 +108,7 @@ class EmployeeServiceTest {
             .hasMessage("Employee cannot be deleted because they are referenced by project assignments");
 
         verify(employeeRepository, never()).delete(employee);
-        verify(adminUserService, never()).delete(employee.getUserId(), actorId);
+        verify(userDeletionService, never()).deleteUser(employee.getUserId(), actorId);
     }
 
     @Test
