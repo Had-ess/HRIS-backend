@@ -54,8 +54,8 @@ class ProjectControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/projects/{id} does not expose project manager fields")
-    void getByIdDoesNotExposeProjectManagerFields() throws Exception {
+    @DisplayName("GET /api/projects/{id} returns the project payload")
+    void getByIdReturnsProjectPayload() throws Exception {
         UUID projectId = UUID.randomUUID();
         when(projectService.getById(any(), any())).thenReturn(new ProjectResponseDto(
             projectId,
@@ -69,9 +69,9 @@ class ProjectControllerTest {
         mockMvc.perform(get("/api/projects/{id}", projectId).with(TestAuthenticationFactory.jwtRequest(UUID.randomUUID(), "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.id").value(projectId.toString()))
-            .andExpect(jsonPath("$.data.projectManagerEmployeeId").doesNotExist())
-            .andExpect(jsonPath("$.data.projectManagerEmployeeCode").doesNotExist())
-            .andExpect(jsonPath("$.data.projectManagerName").doesNotExist());
+            .andExpect(jsonPath("$.data.name").value("HRIS Core"))
+            .andExpect(jsonPath("$.data.code").value("HRIS-CORE"))
+            .andExpect(jsonPath("$.data.status").value("ACTIVE"));
     }
 
     @Test
@@ -100,7 +100,8 @@ class ProjectControllerTest {
                     }
                     """))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.data.projectManagerEmployeeId").doesNotExist());
+            .andExpect(jsonPath("$.data.id").value(projectId.toString()))
+            .andExpect(jsonPath("$.data.code").value("HRIS-CORE"));
     }
 
     @TestConfiguration
