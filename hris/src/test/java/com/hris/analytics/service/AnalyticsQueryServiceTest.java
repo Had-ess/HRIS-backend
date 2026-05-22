@@ -5,7 +5,6 @@ import com.hris.analytics.dto.AnalyticsCountDto;
 import com.hris.analytics.dto.AnalyticsDateCountDto;
 import com.hris.analytics.dto.AnalyticsOverviewDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
-import com.hris.analytics.enums.AnalyticsScopeType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +27,6 @@ import static org.mockito.Mockito.when;
 class AnalyticsQueryServiceTest {
 
     @Mock private NamedParameterJdbcTemplate jdbcTemplate;
-    @Mock private AnalyticsScopeService analyticsScopeService;
 
     @InjectMocks
     private AnalyticsQueryService analyticsQueryService;
@@ -41,9 +39,7 @@ class AnalyticsQueryServiceTest {
 
         AnalyticsSummaryDto result = analyticsQueryService.getSummary(
             LocalDate.of(2026, 5, 1),
-            LocalDate.of(2026, 5, 31),
-            AnalyticsScopeType.EMPLOYEE,
-            UUID.randomUUID()
+            LocalDate.of(2026, 5, 31)
         );
 
         assertThat(result.leaveRequests()).isEqualTo(12L);
@@ -72,9 +68,7 @@ class AnalyticsQueryServiceTest {
 
         AnalyticsAdminRequestReportDto result = analyticsQueryService.getAdminRequests(
             LocalDate.of(2026, 5, 1),
-            LocalDate.of(2026, 5, 31),
-            AnalyticsScopeType.GLOBAL,
-            null
+            LocalDate.of(2026, 5, 31)
         );
 
         assertThat(result.totalRequests()).isEqualTo(9L);
@@ -94,10 +88,7 @@ class AnalyticsQueryServiceTest {
     @Test
     @DisplayName("overview aggregates dashboard KPIs headcount distribution bottlenecks and leave reasons")
     void overviewAggregatesScreenshotDashboardSections() {
-        UUID userId = UUID.randomUUID();
         UUID employeeId = UUID.randomUUID();
-        when(analyticsScopeService.getDefaultScope(userId))
-            .thenReturn(new com.hris.analytics.dto.AnalyticsScopeOptionDto(AnalyticsScopeType.EMPLOYEE, employeeId, "My analytics"));
         when(jdbcTemplate.queryForObject(any(String.class), any(MapSqlParameterSource.class), eq(Long.class)))
             .thenReturn(
                 105L,
@@ -118,14 +109,10 @@ class AnalyticsQueryServiceTest {
             );
 
         AnalyticsOverviewDto result = analyticsQueryService.getOverview(
-            userId,
-            null,
-            null,
             LocalDate.of(2026, 5, 1),
             LocalDate.of(2026, 5, 31)
         );
 
-        assertThat(result.scopeLabel()).isEqualTo("My analytics");
         assertThat(result.kpis()).extracting("key")
             .containsExactly("headcount", "totalLeaveDays", "averageUtilization", "openRequests");
         assertThat(result.kpis().get(0).value()).isEqualTo("105");

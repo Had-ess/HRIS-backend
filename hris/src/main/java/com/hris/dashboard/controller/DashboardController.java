@@ -36,7 +36,7 @@ public class DashboardController {
         permissionAuthorizationService.authorizeAnyPermissionName(
             auth,
             "APPROVAL_STEP_READ",
-            "ANALYTICS_READ_SCOPED",
+            "ANALYTICS_READ",
             "DASHBOARD_SUPERVISOR_VIEW"
         );
         UUID userId = SecurityUtils.getCurrentUserId(auth);
@@ -59,7 +59,7 @@ public class DashboardController {
     public ResponseEntity<ApiResponse<DirectorDashboardDto>> getDirectorDashboard(Authentication authentication) {
         permissionAuthorizationService.authorizeAnyPermissionName(
             authentication,
-            "ANALYTICS_READ_GLOBAL"
+            "ANALYTICS_READ"
         );
         return ResponseEntity.ok(ApiResponse.ok(dashboardService.getDirectorDashboard()));
     }

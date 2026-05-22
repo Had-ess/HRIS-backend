@@ -2,6 +2,7 @@ package com.hris.access.repository;
 
 import com.hris.access.entity.ProfilePermission;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,5 +25,7 @@ public interface ProfilePermissionRepository extends JpaRepository<ProfilePermis
 
     boolean existsByGrantedById(UUID userId);
 
-    void deleteByProfileId(UUID profileId);
+    @Modifying
+    @Query("DELETE FROM ProfilePermission pp WHERE pp.profileId = :profileId")
+    void deleteByProfileId(@Param("profileId") UUID profileId);
 }
