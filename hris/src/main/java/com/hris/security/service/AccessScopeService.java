@@ -57,7 +57,7 @@ public class AccessScopeService {
     }
 
     public boolean hasGlobalAnalyticsVisibility(UUID userId) {
-        return hasPermissionName(userId, "ANALYTICS_READ_GLOBAL")
+        return hasPermissionName(userId, "ANALYTICS_READ")
             || hasPermissionName(userId, "REPORT_READ")
             || hasPermissionName(userId, "AUDIT_LOG_READ");
     }
@@ -68,7 +68,7 @@ public class AccessScopeService {
             || hasPermissionName(userId, "DEPARTMENT_MANAGE")
             || hasPermissionName(userId, "LEAVE_BALANCE_MANAGE")
             || hasPermissionName(userId, "ADMIN_REQUEST_READ_GLOBAL")
-            || hasPermissionName(userId, "ANALYTICS_READ_GLOBAL");
+            || hasPermissionName(userId, "ANALYTICS_READ");
     }
 
     public boolean hasAdministrationOrHrVisibility(UUID userId) {
@@ -87,13 +87,13 @@ public class AccessScopeService {
     public boolean hasManagerInboxAccess(UUID userId) {
         return hasPermissionName(userId, "APPROVAL_STEP_READ")
             || hasPermissionName(userId, "LEAVE_REQUEST_READ")
-            || hasPermissionName(userId, "ANALYTICS_READ_SCOPED");
+            || hasPermissionName(userId, "ANALYTICS_READ");
     }
 
     private boolean hasManagerDepartmentVisibility(UUID userId) {
         return hasPermissionName(userId, "APPROVAL_STEP_READ")
             || hasPermissionName(userId, "LEAVE_REQUEST_READ")
             || hasPermissionName(userId, "LEAVE_BALANCE_READ_SCOPED")
-            || hasPermissionName(userId, "ANALYTICS_READ_SCOPED");
+            || hasPermissionName(userId, "ANALYTICS_READ");
     }
 }

@@ -2,6 +2,9 @@ package com.hris.access.repository;
 
 import com.hris.access.entity.ProfileMenuAccess;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,5 +16,7 @@ public interface ProfileMenuAccessRepository extends JpaRepository<ProfileMenuAc
 
     List<ProfileMenuAccess> findByProfileIdIn(Collection<UUID> profileIds);
 
-    void deleteByProfileId(UUID profileId);
+    @Modifying
+    @Query("DELETE FROM ProfileMenuAccess pma WHERE pma.profileId = :profileId")
+    void deleteByProfileId(@Param("profileId") UUID profileId);
 }

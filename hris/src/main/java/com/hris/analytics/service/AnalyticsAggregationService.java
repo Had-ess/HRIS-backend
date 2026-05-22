@@ -215,26 +215,11 @@ public class AnalyticsAggregationService {
     }
 
     private List<ScopeKey> buildScopeKeys(List<LeaveFact> facts) {
-        LinkedHashSet<ScopeKey> keys = new LinkedHashSet<>();
-        keys.add(new ScopeKey(AnalyticsScopeType.GLOBAL, null));
-        for (LeaveFact fact : facts) {
-            keys.add(new ScopeKey(AnalyticsScopeType.EMPLOYEE, fact.getEmployeeId()));
-            if (fact.getDepartmentId() != null) keys.add(new ScopeKey(AnalyticsScopeType.DEPARTMENT, fact.getDepartmentId()));
-            if (fact.getProjectId() != null) keys.add(new ScopeKey(AnalyticsScopeType.PROJECT, fact.getProjectId()));
-            if (fact.getTeamId() != null) keys.add(new ScopeKey(AnalyticsScopeType.TEAM, fact.getTeamId()));
-        }
-        return List.copyOf(keys);
+        return List.of(new ScopeKey(AnalyticsScopeType.GLOBAL, null));
     }
 
     private List<ScopeKey> buildHeadcountScopeKeys(List<HeadcountFact> facts) {
-        LinkedHashSet<ScopeKey> keys = new LinkedHashSet<>();
-        keys.add(new ScopeKey(AnalyticsScopeType.GLOBAL, null));
-        for (HeadcountFact fact : facts) {
-            keys.add(new ScopeKey(AnalyticsScopeType.EMPLOYEE, fact.getEmployeeId()));
-            if (fact.getDepartmentId() != null) keys.add(new ScopeKey(AnalyticsScopeType.DEPARTMENT, fact.getDepartmentId()));
-            if (fact.getTeamId() != null) keys.add(new ScopeKey(AnalyticsScopeType.TEAM, fact.getTeamId()));
-        }
-        return List.copyOf(keys);
+        return List.of(new ScopeKey(AnalyticsScopeType.GLOBAL, null));
     }
 
     private List<LeaveFact> filterLeaveFactsByScope(List<LeaveFact> facts, ScopeKey scope) {
