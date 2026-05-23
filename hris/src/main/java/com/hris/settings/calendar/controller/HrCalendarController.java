@@ -63,6 +63,13 @@ public class HrCalendarController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<Void> hardDelete(@PathVariable UUID id, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "HR_CALENDAR", "MANAGE");
+        hrCalendarService.hardDelete(id, SecurityUtils.getCurrentUserId(authentication));
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}/holidays")
     public ResponseEntity<ApiResponse<List<HrHolidayDto>>> getHolidays(@PathVariable UUID id, Authentication authentication) {
         authorizeRead(authentication);

@@ -73,6 +73,16 @@ public class ValidationWorkflowController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<Void> hardDelete(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "VALIDATION_WORKFLOW", "MANAGE");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        validationWorkflowService.hardDelete(id, actorId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/options")
     public ResponseEntity<ApiResponse<ValidationWorkflowOptionsDto>> getOptions(
             @RequestParam ValidationUsage usage,

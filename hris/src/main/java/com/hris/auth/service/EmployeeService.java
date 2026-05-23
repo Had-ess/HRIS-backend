@@ -10,7 +10,9 @@ import com.hris.auth.enums.AccountStatus;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.DepartmentRepository;
+import com.hris.auth.repository.EmployeeDepartmentHistoryRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.EmployeeStatusHistoryRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.leave.entity.LeaveType;
@@ -46,6 +48,8 @@ public class EmployeeService {
     private final LeavePolicyRepository leavePolicyRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeaveRequestRepository leaveRequestRepository;
+    private final EmployeeDepartmentHistoryRepository employeeDepartmentHistoryRepository;
+    private final EmployeeStatusHistoryRepository employeeStatusHistoryRepository;
     private final DepartmentRepository departmentRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final UserDeletionService userDeletionService;
@@ -241,8 +245,8 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        if (employee.getStatus() != EmployeeStatus.TERMINATED) {
-            throw new IllegalStateException("Only terminated employees can be deleted");
+        if (employee.getStatus() != EmployeeStatus.INACTIVE && employee.getStatus() != EmployeeStatus.TERMINATED) {
+            throw new IllegalStateException("Only deactivated or terminated employees can be deleted");
         }
         if (departmentRepository.existsByHeadEmployeeId(employee.getId())) {
             throw new IllegalStateException("Employee cannot be deleted because they are assigned as a department head");
@@ -259,6 +263,8 @@ public class EmployeeService {
         }
 
         leaveBalanceRepository.deleteByEmployeeId(employee.getId());
+        employeeStatusHistoryRepository.deleteByEmployeeId(employee.getId());
+        employeeDepartmentHistoryRepository.deleteByEmployeeId(employee.getId());
         employeeRepository.delete(employee);
         employeeRepository.flush();
         userDeletionService.deleteUser(employee.getUserId(), actorId);

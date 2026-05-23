@@ -11,6 +11,7 @@ import com.hris.leave.acquisition.repository.LeaveAcquisitionPolicyRepository;
 import com.hris.leave.entity.LeaveType;
 import com.hris.leave.repository.LeaveTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,6 +107,21 @@ public class LeaveAcquisitionPolicyService {
         policy.setActive(false);
         repository.save(policy);
         auditLogService.log(actorId, AuditAction.UPDATE, "leave_acquisition_policy", policy.getId(), previous, policy);
+    }
+
+    @Transactional
+    public void hardDelete(UUID id, UUID actorId) {
+        LeaveAcquisitionPolicy policy = findPolicy(id);
+        if (policy.isActive()) {
+            throw new IllegalStateException("Leave acquisition policy must be deactivated before deletion");
+        }
+        try {
+            repository.delete(policy);
+            repository.flush();
+            auditLogService.log(actorId, AuditAction.DELETE, "leave_acquisition_policy", policy.getId(), policy, null);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Leave acquisition policy cannot be deleted because it is still referenced");
+        }
     }
 
     private LeaveAcquisitionPolicy findPolicy(UUID id) {

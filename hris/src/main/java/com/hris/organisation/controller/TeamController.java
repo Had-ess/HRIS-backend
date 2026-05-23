@@ -73,4 +73,14 @@ public class TeamController {
         teamService.deactivate(id, actorId);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<Void> hardDelete(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "TEAM", "MANAGE");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        teamService.hardDelete(id, actorId);
+        return ResponseEntity.noContent().build();
+    }
 }

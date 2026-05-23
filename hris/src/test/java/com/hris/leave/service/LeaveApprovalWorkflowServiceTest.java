@@ -19,8 +19,11 @@ import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
 import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.organisation.repository.TeamProjectLinkRepository;
 import com.hris.settings.validation.entity.ValidationFallbackMode;
 import com.hris.settings.validation.entity.ValidationMode;
 import com.hris.settings.validation.entity.ValidationUsage;
@@ -56,6 +59,7 @@ class LeaveApprovalWorkflowServiceTest {
     @Mock private AccessProfileRepository accessProfileRepository;
     @Mock private TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
+    @Mock private TeamProjectLinkRepository teamProjectLinkRepository;
     @Mock private TeamHierarchyResolver teamHierarchyResolver;
     @Mock private LeaveValidationWorkflowResolver leaveValidationWorkflowResolver;
 
@@ -78,6 +82,7 @@ class LeaveApprovalWorkflowServiceTest {
             accessProfileRepository,
             teamHierarchyRelationRepository,
             projectAssignmentRepository,
+            teamProjectLinkRepository,
             teamHierarchyResolver,
             leaveValidationWorkflowResolver,
             new ObjectMapper().findAndRegisterModules()
@@ -225,5 +230,47 @@ class LeaveApprovalWorkflowServiceTest {
         assertThatThrownBy(() -> service.instantiate(leaveRequest, requester, leaveType))
             .isInstanceOf(InvalidWorkflowStateException.class)
             .hasMessageContaining("No hierarchy approver");
+    }
+
+    @Test
+    @DisplayName("instantiate resolves team from hierarchy membership when assignment row is missing")
+    void instantiateResolvesTeamFromHierarchyMembershipWhenAssignmentMissing() {
+        UUID teamId = UUID.randomUUID();
+        UUID managerEmployeeId = UUID.randomUUID();
+        UUID managerUserId = UUID.randomUUID();
+
+        when(leaveValidationWorkflowResolver.resolveForLeaveType(leaveType)).thenReturn(workflow);
+        when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(any(), any(), any())).thenReturn(List.of());
+        when(teamHierarchyRelationRepository.findByCollaboratorEmployeeIdAndStatusOrderByStartDateAscTeamIdAsc(
+            requester.getId(), TeamHierarchyStatus.ACTIVE))
+            .thenReturn(List.of(
+                TeamHierarchyRelation.builder()
+                    .id(UUID.randomUUID())
+                    .teamId(teamId)
+                    .collaboratorEmployeeId(requester.getId())
+                    .responsibleEmployeeId(managerEmployeeId)
+                    .status(TeamHierarchyStatus.ACTIVE)
+                    .startDate(LocalDate.of(2026, 1, 1))
+                    .endDate(null)
+                    .build()
+            ));
+        when(teamProjectLinkRepository.findActiveTeamIdsDuringPeriod(List.of(teamId), leaveRequest.getStartDate(), leaveRequest.getEndDate()))
+            .thenReturn(List.of(teamId));
+        when(teamHierarchyResolver.resolveAboveRequester(teamId, requester.getId(), leaveRequest.getStartDate()))
+            .thenReturn(new TeamHierarchyResolver.RouteCandidateList(
+                List.of(new TeamHierarchyResolver.RouteCandidate(managerEmployeeId, 1, null)),
+                false
+            ));
+        when(employeeRepository.findAllById(List.of(managerEmployeeId))).thenReturn(List.of(
+            Employee.builder().id(managerEmployeeId).userId(managerUserId).build()
+        ));
+        when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(approvalStepRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.instantiate(leaveRequest, requester, leaveType);
+
+        assertThat(result.steps()).hasSize(1);
+        assertThat(result.steps().getFirst().getApproverId()).isEqualTo(managerUserId);
+        assertThat(result.steps().getFirst().getSourceType()).isEqualTo(ApprovalSourceType.TEAM_CHAIN);
     }
 }

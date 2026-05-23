@@ -21,6 +21,7 @@ import com.hris.auth.repository.PermissionRepository;
 import com.hris.common.PageResponse;
 import com.hris.common.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,6 +102,29 @@ public class AccessProfileService {
         existing.setActive(false);
         accessProfileRepository.save(existing);
         auditLogService.log(actorId, AuditAction.DELETE, "access_profile", existing.getId(), null, snapshot(existing));
+    }
+
+    @Transactional
+    public void hardDelete(UUID id, UUID actorId) {
+        AccessProfile existing = getEntity(id);
+        if (existing.isSystemProfile()) {
+            throw new IllegalStateException("System access profiles cannot be deleted");
+        }
+        if (existing.isActive()) {
+            throw new IllegalStateException("Access profile must be deactivated before deletion");
+        }
+        if (userProfileAssignmentRepository.countByProfileIdAndIsActiveTrue(existing.getId()) > 0) {
+            throw new IllegalStateException("Access profile cannot be deleted while assigned to active users");
+        }
+        try {
+            profilePermissionRepository.deleteByProfileId(existing.getId());
+            profileMenuAccessRepository.deleteByProfileId(existing.getId());
+            accessProfileRepository.delete(existing);
+            accessProfileRepository.flush();
+            auditLogService.log(actorId, AuditAction.DELETE, "access_profile", existing.getId(), snapshot(existing), null);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Access profile cannot be deleted because it is still referenced");
+        }
     }
 
     @Transactional(readOnly = true)
