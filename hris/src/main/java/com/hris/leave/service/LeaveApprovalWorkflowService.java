@@ -23,10 +23,12 @@ import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.entity.TeamProjectLink;
 import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
 import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
 import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.organisation.repository.TeamProjectLinkRepository;
 import com.hris.settings.validation.entity.ValidationFallbackMode;
 import com.hris.settings.validation.entity.ValidationMode;
 import com.hris.settings.validation.entity.ValidationWorkflow;
@@ -54,6 +56,7 @@ public class LeaveApprovalWorkflowService {
     private final AccessProfileRepository accessProfileRepository;
     private final TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final TeamProjectLinkRepository teamProjectLinkRepository;
     private final TeamHierarchyResolver teamHierarchyResolver;
     private final LeaveValidationWorkflowResolver leaveValidationWorkflowResolver;
     private final ObjectMapper objectMapper;
@@ -86,9 +89,44 @@ public class LeaveApprovalWorkflowService {
     }
 
     private UUID resolveTeamId(UUID requesterEmployeeId, LocalDate startDate, LocalDate endDate) {
-        return projectAssignmentRepository.findActiveAssignmentsDuringPeriod(requesterEmployeeId, startDate, endDate).stream()
+        UUID teamIdFromAssignment = projectAssignmentRepository.findActiveAssignmentsDuringPeriod(requesterEmployeeId, startDate, endDate).stream()
             .map(ProjectAssignment::getTeamId)
             .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
+        if (teamIdFromAssignment != null) {
+            return teamIdFromAssignment;
+        }
+
+        // Fallback for data gaps: derive team from active hierarchy membership, but
+        // only keep teams effectively linked to at least one active project.
+        List<TeamHierarchyRelation> activeMemberships =
+            teamHierarchyRelationRepository.findByCollaboratorEmployeeIdAndStatusOrderByStartDateAscTeamIdAsc(
+                requesterEmployeeId,
+                TeamHierarchyStatus.ACTIVE);
+
+        List<UUID> membershipTeamIds = activeMemberships.stream()
+            .filter(relation -> isRelationEffectiveDuring(relation, startDate, endDate))
+            .map(TeamHierarchyRelation::getTeamId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+
+        if (membershipTeamIds.isEmpty()) {
+            return null;
+        }
+
+        Set<UUID> activeLinkedTeamIds = new LinkedHashSet<>(
+            teamProjectLinkRepository.findActiveTeamIdsDuringPeriod(membershipTeamIds, startDate, endDate)
+        );
+
+        if (activeLinkedTeamIds.isEmpty()) {
+            return null;
+        }
+
+        return membershipTeamIds.stream()
+            .filter(activeLinkedTeamIds::contains)
             .findFirst()
             .orElse(null);
     }
@@ -177,6 +215,11 @@ public class LeaveApprovalWorkflowService {
     private boolean isRelationEffectiveOn(TeamHierarchyRelation relation, LocalDate date) {
         return !relation.getStartDate().isAfter(date)
             && (relation.getEndDate() == null || !relation.getEndDate().isBefore(date));
+    }
+
+    private boolean isRelationEffectiveDuring(TeamHierarchyRelation relation, LocalDate startDate, LocalDate endDate) {
+        return !relation.getStartDate().isAfter(endDate)
+            && (relation.getEndDate() == null || !relation.getEndDate().isBefore(startDate));
     }
 
     private List<RouteApprover> resolveProfileBasedEscalation(

@@ -79,6 +79,16 @@ public class ProjectController {
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<ApiResponse<Void>> hardDelete(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "PROJECT", "PORTFOLIO_MANAGE");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        projectService.hardDelete(id, actorId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
     @GetMapping("/{id}/assignments")
     public ResponseEntity<ApiResponse<List<ProjectAssignmentViewDto>>> getAssignments(
             @PathVariable UUID id,

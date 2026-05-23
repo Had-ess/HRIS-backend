@@ -60,6 +60,13 @@ public class LeaveTypeController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<Void> hardDelete(@PathVariable UUID id, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "LEAVE_TYPE", "MANAGE");
+        leaveTypeService.hardDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{leaveTypeId}/acquisition-policies")
     public ResponseEntity<ApiResponse<List<LeaveAcquisitionPolicyDto>>> getAcquisitionPolicies(
             @PathVariable UUID leaveTypeId,

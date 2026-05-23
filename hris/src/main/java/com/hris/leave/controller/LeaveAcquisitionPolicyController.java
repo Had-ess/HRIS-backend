@@ -63,6 +63,13 @@ public class LeaveAcquisitionPolicyController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<Void> hardDelete(@PathVariable UUID id, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ACQUISITION_POLICY", "MANAGE");
+        service.hardDelete(id, SecurityUtils.getCurrentUserId(authentication));
+        return ResponseEntity.noContent().build();
+    }
+
     private void authorizeRead(Authentication authentication) {
         if (permissionAuthorizationService.hasPermission(authentication, "ACQUISITION_POLICY", "READ")
             || permissionAuthorizationService.hasPermission(authentication, "ACQUISITION_POLICY", "MANAGE")) {

@@ -57,11 +57,17 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
 
     long countByTeamIdAndIsActiveTrue(UUID teamId);
 
+    @Modifying
+    @Query("UPDATE ProjectAssignment pa SET pa.teamId = null WHERE pa.teamId = :teamId")
+    int clearTeamReference(@Param("teamId") UUID teamId);
+
     boolean existsByEmployeeId(UUID employeeId);
 
     boolean existsBySupervisorId(UUID supervisorId);
 
     List<ProjectAssignment> findByProjectId(UUID projectId);
+
+    void deleteByProjectId(UUID projectId);
 
     @Query(value = """
         SELECT COUNT(*)

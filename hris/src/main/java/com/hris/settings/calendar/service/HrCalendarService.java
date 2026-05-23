@@ -12,6 +12,7 @@ import com.hris.settings.calendar.entity.HrHoliday;
 import com.hris.settings.calendar.repository.HrCalendarRepository;
 import com.hris.settings.calendar.repository.HrHolidayRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +82,22 @@ public class HrCalendarService {
         calendar.setActive(false);
         calendarRepository.save(calendar);
         auditLogService.log(actorId, AuditAction.UPDATE, "hr_calendar", calendar.getId(), previous, calendar);
+    }
+
+    @Transactional
+    public void hardDelete(UUID id, UUID actorId) {
+        HrCalendar calendar = findCalendar(id);
+        if (calendar.isActive()) {
+            throw new IllegalStateException("HR calendar must be deactivated before deletion");
+        }
+        try {
+            holidayRepository.deleteAll(holidayRepository.findByCalendarIdOrderByDateAscNameAsc(id));
+            calendarRepository.delete(calendar);
+            calendarRepository.flush();
+            auditLogService.log(actorId, AuditAction.DELETE, "hr_calendar", calendar.getId(), calendar, null);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("HR calendar cannot be deleted because it is still referenced");
+        }
     }
 
     @Transactional(readOnly = true)
