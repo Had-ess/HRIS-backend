@@ -69,7 +69,7 @@ class UserDeletionServiceTest {
         when(auditLogRepository.existsByActorId(userId)).thenReturn(false);
         when(exportRecordRepository.existsByExportedById(userId)).thenReturn(false);
         when(userAccessAssignmentService.getProfiles(userId)).thenReturn(List.of(
-            new com.hris.access.dto.UserProfileSummaryDto(UUID.randomUUID(), "SELF_SERVICE", "profile.selfService", true)
+            new com.hris.access.dto.UserProfileSummaryDto(UUID.randomUUID(), "SELF_SERVICE", "profile.selfService", true, "MANUAL", null, null)
         ));
 
         userDeletionService.deleteUser(userId, actorId);

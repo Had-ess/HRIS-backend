@@ -20,7 +20,6 @@ public class LeaveBalance {
     @Column(name = "used_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal usedDays = BigDecimal.ZERO;
     @Column(name = "pending_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal pendingDays = BigDecimal.ZERO;
     @Column(name = "carry_over_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal carryOverDays = BigDecimal.ZERO;
-    @Version private Integer version;
 
     public BigDecimal getAvailableDays() {
         return totalDays.add(carryOverDays).subtract(usedDays).subtract(pendingDays);

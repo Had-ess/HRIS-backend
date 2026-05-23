@@ -1,5 +1,7 @@
 package com.hris.auth.service;
 
+import com.hris.access.enums.StructuralEventType;
+import com.hris.access.event.StructuralChangeEvent;
 import com.hris.access.service.UserAccessAssignmentService;
 import com.hris.admin.repository.AdminRequestRepository;
 import com.hris.analytics.enums.AuditAction;
@@ -14,6 +16,7 @@ import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.notification.repository.NotificationEventRepository;
 import com.hris.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,7 @@ public class UserDeletionService {
     private final ExportRecordRepository exportRecordRepository;
     private final KeycloakAdminClient keycloakAdminClient;
     private final AuditLogService auditLogService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public void deleteUser(UUID userId, UUID actorId) {
@@ -52,6 +56,8 @@ public class UserDeletionService {
 
         notificationRepository.deleteByUserId(userId);
         notificationEventRepository.deleteByTargetUserId(userId);
+        applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
+            StructuralEventType.EMPLOYEE_OFFBOARDED, userId, userId, actorId));
         userAccessAssignmentService.getProfiles(userId)
             .forEach(profile -> userAccessAssignmentService.removeProfile(userId, profile.id(), actorId));
         userRepository.delete(user);

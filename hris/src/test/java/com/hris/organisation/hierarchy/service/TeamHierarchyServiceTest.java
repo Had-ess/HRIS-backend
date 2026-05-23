@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -45,6 +46,7 @@ class TeamHierarchyServiceTest {
     @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
     @Mock private AuditLogService auditLogService;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     private TeamHierarchyService service;
     private UUID teamId;
@@ -60,7 +62,8 @@ class TeamHierarchyServiceTest {
             teamRepository,
             employeeRepository,
             userRepository,
-            auditLogService
+            auditLogService,
+            eventPublisher
         );
 
         teamId = UUID.randomUUID();

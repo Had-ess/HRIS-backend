@@ -9,14 +9,17 @@ import com.hris.approval.enums.WorkflowStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.approval.service.TeamHierarchyResolver;
+import com.hris.access.repository.AccessProfileRepository;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
+import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.settings.validation.entity.ValidationFallbackMode;
 import com.hris.settings.validation.entity.ValidationMode;
@@ -49,6 +52,9 @@ class LeaveApprovalWorkflowServiceTest {
     @Mock private ApprovalStepRepository approvalStepRepository;
     @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
+    @Mock private DepartmentRepository departmentRepository;
+    @Mock private AccessProfileRepository accessProfileRepository;
+    @Mock private TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
     @Mock private TeamHierarchyResolver teamHierarchyResolver;
     @Mock private LeaveValidationWorkflowResolver leaveValidationWorkflowResolver;
@@ -68,6 +74,9 @@ class LeaveApprovalWorkflowServiceTest {
             approvalStepRepository,
             employeeRepository,
             userRepository,
+            departmentRepository,
+            accessProfileRepository,
+            teamHierarchyRelationRepository,
             projectAssignmentRepository,
             teamHierarchyResolver,
             leaveValidationWorkflowResolver,

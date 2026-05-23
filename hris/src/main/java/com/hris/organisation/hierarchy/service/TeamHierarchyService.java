@@ -1,5 +1,7 @@
 package com.hris.organisation.hierarchy.service;
 
+import com.hris.access.enums.StructuralEventType;
+import com.hris.access.event.StructuralChangeEvent;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.entity.Employee;
@@ -15,6 +17,7 @@ import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
 import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,7 @@ public class TeamHierarchyService {
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
     public List<TeamHierarchyNodeDto> getHierarchy(UUID teamId) {
@@ -67,6 +71,7 @@ public class TeamHierarchyService {
             .build();
         TeamHierarchyRelation saved = relationRepository.save(relation);
         auditLogService.log(actorId, AuditAction.CREATE, "team_hierarchy_relation", saved.getId(), null, snapshot(saved));
+        publishDesignationEvent(saved, null, actorId);
         return getNode(saved.getId());
     }
 
@@ -76,6 +81,14 @@ public class TeamHierarchyService {
         validateMutation(dto, id);
 
         Map<String, Object> previous = snapshot(existing);
+        TeamHierarchyRelation before = TeamHierarchyRelation.builder()
+            .teamId(existing.getTeamId())
+            .responsibleEmployeeId(existing.getResponsibleEmployeeId())
+            .collaboratorEmployeeId(existing.getCollaboratorEmployeeId())
+            .status(existing.getStatus())
+            .startDate(existing.getStartDate())
+            .endDate(existing.getEndDate())
+            .build();
         existing.setTeamId(dto.teamId());
         existing.setResponsibleEmployeeId(dto.responsibleEmployeeId());
         existing.setCollaboratorEmployeeId(dto.collaboratorEmployeeId());
@@ -84,6 +97,7 @@ public class TeamHierarchyService {
         existing.setStatus(TeamHierarchyStatus.ACTIVE);
         TeamHierarchyRelation saved = relationRepository.save(existing);
         auditLogService.log(actorId, AuditAction.UPDATE, "team_hierarchy_relation", saved.getId(), previous, snapshot(saved));
+        publishDesignationEvent(saved, before, actorId);
         return getNode(saved.getId());
     }
 
@@ -91,12 +105,21 @@ public class TeamHierarchyService {
     public void endRelation(UUID id, UUID actorId) {
         TeamHierarchyRelation relation = getRelation(id);
         Map<String, Object> previous = snapshot(relation);
+        TeamHierarchyRelation before = TeamHierarchyRelation.builder()
+            .teamId(relation.getTeamId())
+            .responsibleEmployeeId(relation.getResponsibleEmployeeId())
+            .collaboratorEmployeeId(relation.getCollaboratorEmployeeId())
+            .status(relation.getStatus())
+            .startDate(relation.getStartDate())
+            .endDate(relation.getEndDate())
+            .build();
         relation.setStatus(TeamHierarchyStatus.ENDED);
         if (relation.getEndDate() == null || relation.getEndDate().isAfter(LocalDate.now())) {
             relation.setEndDate(LocalDate.now());
         }
         relationRepository.save(relation);
         auditLogService.log(actorId, AuditAction.UPDATE, "team_hierarchy_relation", relation.getId(), previous, snapshot(relation));
+        publishEndedEvent(before, actorId);
     }
 
     private TeamHierarchyNodeDto getNode(UUID relationId) {
@@ -302,5 +325,53 @@ public class TeamHierarchyService {
         state.put("startDate", relation.getStartDate());
         state.put("endDate", relation.getEndDate());
         return state;
+    }
+
+    private void publishDesignationEvent(TeamHierarchyRelation after, TeamHierarchyRelation before, UUID actorId) {
+        boolean isHeadNow = after.getResponsibleEmployeeId() == null
+            && after.getStatus() == TeamHierarchyStatus.ACTIVE;
+        boolean wasHeadBefore = before != null
+            && before.getResponsibleEmployeeId() == null
+            && before.getStatus() == TeamHierarchyStatus.ACTIVE
+            && Objects.equals(before.getCollaboratorEmployeeId(), after.getCollaboratorEmployeeId());
+
+        if (isHeadNow && !wasHeadBefore) {
+            publishEvent(StructuralEventType.TEAM_HEAD_ASSIGNED, after.getCollaboratorEmployeeId(), after.getId(), actorId);
+        } else if (!isHeadNow && wasHeadBefore) {
+            publishEvent(StructuralEventType.TEAM_HEAD_REMOVED, before.getCollaboratorEmployeeId(), after.getId(), actorId);
+        }
+
+        boolean designatedNow = after.getStatus() == TeamHierarchyStatus.ACTIVE && !isHeadNow;
+        boolean designatedBefore = before != null
+            && before.getStatus() == TeamHierarchyStatus.ACTIVE
+            && before.getResponsibleEmployeeId() != null
+            && Objects.equals(before.getCollaboratorEmployeeId(), after.getCollaboratorEmployeeId());
+
+        if (designatedNow && !designatedBefore && !isHeadNow) {
+            publishEvent(StructuralEventType.APPROVER_DESIGNATED, after.getResponsibleEmployeeId(), after.getId(), actorId);
+        }
+    }
+
+    private void publishEndedEvent(TeamHierarchyRelation before, UUID actorId) {
+        if (before == null) {
+            return;
+        }
+        if (before.getResponsibleEmployeeId() == null) {
+            publishEvent(StructuralEventType.TEAM_HEAD_REMOVED, before.getCollaboratorEmployeeId(), before.getTeamId(), actorId);
+        } else {
+            publishEvent(StructuralEventType.APPROVER_REMOVED, before.getResponsibleEmployeeId(), before.getTeamId(), actorId);
+        }
+    }
+
+    private void publishEvent(StructuralEventType type, UUID employeeId, UUID refId, UUID actorId) {
+        if (employeeId == null) {
+            return;
+        }
+        Employee employee = employeeRepository.findById(employeeId).orElse(null);
+        if (employee == null) {
+            return;
+        }
+        applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
+            type, employee.getUserId(), refId, actorId));
     }
 }

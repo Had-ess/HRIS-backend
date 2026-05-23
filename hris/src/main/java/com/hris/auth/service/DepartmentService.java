@@ -1,10 +1,13 @@
 package com.hris.auth.service;
 
+import com.hris.access.enums.StructuralEventType;
+import com.hris.access.event.StructuralChangeEvent;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.DepartmentCreateDto;
 import com.hris.auth.dto.DepartmentDto;
 import com.hris.auth.entity.Department;
+import com.hris.auth.entity.Employee;
 import com.hris.auth.mapper.DepartmentMapper;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
@@ -15,6 +18,7 @@ import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -36,6 +41,7 @@ public class DepartmentService {
     private final AccessScopeService accessScopeService;
     private final DepartmentMapper departmentMapper;
     private final AuditLogService auditLogService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
     public Page<DepartmentDto> getAll(UUID userId, Pageable pageable) {
@@ -76,6 +82,9 @@ public class DepartmentService {
         Department saved = departmentRepository.save(dept);
         auditLogService.log(actorId, AuditAction.CREATE, "department",
             saved.getId(), null, saved);
+        if (saved.getHeadEmployeeId() != null) {
+            publishDeptHeadEvent(StructuralEventType.DEPT_HEAD_ASSIGNED, saved.getHeadEmployeeId(), saved.getId(), actorId);
+        }
         return toDto(saved);
     }
 
@@ -97,6 +106,17 @@ public class DepartmentService {
         Department saved = departmentRepository.save(dept);
         auditLogService.log(actorId, AuditAction.UPDATE, "department",
             saved.getId(), previous, saved);
+
+        UUID previousHead = previous.getHeadEmployeeId();
+        UUID nextHead = saved.getHeadEmployeeId();
+        if (!Objects.equals(previousHead, nextHead)) {
+            if (previousHead != null) {
+                publishDeptHeadEvent(StructuralEventType.DEPT_HEAD_REMOVED, previousHead, saved.getId(), actorId);
+            }
+            if (nextHead != null) {
+                publishDeptHeadEvent(StructuralEventType.DEPT_HEAD_ASSIGNED, nextHead, saved.getId(), actorId);
+            }
+        }
         return toDto(saved);
     }
 
@@ -107,9 +127,13 @@ public class DepartmentService {
 
         validateDeletion(department.getId());
 
+        UUID previousHead = department.getHeadEmployeeId();
         departmentRepository.delete(department);
         auditLogService.log(actorId, AuditAction.DELETE, "department",
             department.getId(), department, null);
+        if (previousHead != null) {
+            publishDeptHeadEvent(StructuralEventType.DEPT_HEAD_REMOVED, previousHead, department.getId(), actorId);
+        }
     }
 
     @Transactional
@@ -143,6 +167,15 @@ public class DepartmentService {
             throw new DepartmentDeletionNotAllowedException(
                 "Department cannot be deleted because it is linked to active projects");
         }
+    }
+
+    private void publishDeptHeadEvent(StructuralEventType type, UUID employeeId, UUID departmentId, UUID actorId) {
+        Employee employee = employeeRepository.findById(employeeId).orElse(null);
+        if (employee == null) {
+            return;
+        }
+        applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
+            type, employee.getUserId(), departmentId, actorId));
     }
 
     private DepartmentDto toDto(Department department) {

@@ -1,5 +1,7 @@
 package com.hris.auth.service;
 
+import com.hris.access.enums.StructuralEventType;
+import com.hris.access.event.StructuralChangeEvent;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
@@ -13,6 +15,7 @@ import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ public class EmployeeOnboardingService {
     private final AuditLogService auditLogService;
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public EmployeeResponseDto onboard(EmployeeCreateDto dto, UUID actorId) {
@@ -72,6 +76,8 @@ public class EmployeeOnboardingService {
             employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
             analyticsEventPublisher.publishEmployeeHireEvent(saved);
             auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
+            applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
+                StructuralEventType.EMPLOYEE_ONBOARDED, user.getId(), saved.getId(), actorId));
             return employeeMapper.toDto(saved);
         } catch (RuntimeException ex) {
             accountProvisioningService.rollbackExternalAccount(user.getKeycloakId());

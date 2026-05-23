@@ -5,6 +5,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: hris_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: hris_db
       POSTGRES_USER: hris_user
@@ -25,6 +26,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: hris_rabbitmq
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: hris_user
       RABBITMQ_DEFAULT_PASS: hris_pass
@@ -45,6 +47,7 @@ services:
   mailpit:
     image: axllent/mailpit:v1.18
     container_name: hris_mailpit
+    restart: unless-stopped
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -54,6 +57,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: hris_keycloak
+    restart: unless-stopped
     entrypoint:
       - /bin/sh
       - /opt/keycloak/data/import/init-service-account-roles.sh

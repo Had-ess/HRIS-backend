@@ -6,8 +6,10 @@ import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.repository.AuditLogRepository;
 import com.hris.common.event.ActorType;
+import com.hris.config.AuditContextFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -45,6 +47,7 @@ public class AuditLogService {
                 .resourceId(resourceId)
                 .previousState(serializeState(previousState))
                 .newState(serializeState(newState))
+                .ipAddress(MDC.get(AuditContextFilter.MDC_CLIENT_IP))
                 .timestamp(Instant.now())
                 .build();
 

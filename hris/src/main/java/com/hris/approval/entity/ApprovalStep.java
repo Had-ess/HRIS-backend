@@ -56,9 +56,6 @@ public class ApprovalStep {
     @Column(name = "decided_at")
     private Instant decidedAt;
 
-    @Version
-    private Integer version;
-
     public boolean isPending() {
         return status == StepStatus.PENDING;
     }

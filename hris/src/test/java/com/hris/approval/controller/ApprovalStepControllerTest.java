@@ -108,6 +108,7 @@ class ApprovalStepControllerTest {
                 ApprovalContext.TEAM,
                 "{\"routingSource\":\"TEAM_HIERARCHY\",\"role\":\"TEAM_LEAD\"}",
                 null,
+                null,
                 null
             ))));
 

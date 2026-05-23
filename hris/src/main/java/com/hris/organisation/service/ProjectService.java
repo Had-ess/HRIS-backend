@@ -2,6 +2,8 @@ package com.hris.organisation.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hris.access.enums.StructuralEventType;
+import com.hris.access.event.StructuralChangeEvent;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.enums.AnalyticsEventType;
 import com.hris.analytics.service.AnalyticsEventPublisher;
@@ -41,6 +43,7 @@ import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -75,6 +78,7 @@ public class ProjectService {
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final TransactionalNotificationPublisher notificationPublisher;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
     public Page<ProjectResponseDto> getAll(UUID userId, Pageable pageable) {
@@ -176,6 +180,10 @@ public class ProjectService {
             saved.getId(), null, saved);
         analyticsEventPublisher.publishProjectAssignmentEvent(AnalyticsEventType.PROJECT_ASSIGNMENT_CREATED, saved);
 
+        if (saved.getAssignmentRole() == com.hris.organisation.enums.ProjectRole.MANAGER) {
+            publishProjectLeadEvent(StructuralEventType.PROJECT_LEAD_ASSIGNED, saved.getEmployeeId(), saved.getId(), actorId);
+        }
+
         scheduleAssignmentNotification(project, employee, supervisor);
 
         return projectMapper.toAssignmentDto(saved);
@@ -262,6 +270,10 @@ public class ProjectService {
 
         auditLogService.log(actorId, AuditAction.UPDATE, "project_assignment",
             assignmentId, previous, assignment);
+
+        if (previous.getAssignmentRole() == com.hris.organisation.enums.ProjectRole.MANAGER) {
+            publishProjectLeadEvent(StructuralEventType.PROJECT_LEAD_REMOVED, previous.getEmployeeId(), assignment.getId(), actorId);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -656,6 +668,9 @@ public class ProjectService {
         ProjectAssignment saved = projectAssignmentRepository.save(assignment);
         auditLogService.log(actorId, AuditAction.CREATE, "project_assignment", saved.getId(), null, saved);
         analyticsEventPublisher.publishProjectAssignmentEvent(AnalyticsEventType.PROJECT_ASSIGNMENT_CREATED, saved);
+        if (saved.getAssignmentRole() == com.hris.organisation.enums.ProjectRole.MANAGER) {
+            publishProjectLeadEvent(StructuralEventType.PROJECT_LEAD_ASSIGNED, saved.getEmployeeId(), saved.getId(), actorId);
+        }
         scheduleAssignmentNotification(project, member, supervisor);
     }
 
@@ -701,6 +716,18 @@ public class ProjectService {
         String suffix = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String code = projectCode + "_" + normalizedName + "_" + suffix;
         return code.length() > 80 ? code.substring(0, 80) : code;
+    }
+
+    private void publishProjectLeadEvent(StructuralEventType type, UUID employeeId, UUID refId, UUID actorId) {
+        if (employeeId == null) {
+            return;
+        }
+        Employee employee = employeeRepository.findById(employeeId).orElse(null);
+        if (employee == null) {
+            return;
+        }
+        applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
+            type, employee.getUserId(), refId, actorId));
     }
 
     private record ProjectReadScope(ProjectReadScopeType type, List<UUID> projectIds) {

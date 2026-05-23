@@ -31,16 +31,23 @@ public class UserAccessAssignmentService {
     public List<UserProfileSummaryDto> getProfiles(UUID userId) {
         ensureUser(userId);
         return userProfileAssignmentRepository.findEffectiveByUserId(userId, Instant.now()).stream()
-            .map(UserProfileAssignment::getProfile)
-            .filter(profile -> profile != null)
-            .sorted(Comparator.comparing(AccessProfile::getCode))
-            .map(profile -> new UserProfileSummaryDto(
-                profile.getId(),
-                profile.getCode(),
-                profile.getDisplayKey(),
-                profile.isActive()
-            ))
+            .filter(assignment -> assignment.getProfile() != null)
+            .sorted(Comparator.comparing(assignment -> assignment.getProfile().getCode()))
+            .map(this::toSummary)
             .toList();
+    }
+
+    private UserProfileSummaryDto toSummary(UserProfileAssignment assignment) {
+        AccessProfile profile = assignment.getProfile();
+        return new UserProfileSummaryDto(
+            profile.getId(),
+            profile.getCode(),
+            profile.getDisplayKey(),
+            profile.isActive(),
+            assignment.getAssignmentSource(),
+            assignment.getSourceEvent(),
+            assignment.getSourceRefId()
+        );
     }
 
     @Transactional

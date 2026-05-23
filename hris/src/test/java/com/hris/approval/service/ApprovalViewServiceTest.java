@@ -123,7 +123,7 @@ class ApprovalViewServiceTest {
             .approverId(missingApproverId)
             .stepOrder(2)
             .status(StepStatus.REJECTED)
-            .context(ApprovalContext.DEPARTMENT)
+            .context(ApprovalContext.TEAM)
             .routingSnapshot("{\"role\":\"DEPT_HEAD\"}")
             .comment("Insufficient coverage")
             .decidedAt(Instant.now())
