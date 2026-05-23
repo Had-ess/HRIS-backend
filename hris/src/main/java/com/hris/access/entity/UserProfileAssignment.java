@@ -53,6 +53,16 @@ public class UserProfileAssignment {
     @Builder.Default
     private boolean isActive = true;
 
+    @Column(name = "assignment_source", nullable = false, length = 20)
+    @Builder.Default
+    private String assignmentSource = "MANUAL";
+
+    @Column(name = "source_event", length = 100)
+    private String sourceEvent;
+
+    @Column(name = "source_ref_id")
+    private UUID sourceRefId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;

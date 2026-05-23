@@ -2,6 +2,7 @@ package com.hris.leave.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hris.access.repository.AccessProfileRepository;
 import com.hris.analytics.enums.ApprovalSourceType;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
@@ -11,8 +12,10 @@ import com.hris.approval.enums.WorkflowStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.approval.service.TeamHierarchyResolver;
+import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
+import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
@@ -20,10 +23,14 @@ import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
+import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.settings.validation.entity.ValidationFallbackMode;
 import com.hris.settings.validation.entity.ValidationMode;
 import com.hris.settings.validation.entity.ValidationWorkflow;
+import com.hris.settings.validation.entity.ValidatorSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,11 +44,15 @@ import java.util.*;
 public class LeaveApprovalWorkflowService {
 
     private static final String FALLBACK_PERMISSION = "LEAVE_REQUEST_FALLBACK_APPROVE";
+    private static final String DEPT_APPROVER_PROFILE_CODE = "DEPT_APPROVER_PROFILE";
 
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final ApprovalStepRepository approvalStepRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;
+    private final AccessProfileRepository accessProfileRepository;
+    private final TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final TeamHierarchyResolver teamHierarchyResolver;
     private final LeaveValidationWorkflowResolver leaveValidationWorkflowResolver;
@@ -86,8 +97,13 @@ public class LeaveApprovalWorkflowService {
         List<RouteApprover> approvers = new ArrayList<>();
         boolean fallbackUsed = false;
         String fallbackReason = null;
+        ValidatorSource source = workflow.getValidatorSource();
 
-        if (teamId != null) {
+        boolean useTeamHierarchy = source == ValidatorSource.TEAM_HIERARCHY
+            || source == ValidatorSource.HYBRID
+            || source == null;
+
+        if (useTeamHierarchy && teamId != null) {
             TeamHierarchyResolver.RouteCandidateList candidateList =
                 teamHierarchyResolver.resolveAboveRequester(teamId, requesterEmployee.getId(), effectiveDate);
             approvers.addAll(toHierarchyApprovers(candidateList, requesterEmployee.getId()));
@@ -95,9 +111,33 @@ public class LeaveApprovalWorkflowService {
                 fallbackUsed = true;
                 fallbackReason = "NO_HIERARCHY_VALIDATOR";
             }
-        } else {
+        } else if (useTeamHierarchy) {
             fallbackUsed = true;
             fallbackReason = "NO_TEAM";
+        }
+
+        boolean teamHead = useTeamHierarchy && approvers.isEmpty()
+            && isTeamChainHead(requesterEmployee.getId(), teamId, effectiveDate);
+        boolean deptHead = approvers.isEmpty() && isDeptHead(requesterEmployee.getId());
+
+        boolean shouldEscalateViaProfiles = approvers.isEmpty() && (
+            source == ValidatorSource.PROFILE_BASED
+                || source == ValidatorSource.HYBRID
+                || teamHead
+                || deptHead
+        );
+
+        if (shouldEscalateViaProfiles) {
+            List<RouteApprover> profileApprovers = resolveProfileBasedEscalation(
+                requesterEmployee, teamHead, deptHead);
+            if (!profileApprovers.isEmpty()) {
+                approvers.addAll(profileApprovers);
+                if (fallbackReason == null) {
+                    fallbackReason = source == ValidatorSource.PROFILE_BASED
+                        ? "PROFILE_BASED_PRIMARY"
+                        : "TEAM_HEAD_CEILING_ESCALATION";
+                }
+            }
         }
 
         if (approvers.isEmpty()) {
@@ -116,6 +156,83 @@ public class LeaveApprovalWorkflowService {
             .toList();
 
         return new RouteResolution(distinctApprovers, fallbackUsed, fallbackReason);
+    }
+
+    private boolean isTeamChainHead(UUID requesterEmployeeId, UUID teamId, LocalDate effectiveDate) {
+        if (teamId == null) {
+            return false;
+        }
+        return teamHierarchyRelationRepository
+            .findByTeamIdAndStatusOrderByStartDateAscCollaboratorEmployeeIdAsc(teamId, TeamHierarchyStatus.ACTIVE)
+            .stream()
+            .filter(relation -> isRelationEffectiveOn(relation, effectiveDate))
+            .anyMatch(relation -> requesterEmployeeId.equals(relation.getCollaboratorEmployeeId())
+                && relation.getResponsibleEmployeeId() == null);
+    }
+
+    private boolean isDeptHead(UUID requesterEmployeeId) {
+        return departmentRepository.existsByHeadEmployeeId(requesterEmployeeId);
+    }
+
+    private boolean isRelationEffectiveOn(TeamHierarchyRelation relation, LocalDate date) {
+        return !relation.getStartDate().isAfter(date)
+            && (relation.getEndDate() == null || !relation.getEndDate().isBefore(date));
+    }
+
+    private List<RouteApprover> resolveProfileBasedEscalation(
+            Employee requesterEmployee,
+            boolean teamHead,
+            boolean deptHead) {
+        List<RouteApprover> approvers = new ArrayList<>();
+        int level = 1;
+
+        if (teamHead && requesterEmployee.getDepartmentId() != null && !deptHead) {
+            Department department = departmentRepository.findById(requesterEmployee.getDepartmentId()).orElse(null);
+            if (department != null
+                && department.getHeadEmployeeId() != null
+                && !department.getHeadEmployeeId().equals(requesterEmployee.getId())) {
+                Employee head = employeeRepository.findById(department.getHeadEmployeeId()).orElse(null);
+                if (head != null && head.getUserId() != null
+                    && !head.getUserId().equals(requesterEmployee.getUserId())) {
+                    approvers.add(new RouteApprover(
+                        head.getId(),
+                        head.getUserId(),
+                        level++,
+                        "PROFILE_BASED",
+                        "DEPT_HEAD",
+                        ApprovalSourceType.PROFILE_BASED,
+                        false,
+                        null
+                    ));
+                }
+            }
+        }
+
+        if (approvers.isEmpty() || deptHead) {
+            UUID profileId = accessProfileRepository.findByCodeIgnoreCase(DEPT_APPROVER_PROFILE_CODE)
+                .map(profile -> profile.getId())
+                .orElse(null);
+            if (profileId != null) {
+                List<User> deptApprovers = userRepository.findByAccessProfileId(profileId);
+                for (User user : deptApprovers) {
+                    if (user == null || !user.isActive() || requesterEmployee.getUserId().equals(user.getId())) {
+                        continue;
+                    }
+                    approvers.add(new RouteApprover(
+                        null,
+                        user.getId(),
+                        level++,
+                        "PROFILE_BASED",
+                        "DEPT_APPROVER_PROFILE",
+                        ApprovalSourceType.PROFILE_BASED,
+                        false,
+                        null
+                    ));
+                }
+            }
+        }
+
+        return approvers;
     }
 
     private List<RouteApprover> toHierarchyApprovers(TeamHierarchyResolver.RouteCandidateList candidateList, UUID requesterEmployeeId) {

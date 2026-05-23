@@ -2,6 +2,7 @@ package com.hris.approval.dto;
 
 import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
+import com.hris.settings.validation.entity.ValidationMode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,5 +23,6 @@ public record ApprovalStepResponseDto(
     ApprovalContext context,
     String routingSnapshot,
     String comment,
-    Instant decidedAt
+    Instant decidedAt,
+    ValidationMode validationMode
 ) {}

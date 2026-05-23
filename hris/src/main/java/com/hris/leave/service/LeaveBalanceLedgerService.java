@@ -173,9 +173,16 @@ public class LeaveBalanceLedgerService {
     public LeaveBalance adjustBalance(UUID employeeId, LeaveBalanceAdjustmentDto dto, UUID actorId) {
         LeaveType leaveType = leaveTypeRepository.findById(dto.leaveTypeId())
             .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
-        int year = LocalDate.now().getYear();
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
         LeaveBalance balance = getOrCreateBalanceForUpdate(employeeId, leaveType.getId(), year);
         balance.adjustTotalDays(BigDecimal.valueOf(dto.amount()));
+        if (balance.getAvailableDays().signum() < 0
+                && !isNegativeBalanceAllowed(leaveType.getId(), today)) {
+            throw new InsufficientLeaveBalanceException(
+                String.format("Adjustment would drive balance negative. Resulting available days: %s", balance.getAvailableDays())
+            );
+        }
         leaveBalanceRepository.save(balance);
         recordTransaction(
             balance,

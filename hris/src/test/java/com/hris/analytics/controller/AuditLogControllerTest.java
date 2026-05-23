@@ -69,8 +69,7 @@ class AuditLogControllerTest {
             null,
             "{\"status\":\"ACTIVE\"}",
             null,
-            Instant.now(),
-            null
+            Instant.now()
         );
 
         when(auditLogQueryService.search(any(), any(), any(), any(), any(), any()))

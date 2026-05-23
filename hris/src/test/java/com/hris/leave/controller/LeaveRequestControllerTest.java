@@ -137,8 +137,9 @@ class LeaveRequestControllerTest {
             "John Doe",
             1,
             StepStatus.PENDING,
-            ApprovalContext.DEPARTMENT,
+            ApprovalContext.TEAM,
             "{\"role\":\"DEPT_HEAD\"}",
+            null,
             null,
             null
         )));
@@ -154,7 +155,7 @@ class LeaveRequestControllerTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(leaveId.toString()))
             .andExpect(jsonPath("$.data.approvalSteps[0].approverName").value("John Doe"))
-            .andExpect(jsonPath("$.data.approvalSteps[0].context").value("DEPARTMENT"))
+            .andExpect(jsonPath("$.data.approvalSteps[0].context").value("TEAM"))
             .andExpect(jsonPath("$.data.approvalSteps[0].status").value("PENDING"));
     }
 

@@ -52,9 +52,6 @@ public class ApprovalWorkflow {
     @Column(name = "completed_at")
     private Instant completedAt;
 
-    @Version
-    private Integer version;
-
     public boolean isComplete() {
         return status == WorkflowStatus.APPROVED
             || status == WorkflowStatus.REJECTED

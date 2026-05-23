@@ -97,7 +97,8 @@ public class ApprovalViewService {
                     step.getContext(),
                     step.getRoutingSnapshot(),
                     step.getComment(),
-                    step.getDecidedAt()
+                    step.getDecidedAt(),
+                    workflow.getValidationMode()
                 ));
         }
 

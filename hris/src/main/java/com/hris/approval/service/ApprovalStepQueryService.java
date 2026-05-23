@@ -66,7 +66,8 @@ public class ApprovalStepQueryService {
             step.getContext(),
             step.getRoutingSnapshot(),
             step.getComment(),
-            step.getDecidedAt()
+            step.getDecidedAt(),
+            workflow != null ? workflow.getValidationMode() : null
         );
     }
 

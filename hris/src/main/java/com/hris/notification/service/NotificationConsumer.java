@@ -98,9 +98,13 @@ public class NotificationConsumer {
             log.debug("Found target user for notification event type={}, userId={}",
                 event.getEventType(), user.getId());
 
-            // Use user's locale preference, not event's locale
+            // Resolve locale: prefer user preference, then event locale, then default to "fr".
+            String preferred = user.getLocalePreference();
+            if (preferred == null || preferred.isBlank()) {
+                preferred = event.getLocale();
+            }
             Locale locale = Locale.forLanguageTag(
-                user.getLocalePreference() != null ? user.getLocalePreference() : "fr");
+                preferred != null && !preferred.isBlank() ? preferred : "fr");
 
             Object[] paramsArray = deserializeParams(event);
             log.debug("Deserialized {} notification params for event type={}",
