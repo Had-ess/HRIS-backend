@@ -2,6 +2,7 @@ package com.hris.organisation.service;
 
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,14 +46,29 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public PageResponse<TeamDto> getAll(UUID actorId, Pageable pageable) {
-        enforceReadAccess(actorId);
-        return PageResponse.of(teamRepository.findAllByOrderByNameAsc(pageable).map(this::toDto));
+        TeamReadScope scope = resolveReadScope(actorId);
+        return switch (scope.type()) {
+            case GLOBAL -> PageResponse.of(teamRepository.findAllByOrderByNameAsc(pageable).map(this::toDto));
+            case DEPARTMENT -> PageResponse.of(teamRepository.findByDepartmentIdOrderByNameAsc(scope.departmentId(), pageable).map(this::toDto));
+            case DEPARTMENTS -> PageResponse.of(teamRepository.findByDepartmentIdInOrderByNameAsc(scope.departmentIds(), pageable).map(this::toDto));
+            case SELF -> PageResponse.of(org.springframework.data.domain.Page.empty(pageable));
+        };
     }
 
     @Transactional(readOnly = true)
     public TeamDto getById(UUID id, UUID actorId) {
-        enforceReadAccess(actorId);
-        return toDto(getEntity(id));
+        TeamReadScope scope = resolveReadScope(actorId);
+        Team team = getEntity(id);
+        if (scope.type() == TeamReadScopeType.DEPARTMENT && !scope.departmentId().equals(team.getDepartmentId())) {
+            throw new AccessDeniedException("You are not allowed to access teams");
+        }
+        if (scope.type() == TeamReadScopeType.DEPARTMENTS && !scope.departmentIds().contains(team.getDepartmentId())) {
+            throw new AccessDeniedException("You are not allowed to access teams");
+        }
+        if (scope.type() == TeamReadScopeType.SELF) {
+            throw new AccessDeniedException("You are not allowed to access teams");
+        }
+        return toDto(team);
     }
 
     @Transactional
@@ -205,10 +222,42 @@ public class TeamService {
         return state;
     }
 
-    private void enforceReadAccess(UUID actorId) {
-        if (!accessScopeService.hasPermissionName(actorId, "TEAM_READ")
-            && !accessScopeService.hasPermissionName(actorId, "TEAM_MANAGE")) {
-            throw new AccessDeniedException("You are not allowed to access teams");
+    private TeamReadScope resolveReadScope(UUID actorId) {
+        AccessResolutionService.ScopeResolution scope = accessScopeService.resolveDepartmentDataScope(actorId);
+        if (scope.isGlobal()) {
+            return TeamReadScope.global();
         }
+        if (scope.isDepartment() && !scope.departmentIds().isEmpty()) {
+            if (scope.departmentIds().size() == 1) {
+                return TeamReadScope.department(scope.departmentIds().get(0));
+            }
+            return TeamReadScope.departments(scope.departmentIds());
+        }
+        return TeamReadScope.self();
+    }
+
+    private record TeamReadScope(TeamReadScopeType type, UUID departmentId, List<UUID> departmentIds) {
+        static TeamReadScope global() {
+            return new TeamReadScope(TeamReadScopeType.GLOBAL, null, List.of());
+        }
+
+        static TeamReadScope department(UUID departmentId) {
+            return new TeamReadScope(TeamReadScopeType.DEPARTMENT, departmentId, List.of(departmentId));
+        }
+
+        static TeamReadScope departments(List<UUID> departmentIds) {
+            return new TeamReadScope(TeamReadScopeType.DEPARTMENTS, null, List.copyOf(departmentIds));
+        }
+
+        static TeamReadScope self() {
+            return new TeamReadScope(TeamReadScopeType.SELF, null, List.of());
+        }
+    }
+
+    private enum TeamReadScopeType {
+        GLOBAL,
+        DEPARTMENT,
+        DEPARTMENTS,
+        SELF
     }
 }

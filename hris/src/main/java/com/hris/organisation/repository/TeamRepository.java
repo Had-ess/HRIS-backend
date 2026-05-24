@@ -38,4 +38,8 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
           and t.isActive = true
         """)
     List<UUID> findProjectIdsBySupervisorEmployeeId(@Param("supervisorEmployeeId") UUID supervisorEmployeeId);
+
+    Page<Team> findByDepartmentIdInOrderByNameAsc(List<UUID> departmentIds, Pageable pageable);
+
+    Page<Team> findByDepartmentIdOrderByNameAsc(UUID departmentId, Pageable pageable);
 }

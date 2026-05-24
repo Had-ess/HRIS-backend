@@ -30,6 +30,7 @@ import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.service.WorkScheduleService;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.security.service.AccessScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,6 +57,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -110,6 +112,9 @@ class LeaveRequestServiceTest {
             .firstName("John")
             .lastName("Doe")
             .build();
+
+        lenient().when(accessScopeService.resolveDepartmentDataScope(any()))
+            .thenReturn(AccessResolutionService.ScopeResolution.self());
 
         leaveType = LeaveType.builder()
             .id(leaveTypeId)

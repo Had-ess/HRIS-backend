@@ -76,14 +76,13 @@ public class LeaveBalanceService {
     }
 
     private void assertLeaveBalanceVisibility(Employee targetEmployee, UUID requesterId) {
-        if (accessScopeService.hasGlobalBusinessRead(requesterId)) {
+        com.hris.access.service.AccessResolutionService.ScopeResolution scope =
+            accessScopeService.resolveDepartmentDataScope(requesterId);
+        if (scope.isGlobal()) {
             return;
         }
 
-        Employee requesterEmployee = accessScopeService.findEmployee(requesterId).orElse(null);
-        UUID managedDepartmentId = accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee)
-            .orElse(null);
-        if (managedDepartmentId != null && managedDepartmentId.equals(targetEmployee.getDepartmentId())) {
+        if (scope.isDepartment() && scope.departmentIds().contains(targetEmployee.getDepartmentId())) {
             return;
         }
 
@@ -280,19 +279,25 @@ public class LeaveBalanceService {
             return List.of(employeeId);
         }
 
-        if (accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")
-            || accessScopeService.hasGlobalBusinessRead(requesterId)) {
+        com.hris.access.service.AccessResolutionService.ScopeResolution scope =
+            accessScopeService.resolveDepartmentDataScope(requesterId);
+        if (scope.isGlobal()) {
             return null;
         }
 
         if (accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_SCOPED")) {
+            if (scope.isDepartment() && !scope.departmentIds().isEmpty()) {
+                List<UUID> ids = new ArrayList<>();
+                for (UUID departmentId : scope.departmentIds()) {
+                    ids.addAll(employeeRepository.findByDepartmentId(departmentId).stream().map(Employee::getId).toList());
+                }
+                return ids;
+            }
             Employee requesterEmployee = accessScopeService.getEmployeeOrThrow(requesterId);
-            UUID departmentId = accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee)
-                .orElse(null);
-            if (departmentId == null) {
+            if (requesterEmployee.getDepartmentId() == null) {
                 return List.of();
             }
-            return employeeRepository.findByDepartmentId(departmentId).stream()
+            return employeeRepository.findByDepartmentId(requesterEmployee.getDepartmentId()).stream()
                 .map(Employee::getId)
                 .toList();
         }

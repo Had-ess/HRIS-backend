@@ -72,4 +72,30 @@ public class PermissionAuthorizationService {
             throw new AccessDeniedException("You do not have permission to perform this action");
         }
     }
+
+    /**
+     * Returns whether the authenticated user holds {@code permissionName} for the given scope
+     * entity. MANUAL profile assignments grant unrestricted access; SYSTEM-granted assignments
+     * only match when their {@code source_ref_id} equals {@code scopeEntityId}.
+     */
+    public boolean hasPermissionInScope(Authentication authentication, String permissionName, UUID scopeEntityId) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        UUID userId;
+        try {
+            userId = SecurityUtils.getCurrentUserId(authentication);
+        } catch (IllegalStateException ex) {
+            return false;
+        }
+
+        return accessResolutionService.hasPermissionInScope(userId, permissionName, scopeEntityId);
+    }
+
+    public void authorizePermissionInScope(Authentication authentication, String permissionName, UUID scopeEntityId) {
+        if (!hasPermissionInScope(authentication, permissionName, scopeEntityId)) {
+            throw new AccessDeniedException("You do not have permission to perform this action in this scope");
+        }
+    }
 }

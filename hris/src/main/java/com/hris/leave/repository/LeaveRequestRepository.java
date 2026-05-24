@@ -110,6 +110,58 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
         Pageable pageable);
 
     @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId IN :departmentIds
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdInOrderBySubmittedAtDesc(
+        @Param("departmentIds") List<UUID> departmentIds,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId IN :departmentIds
+          AND lr.status = :status
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdInAndStatusOrderBySubmittedAtDesc(
+        @Param("departmentIds") List<UUID> departmentIds,
+        @Param("status") LeaveStatus status,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId IN :departmentIds
+          AND lr.employeeId = :employeeId
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdInAndEmployeeIdOrderBySubmittedAtDesc(
+        @Param("departmentIds") List<UUID> departmentIds,
+        @Param("employeeId") UUID employeeId,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr
+        FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId IN :departmentIds
+          AND lr.employeeId = :employeeId
+          AND lr.status = :status
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findByDepartmentIdInAndEmployeeIdAndStatusOrderBySubmittedAtDesc(
+        @Param("departmentIds") List<UUID> departmentIds,
+        @Param("employeeId") UUID employeeId,
+        @Param("status") LeaveStatus status,
+        Pageable pageable);
+
+    @Query("""
         SELECT COUNT(lr) FROM LeaveRequest lr
         WHERE lr.status = :status
           AND lr.startDate <= :date

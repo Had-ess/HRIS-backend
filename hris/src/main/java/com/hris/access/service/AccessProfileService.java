@@ -26,15 +26,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AccessProfileService {
+
+    private static final Map<String, List<String>> MENU_REQUIRED_PERMISSIONS = Map.of(
+        "menu.administration.employees", List.of("EMPLOYEE_READ", "EMPLOYEE_MANAGE", "DEPARTMENT_READ"),
+        "menu.administration.teams", List.of("TEAM_READ", "TEAM_MANAGE", "DEPARTMENT_READ", "DEPARTMENT_MANAGE", "EMPLOYEE_READ", "EMPLOYEE_MANAGE", "PROJECT_PORTFOLIO_MANAGE", "PROJECT_ASSIGNMENT_MANAGE"),
+        "menu.administration.teamHierarchy", List.of("TEAM_READ"),
+        "menu.settings.projects", List.of("PROJECT_PORTFOLIO_MANAGE", "PROJECT_ASSIGNMENT_MANAGE", "TEAM_MANAGE", "TEAM_READ", "DEPARTMENT_READ", "DEPARTMENT_MANAGE", "EMPLOYEE_READ", "EMPLOYEE_MANAGE")
+    );
 
     private final AccessProfileRepository accessProfileRepository;
     private final PermissionRepository permissionRepository;
@@ -154,9 +164,11 @@ public class AccessProfileService {
         getEntity(profileId);
         profileMenuAccessRepository.deleteByProfileId(profileId);
         Instant grantedAt = Instant.now();
+        List<MenuItem> selectedMenuItems = new ArrayList<>();
         for (UUID menuItemId : menuItemIds) {
-            menuItemRepository.findById(menuItemId)
+            MenuItem menuItem = menuItemRepository.findById(menuItemId)
                 .orElseThrow(() -> new EntityNotFoundException("Menu item not found"));
+            selectedMenuItems.add(menuItem);
             profileMenuAccessRepository.save(ProfileMenuAccess.builder()
                 .profileId(profileId)
                 .menuItemId(menuItemId)
@@ -164,6 +176,7 @@ public class AccessProfileService {
                 .grantedById(actorId)
                 .build());
         }
+        grantPermissionsRequiredByMenus(profileId, selectedMenuItems, actorId, grantedAt);
         auditLogService.log(actorId, AuditAction.UPDATE, "access_profile_menu", profileId, null, menuItemIds);
         return getMenus(profileId);
     }
@@ -233,6 +246,36 @@ public class AccessProfileService {
 
     private String normalizeCode(String code) {
         return code.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private void grantPermissionsRequiredByMenus(
+            UUID profileId,
+            List<MenuItem> selectedMenuItems,
+            UUID actorId,
+            Instant grantedAt) {
+        Set<String> requiredPermissionNames = selectedMenuItems.stream()
+            .flatMap(menuItem -> MENU_REQUIRED_PERMISSIONS.getOrDefault(menuItem.getCode(), List.of()).stream())
+            .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+        if (requiredPermissionNames.isEmpty()) {
+            return;
+        }
+
+        Set<UUID> existingPermissionIds = profilePermissionRepository.findByProfileId(profileId).stream()
+            .map(ProfilePermission::getPermissionId)
+            .collect(java.util.stream.Collectors.toSet());
+
+        for (String permissionName : requiredPermissionNames) {
+            Permission permission = permissionRepository.findByNameIgnoreCase(permissionName)
+                .orElseThrow(() -> new EntityNotFoundException("Permission not found"));
+            if (existingPermissionIds.add(permission.getId())) {
+                profilePermissionRepository.save(ProfilePermission.builder()
+                    .profileId(profileId)
+                    .permissionId(permission.getId())
+                    .grantedAt(grantedAt)
+                    .grantedById(actorId)
+                    .build());
+            }
+        }
     }
 
     private Map<String, Object> snapshot(AccessProfile profile) {

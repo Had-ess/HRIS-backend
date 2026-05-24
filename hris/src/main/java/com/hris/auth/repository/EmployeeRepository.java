@@ -37,6 +37,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     Page<Employee> findByDepartmentId(UUID departmentId, Pageable pageable);
 
+    Page<Employee> findByDepartmentIdIn(List<UUID> departmentIds, Pageable pageable);
+
     Page<Employee> findAll(Pageable pageable);
 
     @Query("SELECT COUNT(e) FROM Employee e WHERE e.hireDate >= :since")

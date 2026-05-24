@@ -2,6 +2,7 @@ package com.hris.auth.service;
 
 import com.hris.access.enums.StructuralEventType;
 import com.hris.access.event.StructuralChangeEvent;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.DepartmentCreateDto;
@@ -55,6 +56,13 @@ public class DepartmentService {
                 }
                 yield departmentRepository.findAllByIdIn(List.of(scope.departmentId()), pageable).map(this::toDto);
             }
+            case DEPARTMENTS -> {
+                if (scope.departmentIds().isEmpty()) {
+                    yield Page.empty(pageable);
+                }
+                yield departmentRepository.findAllByIdIn(scope.departmentIds(), pageable).map(this::toDto);
+            }
+            case SELF -> Page.empty(pageable);
         };
     }
 
@@ -62,6 +70,12 @@ public class DepartmentService {
     public DepartmentDto getById(UUID id, UUID userId) {
         DepartmentReadScope scope = resolveReadScope(userId);
         if (scope.type() == DepartmentReadScopeType.DEPARTMENT && !id.equals(scope.departmentId())) {
+            throw new AccessDeniedException("You are not allowed to access this department");
+        }
+        if (scope.type() == DepartmentReadScopeType.DEPARTMENTS && !scope.departmentIds().contains(id)) {
+            throw new AccessDeniedException("You are not allowed to access this department");
+        }
+        if (scope.type() == DepartmentReadScopeType.SELF) {
             throw new AccessDeniedException("You are not allowed to access this department");
         }
 
@@ -198,34 +212,38 @@ public class DepartmentService {
     }
 
     private DepartmentReadScope resolveReadScope(UUID userId) {
-        if (accessScopeService.hasGlobalBusinessRead(userId)) {
+        AccessResolutionService.ScopeResolution scope = accessScopeService.resolveDepartmentDataScope(userId);
+        if (scope.isGlobal()) {
             return DepartmentReadScope.all();
         }
-
-        if (!accessScopeService.hasPermissionName(userId, "DEPARTMENT_READ")) {
-            return DepartmentReadScope.all();
+        if (scope.isDepartment() && !scope.departmentIds().isEmpty()) {
+            return DepartmentReadScope.departments(scope.departmentIds());
         }
-
-        return DepartmentReadScope.department(
-            accessScopeService.resolveDepartmentManagerDepartmentId(
-                userId,
-                accessScopeService.findEmployee(userId).orElse(null)
-            ).orElse(null)
-        );
+        return DepartmentReadScope.self();
     }
 
-    private record DepartmentReadScope(DepartmentReadScopeType type, UUID departmentId) {
+    private record DepartmentReadScope(DepartmentReadScopeType type, UUID departmentId, List<UUID> departmentIds) {
         static DepartmentReadScope all() {
-            return new DepartmentReadScope(DepartmentReadScopeType.ALL, null);
+            return new DepartmentReadScope(DepartmentReadScopeType.ALL, null, List.of());
         }
 
         static DepartmentReadScope department(UUID departmentId) {
-            return new DepartmentReadScope(DepartmentReadScopeType.DEPARTMENT, departmentId);
+            return new DepartmentReadScope(DepartmentReadScopeType.DEPARTMENT, departmentId, List.of(departmentId));
+        }
+
+        static DepartmentReadScope departments(List<UUID> departmentIds) {
+            return new DepartmentReadScope(DepartmentReadScopeType.DEPARTMENTS, null, List.copyOf(departmentIds));
+        }
+
+        static DepartmentReadScope self() {
+            return new DepartmentReadScope(DepartmentReadScopeType.SELF, null, List.of());
         }
     }
 
     private enum DepartmentReadScopeType {
         ALL,
-        DEPARTMENT
+        DEPARTMENT,
+        DEPARTMENTS,
+        SELF
     }
 }

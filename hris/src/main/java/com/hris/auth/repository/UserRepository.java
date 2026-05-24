@@ -60,4 +60,35 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         ORDER BY u.email ASC
         """)
     List<User> findByAccessProfileId(@Param("profileId") UUID profileId);
+
+    /**
+     * Returns users holding the given profile, honoring scoped assignments.
+     *
+     * <p>MANUAL assignments are always unrestricted (a System Administrator or HR Admin who was
+     * granted the profile by hand is never scope-limited). Only SYSTEM-granted assignments enforce
+     * scope, and they only match when {@code source_ref_id} equals the supplied
+     * {@code scopeEntityId} (typically the department being approved for).
+     *
+     * @param profileId      profile code id (e.g. DEPT_APPROVER_PROFILE)
+     * @param scopeEntityId  the entity the caller is filtering against (e.g. requester's department)
+     */
+    @Query("""
+        SELECT DISTINCT u FROM User u
+        JOIN UserProfileAssignment assignment ON assignment.userId = u.id
+        JOIN AccessProfile profile ON profile.id = assignment.profileId
+        WHERE assignment.isActive = true
+          AND assignment.assignedAt <= CURRENT_TIMESTAMP
+          AND (assignment.expiresAt IS NULL OR assignment.expiresAt > CURRENT_TIMESTAMP)
+          AND profile.isActive = true
+          AND profile.id = :profileId
+          AND (
+                assignment.assignmentSource = 'MANUAL'
+             OR (assignment.assignmentSource = 'SYSTEM' AND assignment.sourceRefId = :scopeEntityId)
+          )
+        ORDER BY u.email ASC
+        """)
+    List<User> findByAccessProfileIdScopedTo(
+        @Param("profileId") UUID profileId,
+        @Param("scopeEntityId") UUID scopeEntityId
+    );
 }

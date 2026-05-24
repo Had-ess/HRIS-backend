@@ -9,7 +9,7 @@ import com.hris.approval.enums.WorkflowStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.approval.service.TeamHierarchyResolver;
-import com.hris.access.repository.AccessProfileRepository;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.DepartmentRepository;
@@ -42,6 +42,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +54,7 @@ class LeaveApprovalWorkflowServiceTest {
     @Mock private EmployeeRepository employeeRepository;
     @Mock private UserRepository userRepository;
     @Mock private DepartmentRepository departmentRepository;
-    @Mock private AccessProfileRepository accessProfileRepository;
+    @Mock private AccessResolutionService accessResolutionService;
     @Mock private TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
     @Mock private TeamHierarchyResolver teamHierarchyResolver;
@@ -75,7 +76,7 @@ class LeaveApprovalWorkflowServiceTest {
             employeeRepository,
             userRepository,
             departmentRepository,
-            accessProfileRepository,
+            accessResolutionService,
             teamHierarchyRelationRepository,
             projectAssignmentRepository,
             teamHierarchyResolver,
@@ -212,6 +213,36 @@ class LeaveApprovalWorkflowServiceTest {
         assertThat(result.steps()).hasSize(1);
         assertThat(result.steps().getFirst().getApproverId()).isEqualTo(fallbackUserId);
         assertThat(result.steps().getFirst().getSourceType()).isEqualTo(ApprovalSourceType.FALLBACK);
+    }
+
+    @Test
+    @DisplayName("profile-based department fallback only uses approvers scoped to requester's department")
+    void profileBasedDepartmentFallbackUsesScopedApprovers() {
+        UUID departmentId = UUID.randomUUID();
+        UUID scopedApproverEmployeeId = UUID.randomUUID();
+        UUID scopedApproverUserId = UUID.randomUUID();
+        requester.setDepartmentId(departmentId);
+        workflow.setValidatorSource(ValidatorSource.PROFILE_BASED);
+
+        when(leaveValidationWorkflowResolver.resolveForLeaveType(leaveType)).thenReturn(workflow);
+        when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(any(), any(), any())).thenReturn(List.of());
+        when(accessResolutionService.findEmployeesWithScopedProfile(
+            eq("DEPT_APPROVER_PROFILE"),
+            eq(departmentId),
+            eq(requester.getUserId()),
+            any()
+        )).thenReturn(List.of(Employee.builder()
+            .id(scopedApproverEmployeeId)
+            .userId(scopedApproverUserId)
+            .build()));
+        when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(approvalStepRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.instantiate(leaveRequest, requester, leaveType);
+
+        assertThat(result.steps()).hasSize(1);
+        assertThat(result.steps().getFirst().getApproverId()).isEqualTo(scopedApproverUserId);
+        assertThat(result.steps().getFirst().getSourceType()).isEqualTo(ApprovalSourceType.PROFILE_BASED);
     }
 
     @Test

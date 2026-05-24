@@ -2,7 +2,7 @@ package com.hris.leave.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hris.access.repository.AccessProfileRepository;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.analytics.enums.ApprovalSourceType;
 import com.hris.approval.entity.ApprovalStep;
 import com.hris.approval.entity.ApprovalWorkflow;
@@ -44,14 +44,13 @@ import java.util.*;
 public class LeaveApprovalWorkflowService {
 
     private static final String FALLBACK_PERMISSION = "LEAVE_REQUEST_FALLBACK_APPROVE";
-    private static final String DEPT_APPROVER_PROFILE_CODE = "DEPT_APPROVER_PROFILE";
 
     private final ApprovalWorkflowRepository approvalWorkflowRepository;
     private final ApprovalStepRepository approvalStepRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
-    private final AccessProfileRepository accessProfileRepository;
+    private final AccessResolutionService accessResolutionService;
     private final TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final TeamHierarchyResolver teamHierarchyResolver;
@@ -209,30 +208,47 @@ public class LeaveApprovalWorkflowService {
         }
 
         if (approvers.isEmpty() || deptHead) {
-            UUID profileId = accessProfileRepository.findByCodeIgnoreCase(DEPT_APPROVER_PROFILE_CODE)
-                .map(profile -> profile.getId())
-                .orElse(null);
-            if (profileId != null) {
-                List<User> deptApprovers = userRepository.findByAccessProfileId(profileId);
-                for (User user : deptApprovers) {
-                    if (user == null || !user.isActive() || requesterEmployee.getUserId().equals(user.getId())) {
-                        continue;
-                    }
-                    approvers.add(new RouteApprover(
-                        null,
-                        user.getId(),
-                        level++,
-                        "PROFILE_BASED",
-                        "DEPT_APPROVER_PROFILE",
-                        ApprovalSourceType.PROFILE_BASED,
-                        false,
-                        null
-                    ));
+            UUID scopeDepartmentId = requesterEmployee.getDepartmentId();
+            if (scopeDepartmentId == null) {
+                return approvers;
+            }
+            List<Employee> deptApprovers = findScopedApprovalApprovers(
+                scopeDepartmentId,
+                requesterEmployee.getUserId()
+            );
+            for (Employee employee : deptApprovers) {
+                if (employee == null || employee.getUserId() == null || requesterEmployee.getUserId().equals(employee.getUserId())) {
+                    continue;
                 }
+                approvers.add(new RouteApprover(
+                    employee.getId(),
+                    employee.getUserId(),
+                    level++,
+                    "PROFILE_BASED",
+                    "SCOPED_APPROVAL_PROFILE",
+                    ApprovalSourceType.PROFILE_BASED,
+                    false,
+                    null
+                ));
             }
         }
 
         return approvers;
+    }
+
+    private List<Employee> findScopedApprovalApprovers(UUID scopeDepartmentId, UUID excludeUserId) {
+        return userRepository.findByPermissionNames(List.of("LEAVE_REQUEST_APPROVE")).stream()
+            .filter(user -> user != null && user.isActive() && !excludeUserId.equals(user.getId()))
+            .map(user -> employeeRepository.findByUserId(user.getId()).orElse(null))
+            .filter(Objects::nonNull)
+            .filter(employee -> {
+                AccessResolutionService.ScopeResolution scope = accessResolutionService.resolveApprovalScope(employee.getUserId());
+                if (scope.isGlobal()) {
+                    return true;
+                }
+                return scope.isDepartment() && scope.departmentIds().contains(scopeDepartmentId);
+            })
+            .toList();
     }
 
     private List<RouteApprover> toHierarchyApprovers(TeamHierarchyResolver.RouteCandidateList candidateList, UUID requesterEmployeeId) {

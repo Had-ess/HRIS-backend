@@ -1,6 +1,7 @@
 package com.hris.access.repository;
 
 import com.hris.access.entity.UserProfileAssignment;
+import com.hris.auth.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -53,6 +54,28 @@ public interface UserProfileAssignmentRepository extends JpaRepository<UserProfi
     boolean existsByUserIdAndProfileIdAndIsActiveTrue(UUID userId, UUID profileId);
 
     long countByProfileIdAndIsActiveTrue(UUID profileId);
+
+    @Query("""
+        SELECT DISTINCT e FROM Employee e
+        JOIN User u ON u.id = e.userId
+        JOIN UserProfileAssignment upa ON upa.userId = u.id
+        JOIN AccessProfile ap ON ap.id = upa.profileId
+        WHERE ap.code = :profileCode
+          AND upa.isActive = true
+          AND (upa.expiresAt IS NULL OR upa.expiresAt > :now)
+          AND (
+                upa.assignmentSource = 'MANUAL'
+             OR (upa.assignmentSource = 'SYSTEM' AND upa.sourceRefId = :scopeEntityId)
+          )
+          AND u.id != :excludeUserId
+        ORDER BY e.employeeCode ASC
+        """)
+    List<Employee> findEmployeesWithScopedProfile(
+        @Param("profileCode") String profileCode,
+        @Param("scopeEntityId") UUID scopeEntityId,
+        @Param("excludeUserId") UUID excludeUserId,
+        @Param("now") Instant now
+    );
 
     void deleteByUserId(UUID userId);
 }

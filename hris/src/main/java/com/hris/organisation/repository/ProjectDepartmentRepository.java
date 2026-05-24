@@ -30,6 +30,13 @@ public interface ProjectDepartmentRepository extends JpaRepository<ProjectDepart
     List<UUID> findProjectIdsByDepartmentId(@Param("departmentId") UUID departmentId);
 
     @Query("""
+        select distinct pd.projectId
+        from ProjectDepartment pd
+        where pd.departmentId in :departmentIds
+        """)
+    List<UUID> findProjectIdsByDepartmentIds(@Param("departmentIds") List<UUID> departmentIds);
+
+    @Query("""
         select count(pd) > 0
         from ProjectDepartment pd
         join Project p on p.id = pd.projectId
