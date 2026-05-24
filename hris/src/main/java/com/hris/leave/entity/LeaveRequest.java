@@ -5,6 +5,7 @@ import com.hris.leave.enums.PartialLeaveMode;
 import com.hris.leave.enums.UrgencyLevel;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -15,15 +16,16 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "leave_requests")
+@Where(clause = "deleted_at IS NULL")
 @Getter @Setter @NoArgsConstructor @Builder @AllArgsConstructor
 public class LeaveRequest {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "employee_id", nullable = false) private UUID employeeId;
-    @Column(name = "leave_type_id", nullable = false) private UUID leaveTypeId;
-    @Column(name = "start_date", nullable = false) private LocalDate startDate;
-    @Column(name = "end_date", nullable = false) private LocalDate endDate;
+    @Column(name = "leave_type_id") private UUID leaveTypeId;
+    @Column(name = "start_date") private LocalDate startDate;
+    @Column(name = "end_date") private LocalDate endDate;
     @Column(name = "working_days", nullable = false) private int workingDays;
     @Column(name = "is_half_day", nullable = false) @Builder.Default private boolean isHalfDay = false;
     @Column(name = "duration_days", nullable = false, precision = 10, scale = 3) @Builder.Default private BigDecimal durationDays = BigDecimal.ZERO;
@@ -37,7 +39,7 @@ public class LeaveRequest {
     private PartialLeaveMode partialMode = PartialLeaveMode.FULL_DAY;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "urgency_level", nullable = false, length = 50)
+    @Column(name = "urgency_level", length = 50)
     private UrgencyLevel urgencyLevel;
 
     @Enumerated(EnumType.STRING)
@@ -47,6 +49,12 @@ public class LeaveRequest {
 
     @Column(name = "submitted_at", nullable = false)
     @Builder.Default private Instant submittedAt = Instant.now();
+
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @Version private Integer version;
 
