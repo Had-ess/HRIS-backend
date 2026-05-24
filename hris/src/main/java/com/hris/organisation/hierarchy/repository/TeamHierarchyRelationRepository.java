@@ -13,4 +13,15 @@ public interface TeamHierarchyRelationRepository extends JpaRepository<TeamHiera
         UUID teamId,
         TeamHierarchyStatus status
     );
+
+    List<TeamHierarchyRelation> findByCollaboratorEmployeeIdAndStatusOrderByStartDateAscTeamIdAsc(
+        UUID collaboratorEmployeeId,
+        TeamHierarchyStatus status
+    );
+
+    boolean existsByTeamId(UUID teamId);
+
+    void deleteByTeamId(UUID teamId);
+
+    void deleteByTeamIdIn(List<UUID> teamIds);
 }

@@ -48,7 +48,7 @@ public class UserDeletionService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        validateDeletionAllowed(userId);
+        boolean hasImmutableReferences = hasImmutableReferences(userId);
 
         if (user.getKeycloakId() != null && !user.getKeycloakId().isBlank()) {
             keycloakAdminClient.deleteUser(user.getKeycloakId());
@@ -60,27 +60,36 @@ public class UserDeletionService {
             StructuralEventType.EMPLOYEE_OFFBOARDED, userId, userId, actorId));
         userAccessAssignmentService.getProfiles(userId)
             .forEach(profile -> userAccessAssignmentService.removeProfile(userId, profile.id(), actorId));
+
+        if (hasImmutableReferences) {
+            archiveUser(user);
+            userRepository.save(user);
+            auditLogService.log(actorId, AuditAction.UPDATE, "user",
+                userId, null, user);
+            return;
+        }
+
         userRepository.delete(user);
 
         auditLogService.log(actorId, AuditAction.DELETE, "user", userId, user, null);
     }
 
-    private void validateDeletionAllowed(UUID userId) {
-        if (approvalStepRepository.existsByApproverId(userId)) {
-            throw new IllegalStateException("User cannot be deleted because it is referenced in approval history");
-        }
-        if (fileAttachmentRepository.existsByUploadedById(userId)) {
-            throw new IllegalStateException("User cannot be deleted because it is referenced by uploaded files");
-        }
-        if (adminRequestRepository.existsByRequesterUserId(userId)
-            || adminRequestRepository.existsByProcessedByUserId(userId)) {
-            throw new IllegalStateException("User cannot be deleted because it is referenced by administrative requests");
-        }
-        if (auditLogRepository.existsByActorId(userId)) {
-            throw new IllegalStateException("User cannot be deleted because it is referenced in audit history");
-        }
-        if (exportRecordRepository.existsByExportedById(userId)) {
-            throw new IllegalStateException("User cannot be deleted because it is referenced by exported reports");
-        }
+    private boolean hasImmutableReferences(UUID userId) {
+        return approvalStepRepository.existsByApproverId(userId)
+            || fileAttachmentRepository.existsByUploadedById(userId)
+            || adminRequestRepository.existsByRequesterUserId(userId)
+            || adminRequestRepository.existsByProcessedByUserId(userId)
+            || auditLogRepository.existsByActorId(userId)
+            || exportRecordRepository.existsByExportedById(userId);
+    }
+
+    private void archiveUser(User user) {
+        UUID userId = user.getId();
+        user.setActive(false);
+        user.setSeed(false);
+        user.setFirstName("Deleted");
+        user.setLastName("User");
+        user.setEmail("deleted+" + userId + "@hris.local");
+        user.setKeycloakId("deleted-" + userId);
     }
 }

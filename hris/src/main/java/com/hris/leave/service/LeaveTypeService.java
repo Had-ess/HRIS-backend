@@ -10,6 +10,7 @@ import com.hris.settings.validation.entity.ValidationUsage;
 import com.hris.settings.validation.entity.ValidationWorkflow;
 import com.hris.settings.validation.repository.ValidationWorkflowRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +82,21 @@ public class LeaveTypeService {
             .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
         existing.setActive(false);
         leaveTypeRepository.save(existing);
+    }
+
+    @Transactional
+    public void hardDelete(UUID id) {
+        LeaveType existing = leaveTypeRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
+        if (existing.isActive()) {
+            throw new IllegalStateException("Leave type must be deactivated before deletion");
+        }
+        try {
+            leaveTypeRepository.delete(existing);
+            leaveTypeRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Leave type cannot be deleted because it is still referenced");
+        }
     }
 
     private LeaveTypeDto toDto(LeaveType leaveType) {

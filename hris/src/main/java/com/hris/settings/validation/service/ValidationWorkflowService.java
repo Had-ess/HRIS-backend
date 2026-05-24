@@ -17,6 +17,7 @@ import com.hris.settings.validation.dto.ValidationWorkflowOptionsDto;
 import com.hris.settings.validation.entity.*;
 import com.hris.settings.validation.repository.ValidationWorkflowRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +91,22 @@ public class ValidationWorkflowService {
         workflow.setActive(false);
         repository.save(workflow);
         auditLogService.log(actorId, AuditAction.UPDATE, "validation_workflow", workflow.getId(), previous, snapshot(workflow));
+    }
+
+    @Transactional
+    public void hardDelete(UUID id, UUID actorId) {
+        ValidationWorkflow workflow = getEntity(id);
+        if (workflow.isActive()) {
+            throw new IllegalStateException("Validation workflow must be deactivated before deletion");
+        }
+        ensureNotReferencedByLeaveTypes(workflow.getId());
+        try {
+            repository.delete(workflow);
+            repository.flush();
+            auditLogService.log(actorId, AuditAction.DELETE, "validation_workflow", workflow.getId(), snapshot(workflow), null);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Validation workflow cannot be deleted because it is still referenced");
+        }
     }
 
     @Transactional(readOnly = true)

@@ -16,6 +16,8 @@ public interface ProjectDepartmentRepository extends JpaRepository<ProjectDepart
 
     List<ProjectDepartment> findByProjectId(UUID projectId);
 
+    void deleteByProjectId(UUID projectId);
+
     Optional<ProjectDepartment> findByProjectIdAndDepartmentId(UUID projectId, UUID departmentId);
 
     boolean existsByProjectIdAndDepartmentId(UUID projectId, UUID departmentId);

@@ -33,6 +33,7 @@ import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.entity.ProjectDepartment;
 import com.hris.organisation.entity.Team;
 import com.hris.organisation.entity.TeamProjectLink;
+import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
@@ -45,6 +46,7 @@ import com.hris.notification.service.TransactionalNotificationPublisher;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -70,6 +72,7 @@ public class ProjectService {
     private final ProjectDepartmentRepository projectDepartmentRepository;
     private final TeamRepository teamRepository;
     private final TeamProjectLinkRepository teamProjectLinkRepository;
+    private final TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
@@ -147,6 +150,41 @@ public class ProjectService {
         projectRepository.save(project);
         auditLogService.log(actorId, AuditAction.UPDATE, "project",
             project.getId(), previous, project);
+    }
+
+    @Transactional
+    public void hardDelete(UUID projectId, UUID actorId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        if (project.getStatus() != com.hris.organisation.enums.ProjectStatus.CANCELLED) {
+            throw new IllegalStateException("Project must be deactivated before deletion");
+        }
+        if (projectAssignmentRepository.existsByProjectIdAndIsActiveTrue(projectId)) {
+            throw new IllegalStateException("Project cannot be deleted because it has active assignments");
+        }
+        if (teamRepository.existsByProjectIdAndIsActiveTrue(projectId)) {
+            throw new IllegalStateException("Project cannot be deleted because it has active teams");
+        }
+        try {
+            List<UUID> teamIds = teamRepository.findByProjectId(projectId).stream()
+                .map(Team::getId)
+                .toList();
+
+            if (!teamIds.isEmpty()) {
+                teamHierarchyRelationRepository.deleteByTeamIdIn(teamIds);
+            }
+            projectAssignmentRepository.deleteByProjectId(projectId);
+            teamProjectLinkRepository.deleteByProjectId(projectId);
+            if (!teamIds.isEmpty()) {
+                teamRepository.deleteAllById(teamIds);
+            }
+            projectDepartmentRepository.deleteByProjectId(projectId);
+            projectRepository.delete(project);
+            projectRepository.flush();
+            auditLogService.log(actorId, AuditAction.DELETE, "project", project.getId(), snapshot(project), null);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Project cannot be deleted because it is still referenced");
+        }
     }
 
     @Transactional

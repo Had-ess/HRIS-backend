@@ -82,6 +82,14 @@ public class AccessProfileController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/hard-delete")
+    public ResponseEntity<Void> hardDelete(@PathVariable UUID id, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "ACCESS_PROFILE", "DELETE");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        accessProfileService.hardDelete(id, actorId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}/permissions")
     public ResponseEntity<ApiResponse<List<PermissionResponseDto>>> getPermissions(
             @PathVariable UUID id,
