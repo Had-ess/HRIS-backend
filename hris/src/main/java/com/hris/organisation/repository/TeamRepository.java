@@ -22,6 +22,10 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
 
     List<Team> findBySupervisorEmployeeIdAndIsActiveTrue(UUID supervisorEmployeeId);
 
+    List<Team> findByProjectId(UUID projectId);
+
+    boolean existsByProjectIdAndIsActiveTrue(UUID projectId);
+
     @Query("""
         select t
         from Team t

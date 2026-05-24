@@ -17,10 +17,14 @@ import com.hris.organisation.dto.TeamDto;
 import com.hris.organisation.dto.TeamUpdateDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.Team;
+import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
 import com.hris.organisation.repository.TeamRepository;
+import com.hris.organisation.repository.TeamProjectLinkRepository;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -38,6 +42,9 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final TeamHierarchyRelationRepository teamHierarchyRelationRepository;
+    private final TeamProjectLinkRepository teamProjectLinkRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
@@ -129,6 +136,32 @@ public class TeamService {
         team.setActive(false);
         teamRepository.save(team);
         auditLogService.log(actorId, AuditAction.UPDATE, "team", team.getId(), previous, snapshot(team));
+    }
+
+    @Transactional
+    public void hardDelete(UUID id, UUID actorId) {
+        Team team = getEntity(id);
+        if (team.isActive()) {
+            throw new IllegalStateException("Team must be deactivated before deletion");
+        }
+        if (projectAssignmentRepository.countByTeamIdAndIsActiveTrue(team.getId()) > 0) {
+            throw new IllegalStateException("Team cannot be deleted because it has active project assignments");
+        }
+
+        try {
+            Map<String, Object> previous = snapshot(team);
+            // Keep historical project assignments while removing FK reference to the deleted team.
+            projectAssignmentRepository.clearTeamReference(team.getId());
+            // Remove hierarchy relations bound to this team before hard deletion.
+            teamHierarchyRelationRepository.deleteByTeamId(team.getId());
+            // Remove project-team links bound to this team before hard deletion.
+            teamProjectLinkRepository.deleteByTeamId(team.getId());
+            teamRepository.delete(team);
+            teamRepository.flush();
+            auditLogService.log(actorId, AuditAction.DELETE, "team", team.getId(), previous, null);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Team cannot be deleted because it is still referenced");
+        }
     }
 
     private void validate(

@@ -48,6 +48,12 @@ public class LeaveRequestController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<LeaveRequestResponseDto>> create(
             @Valid @RequestBody CreateLeaveRequestDto dto, Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_OWN"
+        );
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         LeaveRequest request = leaveRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -59,6 +65,12 @@ public class LeaveRequestController {
     public ResponseEntity<ApiResponse<LeaveRequestPreviewDto>> preview(
             @Valid @RequestBody LeaveRequestPreviewRequestDto dto,
             Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_OWN"
+        );
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(leaveRequestService.preview(dto, userId)));
     }
@@ -68,6 +80,15 @@ public class LeaveRequestController {
     public ResponseEntity<ApiResponse<PageResponse<LeaveRequestResponseDto>>> getMyRequests(
             @RequestParam(required = false) LeaveStatus status,
             Pageable pageable, Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_READ_OWN",
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_GLOBAL",
+            "LEAVE_REQUEST_APPROVE",
+            "LEAVE_REQUEST_MANAGE"
+        );
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         Page<LeaveRequest> page = leaveRequestService.getMyRequests(userId, status, pageable);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.of(
@@ -102,6 +123,13 @@ public class LeaveRequestController {
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> cancel(@PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CANCEL_OWN",
+            "LEAVE_REQUEST_READ_OWN",
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ"
+        );
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         leaveRequestService.cancel(id, userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
