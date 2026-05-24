@@ -27,6 +27,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -162,5 +163,202 @@ class AccessProfileServiceTest {
         verify(profileMenuAccessRepository).deleteByProfileId(profileId);
         verify(profileMenuAccessRepository).save(any(ProfileMenuAccess.class));
         verify(auditLogService).log(eq(actorId), any(), eq("access_profile_menu"), eq(profileId), eq(null), eq(List.of(menuId)));
+    }
+
+    @Test
+    @DisplayName("assignMenus grants permissions required by selected page menus")
+    void assignMenusGrantsRequiredPagePermissions() {
+        UUID actorId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
+        UUID menuId = UUID.randomUUID();
+        UUID permissionId = UUID.randomUUID();
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("MANAGER_INBOX")
+            .displayKey("profile.seed.MANAGER_INBOX")
+            .isActive(true)
+            .build();
+        MenuItem menuItem = MenuItem.builder()
+            .id(menuId)
+            .code("menu.administration.employees")
+            .translationKey("menu.people.employees")
+            .sectionCode("PEOPLE")
+            .route("/employees")
+            .icon("users")
+            .displayOrder(5)
+            .isActive(true)
+            .build();
+        Permission employeeRead = Permission.builder()
+            .id(permissionId)
+            .name("EMPLOYEE_READ")
+            .resource("EMPLOYEE")
+            .action("READ")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        Permission employeeManage = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("EMPLOYEE_MANAGE")
+            .resource("EMPLOYEE")
+            .action("MANAGE")
+            .scope("GLOBAL")
+            .isActive(true)
+            .build();
+        Permission departmentRead = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("DEPARTMENT_READ")
+            .resource("DEPARTMENT")
+            .action("READ")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        when(accessProfileRepository.findById(profileId)).thenReturn(Optional.of(profile));
+        when(menuItemRepository.findById(menuId)).thenReturn(Optional.of(menuItem));
+        when(profilePermissionRepository.findByProfileId(profileId)).thenReturn(List.of());
+        when(permissionRepository.findByNameIgnoreCase("EMPLOYEE_READ")).thenReturn(Optional.of(employeeRead));
+        when(permissionRepository.findByNameIgnoreCase("EMPLOYEE_MANAGE")).thenReturn(Optional.of(employeeManage));
+        when(permissionRepository.findByNameIgnoreCase("DEPARTMENT_READ")).thenReturn(Optional.of(departmentRead));
+        when(profileMenuAccessRepository.findByProfileId(profileId)).thenReturn(List.of(
+            ProfileMenuAccess.builder().profileId(profileId).menuItemId(menuId).build()
+        ));
+        when(menuItemRepository.findByIdIn(List.of(menuId))).thenReturn(List.of(menuItem));
+
+        accessProfileService.assignMenus(profileId, List.of(menuId), actorId);
+
+        verify(profilePermissionRepository, atLeastOnce()).save(any(ProfilePermission.class));
+    }
+
+    @Test
+    @DisplayName("assignMenus grants department read for people and project pages")
+    void assignMenusGrantsDepartmentReadForPeoplePages() {
+        UUID actorId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
+        UUID employeeMenuId = UUID.randomUUID();
+        UUID teamMenuId = UUID.randomUUID();
+        UUID projectMenuId = UUID.randomUUID();
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("MANAGER_INBOX")
+            .displayKey("profile.seed.MANAGER_INBOX")
+            .isActive(true)
+            .build();
+        MenuItem employeeMenu = MenuItem.builder()
+            .id(employeeMenuId)
+            .code("menu.administration.employees")
+            .translationKey("menu.people.employees")
+            .sectionCode("PEOPLE")
+            .route("/employees")
+            .icon("users")
+            .displayOrder(5)
+            .isActive(true)
+            .build();
+        MenuItem teamMenu = MenuItem.builder()
+            .id(teamMenuId)
+            .code("menu.administration.teams")
+            .translationKey("menu.people.teams")
+            .sectionCode("PEOPLE")
+            .route("/admin/teams")
+            .icon("users")
+            .displayOrder(10)
+            .isActive(true)
+            .build();
+        MenuItem projectMenu = MenuItem.builder()
+            .id(projectMenuId)
+            .code("menu.settings.projects")
+            .translationKey("menu.people.projects")
+            .sectionCode("PEOPLE")
+            .route("/settings/projects")
+            .icon("briefcase")
+            .displayOrder(15)
+            .isActive(true)
+            .build();
+        Permission employeeRead = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("EMPLOYEE_READ")
+            .resource("EMPLOYEE")
+            .action("READ")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        Permission teamRead = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("TEAM_READ")
+            .resource("TEAM")
+            .action("READ")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        Permission projectManage = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("PROJECT_PORTFOLIO_MANAGE")
+            .resource("PROJECT")
+            .action("PORTFOLIO_MANAGE")
+            .scope("GLOBAL")
+            .isActive(true)
+            .build();
+        Permission projectAssignmentManage = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("PROJECT_ASSIGNMENT_MANAGE")
+            .resource("PROJECT")
+            .action("ASSIGNMENT_MANAGE")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        Permission teamManage = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("TEAM_MANAGE")
+            .resource("TEAM")
+            .action("MANAGE")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        Permission departmentRead = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("DEPARTMENT_READ")
+            .resource("DEPARTMENT")
+            .action("READ")
+            .scope("SCOPED")
+            .isActive(true)
+            .build();
+        Permission departmentManage = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("DEPARTMENT_MANAGE")
+            .resource("DEPARTMENT")
+            .action("MANAGE")
+            .scope("GLOBAL")
+            .isActive(true)
+            .build();
+        Permission employeeManage = Permission.builder()
+            .id(UUID.randomUUID())
+            .name("EMPLOYEE_MANAGE")
+            .resource("EMPLOYEE")
+            .action("MANAGE")
+            .scope("GLOBAL")
+            .isActive(true)
+            .build();
+
+        when(accessProfileRepository.findById(profileId)).thenReturn(Optional.of(profile));
+        when(menuItemRepository.findById(employeeMenuId)).thenReturn(Optional.of(employeeMenu));
+        when(menuItemRepository.findById(teamMenuId)).thenReturn(Optional.of(teamMenu));
+        when(menuItemRepository.findById(projectMenuId)).thenReturn(Optional.of(projectMenu));
+        when(profilePermissionRepository.findByProfileId(profileId)).thenReturn(List.of());
+        when(permissionRepository.findByNameIgnoreCase("EMPLOYEE_READ")).thenReturn(Optional.of(employeeRead));
+        when(permissionRepository.findByNameIgnoreCase("TEAM_READ")).thenReturn(Optional.of(teamRead));
+        when(permissionRepository.findByNameIgnoreCase("TEAM_MANAGE")).thenReturn(Optional.of(teamManage));
+        when(permissionRepository.findByNameIgnoreCase("PROJECT_PORTFOLIO_MANAGE")).thenReturn(Optional.of(projectManage));
+        when(permissionRepository.findByNameIgnoreCase("PROJECT_ASSIGNMENT_MANAGE")).thenReturn(Optional.of(projectAssignmentManage));
+        when(permissionRepository.findByNameIgnoreCase("DEPARTMENT_READ")).thenReturn(Optional.of(departmentRead));
+        when(permissionRepository.findByNameIgnoreCase("DEPARTMENT_MANAGE")).thenReturn(Optional.of(departmentManage));
+        when(permissionRepository.findByNameIgnoreCase("EMPLOYEE_MANAGE")).thenReturn(Optional.of(employeeManage));
+        when(profileMenuAccessRepository.findByProfileId(profileId)).thenReturn(List.of(
+            ProfileMenuAccess.builder().profileId(profileId).menuItemId(employeeMenuId).build(),
+            ProfileMenuAccess.builder().profileId(profileId).menuItemId(teamMenuId).build(),
+            ProfileMenuAccess.builder().profileId(profileId).menuItemId(projectMenuId).build()
+        ));
+        when(menuItemRepository.findByIdIn(List.of(employeeMenuId, teamMenuId, projectMenuId))).thenReturn(List.of(employeeMenu, teamMenu, projectMenu));
+
+        accessProfileService.assignMenus(profileId, List.of(employeeMenuId, teamMenuId, projectMenuId), actorId);
+
+        verify(profilePermissionRepository, atLeastOnce()).save(any(ProfilePermission.class));
     }
 }

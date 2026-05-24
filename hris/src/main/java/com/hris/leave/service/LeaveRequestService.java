@@ -207,7 +207,8 @@ public class LeaveRequestService {
         LeaveVisibilityScope scope = resolveLeaveVisibilityScope(requesterId);
         return switch (scope.type()) {
             case GLOBAL -> resolveGlobalVisibleRequests(status, employeeId, pageable);
-            case DEPARTMENT -> resolveDepartmentVisibleRequests(scope.departmentId(), status, employeeId, pageable);
+            case DEPARTMENT -> resolveDepartmentVisibleRequests(scope.departmentIds(), status, employeeId, pageable);
+            case SELF -> resolveSelfVisibleRequests(scope.employeeId(), status, employeeId, pageable);
         };
     }
 
@@ -567,14 +568,17 @@ public class LeaveRequestService {
     }
 
     private boolean hasLeaveOversightAccess(LeaveRequest request, UUID userId) {
-        if (accessScopeService.hasGlobalBusinessRead(userId)) {
+        com.hris.access.service.AccessResolutionService.ScopeResolution scope =
+            accessScopeService.resolveDepartmentDataScope(userId);
+        if (scope.isGlobal()) {
             return true;
         }
 
-        Employee requesterEmployee = accessScopeService.findEmployee(userId).orElse(null);
-        return accessScopeService.resolveDepartmentManagerDepartmentId(userId, requesterEmployee)
-            .map(departmentId -> requestBelongsToDepartment(request, departmentId))
-            .orElse(false);
+        if (scope.isDepartment()) {
+            return scope.departmentIds().stream()
+                .anyMatch(departmentId -> requestBelongsToDepartment(request, departmentId));
+        }
+        return false;
     }
 
     private boolean requestBelongsToDepartment(LeaveRequest request, UUID departmentId) {
@@ -584,15 +588,19 @@ public class LeaveRequestService {
     }
 
     private LeaveVisibilityScope resolveLeaveVisibilityScope(UUID requesterId) {
-        if (accessScopeService.hasGlobalBusinessRead(requesterId)) {
+        com.hris.access.service.AccessResolutionService.ScopeResolution scope =
+            accessScopeService.resolveDepartmentDataScope(requesterId);
+        if (scope.isGlobal()) {
             return LeaveVisibilityScope.global();
         }
 
         Employee requesterEmployee = accessScopeService.findEmployee(requesterId).orElse(null);
-        UUID departmentId = accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee)
-            .orElse(null);
-        if (departmentId != null) {
-            return LeaveVisibilityScope.department(departmentId);
+        if (scope.isDepartment() && !scope.departmentIds().isEmpty()) {
+            return LeaveVisibilityScope.department(scope.departmentIds());
+        }
+
+        if (requesterEmployee != null) {
+            return LeaveVisibilityScope.self(requesterEmployee.getId());
         }
 
         throw new AccessDeniedException("You are not allowed to browse leave requests");
@@ -613,25 +621,38 @@ public class LeaveRequestService {
     }
 
     private Page<LeaveRequest> resolveDepartmentVisibleRequests(
-            UUID departmentId,
+            List<UUID> departmentIds,
             LeaveStatus status,
             UUID employeeId,
             Pageable pageable) {
         if (employeeId != null) {
             Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-            if (!departmentId.equals(employee.getDepartmentId())) {
+            if (employee.getDepartmentId() == null || !departmentIds.contains(employee.getDepartmentId())) {
                 throw new AccessDeniedException("You are not allowed to browse leave requests for this employee");
             }
             return status == null
-                ? leaveRequestRepository.findByDepartmentIdAndEmployeeIdOrderBySubmittedAtDesc(
-                    departmentId, employeeId, pageable)
-                : leaveRequestRepository.findByDepartmentIdAndEmployeeIdAndStatusOrderBySubmittedAtDesc(
-                    departmentId, employeeId, status, pageable);
+                ? leaveRequestRepository.findByDepartmentIdInAndEmployeeIdOrderBySubmittedAtDesc(
+                    departmentIds, employeeId, pageable)
+                : leaveRequestRepository.findByDepartmentIdInAndEmployeeIdAndStatusOrderBySubmittedAtDesc(
+                    departmentIds, employeeId, status, pageable);
         }
         return status == null
-            ? leaveRequestRepository.findByDepartmentIdOrderBySubmittedAtDesc(departmentId, pageable)
-            : leaveRequestRepository.findByDepartmentIdAndStatusOrderBySubmittedAtDesc(departmentId, status, pageable);
+            ? leaveRequestRepository.findByDepartmentIdInOrderBySubmittedAtDesc(departmentIds, pageable)
+            : leaveRequestRepository.findByDepartmentIdInAndStatusOrderBySubmittedAtDesc(departmentIds, status, pageable);
+    }
+
+    private Page<LeaveRequest> resolveSelfVisibleRequests(
+            UUID ownEmployeeId,
+            LeaveStatus status,
+            UUID employeeId,
+            Pageable pageable) {
+        if (employeeId != null && !ownEmployeeId.equals(employeeId)) {
+            throw new AccessDeniedException("You are not allowed to browse leave requests for this employee");
+        }
+        return status == null
+            ? leaveRequestRepository.findByEmployeeIdOrderBySubmittedAtDesc(ownEmployeeId, pageable)
+            : leaveRequestRepository.findByEmployeeIdAndStatusOrderBySubmittedAtDesc(ownEmployeeId, status, pageable);
     }
 
     private int validateAndResolveBalanceYear(LocalDate startDate, LocalDate endDate) {
@@ -717,22 +738,31 @@ public class LeaveRequestService {
         if (assignments == null || assignments.isEmpty()) {
             return null;
         }
-        return assignments.getFirst();
+        return assignments.get(0);
     }
 
-    private record LeaveVisibilityScope(LeaveVisibilityScopeType type, UUID departmentId) {
-        static LeaveVisibilityScope global() {
-            return new LeaveVisibilityScope(LeaveVisibilityScopeType.GLOBAL, null);
+    private record LeaveVisibilityScope(LeaveVisibilityScopeType type, List<UUID> departmentIds, UUID employeeId) {
+        LeaveVisibilityScope {
+            departmentIds = departmentIds == null ? List.of() : List.copyOf(departmentIds);
         }
 
-        static LeaveVisibilityScope department(UUID departmentId) {
-            return new LeaveVisibilityScope(LeaveVisibilityScopeType.DEPARTMENT, departmentId);
+        static LeaveVisibilityScope global() {
+            return new LeaveVisibilityScope(LeaveVisibilityScopeType.GLOBAL, List.of(), null);
+        }
+
+        static LeaveVisibilityScope department(List<UUID> departmentIds) {
+            return new LeaveVisibilityScope(LeaveVisibilityScopeType.DEPARTMENT, departmentIds, null);
+        }
+
+        static LeaveVisibilityScope self(UUID employeeId) {
+            return new LeaveVisibilityScope(LeaveVisibilityScopeType.SELF, List.of(), employeeId);
         }
     }
 
     private enum LeaveVisibilityScopeType {
         GLOBAL,
-        DEPARTMENT
+        DEPARTMENT,
+        SELF
     }
 
     private record LeaveComputation(

@@ -65,14 +65,16 @@ class AccessControllerTest {
         when(accessResolutionService.resolveAccess(userId)).thenReturn(new AccessMeResponseDto(
             List.of("HR_CONSOLE"),
             List.of(new AccessPermissionDto("ACCESS_PROFILE_READ", "ACCESS_PROFILE", "READ", "GLOBAL")),
-            List.of("GLOBAL")
+            List.of("GLOBAL"),
+            null
         ));
 
         mockMvc.perform(get("/api/access/me").with(TestAuthenticationFactory.jwtRequest(userId, "EMPLOYEE")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.profileCodes[0]").value("HR_CONSOLE"))
             .andExpect(jsonPath("$.data.permissions[0].name").value("ACCESS_PROFILE_READ"))
-            .andExpect(jsonPath("$.data.scopes[0]").value("GLOBAL"));
+            .andExpect(jsonPath("$.data.scopes[0]").value("GLOBAL"))
+            .andExpect(jsonPath("$.data.scopedDepartmentIds").doesNotExist());
     }
 
     @Test

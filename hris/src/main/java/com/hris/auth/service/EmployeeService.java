@@ -3,6 +3,7 @@ package com.hris.auth.service;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AnalyticsEventPublisher;
 import com.hris.analytics.service.AuditLogService;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
 import com.hris.auth.entity.Employee;
@@ -24,6 +25,7 @@ import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -65,6 +67,19 @@ public class EmployeeService {
                     yield Page.empty(pageable);
                 }
                 yield employeeRepository.findByDepartmentId(scope.departmentId(), pageable).map(employeeMapper::toDto);
+            }
+            case DEPARTMENTS -> {
+            if (scope.departmentIds().isEmpty()) {
+                    yield Page.empty(pageable);
+                }
+                yield employeeRepository.findByDepartmentIdIn(scope.departmentIds(), pageable).map(employeeMapper::toDto);
+            }
+            case SELF -> {
+                Employee requester = accessScopeService.findEmployee(requesterId).orElse(null);
+                if (requester == null) {
+                    yield Page.empty(pageable);
+                }
+                yield new PageImpl<>(List.of(employeeMapper.toDto(requester)), pageable, 1);
             }
         };
     }
@@ -156,6 +171,16 @@ public class EmployeeService {
             && scope.departmentId() != null
             && !scope.departmentId().equals(employee.getDepartmentId())) {
             throw new AccessDeniedException("You are not allowed to access this employee");
+        }
+        if (scope.type() == EmployeeReadScopeType.DEPARTMENTS
+            && !scope.departmentIds().contains(employee.getDepartmentId())) {
+            throw new AccessDeniedException("You are not allowed to access this employee");
+        }
+        if (scope.type() == EmployeeReadScopeType.SELF) {
+            Employee requester = accessScopeService.findEmployee(requesterId).orElse(null);
+            if (requester == null || !requester.getId().equals(employee.getId())) {
+                throw new AccessDeniedException("You are not allowed to access this employee");
+            }
         }
         return employeeMapper.toDto(employee);
     }
@@ -308,29 +333,42 @@ public class EmployeeService {
     }
 
     private EmployeeReadScope resolveReadScope(UUID requesterId) {
-        if (accessScopeService.hasGlobalBusinessRead(requesterId)) {
+        AccessResolutionService.ScopeResolution scope = accessScopeService.resolveDepartmentDataScope(requesterId);
+        if (scope.isGlobal()) {
             return EmployeeReadScope.global();
         }
-
-        Employee requester = accessScopeService.findEmployee(requesterId).orElse(null);
-        return accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requester)
-            .map(EmployeeReadScope::department)
-            .orElseThrow(() -> new AccessDeniedException("You are not allowed to access employees"));
+        if (scope.isDepartment() && !scope.departmentIds().isEmpty()) {
+            if (scope.departmentIds().size() == 1) {
+                return EmployeeReadScope.department(scope.departmentIds().get(0));
+            }
+            return EmployeeReadScope.departments(scope.departmentIds());
+        }
+        return EmployeeReadScope.self();
     }
 
-    private record EmployeeReadScope(EmployeeReadScopeType type, UUID departmentId) {
+    private record EmployeeReadScope(EmployeeReadScopeType type, UUID departmentId, List<UUID> departmentIds) {
         static EmployeeReadScope global() {
-            return new EmployeeReadScope(EmployeeReadScopeType.GLOBAL, null);
+            return new EmployeeReadScope(EmployeeReadScopeType.GLOBAL, null, List.of());
         }
 
         static EmployeeReadScope department(UUID departmentId) {
-            return new EmployeeReadScope(EmployeeReadScopeType.DEPARTMENT, departmentId);
+            return new EmployeeReadScope(EmployeeReadScopeType.DEPARTMENT, departmentId, List.of(departmentId));
+        }
+
+        static EmployeeReadScope departments(List<UUID> departmentIds) {
+            return new EmployeeReadScope(EmployeeReadScopeType.DEPARTMENTS, null, List.copyOf(departmentIds));
+        }
+
+        static EmployeeReadScope self() {
+            return new EmployeeReadScope(EmployeeReadScopeType.SELF, null, List.of());
         }
     }
 
     private enum EmployeeReadScopeType {
         GLOBAL,
-        DEPARTMENT
+        DEPARTMENT,
+        DEPARTMENTS,
+        SELF
     }
 }
 

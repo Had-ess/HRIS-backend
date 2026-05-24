@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hris.access.enums.StructuralEventType;
 import com.hris.access.event.StructuralChangeEvent;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.enums.AnalyticsEventType;
 import com.hris.analytics.service.AnalyticsEventPublisher;
@@ -412,16 +413,17 @@ public class ProjectService {
     }
 
     private ProjectReadScope resolveReadScope(UUID userId) {
-        if (accessScopeService.hasGlobalBusinessRead(userId)) {
+        AccessResolutionService.ScopeResolution scope = accessScopeService.resolveDepartmentDataScope(userId);
+        if (scope.isGlobal()) {
             return ProjectReadScope.all();
         }
 
         LinkedHashSet<UUID> projectIds = new LinkedHashSet<>();
         Employee employee = accessScopeService.findEmployee(userId).orElse(null);
 
-        accessScopeService.resolveDepartmentManagerDepartmentId(userId, employee)
-            .ifPresent(departmentId ->
-                projectIds.addAll(projectDepartmentRepository.findProjectIdsByDepartmentId(departmentId)));
+        if (scope.isDepartment() && !scope.departmentIds().isEmpty()) {
+            projectIds.addAll(projectDepartmentRepository.findProjectIdsByDepartmentIds(scope.departmentIds()));
+        }
 
         if (employee != null) {
             projectIds.addAll(projectAssignmentRepository.findActiveProjectIdsByEmployeeId(
@@ -441,8 +443,18 @@ public class ProjectService {
         if (!accessScopeService.hasProjectScopedManagement(actorId)) {
             throw new AccessDeniedException("You are not allowed to manage this project");
         }
-        if (accessScopeService.hasPermissionName(actorId, "PROJECT_PORTFOLIO_MANAGE")) {
+        if (accessScopeService.hasUnrestrictedProjectPortfolioManagement(actorId)) {
             return;
+        }
+
+        AccessResolutionService.ScopeResolution departmentScope =
+            accessScopeService.resolveDepartmentDataScope(actorId);
+        if (departmentScope.isDepartment() && !departmentScope.departmentIds().isEmpty()) {
+            List<UUID> departmentProjectIds = projectDepartmentRepository
+                .findProjectIdsByDepartmentIds(departmentScope.departmentIds());
+            if (departmentProjectIds.contains(projectId)) {
+                return;
+            }
         }
 
         Employee employee = accessScopeService.getEmployeeOrThrow(actorId);

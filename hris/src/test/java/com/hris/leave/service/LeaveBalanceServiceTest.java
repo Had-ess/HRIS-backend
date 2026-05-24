@@ -10,6 +10,7 @@ import com.hris.leave.entity.LeaveType;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
+import com.hris.access.service.AccessResolutionService;
 import com.hris.security.service.AccessScopeService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,13 +51,20 @@ class LeaveBalanceServiceTest {
     @InjectMocks
     private LeaveBalanceService leaveBalanceService;
 
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        lenient().when(accessScopeService.resolveDepartmentDataScope(any()))
+            .thenReturn(AccessResolutionService.ScopeResolution.self());
+    }
+
     @Test
     @DisplayName("getVisibleBalances returns an empty list when no balances exist")
     void getVisibleBalancesReturnsEmptyList() {
         UUID requesterId = UUID.randomUUID();
         when(accessScopeService.hasAnyPermissionName(requesterId,
             "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")).thenReturn(true);
-        when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")).thenReturn(true);
+        when(accessScopeService.resolveDepartmentDataScope(requesterId))
+            .thenReturn(AccessResolutionService.ScopeResolution.global());
         when(leaveBalanceRepository.searchSummariesForYear(any(Integer.class), eq(null), any()))
             .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
 
@@ -81,12 +90,9 @@ class LeaveBalanceServiceTest {
 
         when(accessScopeService.hasAnyPermissionName(requesterId,
             "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")).thenReturn(true);
-        when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")).thenReturn(false);
-        when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
         when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_SCOPED")).thenReturn(true);
-        when(accessScopeService.getEmployeeOrThrow(requesterId)).thenReturn(requesterEmployee);
-        when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, requesterEmployee))
-            .thenReturn(Optional.of(departmentId));
+        when(accessScopeService.resolveDepartmentDataScope(requesterId))
+            .thenReturn(AccessResolutionService.ScopeResolution.department(List.of(departmentId)));
         when(employeeRepository.findByDepartmentId(departmentId)).thenReturn(List.of(
             Employee.builder().id(employeeOneId).departmentId(departmentId).build(),
             Employee.builder().id(employeeTwoId).departmentId(departmentId).build()
@@ -115,8 +121,6 @@ class LeaveBalanceServiceTest {
 
         when(accessScopeService.hasAnyPermissionName(requesterId,
             "LEAVE_BALANCE_READ_OWN", "LEAVE_BALANCE_READ_SCOPED", "LEAVE_BALANCE_MANAGE")).thenReturn(true);
-        when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_MANAGE")).thenReturn(false);
-        when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
         when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_SCOPED")).thenReturn(false);
         when(accessScopeService.hasAnyPermissionName(requesterId, "LEAVE_BALANCE_READ_OWN")).thenReturn(true);
         when(accessScopeService.getEmployeeOrThrow(requesterId)).thenReturn(requesterEmployee);

@@ -81,7 +81,11 @@ class AccessResolutionServiceTest {
             .build();
 
         when(userProfileAssignmentRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
-            .thenReturn(List.of(UserProfileAssignment.builder().profile(profile).profileId(profileId).build()));
+            .thenReturn(List.of(UserProfileAssignment.builder()
+                .profile(profile)
+                .profileId(profileId)
+                .assignmentSource("MANUAL")
+                .build()));
         when(profilePermissionRepository.findByProfileIdIn(List.of(profileId)))
             .thenReturn(List.of(ProfilePermission.builder().permission(permission).permissionId(permissionId).build()));
         when(profileMenuAccessRepository.findByProfileIdIn(List.of(profileId)))
@@ -92,11 +96,53 @@ class AccessResolutionServiceTest {
         var navigation = accessResolutionService.resolveNavigation(userId);
 
         assertThat(access.profileCodes()).containsExactly("HR_CONSOLE");
+        assertThat(access.scopedDepartmentIds()).isEmpty();
         assertThat(access.permissions()).extracting(permissionDto -> permissionDto.name())
             .containsExactly("ACCESS_PROFILE_READ");
         assertThat(navigation).hasSize(1);
         assertThat(navigation.getFirst().items()).extracting(item -> item.code())
             .containsExactly("menu.workspace.dashboard");
+    }
+
+    @Test
+    @DisplayName("access response exposes department scope for system-granted approver profiles")
+    void resolveAccessExposesScopedDepartmentIds() {
+        UUID userId = UUID.randomUUID();
+        UUID profileId = UUID.randomUUID();
+        UUID departmentId = UUID.randomUUID();
+
+        AccessProfile profile = AccessProfile.builder()
+            .id(profileId)
+            .code("DEPT_APPROVER_PROFILE")
+            .displayKey("profile.deptApprover")
+            .isActive(true)
+            .build();
+
+        when(userProfileAssignmentRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
+            .thenReturn(List.of(UserProfileAssignment.builder()
+                .profile(profile)
+                .profileId(profileId)
+                .assignmentSource("SYSTEM")
+                .sourceRefId(departmentId)
+                .build()));
+        when(profilePermissionRepository.findByProfileIdIn(List.of(profileId))).thenReturn(List.of());
+
+        var access = accessResolutionService.resolveAccess(userId);
+
+        assertThat(access.scopedDepartmentIds()).containsExactly(departmentId);
+    }
+
+    @Test
+    @DisplayName("access response exposes empty department scope for self-service users")
+    void resolveAccessExposesEmptyScopedDepartmentIdsForSelfScope() {
+        UUID userId = UUID.randomUUID();
+
+        when(userProfileAssignmentRepository.findEffectiveByUserId(eq(userId), any(Instant.class)))
+            .thenReturn(List.of());
+
+        var access = accessResolutionService.resolveAccess(userId);
+
+        assertThat(access.scopedDepartmentIds()).isEmpty();
     }
 
     @Test
