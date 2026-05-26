@@ -43,5 +43,22 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     @Query("SELECT COUNT(e) FROM Employee e WHERE e.hireDate >= :since")
     long countHiredAfter(@Param("since") java.time.LocalDate since);
+
+    @Query("""
+        SELECT COUNT(e) FROM Employee e
+        WHERE e.hireDate <= :asOf
+          AND (e.terminationDate IS NULL OR e.terminationDate > :asOf)
+        """)
+    long countActiveAsOf(@Param("asOf") java.time.LocalDate asOf);
+
+    @Query("""
+        SELECT COUNT(e) FROM Employee e
+        WHERE e.terminationDate IS NOT NULL
+          AND e.terminationDate >= :from
+          AND e.terminationDate < :toExclusive
+        """)
+    long countTerminatedBetween(
+        @Param("from") java.time.LocalDate from,
+        @Param("toExclusive") java.time.LocalDate toExclusive);
 }
 

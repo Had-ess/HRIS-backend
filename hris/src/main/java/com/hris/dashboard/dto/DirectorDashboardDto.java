@@ -36,7 +36,7 @@ public record DirectorDashboardDto(
 
     public record ProjectUtilizationDto(
         String projectName,
-        int utilizationPct,
+        long teamCount,
         long memberCount
     ) {}
 }

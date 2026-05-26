@@ -51,12 +51,50 @@ public interface ApprovalStepRepository extends JpaRepository<ApprovalStep, UUID
     boolean existsByWorkflowIdAndStatus(UUID workflowId, StepStatus status);
 
     @Query(value = """
-        SELECT step_order, 0, 0, COUNT(*)
-        FROM approval_steps
-        WHERE status IN ('APPROVED', 'REJECTED')
-          AND decided_at IS NOT NULL
-        GROUP BY step_order
-        ORDER BY step_order
+        SELECT s.step_order,
+               COALESCE(AVG(EXTRACT(EPOCH FROM (s.decided_at - w.created_at)) / 3600.0), 0) AS avg_hours,
+               COALESCE(
+                 PERCENTILE_CONT(0.5) WITHIN GROUP (
+                   ORDER BY EXTRACT(EPOCH FROM (s.decided_at - w.created_at)) / 3600.0
+                 ), 0) AS median_hours,
+               (SELECT COUNT(*) FROM approval_steps p
+                WHERE p.step_order = s.step_order AND p.status = 'PENDING') AS pending_count
+        FROM approval_steps s
+        JOIN approval_workflows w ON w.id = s.workflow_id
+        WHERE s.status IN ('APPROVED', 'REJECTED')
+          AND s.decided_at IS NOT NULL
+          AND s.decided_at >= :from
+          AND s.decided_at < :toExclusive
+        GROUP BY s.step_order
+        ORDER BY s.step_order
         """, nativeQuery = true)
-    List<Object[]> findCompletedStepTimingStats();
+    List<Object[]> findCompletedStepTimingStats(
+        @Param("from") java.time.Instant from,
+        @Param("toExclusive") java.time.Instant toExclusive);
+
+    @Query(value = """
+        SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (s.decided_at - w.created_at)) / 3600.0), 0)
+        FROM approval_steps s
+        JOIN approval_workflows w ON w.id = s.workflow_id
+        WHERE s.status IN ('APPROVED', 'REJECTED')
+          AND s.decided_at IS NOT NULL
+          AND s.decided_at >= :from
+          AND s.decided_at < :toExclusive
+        """, nativeQuery = true)
+    double averageStepDecisionHoursBetween(
+        @Param("from") java.time.Instant from,
+        @Param("toExclusive") java.time.Instant toExclusive);
+
+    @Query(value = """
+        SELECT s.id, s.step_order, s.approver_id, w.created_at, w.subject_type, w.subject_id
+        FROM approval_steps s
+        JOIN approval_workflows w ON w.id = s.workflow_id
+        WHERE s.status = 'PENDING'
+          AND w.created_at < :olderThan
+        ORDER BY w.created_at ASC
+        LIMIT :limit
+        """, nativeQuery = true)
+    List<Object[]> findStalePendingSteps(
+        @Param("olderThan") java.time.Instant olderThan,
+        @Param("limit") int limit);
 }

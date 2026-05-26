@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,12 +43,13 @@ public class UserDisplayNameService {
             return Map.of();
         }
 
-        return userRepository.findAllById(userIds.stream()
+        Map<UUID, String> result = new HashMap<>();
+        userRepository.findAllById(userIds.stream()
                 .filter(id -> id != null)
                 .distinct()
                 .toList())
-            .stream()
-            .collect(Collectors.toMap(User::getId, this::toDisplayName));
+            .forEach(user -> result.put(user.getId(), toDisplayName(user)));
+        return result;
     }
 
     private String safe(String value) {

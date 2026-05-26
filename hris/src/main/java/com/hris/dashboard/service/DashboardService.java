@@ -11,8 +11,10 @@ import com.hris.approval.enums.StepStatus;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.approval.repository.ApprovalWorkflowRepository;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.entity.User;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.dashboard.dto.AdminRequestSummaryDto;
 import com.hris.dashboard.dto.ApprovalSummaryDto;
@@ -39,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.Instant;
@@ -62,8 +65,12 @@ public class DashboardService {
         AdminRequestStatus.APPROVED
     );
 
+    private static final long STALE_PENDING_HOURS = 5L * 24L;
+    private static final int MAX_RISK_SIGNALS = 8;
+
     private final NotificationRepository notificationRepository;
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final LeaveRequestRepository leaveRequestRepository;
@@ -170,8 +177,10 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public DirectorDashboardDto getDirectorDashboard() {
         LocalDate today = LocalDate.now();
-        Instant from = today.withDayOfMonth(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant toExclusive = today.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        LocalDate periodStart = today.withDayOfMonth(1);
+        LocalDate periodEndExclusive = today.plusDays(1);
+        Instant from = periodStart.atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant toExclusive = periodEndExclusive.atStartOfDay().toInstant(ZoneOffset.UTC);
         long totalRequests = leaveRequestRepository.countSubmittedBetween(from, toExclusive);
         long approvedCount = leaveRequestRepository.countSubmittedBetweenByStatus(from, toExclusive, LeaveStatus.APPROVED);
         long rejectedCount = leaveRequestRepository.countSubmittedBetweenByStatus(from, toExclusive, LeaveStatus.REJECTED);
@@ -188,7 +197,7 @@ public class DashboardService {
                 .toList();
 
         List<DirectorDashboardDto.ApprovalBottleneckDto> bottlenecks =
-            approvalStepRepository.findCompletedStepTimingStats()
+            approvalStepRepository.findCompletedStepTimingStats(from, toExclusive)
                 .stream()
                 .map(row -> new DirectorDashboardDto.ApprovalBottleneckDto(
                     "Step " + row[0],
@@ -199,33 +208,39 @@ public class DashboardService {
                 .limit(4)
                 .toList();
 
-        List<DirectorDashboardDto.RiskSignalDto> riskSignals = List.of();
+        // Year-to-date attrition rate: terminations YTD / average headcount (start vs today).
+        LocalDate yearStart = today.withDayOfYear(1);
+        long terminationsYtd = employeeRepository.countTerminatedBetween(yearStart, periodEndExclusive);
+        long activeAtYearStart = employeeRepository.countActiveAsOf(yearStart);
+        long activeToday = employeeRepository.countActiveAsOf(today);
+        double avgHeadcount = (activeAtYearStart + activeToday) / 2.0;
+        double attritionRate = avgHeadcount > 0 ? (terminationsYtd * 100.0) / avgHeadcount : 0.0;
+
+        double avgLeaveTakenDays = leaveRequestRepository.averageApprovedWorkingDaysBetween(
+            yearStart, periodEndExclusive);
+        double approvalCycleHours = approvalStepRepository.averageStepDecisionHoursBetween(from, toExclusive);
+
+        List<DirectorDashboardDto.RiskSignalDto> riskSignals = buildRiskSignals();
 
         List<DirectorDashboardDto.ProjectUtilizationDto> projectUtilization =
-            projectRepository.findByStatus(ProjectStatus.ACTIVE).stream()
-                .map(p -> {
-                    long members = projectAssignmentRepository.countActiveByProjectId(p.getId());
-                    return new DirectorDashboardDto.ProjectUtilizationDto(p.getName(), 0, members);
-                })
-                .limit(6)
-                .toList();
+            buildProjectUtilization();
 
         return new DirectorDashboardDto(
-            employeeRepository.count(),
+            activeToday,
             departmentRepository.count(),
             projectRepository.countByStatus(ProjectStatus.ACTIVE),
             approvalStepRepository.countByStatus(StepStatus.PENDING),
             new LeaveMetricsSummaryDto(
-                today.withDayOfMonth(1) + " - " + today,
+                periodStart + " - " + today,
                 Math.toIntExact(totalRequests),
                 Math.toIntExact(approvedCount),
                 Math.toIntExact(rejectedCount),
                 avgProcessingDays
             ),
             adminRequestRepository.countByStatusIn(ACTIONABLE_ADMIN_REQUEST_STATUSES),
-            0.0,
-            avgProcessingDays,
-            avgProcessingDays * 24,
+            round2(attritionRate),
+            round2(avgLeaveTakenDays),
+            round2(approvalCycleHours),
             bottlenecks,
             headcountByDept,
             riskSignals,
@@ -233,15 +248,75 @@ public class DashboardService {
         );
     }
 
+    private List<DirectorDashboardDto.RiskSignalDto> buildRiskSignals() {
+        Instant cutoff = Instant.now().minus(Duration.ofHours(STALE_PENDING_HOURS));
+        List<Object[]> rows = approvalStepRepository.findStalePendingSteps(cutoff, MAX_RISK_SIGNALS);
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<UUID> approverIds = rows.stream()
+            .map(r -> (UUID) r[2])
+            .collect(Collectors.toSet());
+        Map<UUID, String> approverNames = userRepository.findAllById(approverIds).stream()
+            .collect(Collectors.toMap(
+                User::getId,
+                u -> {
+                    String first = u.getFirstName() == null ? "" : u.getFirstName();
+                    String last = u.getLastName() == null ? "" : u.getLastName();
+                    String full = (first + " " + last).trim();
+                    return full.isEmpty() ? u.getEmail() : full;
+                }
+            ));
+        Instant now = Instant.now();
+        return rows.stream()
+            .map(row -> {
+                int stepOrder = ((Number) row[1]).intValue();
+                UUID approverId = (UUID) row[2];
+                Instant createdAt = (row[3] instanceof Instant i)
+                    ? i
+                    : ((java.sql.Timestamp) row[3]).toInstant();
+                long pendingHours = Duration.between(createdAt, now).toHours();
+                String severity = pendingHours >= STALE_PENDING_HOURS * 2 ? "HIGH" : "MEDIUM";
+                return new DirectorDashboardDto.RiskSignalDto(
+                    "Approval step " + stepOrder + " pending " + pendingHours + "h",
+                    approverNames.getOrDefault(approverId, "Unknown approver"),
+                    severity,
+                    createdAt.toString()
+                );
+            })
+            .toList();
+    }
+
+    private List<DirectorDashboardDto.ProjectUtilizationDto> buildProjectUtilization() {
+        return projectRepository.findByStatus(ProjectStatus.ACTIVE).stream()
+            .map(p -> {
+                long members = projectAssignmentRepository.countActiveByProjectId(p.getId());
+                long teams = projectAssignmentRepository.countDistinctTeamsByProjectId(p.getId());
+                return new DirectorDashboardDto.ProjectUtilizationDto(p.getName(), teams, members);
+            })
+            .sorted((a, b) -> Long.compare(b.memberCount(), a.memberCount()))
+            .limit(6)
+            .toList();
+    }
+
+    private static double round2(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private List<HrDashboardDto.MonthlyCountDto> buildMonthlyHeadcountTrend(LocalDate today) {
-        long total = employeeRepository.count();
         ArrayList<HrDashboardDto.MonthlyCountDto> trend = new ArrayList<>();
         for (int i = 5; i >= 0; i--) {
             LocalDate month = today.minusMonths(i);
+            LocalDate asOf = (i == 0)
+                ? today
+                : month.withDayOfMonth(month.lengthOfMonth());
             String label = month.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            trend.add(new HrDashboardDto.MonthlyCountDto(label, total));
+            trend.add(new HrDashboardDto.MonthlyCountDto(
+                label,
+                employeeRepository.countActiveAsOf(asOf)
+            ));
         }
         return trend;
     }
