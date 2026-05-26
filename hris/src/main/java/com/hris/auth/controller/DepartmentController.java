@@ -78,4 +78,18 @@ public class DepartmentController {
         return ResponseEntity.ok(ApiResponse.ok(departmentService.deactivate(id, userId)));
     }
 
+    @PatchMapping("/{id}/reactivate")
+    public ResponseEntity<ApiResponse<DepartmentDto>> reactivate(@PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(departmentService.reactivate(id, userId)));
+    }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<ApiResponse<DepartmentDto>> activate(@PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(departmentService.reactivate(id, userId)));
+    }
+
 }

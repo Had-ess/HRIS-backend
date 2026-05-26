@@ -23,6 +23,7 @@ import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.dto.CreateLeaveRequestDto;
 import com.hris.leave.dto.LeaveRequestPreviewDto;
 import com.hris.leave.dto.LeaveRequestPreviewRequestDto;
+import com.hris.leave.dto.SaveLeaveDraftDto;
 import com.hris.leave.entity.FileAttachment;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
@@ -150,6 +151,164 @@ public class LeaveRequestService {
         return saved;
     }
 
+    @Transactional
+    public LeaveRequest createDraft(SaveLeaveDraftDto dto, UUID requesterId) {
+        Employee employee = employeeRepository.findByUserId(requesterId)
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        validateDraftHasContent(dto);
+
+        LeaveRequest draft = LeaveRequest.builder()
+            .employeeId(employee.getId())
+            .leaveTypeId(dto.leaveTypeId())
+            .startDate(dto.startDate())
+            .endDate(dto.endDate())
+            .workingDays(0)
+            .durationDays(BigDecimal.ZERO)
+            .durationHours(BigDecimal.ZERO)
+            .startTime(dto.startTime())
+            .endTime(dto.endTime())
+            .partialMode(dto.partialMode() != null ? dto.partialMode() : PartialLeaveMode.FULL_DAY)
+            .urgencyLevel(dto.urgencyLevel())
+            .status(LeaveStatus.DRAFT)
+            .comment(dto.comment())
+            .submittedAt(Instant.now())
+            .isHalfDay(Boolean.TRUE.equals(dto.isHalfDay()))
+            .build();
+
+        LeaveRequest saved = leaveRequestRepository.save(draft);
+
+        auditLogService.log(requesterId, AuditAction.CREATE, "leave_request_draft",
+            saved.getId(), null, saved);
+
+        return saved;
+    }
+
+    @Transactional
+    public LeaveRequest updateDraft(UUID draftId, SaveLeaveDraftDto dto, UUID requesterId) {
+        LeaveRequest draft = leaveRequestRepository.findByIdForUpdate(draftId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!canManageDraft(draft, requesterId)) {
+            throw new AccessDeniedException("Not your leave request");
+        }
+        if (draft.getStatus() != LeaveStatus.DRAFT) {
+            throw new IllegalStateException("Only draft leave requests can be edited");
+        }
+        validateDraftHasContent(dto);
+
+        draft.setLeaveTypeId(dto.leaveTypeId());
+        draft.setStartDate(dto.startDate());
+        draft.setEndDate(dto.endDate());
+        draft.setUrgencyLevel(dto.urgencyLevel());
+        draft.setComment(dto.comment());
+        draft.setStartTime(dto.startTime());
+        draft.setEndTime(dto.endTime());
+        draft.setPartialMode(dto.partialMode() != null ? dto.partialMode() : PartialLeaveMode.FULL_DAY);
+        draft.setHalfDay(Boolean.TRUE.equals(dto.isHalfDay()));
+
+        LeaveRequest saved = leaveRequestRepository.save(draft);
+
+        auditLogService.log(requesterId, AuditAction.UPDATE, "leave_request_draft",
+            saved.getId(), null, saved);
+
+        return saved;
+    }
+
+    @Transactional
+    public LeaveRequest submitDraft(UUID draftId, UUID requesterId) {
+        LeaveRequest draft = leaveRequestRepository.findByIdForUpdate(draftId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!canManageDraft(draft, requesterId)) {
+            throw new AccessDeniedException("Not your leave request");
+        }
+        if (draft.getStatus() != LeaveStatus.DRAFT) {
+            throw new IllegalStateException("Only draft leave requests can be submitted");
+        }
+        if (draft.getLeaveTypeId() == null
+            || draft.getStartDate() == null
+            || draft.getEndDate() == null
+            || draft.getUrgencyLevel() == null) {
+            throw new IllegalArgumentException("Draft is incomplete: leave type, dates and urgency are required");
+        }
+        Employee employee = employeeRepository.findById(draft.getEmployeeId())
+            .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        validateAndResolveBalanceYear(draft.getStartDate(), draft.getEndDate());
+
+        LeaveType leaveType = leaveTypeRepository.findById(draft.getLeaveTypeId())
+            .orElseThrow(() -> new EntityNotFoundException("Leave type not found"));
+
+        if (leaveType.isRequiresJustification()
+            && (draft.getComment() == null || draft.getComment().isBlank())) {
+            throw new IllegalArgumentException(
+                "Leave type '" + leaveType.getName() + "' requires a justification comment");
+        }
+
+        PartialLeaveMode mode = draft.getPartialMode() != null ? draft.getPartialMode()
+            : (draft.isHalfDay() ? PartialLeaveMode.HALF_DAY : PartialLeaveMode.FULL_DAY);
+        LeaveComputation computation = computeLeave(
+            employee, leaveType,
+            draft.getStartDate(), draft.getEndDate(),
+            draft.getStartTime(), draft.getEndTime(),
+            mode
+        );
+
+        draft.setWorkingDays(computation.workingDays());
+        draft.setDurationDays(computation.durationDays());
+        draft.setDurationHours(computation.durationHours());
+        draft.setPartialMode(computation.partialMode());
+        draft.setHalfDay(computation.partialMode() == PartialLeaveMode.HALF_DAY);
+        draft.setStatus(LeaveStatus.PENDING);
+        draft.setSubmittedAt(Instant.now());
+        LeaveRequest saved = leaveRequestRepository.save(draft);
+
+        leaveBalanceLedgerService.reserveForLeaveRequest(employee, leaveType, saved, computation.durationDays(), requesterId);
+
+        LeaveApprovalWorkflowService.InstantiatedWorkflow instantiatedWorkflow =
+            leaveApprovalWorkflowService.instantiate(saved, employee, leaveType);
+        List<ApprovalStep> steps = instantiatedWorkflow.steps();
+
+        saved.setStatus(LeaveStatus.IN_APPROVAL);
+        leaveRequestRepository.save(saved);
+
+        for (ApprovalStep step : steps) {
+            if (step.getStatus() == StepStatus.PENDING) {
+                notificationPublisher.publishAfterCommit(buildSubmittedEvent(saved, step, employee));
+            }
+        }
+        analyticsEventPublisher.publishLeaveEvent(
+            AnalyticsEventType.LEAVE_SUBMITTED,
+            saved,
+            employee,
+            resolvePrimaryAssignment(employee.getId(), saved.getStartDate(), saved.getEndDate()),
+            null
+        );
+
+        auditLogService.log(requesterId, AuditAction.CREATE, "leave_request",
+            saved.getId(), null, saved);
+
+        return saved;
+    }
+
+    @Transactional
+    public void deleteDraft(UUID draftId, UUID requesterId) {
+        LeaveRequest draft = leaveRequestRepository.findByIdForUpdate(draftId)
+            .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (!canManageDraft(draft, requesterId)) {
+            throw new AccessDeniedException("Not your leave request");
+        }
+        if (draft.getStatus() != LeaveStatus.DRAFT) {
+            throw new IllegalStateException("Only draft leave requests can be deleted");
+        }
+
+        leaveRequestRepository.delete(draft);
+
+        auditLogService.log(requesterId, AuditAction.DELETE, "leave_request_draft",
+            draftId, draft, null);
+    }
+
     @Transactional(readOnly = true)
     public LeaveRequestPreviewDto preview(LeaveRequestPreviewRequestDto dto, UUID requesterId) {
         Employee employee = employeeRepository.findByUserId(requesterId)
@@ -204,6 +363,9 @@ public class LeaveRequestService {
             LeaveStatus status,
             UUID employeeId,
             Pageable pageable) {
+        if (status == LeaveStatus.DRAFT) {
+            throw new AccessDeniedException("Drafts are private to their owner");
+        }
         LeaveVisibilityScope scope = resolveLeaveVisibilityScope(requesterId);
         return switch (scope.type()) {
             case GLOBAL -> resolveGlobalVisibleRequests(status, employeeId, pageable);
@@ -216,6 +378,11 @@ public class LeaveRequestService {
     public LeaveRequest getById(UUID id, UUID requesterId) {
         LeaveRequest request = leaveRequestRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
+
+        if (request.getStatus() == LeaveStatus.DRAFT && !canManageDraft(request, requesterId)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                "You are not allowed to access this leave request");
+        }
 
         if (!canAccessLeaveRequest(request, requesterId)) {
             throw new org.springframework.security.access.AccessDeniedException(
@@ -264,6 +431,8 @@ public class LeaveRequestService {
 
         LeaveStatus previousStatus = request.getStatus();
         request.setStatus(LeaveStatus.CANCELLED);
+        request.setCancelledAt(Instant.now());
+        request.setDeletedAt(null);
         leaveRequestRepository.save(request);
 
         if (workflow != null) {
@@ -546,6 +715,9 @@ public class LeaveRequestService {
     }
 
     private boolean canAccessLeaveRequest(LeaveRequest request, UUID requesterId) {
+        if (request.getStatus() == LeaveStatus.DRAFT) {
+            return canManageDraft(request, requesterId);
+        }
         if (hasLeaveOversightAccess(request, requesterId)) {
             return true;
         }
@@ -581,6 +753,29 @@ public class LeaveRequestService {
         return false;
     }
 
+    private boolean canManageDraft(LeaveRequest draft, UUID requesterId) {
+        UUID requesterEmployeeId = employeeRepository.findByUserId(requesterId)
+            .map(Employee::getId)
+            .orElse(null);
+        if (requesterEmployeeId != null && draft.getEmployeeId().equals(requesterEmployeeId)) {
+            return true;
+        }
+        return accessScopeService.resolveDepartmentDataScope(requesterId).isGlobal();
+    }
+
+    private void validateDraftHasContent(SaveLeaveDraftDto dto) {
+        boolean hasContent =
+            dto.leaveTypeId() != null
+                || dto.startDate() != null
+                || dto.endDate() != null
+                || (dto.comment() != null && !dto.comment().trim().isEmpty())
+                || dto.startTime() != null
+                || dto.endTime() != null;
+        if (!hasContent) {
+            throw new IllegalArgumentException("Draft must include at least one meaningful field");
+        }
+    }
+
     private boolean requestBelongsToDepartment(LeaveRequest request, UUID departmentId) {
         return employeeRepository.findById(request.getEmployeeId())
             .map(employee -> departmentId.equals(employee.getDepartmentId()))
@@ -612,11 +807,11 @@ public class LeaveRequestService {
             Pageable pageable) {
         if (employeeId != null) {
             return status == null
-                ? leaveRequestRepository.findByEmployeeIdOrderBySubmittedAtDesc(employeeId, pageable)
+                ? leaveRequestRepository.findVisibleByEmployeeIdOrderBySubmittedAtDesc(employeeId, pageable)
                 : leaveRequestRepository.findByEmployeeIdAndStatusOrderBySubmittedAtDesc(employeeId, status, pageable);
         }
         return status == null
-            ? leaveRequestRepository.findAllByOrderBySubmittedAtDesc(pageable)
+            ? leaveRequestRepository.findVisibleAllOrderBySubmittedAtDesc(pageable)
             : leaveRequestRepository.findByStatusOrderBySubmittedAtDesc(status, pageable);
     }
 
@@ -632,13 +827,13 @@ public class LeaveRequestService {
                 throw new AccessDeniedException("You are not allowed to browse leave requests for this employee");
             }
             return status == null
-                ? leaveRequestRepository.findByDepartmentIdInAndEmployeeIdOrderBySubmittedAtDesc(
+                ? leaveRequestRepository.findVisibleByDepartmentIdInAndEmployeeIdOrderBySubmittedAtDesc(
                     departmentIds, employeeId, pageable)
                 : leaveRequestRepository.findByDepartmentIdInAndEmployeeIdAndStatusOrderBySubmittedAtDesc(
                     departmentIds, employeeId, status, pageable);
         }
         return status == null
-            ? leaveRequestRepository.findByDepartmentIdInOrderBySubmittedAtDesc(departmentIds, pageable)
+            ? leaveRequestRepository.findVisibleByDepartmentIdInOrderBySubmittedAtDesc(departmentIds, pageable)
             : leaveRequestRepository.findByDepartmentIdInAndStatusOrderBySubmittedAtDesc(departmentIds, status, pageable);
     }
 
@@ -651,7 +846,7 @@ public class LeaveRequestService {
             throw new AccessDeniedException("You are not allowed to browse leave requests for this employee");
         }
         return status == null
-            ? leaveRequestRepository.findByEmployeeIdOrderBySubmittedAtDesc(ownEmployeeId, pageable)
+            ? leaveRequestRepository.findVisibleByEmployeeIdOrderBySubmittedAtDesc(ownEmployeeId, pageable)
             : leaveRequestRepository.findByEmployeeIdAndStatusOrderBySubmittedAtDesc(ownEmployeeId, status, pageable);
     }
 

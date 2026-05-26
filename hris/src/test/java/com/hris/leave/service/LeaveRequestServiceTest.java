@@ -465,6 +465,7 @@ class LeaveRequestServiceTest {
             leaveRequestService.cancel(requestId, requesterId);
 
             assertThat(request.getStatus()).isEqualTo(LeaveStatus.CANCELLED);
+            assertThat(request.getCancelledAt()).isNotNull();
             assertThat(pendingStep.getStatus()).isEqualTo(StepStatus.SKIPPED);
             assertThat(pendingStep.getComment()).isEqualTo("Auto-closed due to cancellation");
             assertThat(pendingStep.getDecidedAt()).isNotNull();

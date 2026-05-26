@@ -170,6 +170,30 @@ public class DepartmentService {
         return toDto(saved);
     }
 
+    @Transactional
+    public DepartmentDto reactivate(UUID id, UUID actorId) {
+        Department department = departmentRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+
+        Department previous = Department.builder()
+            .id(department.getId())
+            .name(department.getName())
+            .code(department.getCode())
+            .headEmployeeId(department.getHeadEmployeeId())
+            .isActive(department.isActive())
+            .build();
+
+        if (department.isActive()) {
+            return toDto(department);
+        }
+
+        department.setActive(true);
+        Department saved = departmentRepository.save(department);
+        auditLogService.log(actorId, AuditAction.UPDATE, "department",
+            saved.getId(), previous, saved);
+        return toDto(saved);
+    }
+
     private void validateDeletion(UUID departmentId) {
         if (employeeRepository.existsByDepartmentId(departmentId)) {
             throw new DepartmentDeletionNotAllowedException(
