@@ -118,13 +118,11 @@ public class AccessProfileService {
     public void hardDelete(UUID id, UUID actorId) {
         AccessProfile existing = getEntity(id);
         if (existing.isSystemProfile()) {
-            throw new IllegalStateException("System access profiles cannot be deleted");
+            throw new IllegalStateException("access_profiles.delete.systemProfileError");
         }
-        if (existing.isActive()) {
-            throw new IllegalStateException("Access profile must be deactivated before deletion");
-        }
-        if (userProfileAssignmentRepository.countByProfileIdAndIsActiveTrue(existing.getId()) > 0) {
-            throw new IllegalStateException("Access profile cannot be deleted while assigned to active users");
+        long assignedUsers = userProfileAssignmentRepository.countByProfileIdAndIsActiveTrue(existing.getId());
+        if (assignedUsers > 0) {
+            throw new IllegalStateException("access_profiles.delete.assignedUsersError");
         }
         try {
             profilePermissionRepository.deleteByProfileId(existing.getId());
@@ -133,7 +131,7 @@ public class AccessProfileService {
             accessProfileRepository.flush();
             auditLogService.log(actorId, AuditAction.DELETE, "access_profile", existing.getId(), snapshot(existing), null);
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Access profile cannot be deleted because it is still referenced");
+            throw new IllegalStateException("access_profiles.delete.referencedError");
         }
     }
 

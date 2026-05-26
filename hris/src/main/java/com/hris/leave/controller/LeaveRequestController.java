@@ -7,6 +7,7 @@ import com.hris.leave.dto.FileAttachmentDto;
 import com.hris.leave.dto.LeaveRequestPreviewDto;
 import com.hris.leave.dto.LeaveRequestPreviewRequestDto;
 import com.hris.leave.dto.LeaveRequestResponseDto;
+import com.hris.leave.dto.SaveLeaveDraftDto;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.enums.LeaveStatus;
 import com.hris.leave.service.AttachmentDownload;
@@ -58,6 +59,78 @@ public class LeaveRequestController {
         LeaveRequest request = leaveRequestService.create(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.ok(leaveRequestQueryService.toDto(request, userId)));
+    }
+
+    @PostMapping("/drafts")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<LeaveRequestResponseDto>> createDraft(
+            @RequestBody SaveLeaveDraftDto dto, Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ_OWN",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_GLOBAL",
+            "LEAVE_REQUEST_MANAGE"
+        );
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        LeaveRequest draft = leaveRequestService.createDraft(dto, userId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok(leaveRequestQueryService.toDto(draft, userId)));
+    }
+
+    @PatchMapping("/{id}/draft")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<LeaveRequestResponseDto>> updateDraft(
+            @PathVariable UUID id,
+            @RequestBody SaveLeaveDraftDto dto,
+            Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ_OWN",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_GLOBAL",
+            "LEAVE_REQUEST_MANAGE"
+        );
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        LeaveRequest draft = leaveRequestService.updateDraft(id, dto, userId);
+        return ResponseEntity.ok(ApiResponse.ok(leaveRequestQueryService.toDto(draft, userId)));
+    }
+
+    @PostMapping("/{id}/submit")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<LeaveRequestResponseDto>> submitDraft(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ_OWN",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_GLOBAL",
+            "LEAVE_REQUEST_MANAGE"
+        );
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        LeaveRequest submitted = leaveRequestService.submitDraft(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(leaveRequestQueryService.toDto(submitted, userId)));
+    }
+
+    @DeleteMapping("/{id}/draft")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> deleteDraft(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorizeAnyPermissionName(
+            auth,
+            "LEAVE_REQUEST_CREATE",
+            "LEAVE_REQUEST_READ_OWN",
+            "LEAVE_REQUEST_READ",
+            "LEAVE_REQUEST_READ_GLOBAL",
+            "LEAVE_REQUEST_MANAGE",
+            "LEAVE_REQUEST_CANCEL_OWN"
+        );
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        leaveRequestService.deleteDraft(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
     @PostMapping("/preview")

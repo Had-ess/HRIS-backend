@@ -120,6 +120,9 @@ app:
     accrual:
       enabled: ${APP_LEAVE_ACCRUAL_ENABLED:false}
       cron: ${APP_LEAVE_ACCRUAL_CRON:0 0 5 * * *}
+    cancelled-cleanup:
+      cron: ${APP_LEAVE_CANCELLED_CLEANUP_CRON:0 0 * * * *}
+      retention-hours: ${APP_LEAVE_CANCELLED_CLEANUP_RETENTION_HOURS:24}
   admin:
     sla-check:
       enabled: ${APP_ADMIN_SLA_CHECK_ENABLED:false}

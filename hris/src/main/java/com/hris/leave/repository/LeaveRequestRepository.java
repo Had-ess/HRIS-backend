@@ -29,6 +29,37 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
     List<LeaveRequest> findByEmployeeId(UUID employeeId);
     List<LeaveRequest> findTop5ByEmployeeIdOrderBySubmittedAtDesc(UUID employeeId);
     boolean existsByEmployeeId(UUID employeeId);
+    List<LeaveRequest> findByStatusAndCancelledAtLessThanEqualAndDeletedAtIsNull(LeaveStatus status, Instant cutoff);
+
+    @Query("SELECT lr FROM LeaveRequest lr WHERE lr.status <> com.hris.leave.enums.LeaveStatus.DRAFT ORDER BY lr.submittedAt DESC")
+    Page<LeaveRequest> findVisibleAllOrderBySubmittedAtDesc(Pageable pageable);
+
+    @Query("""
+        SELECT lr FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId IN :departmentIds
+          AND lr.status <> com.hris.leave.enums.LeaveStatus.DRAFT
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findVisibleByDepartmentIdInOrderBySubmittedAtDesc(
+        @Param("departmentIds") List<UUID> departmentIds,
+        Pageable pageable);
+
+    @Query("""
+        SELECT lr FROM LeaveRequest lr
+        JOIN Employee e ON e.id = lr.employeeId
+        WHERE e.departmentId IN :departmentIds
+          AND lr.employeeId = :employeeId
+          AND lr.status <> com.hris.leave.enums.LeaveStatus.DRAFT
+        ORDER BY lr.submittedAt DESC
+        """)
+    Page<LeaveRequest> findVisibleByDepartmentIdInAndEmployeeIdOrderBySubmittedAtDesc(
+        @Param("departmentIds") List<UUID> departmentIds,
+        @Param("employeeId") UUID employeeId,
+        Pageable pageable);
+
+    @Query("SELECT lr FROM LeaveRequest lr WHERE lr.employeeId = :employeeId AND lr.status <> com.hris.leave.enums.LeaveStatus.DRAFT ORDER BY lr.submittedAt DESC")
+    Page<LeaveRequest> findVisibleByEmployeeIdOrderBySubmittedAtDesc(@Param("employeeId") UUID employeeId, Pageable pageable);
 
     @Query("""
         SELECT COUNT(lr) FROM LeaveRequest lr
@@ -207,6 +238,7 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
         LEFT JOIN analytics_leave_facts alf ON alf.leave_request_id = lr.id
         WHERE lr.submitted_at >= :from
           AND lr.submitted_at < :to
+          AND lr.deleted_at IS NULL
           AND lr.status IN ('APPROVED', 'REJECTED')
         """, nativeQuery = true)
     double averageProcessingDaysBetween(@Param("from") Instant from, @Param("to") Instant to);
