@@ -210,5 +210,16 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
           AND lr.status IN ('APPROVED', 'REJECTED')
         """, nativeQuery = true)
     double averageProcessingDaysBetween(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("""
+        SELECT COALESCE(AVG(lr.workingDays), 0)
+        FROM LeaveRequest lr
+        WHERE lr.status = 'APPROVED'
+          AND lr.startDate >= :from
+          AND lr.startDate < :toExclusive
+        """)
+    double averageApprovedWorkingDaysBetween(
+        @Param("from") LocalDate from,
+        @Param("toExclusive") LocalDate toExclusive);
 }
 

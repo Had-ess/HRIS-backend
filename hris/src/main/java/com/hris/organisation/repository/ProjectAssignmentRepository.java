@@ -77,6 +77,15 @@ public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssign
         """, nativeQuery = true)
     long countActiveByProjectId(@Param("projectId") UUID projectId);
 
+    @Query(value = """
+        SELECT COUNT(DISTINCT pa.team_id)
+        FROM project_assignments pa
+        WHERE pa.project_id = :projectId
+          AND pa.is_active = true
+          AND pa.team_id IS NOT NULL
+        """, nativeQuery = true)
+    long countDistinctTeamsByProjectId(@Param("projectId") UUID projectId);
+
     boolean existsByProjectIdAndIsActiveTrue(UUID projectId);
 
     @Query("""
