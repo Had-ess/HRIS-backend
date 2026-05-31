@@ -1,0 +1,622 @@
+{
+  "batchIndex": 14,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/common/GlobalExceptionHandler.java",
+      "language": "java",
+      "sizeLines": 204,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/DepartmentDeletionNotAllowedException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/EmailDeliveryException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/InsufficientLeaveBalanceException.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/InvalidAdminRequestStateException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/InvalidLeavePeriodException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/MissingDepartmentHeadException.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/PermissionAlreadyAssignedException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/StepAlreadyDecidedException.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java",
+      "language": "java",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/PublicHoliday.java",
+      "language": "java",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/WorkSchedule.java",
+      "language": "java",
+      "sizeLines": 54,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/PublicHolidayRepository.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/WorkScheduleRepository.java",
+      "language": "java",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/service/WorkScheduleService.java",
+      "language": "java",
+      "sizeLines": 90,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+      "language": "java",
+      "sizeLines": 118,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/common/GlobalExceptionHandler.java": [
+      "src/main/java/com/hris/common/exception/DepartmentDeletionNotAllowedException.java",
+      "src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java",
+      "src/main/java/com/hris/common/exception/EmailDeliveryException.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/FileAttachmentValidationException.java",
+      "src/main/java/com/hris/common/exception/InsufficientLeaveBalanceException.java",
+      "src/main/java/com/hris/common/exception/InvalidAdminRequestStateException.java",
+      "src/main/java/com/hris/common/exception/InvalidLeavePeriodException.java",
+      "src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java",
+      "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+      "src/main/java/com/hris/common/exception/KeycloakProvisioningException.java",
+      "src/main/java/com/hris/common/exception/MissingDepartmentHeadException.java",
+      "src/main/java/com/hris/common/exception/PermissionAlreadyAssignedException.java",
+      "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java",
+      "src/main/java/com/hris/common/exception/StepAlreadyDecidedException.java"
+    ],
+    "src/main/java/com/hris/common/exception/DepartmentDeletionNotAllowedException.java": [],
+    "src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java": [],
+    "src/main/java/com/hris/common/exception/EmailDeliveryException.java": [],
+    "src/main/java/com/hris/common/exception/InsufficientLeaveBalanceException.java": [],
+    "src/main/java/com/hris/common/exception/InvalidAdminRequestStateException.java": [],
+    "src/main/java/com/hris/common/exception/InvalidLeavePeriodException.java": [],
+    "src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java": [],
+    "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java": [],
+    "src/main/java/com/hris/common/exception/MissingDepartmentHeadException.java": [],
+    "src/main/java/com/hris/common/exception/PermissionAlreadyAssignedException.java": [],
+    "src/main/java/com/hris/common/exception/StepAlreadyDecidedException.java": [],
+    "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java": [
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+      "src/main/java/com/hris/leave/entity/LeaveType.java",
+      "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+      "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java"
+    ],
+    "src/main/java/com/hris/organisation/entity/PublicHoliday.java": [],
+    "src/main/java/com/hris/organisation/entity/WorkSchedule.java": [],
+    "src/main/java/com/hris/organisation/repository/PublicHolidayRepository.java": [
+      "src/main/java/com/hris/organisation/entity/PublicHoliday.java"
+    ],
+    "src/main/java/com/hris/organisation/repository/WorkScheduleRepository.java": [
+      "src/main/java/com/hris/organisation/entity/WorkSchedule.java"
+    ],
+    "src/main/java/com/hris/organisation/service/WorkScheduleService.java": [
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java",
+      "src/main/java/com/hris/organisation/entity/PublicHoliday.java",
+      "src/main/java/com/hris/organisation/entity/WorkSchedule.java",
+      "src/main/java/com/hris/organisation/repository/PublicHolidayRepository.java",
+      "src/main/java/com/hris/organisation/repository/WorkScheduleRepository.java",
+      "src/main/java/com/hris/settings/calendar/repository/HrHolidayRepository.java",
+      "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java"
+    ],
+    "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrCalendarDto.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrCalendarMutationDto.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrHolidayDto.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrHolidayMutationDto.java",
+      "src/main/java/com/hris/settings/calendar/service/HrCalendarService.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/common/GlobalExceptionHandler.java": [
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/FileAttachmentValidationException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "FileAttachmentValidationException",
+          "FileAttachmentValidationException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/KeycloakProvisioningException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "KeycloakProvisioningException",
+          "KeycloakProvisioningException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionDeletionNotAllowedException",
+          "PermissionDeletionNotAllowedException"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/DepartmentDeletionNotAllowedException.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/InsufficientLeaveBalanceException.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceLedgerService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getTransactions",
+          "getLedgerForEmployee",
+          "getProjection",
+          "getAvailableBalance",
+          "adjustBalance",
+          "reserveForLeaveRequest",
+          "confirmApprovedLeaveRequest",
+          "releaseRejectedLeaveRequest",
+          "releaseCancelledLeaveRequest",
+          "applyAccrual",
+          "LeaveBalanceLedgerService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/InvalidAdminRequestStateException.java": [
+      {
+        "path": "src/main/java/com/hris/admin/service/AdminRequestService.java",
+        "batchIndex": 11,
+        "symbols": [
+          "create",
+          "getMyRequests",
+          "getOwnRequest",
+          "update",
+          "submit",
+          "cancel",
+          "uploadRequesterAttachment",
+          "searchInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "canViewInternal",
+          "AdminRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/InvalidLeavePeriodException.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java": [
+      {
+        "path": "src/main/java/com/hris/approval/service/ApprovalStepService.java",
+        "batchIndex": 3,
+        "symbols": [
+          "getPendingForApprover",
+          "approve",
+          "approve",
+          "reject",
+          "reject",
+          "bulkApprove",
+          "bulkReject",
+          "ApprovalStepService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/StepAlreadyDecidedException.java": [
+      {
+        "path": "src/main/java/com/hris/approval/service/ApprovalStepService.java",
+        "batchIndex": 3,
+        "symbols": [
+          "getPendingForApprover",
+          "approve",
+          "approve",
+          "reject",
+          "reject",
+          "bulkApprove",
+          "bulkReject",
+          "ApprovalStepService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java": [
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveType.java",
+        "batchIndex": 9,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "LeaveType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java",
+        "batchIndex": 15,
+        "symbols": [
+          "EnterpriseSettingsRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+        "batchIndex": 15,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+        "batchIndex": 15,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "ValidationWorkflow"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java",
+        "batchIndex": 15,
+        "symbols": [
+          "ValidationWorkflowRepository"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/service/WorkScheduleService.java": [
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/repository/HrHolidayRepository.java",
+        "batchIndex": 15,
+        "symbols": [
+          "HrHolidayRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java",
+        "batchIndex": 15,
+        "symbols": [
+          "EnterpriseSettingsRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/controller/WorkScheduleController.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "WorkScheduleController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/dto/HrCalendarDto.java",
+        "batchIndex": 15,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/dto/HrCalendarMutationDto.java",
+        "batchIndex": 15,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/dto/HrHolidayDto.java",
+        "batchIndex": 15,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/dto/HrHolidayMutationDto.java",
+        "batchIndex": 15,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/service/HrCalendarService.java",
+        "batchIndex": 15,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "resolveHolidayDates",
+          "HrCalendarService"
+        ]
+      }
+    ]
+  }
+}

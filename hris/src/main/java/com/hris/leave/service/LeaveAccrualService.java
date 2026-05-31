@@ -22,7 +22,7 @@ import com.hris.leave.entity.LeaveType;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
-import com.hris.notification.service.NotificationPublisher;
+import com.hris.notification.service.TransactionalNotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +52,7 @@ public class LeaveAccrualService {
     private final LeaveBalanceLedgerService ledgerService;
     private final AuditLogService auditLogService;
     private final LeaveAccrualRunRepository accrualRunRepository;
-    private final NotificationPublisher notificationPublisher;
+    private final TransactionalNotificationPublisher notificationPublisher;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
@@ -265,7 +265,7 @@ public class LeaveAccrualService {
             String paramsJson = objectMapper.writeValueAsString(params);
 
             for (User user : hrUsers) {
-                notificationPublisher.publish(NotificationEvent.builder()
+                notificationPublisher.publishAfterCommit(NotificationEvent.builder()
                     .eventType(NotificationEventType.LEAVE_ACCRUAL_APPLIED)
                     .targetUserId(user.getId())
                     .titleKey("leave.accrual.summary.title")

@@ -1,0 +1,3531 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 22,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 37,
+      "nonEmptyLines": 27,
+      "classes": [
+        {
+          "name": "PermissionRepository",
+          "startLine": 12,
+          "endLine": 37,
+          "methods": [
+            "findAllByOrderByResourceAscActionAsc",
+            "findByIdInAndIsActiveTrue",
+            "findByNameIgnoreCase",
+            "existsByNameIgnoreCase",
+            "existsByNameIgnoreCaseAndIdNot",
+            "existsByResourceIgnoreCaseAndActionIgnoreCaseAndScopeIgnoreCase",
+            "existsByResourceIgnoreCaseAndActionIgnoreCaseAndScopeIgnoreCaseAndIdNot"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "PermissionRepository",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 149,
+      "nonEmptyLines": 125,
+      "functions": [
+        {
+          "name": "getAll",
+          "startLine": 28,
+          "endLine": 33,
+          "params": []
+        },
+        {
+          "name": "getById",
+          "startLine": 35,
+          "endLine": 38,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "create",
+          "startLine": 40,
+          "endLine": 54,
+          "params": [
+            "dto"
+          ]
+        },
+        {
+          "name": "update",
+          "startLine": 56,
+          "endLine": 83,
+          "params": [
+            "id",
+            "dto"
+          ]
+        },
+        {
+          "name": "delete",
+          "startLine": 85,
+          "endLine": 93,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "getEntityById",
+          "startLine": 95,
+          "endLine": 99,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "validateUniqueness",
+          "startLine": 101,
+          "endLine": 121,
+          "params": [
+            "name",
+            "resource",
+            "action",
+            "permissionId"
+          ]
+        },
+        {
+          "name": "toDto",
+          "startLine": 123,
+          "endLine": 132,
+          "params": [
+            "permission"
+          ]
+        },
+        {
+          "name": "normalizeName",
+          "startLine": 134,
+          "endLine": 136,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "normalizeValue",
+          "startLine": 138,
+          "endLine": 140,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "normalizeDescription",
+          "startLine": 142,
+          "endLine": 148,
+          "params": [
+            "description"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "PermissionService",
+          "startLine": 19,
+          "endLine": 149,
+          "methods": [
+            "getAll",
+            "getById",
+            "create",
+            "update",
+            "delete",
+            "getEntityById",
+            "validateUniqueness",
+            "toDto",
+            "normalizeName",
+            "normalizeValue",
+            "normalizeDescription"
+          ],
+          "properties": [
+            "DEFAULT_SCOPE",
+            "permissionRepository",
+            "profilePermissionRepository"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getAll",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "getById",
+          "line": 35,
+          "isDefault": false
+        },
+        {
+          "name": "create",
+          "line": 40,
+          "isDefault": false
+        },
+        {
+          "name": "update",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "delete",
+          "line": 85,
+          "isDefault": false
+        },
+        {
+          "name": "getEntityById",
+          "line": 95,
+          "isDefault": false
+        },
+        {
+          "name": "PermissionService",
+          "line": 19,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getAll",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream()\r\n            .map(this::toDto).toList",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getAll",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream().map",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getAll",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getAll",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getById",
+          "callee": "toDto",
+          "lineNumber": 37
+        },
+        {
+          "caller": "getById",
+          "callee": "getEntityById",
+          "lineNumber": 37
+        },
+        {
+          "caller": "create",
+          "callee": "validateUniqueness",
+          "lineNumber": 42
+        },
+        {
+          "caller": "create",
+          "callee": "dto.name",
+          "lineNumber": 42
+        },
+        {
+          "caller": "create",
+          "callee": "dto.resource",
+          "lineNumber": 42
+        },
+        {
+          "caller": "create",
+          "callee": "dto.action",
+          "lineNumber": 42
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder()\r\n            .name(normalizeName(dto.name()))\r\n            .resource(normalizeValue(dto.resource()))\r\n            .action(normalizeValue(dto.action()))\r\n            .scope(DEFAULT_SCOPE)\r\n            .description(normalizeDescription(dto.description()))\r\n            .isActive(dto.active() == null || dto.active()).build",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder()\r\n            .name(normalizeName(dto.name()))\r\n            .resource(normalizeValue(dto.resource()))\r\n            .action(normalizeValue(dto.action()))\r\n            .scope(DEFAULT_SCOPE)\r\n            .description(normalizeDescription(dto.description())).isActive",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder()\r\n            .name(normalizeName(dto.name()))\r\n            .resource(normalizeValue(dto.resource()))\r\n            .action(normalizeValue(dto.action()))\r\n            .scope(DEFAULT_SCOPE).description",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder()\r\n            .name(normalizeName(dto.name()))\r\n            .resource(normalizeValue(dto.resource()))\r\n            .action(normalizeValue(dto.action())).scope",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder()\r\n            .name(normalizeName(dto.name()))\r\n            .resource(normalizeValue(dto.resource())).action",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder()\r\n            .name(normalizeName(dto.name())).resource",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder().name",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "Permission.builder",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "normalizeName",
+          "lineNumber": 45
+        },
+        {
+          "caller": "create",
+          "callee": "dto.name",
+          "lineNumber": 45
+        },
+        {
+          "caller": "create",
+          "callee": "normalizeValue",
+          "lineNumber": 46
+        },
+        {
+          "caller": "create",
+          "callee": "dto.resource",
+          "lineNumber": 46
+        },
+        {
+          "caller": "create",
+          "callee": "normalizeValue",
+          "lineNumber": 47
+        },
+        {
+          "caller": "create",
+          "callee": "dto.action",
+          "lineNumber": 47
+        },
+        {
+          "caller": "create",
+          "callee": "normalizeDescription",
+          "lineNumber": 49
+        },
+        {
+          "caller": "create",
+          "callee": "dto.description",
+          "lineNumber": 49
+        },
+        {
+          "caller": "create",
+          "callee": "dto.active",
+          "lineNumber": 50
+        },
+        {
+          "caller": "create",
+          "callee": "dto.active",
+          "lineNumber": 50
+        },
+        {
+          "caller": "create",
+          "callee": "toDto",
+          "lineNumber": 53
+        },
+        {
+          "caller": "create",
+          "callee": "permissionRepository.save",
+          "lineNumber": 53
+        },
+        {
+          "caller": "update",
+          "callee": "getEntityById",
+          "lineNumber": 58
+        },
+        {
+          "caller": "update",
+          "callee": "dto.name",
+          "lineNumber": 60
+        },
+        {
+          "caller": "update",
+          "callee": "dto.name",
+          "lineNumber": 60
+        },
+        {
+          "caller": "update",
+          "callee": "permission.getName",
+          "lineNumber": 60
+        },
+        {
+          "caller": "update",
+          "callee": "dto.resource",
+          "lineNumber": 61
+        },
+        {
+          "caller": "update",
+          "callee": "dto.resource",
+          "lineNumber": 61
+        },
+        {
+          "caller": "update",
+          "callee": "permission.getResource",
+          "lineNumber": 61
+        },
+        {
+          "caller": "update",
+          "callee": "dto.action",
+          "lineNumber": 62
+        },
+        {
+          "caller": "update",
+          "callee": "dto.action",
+          "lineNumber": 62
+        },
+        {
+          "caller": "update",
+          "callee": "permission.getAction",
+          "lineNumber": 62
+        },
+        {
+          "caller": "update",
+          "callee": "validateUniqueness",
+          "lineNumber": 64
+        },
+        {
+          "caller": "update",
+          "callee": "dto.name",
+          "lineNumber": 66
+        },
+        {
+          "caller": "update",
+          "callee": "permission.setName",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "normalizeName",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "dto.name",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "dto.resource",
+          "lineNumber": 69
+        },
+        {
+          "caller": "update",
+          "callee": "permission.setResource",
+          "lineNumber": 70
+        },
+        {
+          "caller": "update",
+          "callee": "normalizeValue",
+          "lineNumber": 70
+        },
+        {
+          "caller": "update",
+          "callee": "dto.resource",
+          "lineNumber": 70
+        },
+        {
+          "caller": "update",
+          "callee": "dto.action",
+          "lineNumber": 72
+        },
+        {
+          "caller": "update",
+          "callee": "permission.setAction",
+          "lineNumber": 73
+        },
+        {
+          "caller": "update",
+          "callee": "normalizeValue",
+          "lineNumber": 73
+        },
+        {
+          "caller": "update",
+          "callee": "dto.action",
+          "lineNumber": 73
+        },
+        {
+          "caller": "update",
+          "callee": "dto.description",
+          "lineNumber": 75
+        },
+        {
+          "caller": "update",
+          "callee": "permission.setDescription",
+          "lineNumber": 76
+        },
+        {
+          "caller": "update",
+          "callee": "normalizeDescription",
+          "lineNumber": 76
+        },
+        {
+          "caller": "update",
+          "callee": "dto.description",
+          "lineNumber": 76
+        },
+        {
+          "caller": "update",
+          "callee": "dto.active",
+          "lineNumber": 78
+        },
+        {
+          "caller": "update",
+          "callee": "permission.setActive",
+          "lineNumber": 79
+        },
+        {
+          "caller": "update",
+          "callee": "dto.active",
+          "lineNumber": 79
+        },
+        {
+          "caller": "update",
+          "callee": "toDto",
+          "lineNumber": 82
+        },
+        {
+          "caller": "update",
+          "callee": "permissionRepository.save",
+          "lineNumber": 82
+        },
+        {
+          "caller": "delete",
+          "callee": "getEntityById",
+          "lineNumber": 87
+        },
+        {
+          "caller": "delete",
+          "callee": "profilePermissionRepository.existsByPermissionId",
+          "lineNumber": 88
+        },
+        {
+          "caller": "delete",
+          "callee": "new PermissionDeletionNotAllowedException",
+          "lineNumber": 89
+        },
+        {
+          "caller": "delete",
+          "callee": "permissionRepository.delete",
+          "lineNumber": 92
+        },
+        {
+          "caller": "getEntityById",
+          "callee": "permissionRepository.findById(id).orElseThrow",
+          "lineNumber": 97
+        },
+        {
+          "caller": "getEntityById",
+          "callee": "permissionRepository.findById",
+          "lineNumber": 97
+        },
+        {
+          "caller": "getEntityById",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 98
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "normalizeName",
+          "lineNumber": 102
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "normalizeValue",
+          "lineNumber": 103
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "normalizeValue",
+          "lineNumber": 104
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "permissionRepository.existsByNameIgnoreCase",
+          "lineNumber": 107
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "permissionRepository.existsByNameIgnoreCaseAndIdNot",
+          "lineNumber": 108
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "new IllegalStateException",
+          "lineNumber": 110
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "permissionRepository.existsByResourceIgnoreCaseAndActionIgnoreCaseAndScopeIgnoreCase",
+          "lineNumber": 114
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "permissionRepository.existsByResourceIgnoreCaseAndActionIgnoreCaseAndScopeIgnoreCaseAndIdNot",
+          "lineNumber": 116
+        },
+        {
+          "caller": "validateUniqueness",
+          "callee": "new IllegalStateException",
+          "lineNumber": 119
+        },
+        {
+          "caller": "toDto",
+          "callee": "new PermissionResponseDto",
+          "lineNumber": 124
+        },
+        {
+          "caller": "toDto",
+          "callee": "permission.getId",
+          "lineNumber": 125
+        },
+        {
+          "caller": "toDto",
+          "callee": "permission.getName",
+          "lineNumber": 126
+        },
+        {
+          "caller": "toDto",
+          "callee": "permission.getResource",
+          "lineNumber": 127
+        },
+        {
+          "caller": "toDto",
+          "callee": "permission.getAction",
+          "lineNumber": 128
+        },
+        {
+          "caller": "toDto",
+          "callee": "permission.getDescription",
+          "lineNumber": 129
+        },
+        {
+          "caller": "toDto",
+          "callee": "permission.isActive",
+          "lineNumber": 130
+        },
+        {
+          "caller": "normalizeName",
+          "callee": "normalizeValue",
+          "lineNumber": 135
+        },
+        {
+          "caller": "normalizeValue",
+          "callee": "value.trim().toUpperCase",
+          "lineNumber": 139
+        },
+        {
+          "caller": "normalizeValue",
+          "callee": "value.trim",
+          "lineNumber": 139
+        },
+        {
+          "caller": "normalizeDescription",
+          "callee": "description.trim",
+          "lineNumber": 146
+        },
+        {
+          "caller": "normalizeDescription",
+          "callee": "trimmed.isEmpty",
+          "lineNumber": 147
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 7,
+        "functionCount": 11,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/common/ApiResponse.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 18,
+      "nonEmptyLines": 15,
+      "callGraph": [
+        {
+          "caller": "ok",
+          "callee": "new ApiResponse<>",
+          "lineNumber": 12
+        },
+        {
+          "caller": "ok",
+          "callee": "Instant.now",
+          "lineNumber": 12
+        },
+        {
+          "caller": "error",
+          "callee": "new ApiResponse<>",
+          "lineNumber": 16
+        },
+        {
+          "caller": "error",
+          "callee": "Instant.now",
+          "lineNumber": 16
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/common/PageResponse.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 24,
+      "callGraph": [
+        {
+          "caller": "of",
+          "callee": "new PageResponse<>",
+          "lineNumber": 17
+        },
+        {
+          "caller": "of",
+          "callee": "page.getContent",
+          "lineNumber": 18
+        },
+        {
+          "caller": "of",
+          "callee": "page.getNumber",
+          "lineNumber": 19
+        },
+        {
+          "caller": "of",
+          "callee": "page.getSize",
+          "lineNumber": 20
+        },
+        {
+          "caller": "of",
+          "callee": "page.getTotalElements",
+          "lineNumber": 21
+        },
+        {
+          "caller": "of",
+          "callee": "page.getTotalPages",
+          "lineNumber": 22
+        },
+        {
+          "caller": "of",
+          "callee": "page.isFirst",
+          "lineNumber": 23
+        },
+        {
+          "caller": "of",
+          "callee": "page.isLast",
+          "lineNumber": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 6,
+      "functions": [
+        {
+          "name": "PermissionDeletionNotAllowedException",
+          "startLine": 5,
+          "endLine": 7,
+          "params": [
+            "message"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "PermissionDeletionNotAllowedException",
+          "startLine": 3,
+          "endLine": 8,
+          "methods": [
+            "PermissionDeletionNotAllowedException"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "PermissionDeletionNotAllowedException",
+          "line": 5,
+          "isDefault": false
+        },
+        {
+          "name": "PermissionDeletionNotAllowedException",
+          "line": 3,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/controller/TeamController.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 86,
+      "nonEmptyLines": 76,
+      "functions": [
+        {
+          "name": "getAll",
+          "startLine": 29,
+          "endLine": 36,
+          "params": [
+            "pageable",
+            "authentication"
+          ]
+        },
+        {
+          "name": "getById",
+          "startLine": 38,
+          "endLine": 45,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        },
+        {
+          "name": "create",
+          "startLine": 47,
+          "endLine": 55,
+          "params": [
+            "dto",
+            "authentication"
+          ]
+        },
+        {
+          "name": "update",
+          "startLine": 57,
+          "endLine": 65,
+          "params": [
+            "id",
+            "dto",
+            "authentication"
+          ]
+        },
+        {
+          "name": "deactivate",
+          "startLine": 67,
+          "endLine": 75,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        },
+        {
+          "name": "hardDelete",
+          "startLine": 77,
+          "endLine": 85,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "TeamController",
+          "startLine": 21,
+          "endLine": 86,
+          "methods": [
+            "getAll",
+            "getById",
+            "create",
+            "update",
+            "deactivate",
+            "hardDelete"
+          ],
+          "properties": [
+            "teamService",
+            "permissionAuthorizationService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getAll",
+          "line": 29,
+          "isDefault": false
+        },
+        {
+          "name": "getById",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "create",
+          "line": 47,
+          "isDefault": false
+        },
+        {
+          "name": "update",
+          "line": 57,
+          "isDefault": false
+        },
+        {
+          "name": "deactivate",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "hardDelete",
+          "line": 77,
+          "isDefault": false
+        },
+        {
+          "name": "TeamController",
+          "line": 21,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getAll",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 33
+        },
+        {
+          "caller": "getAll",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 34
+        },
+        {
+          "caller": "getAll",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 35
+        },
+        {
+          "caller": "getAll",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 35
+        },
+        {
+          "caller": "getAll",
+          "callee": "teamService.getAll",
+          "lineNumber": 35
+        },
+        {
+          "caller": "getById",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getById",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 43
+        },
+        {
+          "caller": "getById",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getById",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getById",
+          "callee": "teamService.getById",
+          "lineNumber": 44
+        },
+        {
+          "caller": "create",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 51
+        },
+        {
+          "caller": "create",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 52
+        },
+        {
+          "caller": "create",
+          "callee": "ResponseEntity.status(HttpStatus.CREATED).body",
+          "lineNumber": 53
+        },
+        {
+          "caller": "create",
+          "callee": "ResponseEntity.status",
+          "lineNumber": 53
+        },
+        {
+          "caller": "create",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 54
+        },
+        {
+          "caller": "create",
+          "callee": "teamService.create",
+          "lineNumber": 54
+        },
+        {
+          "caller": "update",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 62
+        },
+        {
+          "caller": "update",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 63
+        },
+        {
+          "caller": "update",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 64
+        },
+        {
+          "caller": "update",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 64
+        },
+        {
+          "caller": "update",
+          "callee": "teamService.update",
+          "lineNumber": 64
+        },
+        {
+          "caller": "deactivate",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 71
+        },
+        {
+          "caller": "deactivate",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 72
+        },
+        {
+          "caller": "deactivate",
+          "callee": "teamService.deactivate",
+          "lineNumber": 73
+        },
+        {
+          "caller": "deactivate",
+          "callee": "ResponseEntity.noContent().build",
+          "lineNumber": 74
+        },
+        {
+          "caller": "deactivate",
+          "callee": "ResponseEntity.noContent",
+          "lineNumber": 74
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 81
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 82
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "teamService.hardDelete",
+          "lineNumber": 83
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "ResponseEntity.noContent().build",
+          "lineNumber": 84
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "ResponseEntity.noContent",
+          "lineNumber": 84
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 7,
+        "functionCount": 6,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/controller/WorkScheduleController.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 25,
+      "nonEmptyLines": 20,
+      "functions": [
+        {
+          "name": "getAll",
+          "startLine": 21,
+          "endLine": 24,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "WorkScheduleController",
+          "startLine": 14,
+          "endLine": 25,
+          "methods": [
+            "getAll"
+          ],
+          "properties": [
+            "workScheduleService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getAll",
+          "line": 21,
+          "isDefault": false
+        },
+        {
+          "name": "WorkScheduleController",
+          "line": 14,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getAll",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 23
+        },
+        {
+          "caller": "getAll",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 23
+        },
+        {
+          "caller": "getAll",
+          "callee": "workScheduleService.getAll",
+          "lineNumber": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/TeamCreateDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 12,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/TeamDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 20,
+      "nonEmptyLines": 18,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 13,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/controller/TeamHierarchyController.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 64,
+      "nonEmptyLines": 56,
+      "functions": [
+        {
+          "name": "getHierarchy",
+          "startLine": 27,
+          "endLine": 33,
+          "params": [
+            "teamId",
+            "authentication"
+          ]
+        },
+        {
+          "name": "create",
+          "startLine": 35,
+          "endLine": 43,
+          "params": [
+            "dto",
+            "authentication"
+          ]
+        },
+        {
+          "name": "update",
+          "startLine": 45,
+          "endLine": 53,
+          "params": [
+            "id",
+            "dto",
+            "authentication"
+          ]
+        },
+        {
+          "name": "endRelation",
+          "startLine": 55,
+          "endLine": 63,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "TeamHierarchyController",
+          "startLine": 19,
+          "endLine": 64,
+          "methods": [
+            "getHierarchy",
+            "create",
+            "update",
+            "endRelation"
+          ],
+          "properties": [
+            "teamHierarchyService",
+            "permissionAuthorizationService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getHierarchy",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "create",
+          "line": 35,
+          "isDefault": false
+        },
+        {
+          "name": "update",
+          "line": 45,
+          "isDefault": false
+        },
+        {
+          "name": "endRelation",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "TeamHierarchyController",
+          "line": 19,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getHierarchy",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 31
+        },
+        {
+          "caller": "getHierarchy",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 32
+        },
+        {
+          "caller": "getHierarchy",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 32
+        },
+        {
+          "caller": "getHierarchy",
+          "callee": "teamHierarchyService.getHierarchy",
+          "lineNumber": 32
+        },
+        {
+          "caller": "create",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 39
+        },
+        {
+          "caller": "create",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 40
+        },
+        {
+          "caller": "create",
+          "callee": "ResponseEntity.status(HttpStatus.CREATED).body",
+          "lineNumber": 41
+        },
+        {
+          "caller": "create",
+          "callee": "ResponseEntity.status",
+          "lineNumber": 41
+        },
+        {
+          "caller": "create",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 42
+        },
+        {
+          "caller": "create",
+          "callee": "teamHierarchyService.create",
+          "lineNumber": 42
+        },
+        {
+          "caller": "update",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 50
+        },
+        {
+          "caller": "update",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 51
+        },
+        {
+          "caller": "update",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 52
+        },
+        {
+          "caller": "update",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 52
+        },
+        {
+          "caller": "update",
+          "callee": "teamHierarchyService.update",
+          "lineNumber": 52
+        },
+        {
+          "caller": "endRelation",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 59
+        },
+        {
+          "caller": "endRelation",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 60
+        },
+        {
+          "caller": "endRelation",
+          "callee": "teamHierarchyService.endRelation",
+          "lineNumber": 61
+        },
+        {
+          "caller": "endRelation",
+          "callee": "ResponseEntity.noContent().build",
+          "lineNumber": 62
+        },
+        {
+          "caller": "endRelation",
+          "callee": "ResponseEntity.noContent",
+          "lineNumber": 62
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 5,
+        "functionCount": 4,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 12,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 26,
+      "nonEmptyLines": 24,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 101,
+      "nonEmptyLines": 82,
+      "functions": [
+        {
+          "name": "PermissionAuthorizationService",
+          "startLine": 15,
+          "endLine": 17,
+          "params": [
+            "accessResolutionService"
+          ]
+        },
+        {
+          "name": "hasPermission",
+          "startLine": 19,
+          "endLine": 32,
+          "params": [
+            "authentication",
+            "resource",
+            "action"
+          ]
+        },
+        {
+          "name": "authorize",
+          "startLine": 34,
+          "endLine": 38,
+          "params": [
+            "authentication",
+            "resource",
+            "action"
+          ]
+        },
+        {
+          "name": "hasPermissionName",
+          "startLine": 40,
+          "endLine": 53,
+          "params": [
+            "authentication",
+            "permissionName"
+          ]
+        },
+        {
+          "name": "hasAnyPermissionName",
+          "startLine": 55,
+          "endLine": 62,
+          "params": [
+            "authentication"
+          ]
+        },
+        {
+          "name": "authorizePermissionName",
+          "startLine": 64,
+          "endLine": 68,
+          "params": [
+            "authentication",
+            "permissionName"
+          ]
+        },
+        {
+          "name": "authorizeAnyPermissionName",
+          "startLine": 70,
+          "endLine": 74,
+          "params": [
+            "authentication"
+          ]
+        },
+        {
+          "name": "hasPermissionInScope",
+          "startLine": 81,
+          "endLine": 94,
+          "params": [
+            "authentication",
+            "permissionName",
+            "scopeEntityId"
+          ]
+        },
+        {
+          "name": "authorizePermissionInScope",
+          "startLine": 96,
+          "endLine": 100,
+          "params": [
+            "authentication",
+            "permissionName",
+            "scopeEntityId"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "PermissionAuthorizationService",
+          "startLine": 10,
+          "endLine": 101,
+          "methods": [
+            "PermissionAuthorizationService",
+            "hasPermission",
+            "authorize",
+            "hasPermissionName",
+            "hasAnyPermissionName",
+            "authorizePermissionName",
+            "authorizeAnyPermissionName",
+            "hasPermissionInScope",
+            "authorizePermissionInScope"
+          ],
+          "properties": [
+            "accessResolutionService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PermissionAuthorizationService",
+          "line": 15,
+          "isDefault": false
+        },
+        {
+          "name": "hasPermission",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "authorize",
+          "line": 34,
+          "isDefault": false
+        },
+        {
+          "name": "hasPermissionName",
+          "line": 40,
+          "isDefault": false
+        },
+        {
+          "name": "hasAnyPermissionName",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "authorizePermissionName",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "authorizeAnyPermissionName",
+          "line": 70,
+          "isDefault": false
+        },
+        {
+          "name": "hasPermissionInScope",
+          "line": 81,
+          "isDefault": false
+        },
+        {
+          "name": "authorizePermissionInScope",
+          "line": 96,
+          "isDefault": false
+        },
+        {
+          "name": "PermissionAuthorizationService",
+          "line": 10,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "hasPermission",
+          "callee": "authentication.isAuthenticated",
+          "lineNumber": 20
+        },
+        {
+          "caller": "hasPermission",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 26
+        },
+        {
+          "caller": "hasPermission",
+          "callee": "accessResolutionService.hasPermission",
+          "lineNumber": 31
+        },
+        {
+          "caller": "authorize",
+          "callee": "hasPermission",
+          "lineNumber": 35
+        },
+        {
+          "caller": "authorize",
+          "callee": "new AccessDeniedException",
+          "lineNumber": 36
+        },
+        {
+          "caller": "hasPermissionName",
+          "callee": "authentication.isAuthenticated",
+          "lineNumber": 41
+        },
+        {
+          "caller": "hasPermissionName",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 47
+        },
+        {
+          "caller": "hasPermissionName",
+          "callee": "accessResolutionService.hasPermissionName",
+          "lineNumber": 52
+        },
+        {
+          "caller": "hasAnyPermissionName",
+          "callee": "hasPermissionName",
+          "lineNumber": 57
+        },
+        {
+          "caller": "authorizePermissionName",
+          "callee": "hasPermissionName",
+          "lineNumber": 65
+        },
+        {
+          "caller": "authorizePermissionName",
+          "callee": "new AccessDeniedException",
+          "lineNumber": 66
+        },
+        {
+          "caller": "authorizeAnyPermissionName",
+          "callee": "hasAnyPermissionName",
+          "lineNumber": 71
+        },
+        {
+          "caller": "authorizeAnyPermissionName",
+          "callee": "new AccessDeniedException",
+          "lineNumber": 72
+        },
+        {
+          "caller": "hasPermissionInScope",
+          "callee": "authentication.isAuthenticated",
+          "lineNumber": 82
+        },
+        {
+          "caller": "hasPermissionInScope",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 88
+        },
+        {
+          "caller": "hasPermissionInScope",
+          "callee": "accessResolutionService.hasPermissionInScope",
+          "lineNumber": 93
+        },
+        {
+          "caller": "authorizePermissionInScope",
+          "callee": "hasPermissionInScope",
+          "lineNumber": 97
+        },
+        {
+          "caller": "authorizePermissionInScope",
+          "callee": "new AccessDeniedException",
+          "lineNumber": 98
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 10,
+        "functionCount": 9,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/controller/ValidationWorkflowController.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 101,
+      "nonEmptyLines": 89,
+      "functions": [
+        {
+          "name": "getAll",
+          "startLine": 30,
+          "endLine": 36,
+          "params": [
+            "pageable",
+            "authentication"
+          ]
+        },
+        {
+          "name": "getById",
+          "startLine": 38,
+          "endLine": 44,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        },
+        {
+          "name": "create",
+          "startLine": 46,
+          "endLine": 54,
+          "params": [
+            "dto",
+            "authentication"
+          ]
+        },
+        {
+          "name": "update",
+          "startLine": 56,
+          "endLine": 64,
+          "params": [
+            "id",
+            "dto",
+            "authentication"
+          ]
+        },
+        {
+          "name": "deactivate",
+          "startLine": 66,
+          "endLine": 74,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        },
+        {
+          "name": "hardDelete",
+          "startLine": 76,
+          "endLine": 84,
+          "params": [
+            "id",
+            "authentication"
+          ]
+        },
+        {
+          "name": "getOptions",
+          "startLine": 86,
+          "endLine": 92,
+          "params": [
+            "usage",
+            "authentication"
+          ]
+        },
+        {
+          "name": "authorizeRead",
+          "startLine": 94,
+          "endLine": 100,
+          "params": [
+            "authentication"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ValidationWorkflowController",
+          "startLine": 22,
+          "endLine": 101,
+          "methods": [
+            "getAll",
+            "getById",
+            "create",
+            "update",
+            "deactivate",
+            "hardDelete",
+            "getOptions",
+            "authorizeRead"
+          ],
+          "properties": [
+            "validationWorkflowService",
+            "permissionAuthorizationService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getAll",
+          "line": 30,
+          "isDefault": false
+        },
+        {
+          "name": "getById",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "create",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "update",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "deactivate",
+          "line": 66,
+          "isDefault": false
+        },
+        {
+          "name": "hardDelete",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "getOptions",
+          "line": 86,
+          "isDefault": false
+        },
+        {
+          "name": "ValidationWorkflowController",
+          "line": 22,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getAll",
+          "callee": "authorizeRead",
+          "lineNumber": 34
+        },
+        {
+          "caller": "getAll",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 35
+        },
+        {
+          "caller": "getAll",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 35
+        },
+        {
+          "caller": "getAll",
+          "callee": "validationWorkflowService.getAll",
+          "lineNumber": 35
+        },
+        {
+          "caller": "getById",
+          "callee": "authorizeRead",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getById",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 43
+        },
+        {
+          "caller": "getById",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 43
+        },
+        {
+          "caller": "getById",
+          "callee": "validationWorkflowService.getById",
+          "lineNumber": 43
+        },
+        {
+          "caller": "create",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 50
+        },
+        {
+          "caller": "create",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 51
+        },
+        {
+          "caller": "create",
+          "callee": "ResponseEntity.status(HttpStatus.CREATED).body",
+          "lineNumber": 52
+        },
+        {
+          "caller": "create",
+          "callee": "ResponseEntity.status",
+          "lineNumber": 52
+        },
+        {
+          "caller": "create",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 53
+        },
+        {
+          "caller": "create",
+          "callee": "validationWorkflowService.create",
+          "lineNumber": 53
+        },
+        {
+          "caller": "update",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 61
+        },
+        {
+          "caller": "update",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 62
+        },
+        {
+          "caller": "update",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 63
+        },
+        {
+          "caller": "update",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 63
+        },
+        {
+          "caller": "update",
+          "callee": "validationWorkflowService.update",
+          "lineNumber": 63
+        },
+        {
+          "caller": "deactivate",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 70
+        },
+        {
+          "caller": "deactivate",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 71
+        },
+        {
+          "caller": "deactivate",
+          "callee": "validationWorkflowService.deactivate",
+          "lineNumber": 72
+        },
+        {
+          "caller": "deactivate",
+          "callee": "ResponseEntity.noContent().build",
+          "lineNumber": 73
+        },
+        {
+          "caller": "deactivate",
+          "callee": "ResponseEntity.noContent",
+          "lineNumber": 73
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 80
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 81
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "validationWorkflowService.hardDelete",
+          "lineNumber": 82
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "ResponseEntity.noContent().build",
+          "lineNumber": 83
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "ResponseEntity.noContent",
+          "lineNumber": 83
+        },
+        {
+          "caller": "getOptions",
+          "callee": "authorizeRead",
+          "lineNumber": 90
+        },
+        {
+          "caller": "getOptions",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 91
+        },
+        {
+          "caller": "getOptions",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 91
+        },
+        {
+          "caller": "getOptions",
+          "callee": "validationWorkflowService.getOptions",
+          "lineNumber": 91
+        },
+        {
+          "caller": "authorizeRead",
+          "callee": "permissionAuthorizationService.hasPermission",
+          "lineNumber": 95
+        },
+        {
+          "caller": "authorizeRead",
+          "callee": "permissionAuthorizationService.hasPermission",
+          "lineNumber": 96
+        },
+        {
+          "caller": "authorizeRead",
+          "callee": "permissionAuthorizationService.authorize",
+          "lineNumber": 99
+        }
+      ],
+      "metrics": {
+        "importCount": 9,
+        "exportCount": 8,
+        "functionCount": 8,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 22,
+      "nonEmptyLines": 20,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 25,
+      "nonEmptyLines": 22,
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 16,
+      "nonEmptyLines": 13,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 7,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 6,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 291,
+      "nonEmptyLines": 266,
+      "functions": [
+        {
+          "name": "getAll",
+          "startLine": 42,
+          "endLine": 45,
+          "params": [
+            "pageable"
+          ]
+        },
+        {
+          "name": "getById",
+          "startLine": 47,
+          "endLine": 50,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "create",
+          "startLine": 52,
+          "endLine": 59,
+          "params": [
+            "dto",
+            "actorId"
+          ]
+        },
+        {
+          "name": "update",
+          "startLine": 61,
+          "endLine": 84,
+          "params": [
+            "id",
+            "dto",
+            "actorId"
+          ]
+        },
+        {
+          "name": "deactivate",
+          "startLine": 86,
+          "endLine": 94,
+          "params": [
+            "id",
+            "actorId"
+          ]
+        },
+        {
+          "name": "hardDelete",
+          "startLine": 96,
+          "endLine": 110,
+          "params": [
+            "id",
+            "actorId"
+          ]
+        },
+        {
+          "name": "getOptions",
+          "startLine": 112,
+          "endLine": 152,
+          "params": [
+            "usage"
+          ]
+        },
+        {
+          "name": "validate",
+          "startLine": 154,
+          "endLine": 218,
+          "params": [
+            "dto",
+            "currentId"
+          ]
+        },
+        {
+          "name": "getEntity",
+          "startLine": 220,
+          "endLine": 223,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "buildEntity",
+          "startLine": 225,
+          "endLine": 241,
+          "params": [
+            "dto"
+          ]
+        },
+        {
+          "name": "toDto",
+          "startLine": 243,
+          "endLine": 260,
+          "params": [
+            "workflow"
+          ]
+        },
+        {
+          "name": "normalizeCode",
+          "startLine": 262,
+          "endLine": 264,
+          "params": [
+            "code"
+          ]
+        },
+        {
+          "name": "normalizePermissionCode",
+          "startLine": 266,
+          "endLine": 268,
+          "params": [
+            "code"
+          ]
+        },
+        {
+          "name": "snapshot",
+          "startLine": 270,
+          "endLine": 284,
+          "params": [
+            "workflow"
+          ]
+        },
+        {
+          "name": "ensureNotReferencedByLeaveTypes",
+          "startLine": 286,
+          "endLine": 290,
+          "params": [
+            "workflowId"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ValidationWorkflowService",
+          "startLine": 32,
+          "endLine": 291,
+          "methods": [
+            "getAll",
+            "getById",
+            "create",
+            "update",
+            "deactivate",
+            "hardDelete",
+            "getOptions",
+            "validate",
+            "getEntity",
+            "buildEntity",
+            "toDto",
+            "normalizeCode",
+            "normalizePermissionCode",
+            "snapshot",
+            "ensureNotReferencedByLeaveTypes"
+          ],
+          "properties": [
+            "repository",
+            "accessProfileRepository",
+            "permissionRepository",
+            "leaveTypeRepository",
+            "auditLogService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getAll",
+          "line": 42,
+          "isDefault": false
+        },
+        {
+          "name": "getById",
+          "line": 47,
+          "isDefault": false
+        },
+        {
+          "name": "create",
+          "line": 52,
+          "isDefault": false
+        },
+        {
+          "name": "update",
+          "line": 61,
+          "isDefault": false
+        },
+        {
+          "name": "deactivate",
+          "line": 86,
+          "isDefault": false
+        },
+        {
+          "name": "hardDelete",
+          "line": 96,
+          "isDefault": false
+        },
+        {
+          "name": "getOptions",
+          "line": 112,
+          "isDefault": false
+        },
+        {
+          "name": "ValidationWorkflowService",
+          "line": 32,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getAll",
+          "callee": "PageResponse.of",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getAll",
+          "callee": "repository.findAllByOrderByCodeAsc(pageable).map",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getAll",
+          "callee": "repository.findAllByOrderByCodeAsc",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getById",
+          "callee": "toDto",
+          "lineNumber": 49
+        },
+        {
+          "caller": "getById",
+          "callee": "getEntity",
+          "lineNumber": 49
+        },
+        {
+          "caller": "create",
+          "callee": "validate",
+          "lineNumber": 54
+        },
+        {
+          "caller": "create",
+          "callee": "buildEntity",
+          "lineNumber": 55
+        },
+        {
+          "caller": "create",
+          "callee": "repository.save",
+          "lineNumber": 56
+        },
+        {
+          "caller": "create",
+          "callee": "auditLogService.log",
+          "lineNumber": 57
+        },
+        {
+          "caller": "create",
+          "callee": "saved.getId",
+          "lineNumber": 57
+        },
+        {
+          "caller": "create",
+          "callee": "snapshot",
+          "lineNumber": 57
+        },
+        {
+          "caller": "create",
+          "callee": "toDto",
+          "lineNumber": 58
+        },
+        {
+          "caller": "update",
+          "callee": "getEntity",
+          "lineNumber": 63
+        },
+        {
+          "caller": "update",
+          "callee": "validate",
+          "lineNumber": 64
+        },
+        {
+          "caller": "update",
+          "callee": "snapshot",
+          "lineNumber": 65
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setCode",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "normalizeCode",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "dto.code",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setName",
+          "lineNumber": 68
+        },
+        {
+          "caller": "update",
+          "callee": "dto.name().trim",
+          "lineNumber": 68
+        },
+        {
+          "caller": "update",
+          "callee": "dto.name",
+          "lineNumber": 68
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setUsage",
+          "lineNumber": 69
+        },
+        {
+          "caller": "update",
+          "callee": "dto.usage",
+          "lineNumber": 69
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setValidatorSource",
+          "lineNumber": 70
+        },
+        {
+          "caller": "update",
+          "callee": "dto.validatorSource",
+          "lineNumber": 70
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setValidationMode",
+          "lineNumber": 71
+        },
+        {
+          "caller": "update",
+          "callee": "dto.validationMode",
+          "lineNumber": 71
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setMinValidators",
+          "lineNumber": 72
+        },
+        {
+          "caller": "update",
+          "callee": "dto.validationMode",
+          "lineNumber": 72
+        },
+        {
+          "caller": "update",
+          "callee": "dto.minValidators",
+          "lineNumber": 72
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setFallbackMode",
+          "lineNumber": 73
+        },
+        {
+          "caller": "update",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 73
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setFallbackProfileId",
+          "lineNumber": 74
+        },
+        {
+          "caller": "update",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 74
+        },
+        {
+          "caller": "update",
+          "callee": "dto.fallbackProfileId",
+          "lineNumber": 74
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setFallbackPermissionCode",
+          "lineNumber": 75
+        },
+        {
+          "caller": "update",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 75
+        },
+        {
+          "caller": "update",
+          "callee": "normalizePermissionCode",
+          "lineNumber": 76
+        },
+        {
+          "caller": "update",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 76
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setActive",
+          "lineNumber": 78
+        },
+        {
+          "caller": "update",
+          "callee": "dto.active",
+          "lineNumber": 78
+        },
+        {
+          "caller": "update",
+          "callee": "dto.active",
+          "lineNumber": 78
+        },
+        {
+          "caller": "update",
+          "callee": "existing.setDefaultWorkflow",
+          "lineNumber": 79
+        },
+        {
+          "caller": "update",
+          "callee": "Boolean.TRUE.equals",
+          "lineNumber": 79
+        },
+        {
+          "caller": "update",
+          "callee": "dto.defaultWorkflow",
+          "lineNumber": 79
+        },
+        {
+          "caller": "update",
+          "callee": "repository.save",
+          "lineNumber": 81
+        },
+        {
+          "caller": "update",
+          "callee": "auditLogService.log",
+          "lineNumber": 82
+        },
+        {
+          "caller": "update",
+          "callee": "saved.getId",
+          "lineNumber": 82
+        },
+        {
+          "caller": "update",
+          "callee": "snapshot",
+          "lineNumber": 82
+        },
+        {
+          "caller": "update",
+          "callee": "toDto",
+          "lineNumber": 83
+        },
+        {
+          "caller": "deactivate",
+          "callee": "getEntity",
+          "lineNumber": 88
+        },
+        {
+          "caller": "deactivate",
+          "callee": "ensureNotReferencedByLeaveTypes",
+          "lineNumber": 89
+        },
+        {
+          "caller": "deactivate",
+          "callee": "workflow.getId",
+          "lineNumber": 89
+        },
+        {
+          "caller": "deactivate",
+          "callee": "snapshot",
+          "lineNumber": 90
+        },
+        {
+          "caller": "deactivate",
+          "callee": "workflow.setActive",
+          "lineNumber": 91
+        },
+        {
+          "caller": "deactivate",
+          "callee": "repository.save",
+          "lineNumber": 92
+        },
+        {
+          "caller": "deactivate",
+          "callee": "auditLogService.log",
+          "lineNumber": 93
+        },
+        {
+          "caller": "deactivate",
+          "callee": "workflow.getId",
+          "lineNumber": 93
+        },
+        {
+          "caller": "deactivate",
+          "callee": "snapshot",
+          "lineNumber": 93
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "getEntity",
+          "lineNumber": 98
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "workflow.isActive",
+          "lineNumber": 99
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "new IllegalStateException",
+          "lineNumber": 100
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "ensureNotReferencedByLeaveTypes",
+          "lineNumber": 102
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "workflow.getId",
+          "lineNumber": 102
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "repository.delete",
+          "lineNumber": 104
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "repository.flush",
+          "lineNumber": 105
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "auditLogService.log",
+          "lineNumber": 106
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "workflow.getId",
+          "lineNumber": 106
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "snapshot",
+          "lineNumber": 106
+        },
+        {
+          "caller": "hardDelete",
+          "callee": "new IllegalStateException",
+          "lineNumber": 108
+        },
+        {
+          "caller": "getOptions",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 115
+        },
+        {
+          "caller": "getOptions",
+          "callee": "accessProfileRepository.findAll().stream()\r\n            .filter(AccessProfile::isActive)\r\n            .map(profile -> new AccessProfileResponseDto(\r\n                profile.getId(),\r\n                profile.getCode(),\r\n                profile.getDisplayKey(),\r\n                profile.getDescriptionKey(),\r\n                profile.isSystemProfile(),\r\n                profile.isActive(),\r\n                0\r\n            ))\r\n            .sorted(java.util.Comparator.comparing(AccessProfileResponseDto::displayKey)).toList",
+          "lineNumber": 118
+        },
+        {
+          "caller": "getOptions",
+          "callee": "accessProfileRepository.findAll().stream()\r\n            .filter(AccessProfile::isActive)\r\n            .map(profile -> new AccessProfileResponseDto(\r\n                profile.getId(),\r\n                profile.getCode(),\r\n                profile.getDisplayKey(),\r\n                profile.getDescriptionKey(),\r\n                profile.isSystemProfile(),\r\n                profile.isActive(),\r\n                0\r\n            )).sorted",
+          "lineNumber": 118
+        },
+        {
+          "caller": "getOptions",
+          "callee": "accessProfileRepository.findAll().stream()\r\n            .filter(AccessProfile::isActive).map",
+          "lineNumber": 118
+        },
+        {
+          "caller": "getOptions",
+          "callee": "accessProfileRepository.findAll().stream().filter",
+          "lineNumber": 118
+        },
+        {
+          "caller": "getOptions",
+          "callee": "accessProfileRepository.findAll().stream",
+          "lineNumber": 118
+        },
+        {
+          "caller": "getOptions",
+          "callee": "accessProfileRepository.findAll",
+          "lineNumber": 118
+        },
+        {
+          "caller": "getOptions",
+          "callee": "new AccessProfileResponseDto",
+          "lineNumber": 120
+        },
+        {
+          "caller": "getOptions",
+          "callee": "profile.getId",
+          "lineNumber": 121
+        },
+        {
+          "caller": "getOptions",
+          "callee": "profile.getCode",
+          "lineNumber": 122
+        },
+        {
+          "caller": "getOptions",
+          "callee": "profile.getDisplayKey",
+          "lineNumber": 123
+        },
+        {
+          "caller": "getOptions",
+          "callee": "profile.getDescriptionKey",
+          "lineNumber": 124
+        },
+        {
+          "caller": "getOptions",
+          "callee": "profile.isSystemProfile",
+          "lineNumber": 125
+        },
+        {
+          "caller": "getOptions",
+          "callee": "profile.isActive",
+          "lineNumber": 126
+        },
+        {
+          "caller": "getOptions",
+          "callee": "java.util.Comparator.comparing",
+          "lineNumber": 129
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream()\r\n            .filter(Permission::isActive)\r\n            .map(permission -> new PermissionResponseDto(\r\n                permission.getId(),\r\n                permission.getName(),\r\n                permission.getResource(),\r\n                permission.getAction(),\r\n                permission.getDescription(),\r\n                permission.isActive()\r\n            )).toList",
+          "lineNumber": 132
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream()\r\n            .filter(Permission::isActive).map",
+          "lineNumber": 132
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream().filter",
+          "lineNumber": 132
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc().stream",
+          "lineNumber": 132
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permissionRepository.findAllByOrderByResourceAscActionAsc",
+          "lineNumber": 132
+        },
+        {
+          "caller": "getOptions",
+          "callee": "new PermissionResponseDto",
+          "lineNumber": 134
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permission.getId",
+          "lineNumber": 135
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permission.getName",
+          "lineNumber": 136
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permission.getResource",
+          "lineNumber": 137
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permission.getAction",
+          "lineNumber": 138
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permission.getDescription",
+          "lineNumber": 139
+        },
+        {
+          "caller": "getOptions",
+          "callee": "permission.isActive",
+          "lineNumber": 140
+        },
+        {
+          "caller": "getOptions",
+          "callee": "new ValidationWorkflowOptionsDto",
+          "lineNumber": 144
+        },
+        {
+          "caller": "getOptions",
+          "callee": "List.of",
+          "lineNumber": 145
+        },
+        {
+          "caller": "getOptions",
+          "callee": "ValidationUsage.LEAVE.name",
+          "lineNumber": 145
+        },
+        {
+          "caller": "getOptions",
+          "callee": "List.of",
+          "lineNumber": 146
+        },
+        {
+          "caller": "getOptions",
+          "callee": "ValidatorSource.TEAM_HIERARCHY.name",
+          "lineNumber": 146
+        },
+        {
+          "caller": "getOptions",
+          "callee": "Arrays.stream(ValidationMode.values()).map(Enum::name).toList",
+          "lineNumber": 147
+        },
+        {
+          "caller": "getOptions",
+          "callee": "Arrays.stream(ValidationMode.values()).map",
+          "lineNumber": 147
+        },
+        {
+          "caller": "getOptions",
+          "callee": "Arrays.stream",
+          "lineNumber": 147
+        },
+        {
+          "caller": "getOptions",
+          "callee": "ValidationMode.values",
+          "lineNumber": 147
+        },
+        {
+          "caller": "getOptions",
+          "callee": "Arrays.stream(ValidationFallbackMode.values()).map(Enum::name).toList",
+          "lineNumber": 148
+        },
+        {
+          "caller": "getOptions",
+          "callee": "Arrays.stream(ValidationFallbackMode.values()).map",
+          "lineNumber": 148
+        },
+        {
+          "caller": "getOptions",
+          "callee": "Arrays.stream",
+          "lineNumber": 148
+        },
+        {
+          "caller": "getOptions",
+          "callee": "ValidationFallbackMode.values",
+          "lineNumber": 148
+        },
+        {
+          "caller": "validate",
+          "callee": "repository.existsByCodeIgnoreCase",
+          "lineNumber": 156
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.code().trim",
+          "lineNumber": 156
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.code",
+          "lineNumber": 156
+        },
+        {
+          "caller": "validate",
+          "callee": "repository.existsByCodeIgnoreCaseAndIdNot",
+          "lineNumber": 157
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.code().trim",
+          "lineNumber": 157
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.code",
+          "lineNumber": 157
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalStateException",
+          "lineNumber": 159
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.usage",
+          "lineNumber": 161
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 162
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.validatorSource",
+          "lineNumber": 164
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 165
+        },
+        {
+          "caller": "validate",
+          "callee": "Boolean.TRUE.equals",
+          "lineNumber": 167
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.defaultWorkflow",
+          "lineNumber": 167
+        },
+        {
+          "caller": "validate",
+          "callee": "repository.findFirstByUsageAndActiveTrueAndDefaultWorkflowTrue(dto.usage()).isPresent",
+          "lineNumber": 169
+        },
+        {
+          "caller": "validate",
+          "callee": "repository.findFirstByUsageAndActiveTrueAndDefaultWorkflowTrue",
+          "lineNumber": 169
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.usage",
+          "lineNumber": 169
+        },
+        {
+          "caller": "validate",
+          "callee": "repository.existsByUsageAndDefaultWorkflowTrueAndIdNot",
+          "lineNumber": 170
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.usage",
+          "lineNumber": 170
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalStateException",
+          "lineNumber": 172
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.validationMode",
+          "lineNumber": 175
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.minValidators",
+          "lineNumber": 176
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 177
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.minValidators",
+          "lineNumber": 179
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 180
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.minValidators",
+          "lineNumber": 182
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 183
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 186
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackProfileId",
+          "lineNumber": 188
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 189
+        },
+        {
+          "caller": "validate",
+          "callee": "accessProfileRepository.findById(dto.fallbackProfileId()).isEmpty",
+          "lineNumber": 191
+        },
+        {
+          "caller": "validate",
+          "callee": "accessProfileRepository.findById",
+          "lineNumber": 191
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackProfileId",
+          "lineNumber": 191
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalStateException",
+          "lineNumber": 192
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 194
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode().isBlank",
+          "lineNumber": 194
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 194
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 195
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 199
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode().isBlank",
+          "lineNumber": 199
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 199
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 200
+        },
+        {
+          "caller": "validate",
+          "callee": "permissionRepository.findByNameIgnoreCase(dto.fallbackPermissionCode().trim()).isEmpty",
+          "lineNumber": 202
+        },
+        {
+          "caller": "validate",
+          "callee": "permissionRepository.findByNameIgnoreCase",
+          "lineNumber": 202
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode().trim",
+          "lineNumber": 202
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 202
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalStateException",
+          "lineNumber": 203
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackProfileId",
+          "lineNumber": 205
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 206
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackProfileId",
+          "lineNumber": 210
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 211
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 213
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode().isBlank",
+          "lineNumber": 213
+        },
+        {
+          "caller": "validate",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 213
+        },
+        {
+          "caller": "validate",
+          "callee": "new IllegalArgumentException",
+          "lineNumber": 214
+        },
+        {
+          "caller": "getEntity",
+          "callee": "repository.findById(id).orElseThrow",
+          "lineNumber": 221
+        },
+        {
+          "caller": "getEntity",
+          "callee": "repository.findById",
+          "lineNumber": 221
+        },
+        {
+          "caller": "getEntity",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 222
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode())\r\n            .minValidators(dto.validationMode() == ValidationMode.MIN_N ? dto.minValidators() : null)\r\n            .fallbackMode(dto.fallbackMode())\r\n            .fallbackProfileId(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PROFILE ? dto.fallbackProfileId() : null)\r\n            .fallbackPermissionCode(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PERMISSION\r\n                ? normalizePermissionCode(dto.fallbackPermissionCode())\r\n                : null)\r\n            .active(dto.active() == null || dto.active())\r\n            .defaultWorkflow(Boolean.TRUE.equals(dto.defaultWorkflow())).build",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode())\r\n            .minValidators(dto.validationMode() == ValidationMode.MIN_N ? dto.minValidators() : null)\r\n            .fallbackMode(dto.fallbackMode())\r\n            .fallbackProfileId(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PROFILE ? dto.fallbackProfileId() : null)\r\n            .fallbackPermissionCode(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PERMISSION\r\n                ? normalizePermissionCode(dto.fallbackPermissionCode())\r\n                : null)\r\n            .active(dto.active() == null || dto.active()).defaultWorkflow",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode())\r\n            .minValidators(dto.validationMode() == ValidationMode.MIN_N ? dto.minValidators() : null)\r\n            .fallbackMode(dto.fallbackMode())\r\n            .fallbackProfileId(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PROFILE ? dto.fallbackProfileId() : null)\r\n            .fallbackPermissionCode(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PERMISSION\r\n                ? normalizePermissionCode(dto.fallbackPermissionCode())\r\n                : null).active",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode())\r\n            .minValidators(dto.validationMode() == ValidationMode.MIN_N ? dto.minValidators() : null)\r\n            .fallbackMode(dto.fallbackMode())\r\n            .fallbackProfileId(dto.fallbackMode() == ValidationFallbackMode.SPECIFIC_PROFILE ? dto.fallbackProfileId() : null).fallbackPermissionCode",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode())\r\n            .minValidators(dto.validationMode() == ValidationMode.MIN_N ? dto.minValidators() : null)\r\n            .fallbackMode(dto.fallbackMode()).fallbackProfileId",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode())\r\n            .minValidators(dto.validationMode() == ValidationMode.MIN_N ? dto.minValidators() : null).fallbackMode",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource())\r\n            .validationMode(dto.validationMode()).minValidators",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage())\r\n            .validatorSource(dto.validatorSource()).validationMode",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim())\r\n            .usage(dto.usage()).validatorSource",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code()))\r\n            .name(dto.name().trim()).usage",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder()\r\n            .code(normalizeCode(dto.code())).name",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder().code",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "ValidationWorkflow.builder",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "normalizeCode",
+          "lineNumber": 227
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.code",
+          "lineNumber": 227
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.name().trim",
+          "lineNumber": 228
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.name",
+          "lineNumber": 228
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.usage",
+          "lineNumber": 229
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.validatorSource",
+          "lineNumber": 230
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.validationMode",
+          "lineNumber": 231
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.validationMode",
+          "lineNumber": 232
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.minValidators",
+          "lineNumber": 232
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 233
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 234
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.fallbackProfileId",
+          "lineNumber": 234
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.fallbackMode",
+          "lineNumber": 235
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "normalizePermissionCode",
+          "lineNumber": 236
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.fallbackPermissionCode",
+          "lineNumber": 236
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.active",
+          "lineNumber": 238
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.active",
+          "lineNumber": 238
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "Boolean.TRUE.equals",
+          "lineNumber": 239
+        },
+        {
+          "caller": "buildEntity",
+          "callee": "dto.defaultWorkflow",
+          "lineNumber": 239
+        },
+        {
+          "caller": "toDto",
+          "callee": "new ValidationWorkflowDto",
+          "lineNumber": 244
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getId",
+          "lineNumber": 245
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getCode",
+          "lineNumber": 246
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getName",
+          "lineNumber": 247
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getUsage().name",
+          "lineNumber": 248
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getUsage",
+          "lineNumber": 248
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getValidatorSource().name",
+          "lineNumber": 249
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getValidatorSource",
+          "lineNumber": 249
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getValidationMode().name",
+          "lineNumber": 250
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getValidationMode",
+          "lineNumber": 250
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getMinValidators",
+          "lineNumber": 251
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getFallbackMode().name",
+          "lineNumber": 252
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getFallbackMode",
+          "lineNumber": 252
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getFallbackProfileId",
+          "lineNumber": 253
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getFallbackPermissionCode",
+          "lineNumber": 254
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.isActive",
+          "lineNumber": 255
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.isDefaultWorkflow",
+          "lineNumber": 256
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getCreatedAt",
+          "lineNumber": 257
+        },
+        {
+          "caller": "toDto",
+          "callee": "workflow.getUpdatedAt",
+          "lineNumber": 258
+        },
+        {
+          "caller": "normalizeCode",
+          "callee": "code.trim().toUpperCase",
+          "lineNumber": 263
+        },
+        {
+          "caller": "normalizeCode",
+          "callee": "code.trim",
+          "lineNumber": 263
+        },
+        {
+          "caller": "normalizePermissionCode",
+          "callee": "code.trim().toUpperCase",
+          "lineNumber": 267
+        },
+        {
+          "caller": "normalizePermissionCode",
+          "callee": "code.trim",
+          "lineNumber": 267
+        },
+        {
+          "caller": "snapshot",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 271
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 272
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getCode",
+          "lineNumber": 272
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 273
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getName",
+          "lineNumber": 273
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 274
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getUsage",
+          "lineNumber": 274
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 275
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getValidatorSource",
+          "lineNumber": 275
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 276
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getValidationMode",
+          "lineNumber": 276
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 277
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getMinValidators",
+          "lineNumber": 277
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 278
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getFallbackMode",
+          "lineNumber": 278
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 279
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getFallbackProfileId",
+          "lineNumber": 279
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 280
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.getFallbackPermissionCode",
+          "lineNumber": 280
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 281
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.isActive",
+          "lineNumber": 281
+        },
+        {
+          "caller": "snapshot",
+          "callee": "state.put",
+          "lineNumber": 282
+        },
+        {
+          "caller": "snapshot",
+          "callee": "workflow.isDefaultWorkflow",
+          "lineNumber": 282
+        },
+        {
+          "caller": "ensureNotReferencedByLeaveTypes",
+          "callee": "leaveTypeRepository.existsByValidationWorkflowId",
+          "lineNumber": 287
+        },
+        {
+          "caller": "ensureNotReferencedByLeaveTypes",
+          "callee": "new IllegalStateException",
+          "lineNumber": 288
+        }
+      ],
+      "metrics": {
+        "importCount": 15,
+        "exportCount": 8,
+        "functionCount": 15,
+        "classCount": 1
+      }
+    }
+  ]
+}

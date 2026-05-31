@@ -1,0 +1,30 @@
+{
+  "batchIndex": 18,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "docker-compose.yml",
+      "language": "yaml",
+      "sizeLines": 104,
+      "fileCategory": "infra"
+    },
+    {
+      "path": "init-db.sql",
+      "language": "sql",
+      "sizeLines": 9,
+      "fileCategory": "data"
+    },
+    {
+      "path": "pom.xml",
+      "language": "xml",
+      "sizeLines": 264,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "docker-compose.yml": [],
+    "init-db.sql": [],
+    "pom.xml": []
+  },
+  "neighborMap": {}
+}

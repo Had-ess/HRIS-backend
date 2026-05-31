@@ -83,15 +83,32 @@ public class DashboardService {
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final AccessScopeService accessScopeService;
 
+    // ─── Range helper ────────────────────────────────────────────────────────
+
+    private record Range(LocalDate from, LocalDate to) {
+        Instant fromInstant() { return from.atStartOfDay().toInstant(ZoneOffset.UTC); }
+        Instant toExclusiveInstant() { return to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC); }
+    }
+
+    private Range resolveRange(LocalDate from, LocalDate to, LocalDate defaultFrom) {
+        LocalDate resolvedTo = to != null ? to : LocalDate.now();
+        LocalDate resolvedFrom = from != null ? from : defaultFrom;
+        if (resolvedFrom.isAfter(resolvedTo)) {
+            resolvedFrom = resolvedTo;
+        }
+        return new Range(resolvedFrom, resolvedTo);
+    }
+
     // ─── Employee ────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public EmployeeDashboardDto getEmployeeDashboard(UUID userId) {
+    public EmployeeDashboardDto getEmployeeDashboard(UUID userId, LocalDate from, LocalDate to) {
         Employee employee = employeeRepository.findByUserId(userId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
+        LocalDate refDate = to != null ? to : LocalDate.now();
         List<LeaveBalance> leaveBalances = leaveBalanceRepository.findByEmployeeIdAndYear(
-            employee.getId(), LocalDate.now().getYear());
+            employee.getId(), refDate.getYear());
         List<LeaveRequest> leaveRequests =
             leaveRequestRepository.findTop5ByEmployeeIdOrderBySubmittedAtDesc(employee.getId());
         List<AdminRequest> adminRequests =
@@ -108,12 +125,12 @@ public class DashboardService {
     // ─── Supervisor ───────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public SupervisorDashboardDto getSupervisorDashboard(UUID userId) {
+    public SupervisorDashboardDto getSupervisorDashboard(UUID userId, LocalDate from, LocalDate to) {
         List<ApprovalStep> pendingSteps =
             approvalStepRepository.findTop5ByApproverIdAndStatusOrderByStepOrderAsc(
                 userId, StepStatus.PENDING);
         Employee employee = accessScopeService.getEmployeeOrThrow(userId);
-        LocalDate today = LocalDate.now();
+        LocalDate today = to != null ? to : LocalDate.now();
 
         long teamMembersCount;
         long upcomingTeamAbsencesCount;
@@ -141,14 +158,15 @@ public class DashboardService {
     // ─── HR ───────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public HrDashboardDto getHrDashboard() {
-        LocalDate today = LocalDate.now();
+    public HrDashboardDto getHrDashboard(LocalDate from, LocalDate to) {
+        LocalDate today = to != null ? to : LocalDate.now();
+        Range range = resolveRange(from, to, today.withDayOfYear(1));
 
         List<HrDashboardDto.MonthlyCountDto> headcountTrend = buildMonthlyHeadcountTrend(today);
 
-        // Leave distribution by type for current year
+        // Leave distribution by type for the selected range
         List<HrDashboardDto.LeaveTypeDistributionDto> leaveDistribution =
-            leaveRequestRepository.sumWorkingDaysByLeaveTypeForYear(today.getYear())
+            leaveRequestRepository.sumWorkingDaysByLeaveTypeBetween(range.from(), range.to())
                 .stream()
                 .map(row -> new HrDashboardDto.LeaveTypeDistributionDto(
                     (String) row[0], (String) row[1], ((Number) row[2]).longValue()))
@@ -175,12 +193,13 @@ public class DashboardService {
     // ─── Director ─────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public DirectorDashboardDto getDirectorDashboard() {
-        LocalDate today = LocalDate.now();
-        LocalDate periodStart = today.withDayOfMonth(1);
-        LocalDate periodEndExclusive = today.plusDays(1);
-        Instant from = periodStart.atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant toExclusive = periodEndExclusive.atStartOfDay().toInstant(ZoneOffset.UTC);
+    public DirectorDashboardDto getDirectorDashboard(LocalDate fromParam, LocalDate toParam) {
+        LocalDate today = toParam != null ? toParam : LocalDate.now();
+        Range range = resolveRange(fromParam, toParam, today.withDayOfMonth(1));
+        LocalDate periodStart = range.from();
+        LocalDate periodEndExclusive = range.to().plusDays(1);
+        Instant from = range.fromInstant();
+        Instant toExclusive = range.toExclusiveInstant();
         long totalRequests = leaveRequestRepository.countSubmittedBetween(from, toExclusive);
         long approvedCount = leaveRequestRepository.countSubmittedBetweenByStatus(from, toExclusive, LeaveStatus.APPROVED);
         long rejectedCount = leaveRequestRepository.countSubmittedBetweenByStatus(from, toExclusive, LeaveStatus.REJECTED);

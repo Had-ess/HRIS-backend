@@ -212,6 +212,19 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
     List<Object[]> sumWorkingDaysByLeaveTypeForYear(@Param("year") int year);
 
     @Query("""
+        SELECT lt.name, lt.code, SUM(lr.workingDays)
+        FROM LeaveRequest lr
+        JOIN LeaveType lt ON lt.id = lr.leaveTypeId
+        WHERE lr.startDate >= :from
+          AND lr.startDate <= :to
+          AND lr.status = 'APPROVED'
+        GROUP BY lt.id, lt.name, lt.code
+        ORDER BY SUM(lr.workingDays) DESC
+        """)
+    List<Object[]> sumWorkingDaysByLeaveTypeBetween(
+        @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("""
         SELECT COUNT(lr)
         FROM LeaveRequest lr
         WHERE lr.submittedAt >= :from

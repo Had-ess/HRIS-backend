@@ -2,6 +2,7 @@ package com.hris.notification.service;
 
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
+import com.hris.notification.repository.NotificationEventRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +15,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("TransactionalNotificationPublisher Unit Tests")
@@ -23,6 +26,9 @@ class TransactionalNotificationPublisherTest {
 
     @Mock
     private NotificationPublisher notificationPublisher;
+
+    @Mock
+    private NotificationEventRepository notificationEventRepository;
 
     @AfterEach
     void tearDown() {
@@ -33,36 +39,45 @@ class TransactionalNotificationPublisherTest {
     }
 
     @Test
-    @DisplayName("publishes immediately when no transaction is active")
+    @DisplayName("persists + sends inline when no transaction is active")
     void publishesImmediatelyWhenNoTransactionIsActive() {
         TransactionalNotificationPublisher publisher =
-            new TransactionalNotificationPublisher(notificationPublisher);
+            new TransactionalNotificationPublisher(notificationPublisher, notificationEventRepository);
         NotificationEvent event = buildEvent();
 
         publisher.publishAfterCommit(event);
 
+        // No transaction → fall back to the inline persist-and-send path.
         verify(notificationPublisher).publish(event);
+        verify(notificationEventRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("defers publishing until the current transaction commits")
-    void defersPublishingUntilTransactionCommits() {
+    @DisplayName("persists the event in the current transaction and sends only after commit")
+    void persistsInTransactionThenSendsAfterCommit() {
         TransactionalNotificationPublisher publisher =
-            new TransactionalNotificationPublisher(notificationPublisher);
+            new TransactionalNotificationPublisher(notificationPublisher, notificationEventRepository);
         NotificationEvent event = buildEvent();
+        NotificationEvent saved = buildEvent();
+        when(notificationEventRepository.save(event)).thenReturn(saved);
 
         TransactionSynchronizationManager.initSynchronization();
         TransactionSynchronizationManager.setActualTransactionActive(true);
 
         publisher.publishAfterCommit(event);
 
-        verify(notificationPublisher, never()).publish(event);
+        // The row is written atomically with the business change, before commit...
+        verify(notificationEventRepository).save(event);
+        // ...but nothing is sent to the broker until the transaction commits.
+        verify(notificationPublisher, never()).sendNow(any());
 
         for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
             synchronization.afterCommit();
         }
 
-        verify(notificationPublisher).publish(event);
+        verify(notificationPublisher).sendNow(saved);
+        // The inline persist-and-send path is never used inside a transaction.
+        verify(notificationPublisher, never()).publish(any());
     }
 
     private NotificationEvent buildEvent() {

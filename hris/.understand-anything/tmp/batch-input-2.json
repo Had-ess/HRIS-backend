@@ -1,0 +1,1842 @@
+{
+  "batchIndex": 2,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "language": "java",
+      "sizeLines": 382,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "language": "java",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "language": "java",
+      "sizeLines": 26,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "language": "java",
+      "sizeLines": 472,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "language": "java",
+      "sizeLines": 170,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "language": "java",
+      "sizeLines": 18,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "language": "java",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "language": "java",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "language": "java",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "language": "java",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "language": "java",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/Project.java",
+      "language": "java",
+      "sizeLines": 52,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "language": "java",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "language": "java",
+      "sizeLines": 48,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/Team.java",
+      "language": "java",
+      "sizeLines": 52,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "language": "java",
+      "sizeLines": 51,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "language": "java",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "language": "java",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "language": "java",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "language": "java",
+      "sizeLines": 377,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "language": "java",
+      "sizeLines": 201,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "language": "java",
+      "sizeLines": 51,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "language": "java",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "language": "java",
+      "sizeLines": 33,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "language": "java",
+      "sizeLines": 49,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "language": "java",
+      "sizeLines": 797,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "language": "java",
+      "sizeLines": 296,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/security/service/AccessScopeService.java",
+      "language": "java",
+      "sizeLines": 228,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/auth/service/EmployeeService.java": [
+      "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/enums/AccountStatus.java",
+      "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/leave/entity/LeaveBalance.java",
+      "src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "src/main/java/com/hris/leave/entity/LeaveType.java",
+      "src/main/java/com/hris/leave/repository/LeaveBalanceRepository.java",
+      "src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "src/main/java/com/hris/leave/repository/LeaveRequestRepository.java",
+      "src/main/java/com/hris/leave/repository/LeaveTypeRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "src/main/java/com/hris/security/service/AccessScopeService.java"
+    ],
+    "src/main/java/com/hris/leave/entity/LeavePolicy.java": [
+      "src/main/java/com/hris/auth/enums/ContractType.java"
+    ],
+    "src/main/java/com/hris/leave/repository/LeavePolicyRepository.java": [
+      "src/main/java/com/hris/auth/enums/ContractType.java",
+      "src/main/java/com/hris/leave/entity/LeavePolicy.java"
+    ],
+    "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java": [
+      "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "src/main/java/com/hris/approval/enums/ApprovalContext.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java",
+      "src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+      "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "src/main/java/com/hris/auth/entity/Department.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+      "src/main/java/com/hris/leave/entity/LeaveRequest.java",
+      "src/main/java/com/hris/leave/entity/LeaveType.java",
+      "src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java"
+    ],
+    "src/main/java/com/hris/organisation/controller/ProjectController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectRole.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectRole.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectRole.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/ProjectCreateDto.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectStatus.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java": [],
+    "src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java": [],
+    "src/main/java/com/hris/organisation/dto/ProjectResponseDto.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectStatus.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java": [],
+    "src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java": [],
+    "src/main/java/com/hris/organisation/entity/Project.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectStatus.java"
+    ],
+    "src/main/java/com/hris/organisation/entity/ProjectAssignment.java": [
+      "src/main/java/com/hris/organisation/enums/ProjectRole.java"
+    ],
+    "src/main/java/com/hris/organisation/entity/ProjectDepartment.java": [],
+    "src/main/java/com/hris/organisation/entity/Team.java": [],
+    "src/main/java/com/hris/organisation/entity/TeamProjectLink.java": [],
+    "src/main/java/com/hris/organisation/enums/ProjectRole.java": [],
+    "src/main/java/com/hris/organisation/enums/ProjectStatus.java": [],
+    "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java": [],
+    "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java": [],
+    "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java": [
+      "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java"
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java": [
+      "src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/organisation/entity/Team.java",
+      "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java",
+      "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java",
+      "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamRepository.java"
+    ],
+    "src/main/java/com/hris/organisation/mapper/ProjectMapper.java": [
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "src/main/java/com/hris/organisation/entity/Project.java",
+      "src/main/java/com/hris/organisation/entity/ProjectAssignment.java"
+    ],
+    "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java": [
+      "src/main/java/com/hris/organisation/entity/ProjectAssignment.java"
+    ],
+    "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java": [
+      "src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "src/main/java/com/hris/organisation/enums/ProjectStatus.java"
+    ],
+    "src/main/java/com/hris/organisation/repository/ProjectRepository.java": [
+      "src/main/java/com/hris/organisation/entity/Project.java",
+      "src/main/java/com/hris/organisation/enums/ProjectStatus.java"
+    ],
+    "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java": [
+      "src/main/java/com/hris/organisation/entity/TeamProjectLink.java"
+    ],
+    "src/main/java/com/hris/organisation/repository/TeamRepository.java": [
+      "src/main/java/com/hris/organisation/entity/Team.java"
+    ],
+    "src/main/java/com/hris/organisation/service/ProjectService.java": [
+      "src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/entity/Department.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java",
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "src/main/java/com/hris/notification/enums/NotificationEventType.java",
+      "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java",
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "src/main/java/com/hris/organisation/entity/Project.java",
+      "src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "src/main/java/com/hris/organisation/entity/Team.java",
+      "src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "src/main/java/com/hris/security/service/AccessScopeService.java"
+    ],
+    "src/main/java/com/hris/organisation/service/TeamService.java": [
+      "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/entity/Department.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/organisation/dto/TeamCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/TeamDto.java",
+      "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java",
+      "src/main/java/com/hris/organisation/entity/Project.java",
+      "src/main/java/com/hris/organisation/entity/Team.java",
+      "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "src/main/java/com/hris/security/service/AccessScopeService.java"
+    ],
+    "src/main/java/com/hris/security/service/AccessScopeService.java": [
+      "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "src/main/java/com/hris/organisation/repository/TeamRepository.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/auth/service/EmployeeService.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+        "batchIndex": 3,
+        "symbols": [
+          "publishLeaveEvent",
+          "publishApprovalEvent",
+          "publishEmployeeHireEvent",
+          "publishEmployeeTransferEvent",
+          "publishEmployeeTerminationEvent",
+          "publishProjectAssignmentEvent",
+          "AnalyticsEventPublisher"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/enums/AccountStatus.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeMapper"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "DepartmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeDepartmentHistoryRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeStatusHistoryRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveBalance.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getAvailableDays",
+          "adjustTotalDays",
+          "deductDays",
+          "restoreDays",
+          "confirmUsage",
+          "equals",
+          "hashCode",
+          "LeaveBalance"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveType.java",
+        "batchIndex": 9,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "LeaveType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/repository/LeaveBalanceRepository.java",
+        "batchIndex": 16,
+        "symbols": [
+          "LeaveBalanceRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/repository/LeaveRequestRepository.java",
+        "batchIndex": 4,
+        "symbols": [
+          "LeaveRequestRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/repository/LeaveTypeRepository.java",
+        "batchIndex": 9,
+        "symbols": [
+          "LeaveTypeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/EmployeeController.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "getProfileSummary",
+          "update",
+          "delete",
+          "resendActivation",
+          "EmployeeController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/leave/entity/LeavePolicy.java": [
+      {
+        "path": "src/main/java/com/hris/auth/enums/ContractType.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "resolveEmployeeByUserId",
+          "getMyBalances",
+          "getForEmployee",
+          "getVisibleBalances",
+          "getTransactions",
+          "adjustBalance",
+          "rolloverBalances",
+          "LeaveBalanceService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/leave/repository/LeavePolicyRepository.java": [
+      {
+        "path": "src/main/java/com/hris/auth/enums/ContractType.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "resolveEmployeeByUserId",
+          "getMyBalances",
+          "getForEmployee",
+          "getVisibleBalances",
+          "getTransactions",
+          "adjustBalance",
+          "rolloverBalances",
+          "LeaveBalanceService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+        "batchIndex": 3,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+        "batchIndex": 3,
+        "symbols": [
+          "isPending",
+          "isDecidable",
+          "approve",
+          "reject",
+          "skip",
+          "equals",
+          "hashCode",
+          "ApprovalStep"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+        "batchIndex": 3,
+        "symbols": [
+          "isComplete",
+          "equals",
+          "hashCode",
+          "ApprovalWorkflow"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/enums/ApprovalContext.java",
+        "batchIndex": 3,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/approval/enums/StepStatus.java",
+        "batchIndex": 3,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+        "batchIndex": 3,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+        "batchIndex": 3,
+        "symbols": [
+          "ApprovalStepRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+        "batchIndex": 3,
+        "symbols": [
+          "ApprovalWorkflowRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+        "batchIndex": 1,
+        "symbols": [
+          "resolveAboveRequester",
+          "TeamHierarchyResolver"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Department.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Department"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "DepartmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+        "batchIndex": 14,
+        "symbols": [
+          "InvalidWorkflowStateException",
+          "InvalidWorkflowStateException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveRequest.java",
+        "batchIndex": 4,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "LeaveRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveType.java",
+        "batchIndex": 9,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "LeaveType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+        "batchIndex": 15,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "ValidationWorkflow"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java",
+        "batchIndex": 8,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/organisation/controller/ProjectController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/entity/Project.java": [
+      {
+        "path": "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java",
+        "batchIndex": 3,
+        "symbols": [
+          "toPendingPage",
+          "ApprovalStepQueryService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/entity/ProjectAssignment.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+        "batchIndex": 1,
+        "symbols": [
+          "run",
+          "ProfileBootstrapMigration"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+        "batchIndex": 3,
+        "symbols": [
+          "publishLeaveEvent",
+          "publishApprovalEvent",
+          "publishEmployeeHireEvent",
+          "publishEmployeeTransferEvent",
+          "publishEmployeeTerminationEvent",
+          "publishProjectAssignmentEvent",
+          "AnalyticsEventPublisher"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/enums/ProjectRole.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+        "batchIndex": 1,
+        "symbols": [
+          "run",
+          "ProfileBootstrapMigration"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/enums/ProjectStatus.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+        "batchIndex": 1,
+        "symbols": [
+          "run",
+          "ProfileBootstrapMigration"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+        "batchIndex": 1,
+        "symbols": [
+          "resolveAboveRequester",
+          "TeamHierarchyResolver"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+        "batchIndex": 1,
+        "symbols": [
+          "run",
+          "ProfileBootstrapMigration"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+        "batchIndex": 1,
+        "symbols": [
+          "resolveAboveRequester",
+          "TeamHierarchyResolver"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+        "batchIndex": 1,
+        "symbols": [
+          "run",
+          "ProfileBootstrapMigration"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+        "batchIndex": 1,
+        "symbols": [
+          "resolveAboveRequester",
+          "TeamHierarchyResolver"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java": [
+      {
+        "path": "src/main/java/com/hris/access/enums/StructuralEventType.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/hierarchy/controller/TeamHierarchyController.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getHierarchy",
+          "create",
+          "update",
+          "endRelation",
+          "TeamHierarchyController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+        "batchIndex": 1,
+        "symbols": [
+          "run",
+          "ProfileBootstrapMigration"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectAssignmentCleanupService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "deactivateExpiredAssignments",
+          "ProjectAssignmentCleanupService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/repository/ProjectRepository.java": [
+      {
+        "path": "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java",
+        "batchIndex": 3,
+        "symbols": [
+          "toPendingPage",
+          "ApprovalStepQueryService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/repository/TeamRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/service/ProjectService.java": [
+      {
+        "path": "src/main/java/com/hris/access/enums/StructuralEventType.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+        "batchIndex": 3,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+        "batchIndex": 3,
+        "symbols": [
+          "publishLeaveEvent",
+          "publishApprovalEvent",
+          "publishEmployeeHireEvent",
+          "publishEmployeeTransferEvent",
+          "publishEmployeeTerminationEvent",
+          "publishProjectAssignmentEvent",
+          "AnalyticsEventPublisher"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Department.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Department"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "DepartmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java",
+        "batchIndex": 14,
+        "symbols": [
+          "DuplicateProjectDepartmentAssignmentException",
+          "DuplicateProjectDepartmentAssignmentException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java",
+        "batchIndex": 14,
+        "symbols": [
+          "InvalidProjectAssignmentException",
+          "InvalidProjectAssignmentException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+        "batchIndex": 11,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "NotificationEvent"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/notification/enums/NotificationEventType.java",
+        "batchIndex": 11,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java",
+        "batchIndex": 11,
+        "symbols": [
+          "publishAfterCommit",
+          "TransactionalNotificationPublisher"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/service/TeamService.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Department.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Department"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "DepartmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/dto/TeamCreateDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/dto/TeamDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/controller/TeamController.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "TeamController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/security/service/AccessScopeService.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "DepartmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/service/AdminRequestService.java",
+        "batchIndex": 11,
+        "symbols": [
+          "create",
+          "getMyRequests",
+          "getOwnRequest",
+          "update",
+          "submit",
+          "cancel",
+          "uploadRequesterAttachment",
+          "searchInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "canViewInternal",
+          "AdminRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "resolveEmployeeByUserId",
+          "getMyBalances",
+          "getForEmployee",
+          "getVisibleBalances",
+          "getTransactions",
+          "adjustBalance",
+          "rolloverBalances",
+          "LeaveBalanceService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ]
+  }
+}

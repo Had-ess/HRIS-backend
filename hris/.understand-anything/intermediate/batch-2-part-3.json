@@ -1,0 +1,697 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "type": "file",
+      "name": "TeamProjectLink.java",
+      "filePath": "src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "summary": "JPA entity binding a team to a project with effective dates, used by approval routing.",
+      "tags": [
+        "entity",
+        "jpa",
+        "team",
+        "project",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "type": "file",
+      "name": "ProjectRole.java",
+      "filePath": "src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "summary": "Enumeration of roles an employee can hold on a project assignment.",
+      "tags": [
+        "enum",
+        "project",
+        "role"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "file",
+      "name": "ProjectStatus.java",
+      "filePath": "src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "summary": "Enumeration of project lifecycle states (active, archived, etc.).",
+      "tags": [
+        "enum",
+        "project",
+        "status"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "type": "file",
+      "name": "TeamHierarchyRelation.java",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "summary": "JPA entity modelling a parent-child relation between teams or employees with effective dating used for approval chains.",
+      "tags": [
+        "entity",
+        "jpa",
+        "team",
+        "hierarchy",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "type": "file",
+      "name": "TeamHierarchyStatus.java",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "summary": "Enumeration of statuses (active, ended) for a team hierarchy relation.",
+      "tags": [
+        "enum",
+        "team",
+        "hierarchy",
+        "status"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "file",
+      "name": "TeamHierarchyRelationRepository.java",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "summary": "Spring Data repository for TeamHierarchyRelation supporting hierarchy traversal queries.",
+      "tags": [
+        "repository",
+        "jpa",
+        "team",
+        "hierarchy",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "type": "file",
+      "name": "TeamHierarchyService.java",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "summary": "Service that builds, validates, and mutates the team hierarchy graph, ensuring no cycles, computing levels, and emitting designation and ended notification events.",
+      "tags": [
+        "service",
+        "team",
+        "hierarchy",
+        "graph",
+        "workflow"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "type": "file",
+      "name": "ProjectMapper.java",
+      "filePath": "src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "summary": "MapStruct mapper translating Project entities to DTOs.",
+      "tags": [
+        "mapper",
+        "project",
+        "mapstruct"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "file",
+      "name": "ProjectAssignmentRepository.java",
+      "filePath": "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "summary": "Spring Data repository for ProjectAssignment exposing scope-filtered queries used by approval routing and project administration.",
+      "tags": [
+        "repository",
+        "jpa",
+        "project",
+        "assignment",
+        "data-access"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/entity/TeamProjectLink.java:TeamProjectLink",
+      "type": "class",
+      "name": "TeamProjectLink",
+      "filePath": "src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "lineRange": [
+        10,
+        51
+      ],
+      "summary": "Class TeamProjectLink declared in TeamProjectLink.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java:TeamHierarchyRelation",
+      "type": "class",
+      "name": "TeamHierarchyRelation",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "lineRange": [
+        13,
+        66
+      ],
+      "summary": "Class TeamHierarchyRelation declared in TeamHierarchyRelation.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java:TeamHierarchyRelationRepository",
+      "type": "class",
+      "name": "TeamHierarchyRelationRepository",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "lineRange": [
+        10,
+        27
+      ],
+      "summary": "Class TeamHierarchyRelationRepository declared in TeamHierarchyRelationRepository.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:TeamHierarchyService",
+      "type": "class",
+      "name": "TeamHierarchyService",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        28,
+        377
+      ],
+      "summary": "Class TeamHierarchyService declared in TeamHierarchyService.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:getHierarchy",
+      "type": "function",
+      "name": "getHierarchy",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        39,
+        59
+      ],
+      "summary": "Loads the active team hierarchy as a node-and-children DTO tree.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:create",
+      "type": "function",
+      "name": "create",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        61,
+        76
+      ],
+      "summary": "Creates a new parent-child hierarchy relation after validation.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        78,
+        102
+      ],
+      "summary": "Updates an existing hierarchy relation effective dates or parent.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:endRelation",
+      "type": "function",
+      "name": "endRelation",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        104,
+        123
+      ],
+      "summary": "Ends a hierarchy relation on a given date and emits a notification.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:validateMutation",
+      "type": "function",
+      "name": "validateMutation",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        133,
+        168
+      ],
+      "summary": "Validates a hierarchy mutation against overlap and cycle constraints.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:ensureNoCycle",
+      "type": "function",
+      "name": "ensureNoCycle",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        170,
+        197
+      ],
+      "summary": "Walks the parent chain to ensure the proposed relation introduces no cycle.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:buildChildrenMap",
+      "type": "function",
+      "name": "buildChildrenMap",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        199,
+        209
+      ],
+      "summary": "Helper method buildChildrenMap in TeamHierarchyService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:computeLevel",
+      "type": "function",
+      "name": "computeLevel",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        219,
+        240
+      ],
+      "summary": "Recursively computes the depth level for a single hierarchy node.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:toNodeDto",
+      "type": "function",
+      "name": "toNodeDto",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        242,
+        274
+      ],
+      "summary": "Maps a TeamHierarchyRelation into a DTO with resolved names and children.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:publishDesignationEvent",
+      "type": "function",
+      "name": "publishDesignationEvent",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        330,
+        353
+      ],
+      "summary": "Publishes a RabbitMQ notification when a designation is set.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:publishEvent",
+      "type": "function",
+      "name": "publishEvent",
+      "filePath": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "lineRange": [
+        366,
+        376
+      ],
+      "summary": "Common helper that serializes payloads and publishes notification events.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/mapper/ProjectMapper.java:ProjectMapper",
+      "type": "class",
+      "name": "ProjectMapper",
+      "filePath": "src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "lineRange": [
+        9,
+        15
+      ],
+      "summary": "Class ProjectMapper declared in ProjectMapper.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java:ProjectAssignmentRepository",
+      "type": "class",
+      "name": "ProjectAssignmentRepository",
+      "filePath": "src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "lineRange": [
+        17,
+        201
+      ],
+      "summary": "Class ProjectAssignmentRepository declared in ProjectAssignmentRepository.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "target": "class:src/main/java/com/hris/organisation/entity/TeamProjectLink.java:TeamProjectLink",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "target": "class:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java:TeamHierarchyRelation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "target": "class:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java:TeamHierarchyRelationRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "class:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:TeamHierarchyService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:getHierarchy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:create",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:endRelation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:validateMutation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:ensureNoCycle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:buildChildrenMap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:computeLevel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:toNodeDto",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:publishDesignationEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "function:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java:publishEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "target": "class:src/main/java/com/hris/organisation/mapper/ProjectMapper.java:ProjectMapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "target": "class:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java:ProjectAssignmentRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/User.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/UserRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Team.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

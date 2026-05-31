@@ -136,4 +136,72 @@ class NotificationPublisherTest {
         );
         verify(rabbitTemplate, never()).send(any(Message.class));
     }
+
+    @Test
+    @DisplayName("sendNow sends an already-persisted event and stamps deliveredAt without re-inserting")
+    void sendNowSendsAlreadyPersistedEventAndStampsDeliveredAt() {
+        NotificationPublisher publisher = new NotificationPublisher(
+            rabbitTemplate,
+            messageConverter,
+            notificationEventRepository
+        );
+        NotificationEvent saved = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.LEAVE_APPROVED)
+            .targetUserId(UUID.randomUUID())
+            .titleKey("leave.approved.title")
+            .bodyKey("leave.approved.body")
+            .params("{}")
+            .locale("fr")
+            .routingKey("leave.approved")
+            .publishedAt(Instant.now())
+            .build();
+
+        publisher.sendNow(saved);
+
+        // Sent to the broker, then stamped delivered and saved once (the delivery stamp only).
+        verify(rabbitTemplate).convertAndSend(
+            eq(RabbitMQConfig.EXCHANGE),
+            eq("leave.approved"),
+            eq(saved),
+            any(),
+            any(CorrelationData.class)
+        );
+        assertThat(saved.getDeliveredAt()).isNotNull();
+        verify(notificationEventRepository).save(saved);
+    }
+
+    @Test
+    @DisplayName("sendNow leaves deliveredAt null when the broker send fails")
+    void sendNowLeavesDeliveredAtNullOnFailure() {
+        NotificationPublisher publisher = new NotificationPublisher(
+            rabbitTemplate,
+            messageConverter,
+            notificationEventRepository
+        );
+        NotificationEvent saved = NotificationEvent.builder()
+            .id(UUID.randomUUID())
+            .eventType(NotificationEventType.LEAVE_APPROVED)
+            .targetUserId(UUID.randomUUID())
+            .titleKey("leave.approved.title")
+            .bodyKey("leave.approved.body")
+            .params("{}")
+            .locale("fr")
+            .routingKey("leave.approved")
+            .publishedAt(Instant.now())
+            .build();
+        doThrow(new RuntimeException("broker unavailable")).when(rabbitTemplate).convertAndSend(
+            eq(RabbitMQConfig.EXCHANGE),
+            eq("leave.approved"),
+            eq(saved),
+            any(),
+            any(CorrelationData.class)
+        );
+
+        publisher.sendNow(saved);
+
+        // Failure is swallowed; the row keeps deliveredAt == null for the outbox worker to retry.
+        assertThat(saved.getDeliveredAt()).isNull();
+        verify(notificationEventRepository, never()).save(saved);
+    }
 }

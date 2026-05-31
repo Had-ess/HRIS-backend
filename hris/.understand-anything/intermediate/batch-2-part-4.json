@@ -1,0 +1,1598 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "type": "file",
+      "name": "ProjectDepartmentRepository.java",
+      "filePath": "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "summary": "Spring Data repository for ProjectDepartment links with project/department lookup queries.",
+      "tags": [
+        "repository",
+        "jpa",
+        "project",
+        "department",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "type": "file",
+      "name": "ProjectRepository.java",
+      "filePath": "src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "summary": "Spring Data repository for Project entities with scope and status-aware queries.",
+      "tags": [
+        "repository",
+        "jpa",
+        "project",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "type": "file",
+      "name": "TeamProjectLinkRepository.java",
+      "filePath": "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "summary": "Spring Data repository for TeamProjectLink supporting effective-date queries used during approval routing.",
+      "tags": [
+        "repository",
+        "jpa",
+        "team",
+        "project",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "type": "file",
+      "name": "TeamRepository.java",
+      "filePath": "src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "summary": "Spring Data repository for Team entities with code, leader, and parent lookups.",
+      "tags": [
+        "repository",
+        "jpa",
+        "team",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "type": "file",
+      "name": "ProjectService.java",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "summary": "Comprehensive service orchestrating project CRUD, team creation, employee and department assignments, scope-based read filtering, and notification publication for project leads.",
+      "tags": [
+        "service",
+        "project",
+        "crud",
+        "workflow",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "type": "file",
+      "name": "TeamService.java",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "summary": "Service handling team CRUD with code normalization, leader and parent validation, and scope-aware list queries.",
+      "tags": [
+        "service",
+        "team",
+        "crud",
+        "validation",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "type": "file",
+      "name": "AccessScopeService.java",
+      "filePath": "src/main/java/com/hris/security/service/AccessScopeService.java",
+      "summary": "Security helper resolving the caller effective permissions, approval scope, manager visibility, and department or project scope references used to filter business reads.",
+      "tags": [
+        "security",
+        "scope",
+        "authorization",
+        "service",
+        "permission"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java:ProjectDepartmentRepository",
+      "type": "class",
+      "name": "ProjectDepartmentRepository",
+      "filePath": "src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "lineRange": [
+        14,
+        51
+      ],
+      "summary": "Class ProjectDepartmentRepository declared in ProjectDepartmentRepository.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/repository/ProjectRepository.java:ProjectRepository",
+      "type": "class",
+      "name": "ProjectRepository",
+      "filePath": "src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "lineRange": [
+        17,
+        58
+      ],
+      "summary": "Class ProjectRepository declared in ProjectRepository.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java:TeamProjectLinkRepository",
+      "type": "class",
+      "name": "TeamProjectLinkRepository",
+      "filePath": "src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "lineRange": [
+        14,
+        33
+      ],
+      "summary": "Class TeamProjectLinkRepository declared in TeamProjectLinkRepository.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/repository/TeamRepository.java:TeamRepository",
+      "type": "class",
+      "name": "TeamRepository",
+      "filePath": "src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "lineRange": [
+        14,
+        49
+      ],
+      "summary": "Class TeamRepository declared in TeamRepository.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/service/ProjectService.java:ProjectService",
+      "type": "class",
+      "name": "ProjectService",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        66,
+        797
+      ],
+      "summary": "Class ProjectService declared in ProjectService.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:create",
+      "type": "function",
+      "name": "create",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        104,
+        116
+      ],
+      "summary": "Persists a new project after validating uniqueness and dates.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        118,
+        137
+      ],
+      "summary": "Updates a project metadata, capturing the prior snapshot for audit.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:deactivate",
+      "type": "function",
+      "name": "deactivate",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        139,
+        153
+      ],
+      "summary": "Deactivates a project while preserving historical assignments.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:hardDelete",
+      "type": "function",
+      "name": "hardDelete",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        155,
+        188
+      ],
+      "summary": "Removes a project and all dependent records under admin permission.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:assignEmployee",
+      "type": "function",
+      "name": "assignEmployee",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        190,
+        229
+      ],
+      "summary": "Assigns an employee to a project with role validation and schedules a notification.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:createTeam",
+      "type": "function",
+      "name": "createTeam",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        240,
+        290
+      ],
+      "summary": "Creates a project-scoped team validating leader, parent supervisor, and project membership.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:removeAssignment",
+      "type": "function",
+      "name": "removeAssignment",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        292,
+        316
+      ],
+      "summary": "Ends a project assignment and records the change.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:getDepartments",
+      "type": "function",
+      "name": "getDepartments",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        326,
+        344
+      ],
+      "summary": "Helper method getDepartments in ProjectService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:assignDepartment",
+      "type": "function",
+      "name": "assignDepartment",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        346,
+        378
+      ],
+      "summary": "Links a department to a project, broadening its visibility.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:removeDepartment",
+      "type": "function",
+      "name": "removeDepartment",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        380,
+        390
+      ],
+      "summary": "Helper method removeDepartment in ProjectService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateAssignment",
+      "type": "function",
+      "name": "validateAssignment",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        393,
+        416
+      ],
+      "summary": "Validates a project assignment request: employee existence, role, and date window.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateProject",
+      "type": "function",
+      "name": "validateProject",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        418,
+        430
+      ],
+      "summary": "Helper method validateProject in ProjectService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:getScopedProject",
+      "type": "function",
+      "name": "getScopedProject",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        437,
+        451
+      ],
+      "summary": "Helper method getScopedProject in ProjectService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:resolveReadScope",
+      "type": "function",
+      "name": "resolveReadScope",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        453,
+        478
+      ],
+      "summary": "Resolves which projects the caller is allowed to read based on their access profile.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:ensureProjectScopedManagementAccess",
+      "type": "function",
+      "name": "ensureProjectScopedManagementAccess",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        480,
+        511
+      ],
+      "summary": "Ensures the caller has permission to manage the specific project.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:snapshot",
+      "type": "function",
+      "name": "snapshot",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        524,
+        536
+      ],
+      "summary": "Helper method snapshot in ProjectService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:buildAssignmentNotification",
+      "type": "function",
+      "name": "buildAssignmentNotification",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        543,
+        563
+      ],
+      "summary": "Builds the notification payload published when an employee is assigned to a project.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:normalizeAssignmentView",
+      "type": "function",
+      "name": "normalizeAssignmentView",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        580,
+        599
+      ],
+      "summary": "Normalises an assignment view by resolving employee and project names.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateTeam",
+      "type": "function",
+      "name": "validateTeam",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        601,
+        663
+      ],
+      "summary": "Validates a project-team creation request including leader and supervisor constraints.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateLeaderParentSupervisor",
+      "type": "function",
+      "name": "validateLeaderParentSupervisor",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        665,
+        686
+      ],
+      "summary": "Validates that the leader and parent supervisor on a team request are coherent.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:createTeamAssignment",
+      "type": "function",
+      "name": "createTeamAssignment",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        699,
+        725
+      ],
+      "summary": "Persists the assignment linking an employee to a newly created project team.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:toTeamDto",
+      "type": "function",
+      "name": "toTeamDto",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        727,
+        747
+      ],
+      "summary": "Maps a Team entity together with its project link into a response DTO.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/ProjectService.java:publishProjectLeadEvent",
+      "type": "function",
+      "name": "publishProjectLeadEvent",
+      "filePath": "src/main/java/com/hris/organisation/service/ProjectService.java",
+      "lineRange": [
+        771,
+        781
+      ],
+      "summary": "Publishes a RabbitMQ event when a project lead is designated.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/service/TeamService.java:TeamService",
+      "type": "class",
+      "name": "TeamService",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        39,
+        296
+      ],
+      "summary": "Class TeamService declared in TeamService.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:getById",
+      "type": "function",
+      "name": "getById",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        65,
+        79
+      ],
+      "summary": "Loads a single team enforcing scoped read access.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:create",
+      "type": "function",
+      "name": "create",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        81,
+        96
+      ],
+      "summary": "Creates a new team after normalising its code and validating leader and parent.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        98,
+        130
+      ],
+      "summary": "Updates a team metadata with validation and audit snapshot.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:hardDelete",
+      "type": "function",
+      "name": "hardDelete",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        141,
+        165
+      ],
+      "summary": "Hard-deletes a team after verifying no dependent records remain.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:validate",
+      "type": "function",
+      "name": "validate",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        167,
+        204
+      ],
+      "summary": "Validates a team request against business rules.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:toDto",
+      "type": "function",
+      "name": "toDto",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        211,
+        234
+      ],
+      "summary": "Maps a Team entity to its response DTO including resolved leader name.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/organisation/service/TeamService.java:resolveReadScope",
+      "type": "function",
+      "name": "resolveReadScope",
+      "filePath": "src/main/java/com/hris/organisation/service/TeamService.java",
+      "lineRange": [
+        258,
+        270
+      ],
+      "summary": "Resolves the set of departments the caller may read teams within.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/security/service/AccessScopeService.java:AccessScopeService",
+      "type": "class",
+      "name": "AccessScopeService",
+      "filePath": "src/main/java/com/hris/security/service/AccessScopeService.java",
+      "lineRange": [
+        23,
+        228
+      ],
+      "summary": "Class AccessScopeService declared in AccessScopeService.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/security/service/AccessScopeService.java:resolveDepartmentDataScope",
+      "type": "function",
+      "name": "resolveDepartmentDataScope",
+      "filePath": "src/main/java/com/hris/security/service/AccessScopeService.java",
+      "lineRange": [
+        112,
+        135
+      ],
+      "summary": "Computes the effective set of department IDs the caller may operate against for business reads.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/security/service/AccessScopeService.java:resolveDepartmentIdsFromScopeRefs",
+      "type": "function",
+      "name": "resolveDepartmentIdsFromScopeRefs",
+      "filePath": "src/main/java/com/hris/security/service/AccessScopeService.java",
+      "lineRange": [
+        187,
+        221
+      ],
+      "summary": "Resolves explicit scope references on the access profile into concrete department IDs.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "target": "class:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java:ProjectDepartmentRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "target": "class:src/main/java/com/hris/organisation/repository/ProjectRepository.java:ProjectRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "target": "class:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java:TeamProjectLinkRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "target": "class:src/main/java/com/hris/organisation/repository/TeamRepository.java:TeamRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "class:src/main/java/com/hris/organisation/service/ProjectService.java:ProjectService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:create",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:deactivate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:hardDelete",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:assignEmployee",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:createTeam",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:removeAssignment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:getDepartments",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:assignDepartment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:removeDepartment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateAssignment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:getScopedProject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:resolveReadScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:ensureProjectScopedManagementAccess",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:snapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:buildAssignmentNotification",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:normalizeAssignmentView",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateTeam",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:validateLeaderParentSupervisor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:createTeamAssignment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:toTeamDto",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/ProjectService.java:publishProjectLeadEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "class:src/main/java/com/hris/organisation/service/TeamService.java:TeamService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:getById",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:create",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:hardDelete",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:validate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:toDto",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "function:src/main/java/com/hris/organisation/service/TeamService.java:resolveReadScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "class:src/main/java/com/hris/security/service/AccessScopeService.java:AccessScopeService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "function:src/main/java/com/hris/security/service/AccessScopeService.java:resolveDepartmentDataScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "function:src/main/java/com/hris/security/service/AccessScopeService.java:resolveDepartmentIdsFromScopeRefs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Team.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/User.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/UserRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/common/exception/DuplicateProjectDepartmentAssignmentException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/common/exception/InvalidProjectAssignmentException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/notification/enums/NotificationEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Team.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/mapper/ProjectMapper.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "target": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/User.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/UserRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/common/PageResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/TeamCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/TeamDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/TeamUpdateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/Team.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/service/TeamService.java",
+      "target": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

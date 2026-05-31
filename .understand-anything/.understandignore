@@ -1,0 +1,40 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore
+
+# --- Build output / IDE / generated ---
+hris/target/
+target/
+**/target/
+.m2repo/
+hris/.m2repo/
+.idea/
+.vscode/
+*.log
+*.class
+*.zip
+
+# --- Tests (excluded per user request) ---
+hris/src/test/
+**/src/test/
+*.test.*
+*.spec.*
+
+# --- Flyway migrations (excluded per user request) ---
+hris/src/main/resources/db/migration/
+**/db/migration/
+
+# --- External / vendored ---
+keycloak/
+Microsoft/
+storage/
+graphify-out/
+**/graphify-out/
+
+# --- Misc generated docs/logs ---
+COMPREHENSIVE_TEST_SUITE_SUMMARY.md
+TEST_CREATION_SUMMARY.md
+backend-run-current.log
+backend-run-live.log
+spring-boot-run.log
+maven-tests.log
+init-db.sql

@@ -137,7 +137,8 @@ public class AnalyticsEventPublisher {
     }
 
     private void publish(AnalyticsEvent event) {
-        transactionalPublisher.publishAfterCommit(event);
+        // Transactional outbox: write the event row atomically with the business change.
+        transactionalPublisher.persistInTransaction(event);
     }
 
     private AnalyticsEvent buildEvent(

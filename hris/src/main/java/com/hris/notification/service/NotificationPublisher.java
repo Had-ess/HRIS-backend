@@ -14,8 +14,17 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.stereotype.Service;
 
 /**
- * GAP-B-34 FIXED: Saves NotificationEvent before publishing to RabbitMQ.
- * Fire-and-forget pattern — swallows publish errors.
+ * Relays {@link NotificationEvent} outbox rows to RabbitMQ.
+ *
+ * <p>Two entry points:
+ * <ul>
+ *   <li>{@link #publish(NotificationEvent)} — persists the event, then sends it. Used only
+ *       when no business transaction is active (e.g. the inline fallback path).</li>
+ *   <li>{@link #sendNow(NotificationEvent)} — sends an event that is <em>already persisted</em>
+ *       (the transactional-outbox fast path, invoked after the business transaction commits).</li>
+ * </ul>
+ * Both are fire-and-forget: AMQP failures are swallowed and {@code deliveredAt} is left null so
+ * {@link NotificationOutboxWorker} can retry.
  */
 @Service
 @RequiredArgsConstructor
@@ -49,9 +58,23 @@ public class NotificationPublisher {
         });
     }
 
+    /**
+     * Inline fallback: persist the event, then send it. Used when no business transaction is
+     * active, so there is nothing to be atomic with. Within a transaction, callers persist the
+     * event in that transaction and use {@link #sendNow(NotificationEvent)} after commit instead.
+     */
     public void publish(NotificationEvent event) {
         // Persist event first — deliveredAt stays null until AMQP delivery confirmed
         NotificationEvent saved = notificationEventRepository.save(event);
+        sendNow(saved);
+    }
+
+    /**
+     * Sends an already-persisted outbox event to RabbitMQ and stamps {@code deliveredAt} on
+     * success. The row must already exist (written in the business transaction); on failure the
+     * row keeps {@code deliveredAt == null} and {@link NotificationOutboxWorker} relays it later.
+     */
+    public void sendNow(NotificationEvent saved) {
         try {
             CorrelationData correlationData = new CorrelationData(saved.getId().toString());
             rabbitTemplate.convertAndSend(

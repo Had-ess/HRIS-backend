@@ -1,0 +1,1198 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "type": "file",
+      "name": "EmployeeService.java",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "summary": "Service managing the employee lifecycle including profile retrieval, updates, supervisor validation, and leave balance initialization with scope-based access control.",
+      "tags": [
+        "service",
+        "employee",
+        "crud",
+        "scope-aware",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "type": "file",
+      "name": "LeavePolicy.java",
+      "filePath": "src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "summary": "JPA entity mapping leave policy rules per contract type, defining accrual configuration for leave balances.",
+      "tags": [
+        "entity",
+        "jpa",
+        "leave",
+        "policy",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "type": "file",
+      "name": "LeavePolicyRepository.java",
+      "filePath": "src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "summary": "Spring Data JPA repository for LeavePolicy with contract-type lookup methods.",
+      "tags": [
+        "repository",
+        "jpa",
+        "leave",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "type": "file",
+      "name": "LeaveApprovalWorkflowService.java",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "summary": "Core leave approval workflow engine that resolves approver hierarchy from team chain, department, and project scopes and instantiates multi-step ApprovalWorkflow snapshots for leave requests.",
+      "tags": [
+        "service",
+        "workflow",
+        "approval",
+        "hierarchy-resolver",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "type": "file",
+      "name": "ProjectController.java",
+      "filePath": "src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "summary": "REST controller exposing project, project-team, assignment, and department-link endpoints, guarded by permission checks and returning ApiResponse / PageResponse envelopes.",
+      "tags": [
+        "api-handler",
+        "controller",
+        "project",
+        "rest",
+        "authorization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "type": "file",
+      "name": "ProjectAssignmentCreateDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "summary": "Request DTO carrying the employee, role, and date range when assigning an employee to a project.",
+      "tags": [
+        "dto",
+        "project",
+        "assignment",
+        "request"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "type": "file",
+      "name": "ProjectAssignmentResponseDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "summary": "Response DTO returning the persisted project assignment including identifiers, dates, and active flag.",
+      "tags": [
+        "dto",
+        "project",
+        "assignment",
+        "response"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "type": "file",
+      "name": "ProjectAssignmentViewDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "summary": "Aggregated view DTO joining employee, project, and role information for assignment listings.",
+      "tags": [
+        "dto",
+        "project",
+        "assignment",
+        "view"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "type": "file",
+      "name": "ProjectCreateDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "summary": "Request DTO for creating or updating a project with code, name, description, and date range.",
+      "tags": [
+        "dto",
+        "project",
+        "request"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/service/EmployeeService.java:EmployeeService",
+      "type": "class",
+      "name": "EmployeeService",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        43,
+        379
+      ],
+      "summary": "Class EmployeeService declared in EmployeeService.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:getAll",
+      "type": "function",
+      "name": "getAll",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        64,
+        89
+      ],
+      "summary": "Lists employees with pagination, applying scope-based filtering for the current caller.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:getProfileSummary",
+      "type": "function",
+      "name": "getProfileSummary",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        95,
+        167
+      ],
+      "summary": "Assembles an employee profile summary including leave balances and department history.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:getById",
+      "type": "function",
+      "name": "getById",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        169,
+        190
+      ],
+      "summary": "Loads a single employee, enforcing scoped read access.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        192,
+        266
+      ],
+      "summary": "Updates employee fields with supervisor validation, history capture, and audit logging.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:delete",
+      "type": "function",
+      "name": "delete",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        268,
+        298
+      ],
+      "summary": "Soft-deletes an employee and records the status change in history.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:initializeLeaveBalancesForNewEmployee",
+      "type": "function",
+      "name": "initializeLeaveBalancesForNewEmployee",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        300,
+        330
+      ],
+      "summary": "Creates initial leave balances for a newly onboarded employee based on contract-type leave policies.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeService.java:resolveReadScope",
+      "type": "function",
+      "name": "resolveReadScope",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeService.java",
+      "lineRange": [
+        341,
+        353
+      ],
+      "summary": "Resolves the department scope a caller is allowed to read employees within.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/leave/entity/LeavePolicy.java:LeavePolicy",
+      "type": "class",
+      "name": "LeavePolicy",
+      "filePath": "src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "lineRange": [
+        9,
+        29
+      ],
+      "summary": "Class LeavePolicy declared in LeavePolicy.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:LeaveApprovalWorkflowService",
+      "type": "class",
+      "name": "LeaveApprovalWorkflowService",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        44,
+        472
+      ],
+      "summary": "Class LeaveApprovalWorkflowService declared in LeaveApprovalWorkflowService.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:instantiate",
+      "type": "function",
+      "name": "instantiate",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        63,
+        88
+      ],
+      "summary": "Builds and persists an ApprovalWorkflow for a leave request including all approval steps.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveTeamId",
+      "type": "function",
+      "name": "resolveTeamId",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        90,
+        131
+      ],
+      "summary": "Determines which team identifier governs approval routing for a given leave request.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveRoute",
+      "type": "function",
+      "name": "resolveRoute",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        133,
+        196
+      ],
+      "summary": "Resolves the ordered list of approvers by walking the team hierarchy and project links.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:isTeamChainHead",
+      "type": "function",
+      "name": "isTeamChainHead",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        198,
+        208
+      ],
+      "summary": "Helper method isTeamChainHead in LeaveApprovalWorkflowService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveProfileBasedEscalation",
+      "type": "function",
+      "name": "resolveProfileBasedEscalation",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        224,
+        280
+      ],
+      "summary": "Computes fallback approvers based on access profiles when hierarchy resolution yields none.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:findScopedApprovalApprovers",
+      "type": "function",
+      "name": "findScopedApprovalApprovers",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        282,
+        295
+      ],
+      "summary": "Helper method findScopedApprovalApprovers in LeaveApprovalWorkflowService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:toHierarchyApprovers",
+      "type": "function",
+      "name": "toHierarchyApprovers",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        297,
+        327
+      ],
+      "summary": "Maps hierarchy relations and team chain heads into approver entries with metadata.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveFallbackApprovers",
+      "type": "function",
+      "name": "resolveFallbackApprovers",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        329,
+        363
+      ],
+      "summary": "Resolves the configured fallback approvers when the primary chain is empty.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveRequiredApprovals",
+      "type": "function",
+      "name": "resolveRequiredApprovals",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        365,
+        380
+      ],
+      "summary": "Helper method resolveRequiredApprovals in LeaveApprovalWorkflowService.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:buildSteps",
+      "type": "function",
+      "name": "buildSteps",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        382,
+        414
+      ],
+      "summary": "Builds ApprovalStep entities from the resolved approver list in the configured order.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:buildWorkflowSnapshot",
+      "type": "function",
+      "name": "buildWorkflowSnapshot",
+      "filePath": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "lineRange": [
+        416,
+        445
+      ],
+      "summary": "Serializes the workflow context into a snapshot for audit replay.",
+      "tags": [
+        "function",
+        "java",
+        "method"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/controller/ProjectController.java:ProjectController",
+      "type": "class",
+      "name": "ProjectController",
+      "filePath": "src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "lineRange": [
+        28,
+        170
+      ],
+      "summary": "Class ProjectController declared in ProjectController.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "class:src/main/java/com/hris/auth/service/EmployeeService.java:EmployeeService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:getAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:getProfileSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:getById",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:delete",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:initializeLeaveBalancesForNewEmployee",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeService.java:resolveReadScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "target": "class:src/main/java/com/hris/leave/entity/LeavePolicy.java:LeavePolicy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "class:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:LeaveApprovalWorkflowService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:instantiate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveTeamId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveRoute",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:isTeamChainHead",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveProfileBasedEscalation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:findScopedApprovalApprovers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:toHierarchyApprovers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveFallbackApprovers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:resolveRequiredApprovals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:buildSteps",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "function:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java:buildWorkflowSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "class:src/main/java/com/hris/organisation/controller/ProjectController.java:ProjectController",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/enums/AccountStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/UserRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/entity/LeaveBalance.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/entity/LeaveType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/repository/LeaveBalanceRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/repository/LeaveRequestRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/leave/repository/LeaveTypeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "target": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "target": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "target": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/repository/LeavePolicyRepository.java",
+      "target": "file:src/main/java/com/hris/leave/entity/LeavePolicy.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/enums/ApprovalContext.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/enums/StepStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/User.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/UserRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/leave/entity/LeaveRequest.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/leave/entity/LeaveType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/TeamProjectLink.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamProjectLinkRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+      "target": "file:src/main/java/com/hris/settings/validation/entity/ValidatorSource.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/common/PageResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/organisation/service/ProjectService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/controller/ProjectController.java",
+      "target": "file:src/main/java/com/hris/security/SecurityUtils.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentCreateDto.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentResponseDto.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/dto/ProjectAssignmentViewDto.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/dto/ProjectCreateDto.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}
