@@ -1,0 +1,660 @@
+{
+  "batchIndex": 12,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/access/controller/ProfileAssignmentRuleController.java",
+      "language": "java",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/controller/UserAccessAssignmentController.java",
+      "language": "java",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/AccessProfileAssignmentDto.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/ProfileAssignmentRuleResponseDto.java",
+      "language": "java",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/ProfileAssignmentRuleUpdateDto.java",
+      "language": "java",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/UserProfileSummaryDto.java",
+      "language": "java",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/entity/AccessProfile.java",
+      "language": "java",
+      "sizeLines": 60,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/entity/ProfileAssignmentRule.java",
+      "language": "java",
+      "sizeLines": 76,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/entity/UserProfileAssignment.java",
+      "language": "java",
+      "sizeLines": 86,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/enums/RuleAction.java",
+      "language": "java",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/enums/ScopeStrategy.java",
+      "language": "java",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+      "language": "java",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/repository/ProfileAssignmentRuleRepository.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java",
+      "language": "java",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/service/AutomaticProfileAssignmentEngine.java",
+      "language": "java",
+      "sizeLines": 135,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/service/ProfileAssignmentRuleService.java",
+      "language": "java",
+      "sizeLines": 116,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/service/UserAccessAssignmentService.java",
+      "language": "java",
+      "sizeLines": 93,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/controller/AuditLogController.java",
+      "language": "java",
+      "sizeLines": 85,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AuditLogDto.java",
+      "language": "java",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/access/controller/ProfileAssignmentRuleController.java": [
+      "src/main/java/com/hris/access/dto/ProfileAssignmentRuleResponseDto.java",
+      "src/main/java/com/hris/access/dto/ProfileAssignmentRuleUpdateDto.java",
+      "src/main/java/com/hris/access/service/ProfileAssignmentRuleService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/access/controller/UserAccessAssignmentController.java": [
+      "src/main/java/com/hris/access/dto/AccessProfileAssignmentDto.java",
+      "src/main/java/com/hris/access/dto/UserProfileSummaryDto.java",
+      "src/main/java/com/hris/access/service/UserAccessAssignmentService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/access/dto/AccessProfileAssignmentDto.java": [],
+    "src/main/java/com/hris/access/dto/ProfileAssignmentRuleResponseDto.java": [
+      "src/main/java/com/hris/access/enums/RuleAction.java",
+      "src/main/java/com/hris/access/enums/ScopeStrategy.java",
+      "src/main/java/com/hris/access/enums/StructuralEventType.java"
+    ],
+    "src/main/java/com/hris/access/dto/ProfileAssignmentRuleUpdateDto.java": [
+      "src/main/java/com/hris/access/enums/RuleAction.java",
+      "src/main/java/com/hris/access/enums/ScopeStrategy.java"
+    ],
+    "src/main/java/com/hris/access/dto/UserProfileSummaryDto.java": [],
+    "src/main/java/com/hris/access/entity/AccessProfile.java": [],
+    "src/main/java/com/hris/access/entity/ProfileAssignmentRule.java": [
+      "src/main/java/com/hris/access/enums/RuleAction.java",
+      "src/main/java/com/hris/access/enums/ScopeStrategy.java",
+      "src/main/java/com/hris/access/enums/StructuralEventType.java"
+    ],
+    "src/main/java/com/hris/access/entity/UserProfileAssignment.java": [
+      "src/main/java/com/hris/auth/entity/User.java"
+    ],
+    "src/main/java/com/hris/access/enums/RuleAction.java": [],
+    "src/main/java/com/hris/access/enums/ScopeStrategy.java": [],
+    "src/main/java/com/hris/access/repository/AccessProfileRepository.java": [
+      "src/main/java/com/hris/access/entity/AccessProfile.java"
+    ],
+    "src/main/java/com/hris/access/repository/ProfileAssignmentRuleRepository.java": [
+      "src/main/java/com/hris/access/entity/ProfileAssignmentRule.java",
+      "src/main/java/com/hris/access/enums/StructuralEventType.java"
+    ],
+    "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java": [
+      "src/main/java/com/hris/access/entity/UserProfileAssignment.java",
+      "src/main/java/com/hris/auth/entity/Employee.java"
+    ],
+    "src/main/java/com/hris/access/service/AutomaticProfileAssignmentEngine.java": [
+      "src/main/java/com/hris/access/entity/AccessProfile.java",
+      "src/main/java/com/hris/access/entity/ProfileAssignmentRule.java",
+      "src/main/java/com/hris/access/entity/UserProfileAssignment.java",
+      "src/main/java/com/hris/access/enums/RuleAction.java",
+      "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+      "src/main/java/com/hris/access/repository/ProfileAssignmentRuleRepository.java",
+      "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java"
+    ],
+    "src/main/java/com/hris/access/service/ProfileAssignmentRuleService.java": [
+      "src/main/java/com/hris/access/dto/ProfileAssignmentRuleResponseDto.java",
+      "src/main/java/com/hris/access/dto/ProfileAssignmentRuleUpdateDto.java",
+      "src/main/java/com/hris/access/entity/AccessProfile.java",
+      "src/main/java/com/hris/access/entity/ProfileAssignmentRule.java",
+      "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+      "src/main/java/com/hris/access/repository/ProfileAssignmentRuleRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java"
+    ],
+    "src/main/java/com/hris/access/service/UserAccessAssignmentService.java": [
+      "src/main/java/com/hris/access/dto/UserProfileSummaryDto.java",
+      "src/main/java/com/hris/access/entity/AccessProfile.java",
+      "src/main/java/com/hris/access/entity/UserProfileAssignment.java",
+      "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+      "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java"
+    ],
+    "src/main/java/com/hris/analytics/controller/AuditLogController.java": [
+      "src/main/java/com/hris/analytics/dto/AuditLogDto.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogQueryService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java"
+    ],
+    "src/main/java/com/hris/analytics/dto/AuditLogDto.java": [
+      "src/main/java/com/hris/analytics/enums/AuditAction.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/access/controller/ProfileAssignmentRuleController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/controller/UserAccessAssignmentController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/dto/ProfileAssignmentRuleResponseDto.java": [
+      {
+        "path": "src/main/java/com/hris/access/enums/StructuralEventType.java",
+        "batchIndex": 1,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/access/entity/AccessProfile.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessProfileService.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getAllMenus",
+          "getAllMenus",
+          "AccessProfileService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/AccountProvisioningService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "provision",
+          "rollbackExternalAccount",
+          "AccountProvisioningService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/entity/ProfileAssignmentRule.java": [
+      {
+        "path": "src/main/java/com/hris/access/enums/StructuralEventType.java",
+        "batchIndex": 1,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/access/entity/UserProfileAssignment.java": [
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/repository/AccessProfileRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessProfileService.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getAllMenus",
+          "getAllMenus",
+          "AccessProfileService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/AccountProvisioningService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "provision",
+          "rollbackExternalAccount",
+          "AccountProvisioningService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/repository/ProfileAssignmentRuleRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/enums/StructuralEventType.java",
+        "batchIndex": 1,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java": [
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessProfileService.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getAllMenus",
+          "getAllMenus",
+          "AccessProfileService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/service/AutomaticProfileAssignmentEngine.java": [
+      {
+        "path": "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/service/ProfileAssignmentRuleService.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/service/UserAccessAssignmentService.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/AccountProvisioningService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "provision",
+          "rollbackExternalAccount",
+          "AccountProvisioningService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDeletionService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "deleteUser",
+          "UserDeletionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/analytics/controller/AuditLogController.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogQueryService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "getAll",
+          "getByResource",
+          "search",
+          "findForExport",
+          "AuditLogQueryService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/analytics/dto/AuditLogDto.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogQueryService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "getAll",
+          "getByResource",
+          "search",
+          "findForExport",
+          "AuditLogQueryService"
+        ]
+      }
+    ]
+  }
+}

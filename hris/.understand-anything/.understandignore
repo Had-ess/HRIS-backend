@@ -1,0 +1,12 @@
+# .understandignore
+target/
+src/test/
+src/main/resources/db/migration/
+*.log
+keycloak/
+storage/
+Microsoft/
+*.md
+.m2repo/
+.mvn/
+.understand-anything/

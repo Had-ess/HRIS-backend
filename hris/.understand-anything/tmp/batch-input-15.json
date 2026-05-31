@@ -1,0 +1,505 @@
+{
+  "batchIndex": 15,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/settings/calendar/dto/HrCalendarDto.java",
+      "language": "java",
+      "sizeLines": 18,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/dto/HrCalendarMutationDto.java",
+      "language": "java",
+      "sizeLines": 18,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/dto/HrHolidayDto.java",
+      "language": "java",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/dto/HrHolidayMutationDto.java",
+      "language": "java",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/entity/HrCalendar.java",
+      "language": "java",
+      "sizeLines": 67,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/entity/HrHoliday.java",
+      "language": "java",
+      "sizeLines": 59,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/repository/HrCalendarRepository.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/repository/HrHolidayRepository.java",
+      "language": "java",
+      "sizeLines": 18,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/calendar/service/HrCalendarService.java",
+      "language": "java",
+      "sizeLines": 224,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/quick/controller/QuickSettingsController.java",
+      "language": "java",
+      "sizeLines": 42,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/quick/dto/QuickSettingsDto.java",
+      "language": "java",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/quick/dto/QuickSettingsMutationDto.java",
+      "language": "java",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/quick/entity/EnterpriseSettings.java",
+      "language": "java",
+      "sizeLines": 71,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java",
+      "language": "java",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/quick/service/QuickSettingsService.java",
+      "language": "java",
+      "sizeLines": 159,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+      "language": "java",
+      "sizeLines": 84,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java",
+      "language": "java",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/settings/calendar/dto/HrCalendarDto.java": [],
+    "src/main/java/com/hris/settings/calendar/dto/HrCalendarMutationDto.java": [],
+    "src/main/java/com/hris/settings/calendar/dto/HrHolidayDto.java": [],
+    "src/main/java/com/hris/settings/calendar/dto/HrHolidayMutationDto.java": [],
+    "src/main/java/com/hris/settings/calendar/entity/HrCalendar.java": [],
+    "src/main/java/com/hris/settings/calendar/entity/HrHoliday.java": [],
+    "src/main/java/com/hris/settings/calendar/repository/HrCalendarRepository.java": [
+      "src/main/java/com/hris/settings/calendar/entity/HrCalendar.java"
+    ],
+    "src/main/java/com/hris/settings/calendar/repository/HrHolidayRepository.java": [
+      "src/main/java/com/hris/settings/calendar/entity/HrHoliday.java"
+    ],
+    "src/main/java/com/hris/settings/calendar/service/HrCalendarService.java": [
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrCalendarDto.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrCalendarMutationDto.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrHolidayDto.java",
+      "src/main/java/com/hris/settings/calendar/dto/HrHolidayMutationDto.java",
+      "src/main/java/com/hris/settings/calendar/entity/HrCalendar.java",
+      "src/main/java/com/hris/settings/calendar/entity/HrHoliday.java",
+      "src/main/java/com/hris/settings/calendar/repository/HrCalendarRepository.java",
+      "src/main/java/com/hris/settings/calendar/repository/HrHolidayRepository.java"
+    ],
+    "src/main/java/com/hris/settings/quick/controller/QuickSettingsController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java",
+      "src/main/java/com/hris/settings/quick/dto/QuickSettingsDto.java",
+      "src/main/java/com/hris/settings/quick/dto/QuickSettingsMutationDto.java",
+      "src/main/java/com/hris/settings/quick/service/QuickSettingsService.java"
+    ],
+    "src/main/java/com/hris/settings/quick/dto/QuickSettingsDto.java": [],
+    "src/main/java/com/hris/settings/quick/dto/QuickSettingsMutationDto.java": [],
+    "src/main/java/com/hris/settings/quick/entity/EnterpriseSettings.java": [],
+    "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java": [
+      "src/main/java/com/hris/settings/quick/entity/EnterpriseSettings.java"
+    ],
+    "src/main/java/com/hris/settings/quick/service/QuickSettingsService.java": [
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/settings/calendar/entity/HrCalendar.java",
+      "src/main/java/com/hris/settings/calendar/repository/HrCalendarRepository.java",
+      "src/main/java/com/hris/settings/quick/dto/QuickSettingsDto.java",
+      "src/main/java/com/hris/settings/quick/dto/QuickSettingsMutationDto.java",
+      "src/main/java/com/hris/settings/quick/entity/EnterpriseSettings.java",
+      "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java",
+      "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java"
+    ],
+    "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java": [],
+    "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java": [],
+    "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java": [
+      "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/settings/calendar/dto/HrCalendarDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/calendar/dto/HrCalendarMutationDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/calendar/dto/HrHolidayDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/calendar/dto/HrHolidayMutationDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/calendar/repository/HrHolidayRepository.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/WorkScheduleService.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "computeWorkingDays",
+          "getHoursPerDay",
+          "isWorkingDay",
+          "WorkScheduleService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/calendar/service/HrCalendarService.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/quick/controller/QuickSettingsController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/quick/repository/EnterpriseSettingsRepository.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java",
+        "batchIndex": 14,
+        "symbols": [
+          "resolveForLeaveType",
+          "LeaveValidationWorkflowResolver"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/WorkScheduleService.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "computeWorkingDays",
+          "getHoursPerDay",
+          "isWorkingDay",
+          "WorkScheduleService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/quick/service/QuickSettingsService.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveTypeService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAllActive",
+          "getAll",
+          "getDtoById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "LeaveTypeService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java",
+        "batchIndex": 14,
+        "symbols": [
+          "resolveForLeaveType",
+          "LeaveValidationWorkflowResolver"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/controller/ValidationWorkflowController.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/entity/ValidationWorkflow.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveTypeService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAllActive",
+          "getAll",
+          "getDtoById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "LeaveTypeService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java",
+        "batchIndex": 14,
+        "symbols": [
+          "resolveForLeaveType",
+          "LeaveValidationWorkflowResolver"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveTypeService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAllActive",
+          "getAll",
+          "getDtoById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "LeaveTypeService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveValidationWorkflowResolver.java",
+        "batchIndex": 14,
+        "symbols": [
+          "resolveForLeaveType",
+          "LeaveValidationWorkflowResolver"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowService"
+        ]
+      }
+    ]
+  }
+}

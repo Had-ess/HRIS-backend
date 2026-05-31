@@ -1,0 +1,4893 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 30,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "src/main/java/com/hris/analytics/dto/ApprovalBottleneckSnapshotDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 14,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 66,
+      "nonEmptyLines": 51,
+      "functions": [
+        {
+          "name": "equals",
+          "startLine": 54,
+          "endLine": 60,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "hashCode",
+          "startLine": 62,
+          "endLine": 65,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "AnalyticsEvent",
+          "startLine": 12,
+          "endLine": 66,
+          "methods": [
+            "equals",
+            "hashCode"
+          ],
+          "properties": [
+            "id",
+            "eventType",
+            "aggregateType",
+            "aggregateId",
+            "occurredAt",
+            "eventDate",
+            "payload",
+            "processedAt",
+            "retryCount",
+            "lastError"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "equals",
+          "line": 54,
+          "isDefault": false
+        },
+        {
+          "name": "hashCode",
+          "line": 62,
+          "isDefault": false
+        },
+        {
+          "name": "AnalyticsEvent",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "equals",
+          "callee": "getClass",
+          "lineNumber": 57
+        },
+        {
+          "caller": "equals",
+          "callee": "o.getClass",
+          "lineNumber": 57
+        },
+        {
+          "caller": "equals",
+          "callee": "Objects.equals",
+          "lineNumber": 59
+        },
+        {
+          "caller": "hashCode",
+          "callee": "Objects.hashCode",
+          "lineNumber": 64
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/ApprovalFact.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 66,
+      "nonEmptyLines": 51,
+      "functions": [
+        {
+          "name": "equals",
+          "startLine": 54,
+          "endLine": 60,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "hashCode",
+          "startLine": 62,
+          "endLine": 65,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalFact",
+          "startLine": 12,
+          "endLine": 66,
+          "methods": [
+            "equals",
+            "hashCode"
+          ],
+          "properties": [
+            "id",
+            "eventDate",
+            "workflowId",
+            "approvalStepId",
+            "approverId",
+            "subjectType",
+            "sourceType",
+            "approverLevel",
+            "stepStatus",
+            "decisionDelayDays"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "equals",
+          "line": 54,
+          "isDefault": false
+        },
+        {
+          "name": "hashCode",
+          "line": 62,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalFact",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "equals",
+          "callee": "getClass",
+          "lineNumber": 57
+        },
+        {
+          "caller": "equals",
+          "callee": "o.getClass",
+          "lineNumber": 57
+        },
+        {
+          "caller": "equals",
+          "callee": "Objects.equals",
+          "lineNumber": 59
+        },
+        {
+          "caller": "hashCode",
+          "callee": "Objects.hashCode",
+          "lineNumber": 64
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/LeaveFact.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 67,
+      "nonEmptyLines": 51,
+      "functions": [
+        {
+          "name": "equals",
+          "startLine": 55,
+          "endLine": 61,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "hashCode",
+          "startLine": 63,
+          "endLine": 66,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "LeaveFact",
+          "startLine": 11,
+          "endLine": 67,
+          "methods": [
+            "equals",
+            "hashCode"
+          ],
+          "properties": [
+            "id",
+            "eventDate",
+            "leaveRequestId",
+            "employeeId",
+            "departmentId",
+            "projectId",
+            "teamId",
+            "leaveTypeId",
+            "workingDays",
+            "requestStatus",
+            "approvalDurationDays"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "equals",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "hashCode",
+          "line": 63,
+          "isDefault": false
+        },
+        {
+          "name": "LeaveFact",
+          "line": 11,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "equals",
+          "callee": "getClass",
+          "lineNumber": 58
+        },
+        {
+          "caller": "equals",
+          "callee": "o.getClass",
+          "lineNumber": 58
+        },
+        {
+          "caller": "equals",
+          "callee": "Objects.equals",
+          "lineNumber": 60
+        },
+        {
+          "caller": "hashCode",
+          "callee": "Objects.hashCode",
+          "lineNumber": 65
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 6,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/AnalyticsEventRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 22,
+      "classes": [
+        {
+          "name": "AnalyticsEventRepository",
+          "startLine": 12,
+          "endLine": 27,
+          "methods": [
+            "findPending",
+            "countPending"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "AnalyticsEventRepository",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/ApprovalFactRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 16,
+      "nonEmptyLines": 13,
+      "classes": [
+        {
+          "name": "ApprovalFactRepository",
+          "startLine": 12,
+          "endLine": 16,
+          "methods": [
+            "findByApprovalStepId",
+            "findByEventDate"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ApprovalFactRepository",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/LeaveFactRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 17,
+      "nonEmptyLines": 14,
+      "classes": [
+        {
+          "name": "LeaveFactRepository",
+          "startLine": 12,
+          "endLine": 17,
+          "methods": [
+            "findByLeaveRequestId",
+            "findByEventDate",
+            "findByEventDateBetween"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "LeaveFactRepository",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 174,
+      "nonEmptyLines": 158,
+      "functions": [
+        {
+          "name": "publishLeaveEvent",
+          "startLine": 30,
+          "endLine": 56,
+          "params": [
+            "eventType",
+            "request",
+            "employee",
+            "primaryAssignment",
+            "completedAt"
+          ]
+        },
+        {
+          "name": "publishApprovalEvent",
+          "startLine": 58,
+          "endLine": 82,
+          "params": [
+            "eventType",
+            "step",
+            "workflow"
+          ]
+        },
+        {
+          "name": "publishEmployeeHireEvent",
+          "startLine": 84,
+          "endLine": 91,
+          "params": [
+            "employee"
+          ]
+        },
+        {
+          "name": "publishEmployeeTransferEvent",
+          "startLine": 93,
+          "endLine": 103,
+          "params": [
+            "previous",
+            "current"
+          ]
+        },
+        {
+          "name": "publishEmployeeTerminationEvent",
+          "startLine": 105,
+          "endLine": 119,
+          "params": [
+            "employee"
+          ]
+        },
+        {
+          "name": "publishProjectAssignmentEvent",
+          "startLine": 121,
+          "endLine": 137,
+          "params": [
+            "eventType",
+            "assignment"
+          ]
+        },
+        {
+          "name": "publish",
+          "startLine": 139,
+          "endLine": 141,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "buildEvent",
+          "startLine": 143,
+          "endLine": 158,
+          "params": [
+            "eventType",
+            "aggregateType",
+            "aggregateId",
+            "occurredAt",
+            "eventDate",
+            "payload"
+          ]
+        },
+        {
+          "name": "computeDelayDays",
+          "startLine": 160,
+          "endLine": 165,
+          "params": [
+            "start",
+            "end"
+          ]
+        },
+        {
+          "name": "serialize",
+          "startLine": 167,
+          "endLine": 173,
+          "params": [
+            "payload"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "AnalyticsEventPublisher",
+          "startLine": 23,
+          "endLine": 174,
+          "methods": [
+            "publishLeaveEvent",
+            "publishApprovalEvent",
+            "publishEmployeeHireEvent",
+            "publishEmployeeTransferEvent",
+            "publishEmployeeTerminationEvent",
+            "publishProjectAssignmentEvent",
+            "publish",
+            "buildEvent",
+            "computeDelayDays",
+            "serialize"
+          ],
+          "properties": [
+            "transactionalPublisher",
+            "objectMapper"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "publishLeaveEvent",
+          "line": 30,
+          "isDefault": false
+        },
+        {
+          "name": "publishApprovalEvent",
+          "line": 58,
+          "isDefault": false
+        },
+        {
+          "name": "publishEmployeeHireEvent",
+          "line": 84,
+          "isDefault": false
+        },
+        {
+          "name": "publishEmployeeTransferEvent",
+          "line": 93,
+          "isDefault": false
+        },
+        {
+          "name": "publishEmployeeTerminationEvent",
+          "line": 105,
+          "isDefault": false
+        },
+        {
+          "name": "publishProjectAssignmentEvent",
+          "line": 121,
+          "isDefault": false
+        },
+        {
+          "name": "AnalyticsEventPublisher",
+          "line": 23,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 36
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 37
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getId",
+          "lineNumber": 37
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 38
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getEmployeeId",
+          "lineNumber": 38
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 39
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "employee.getDepartmentId",
+          "lineNumber": 39
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 40
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "primaryAssignment.getProjectId",
+          "lineNumber": 40
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 41
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "primaryAssignment.getTeamId",
+          "lineNumber": 41
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 42
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getLeaveTypeId",
+          "lineNumber": 42
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 43
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getWorkingDays",
+          "lineNumber": 43
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 44
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getStatus().name",
+          "lineNumber": 44
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getStatus",
+          "lineNumber": 44
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 45
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getSubmittedAt",
+          "lineNumber": 45
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getSubmittedAt().toString",
+          "lineNumber": 45
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getSubmittedAt",
+          "lineNumber": 45
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "payload.put",
+          "lineNumber": 46
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "completedAt.toString",
+          "lineNumber": 46
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "publish",
+          "lineNumber": 48
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "buildEvent",
+          "lineNumber": 48
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getId",
+          "lineNumber": 51
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getSubmittedAt",
+          "lineNumber": 52
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getSubmittedAt",
+          "lineNumber": 52
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "Instant.now",
+          "lineNumber": 52
+        },
+        {
+          "caller": "publishLeaveEvent",
+          "callee": "request.getStartDate",
+          "lineNumber": 53
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 62
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 63
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "workflow.getId",
+          "lineNumber": 63
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 64
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getId",
+          "lineNumber": 64
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 65
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getApproverId",
+          "lineNumber": 65
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 66
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 66
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 67
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getSourceType",
+          "lineNumber": 67
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getSourceType().name",
+          "lineNumber": 67
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getSourceType",
+          "lineNumber": 67
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 68
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getApproverLevel",
+          "lineNumber": 68
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getApproverLevel",
+          "lineNumber": 68
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 69
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getStatus().name",
+          "lineNumber": 69
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getStatus",
+          "lineNumber": 69
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 70
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "workflow.getCreatedAt",
+          "lineNumber": 70
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "workflow.getCreatedAt().toString",
+          "lineNumber": 70
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "workflow.getCreatedAt",
+          "lineNumber": 70
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 71
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 71
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt().toString",
+          "lineNumber": 71
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 71
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "payload.put",
+          "lineNumber": 72
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "computeDelayDays",
+          "lineNumber": 72
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "workflow.getCreatedAt",
+          "lineNumber": 72
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 72
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "publish",
+          "lineNumber": 74
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "buildEvent",
+          "lineNumber": 74
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getId",
+          "lineNumber": 77
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 78
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 78
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "Instant.now",
+          "lineNumber": 78
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 79
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt().atZone(ZoneOffset.UTC).toLocalDate",
+          "lineNumber": 79
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt().atZone",
+          "lineNumber": 79
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 79
+        },
+        {
+          "caller": "publishApprovalEvent",
+          "callee": "LocalDate.now",
+          "lineNumber": 79
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 85
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "payload.put",
+          "lineNumber": 86
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getId",
+          "lineNumber": 86
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "payload.put",
+          "lineNumber": 87
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getDepartmentId",
+          "lineNumber": 87
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "payload.put",
+          "lineNumber": 88
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getStatus().name",
+          "lineNumber": 88
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getStatus",
+          "lineNumber": 88
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "payload.put",
+          "lineNumber": 89
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getHireDate",
+          "lineNumber": 89
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getHireDate().toString",
+          "lineNumber": 89
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getHireDate",
+          "lineNumber": 89
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "publish",
+          "lineNumber": 90
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "buildEvent",
+          "lineNumber": 90
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getId",
+          "lineNumber": 90
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "Instant.now",
+          "lineNumber": 90
+        },
+        {
+          "caller": "publishEmployeeHireEvent",
+          "callee": "employee.getHireDate",
+          "lineNumber": 90
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "previous.getDepartmentId",
+          "lineNumber": 94
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "previous.getDepartmentId().equals",
+          "lineNumber": 94
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "previous.getDepartmentId",
+          "lineNumber": 94
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "current.getDepartmentId",
+          "lineNumber": 94
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 97
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "payload.put",
+          "lineNumber": 98
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "current.getId",
+          "lineNumber": 98
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "payload.put",
+          "lineNumber": 99
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "previous.getDepartmentId",
+          "lineNumber": 99
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "payload.put",
+          "lineNumber": 100
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "current.getDepartmentId",
+          "lineNumber": 100
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "payload.put",
+          "lineNumber": 101
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "current.getStatus().name",
+          "lineNumber": 101
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "current.getStatus",
+          "lineNumber": 101
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "publish",
+          "lineNumber": 102
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "buildEvent",
+          "lineNumber": 102
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "current.getId",
+          "lineNumber": 102
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "Instant.now",
+          "lineNumber": 102
+        },
+        {
+          "caller": "publishEmployeeTransferEvent",
+          "callee": "LocalDate.now",
+          "lineNumber": 102
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 106
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "payload.put",
+          "lineNumber": 107
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getId",
+          "lineNumber": 107
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "payload.put",
+          "lineNumber": 108
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getDepartmentId",
+          "lineNumber": 108
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "payload.put",
+          "lineNumber": 109
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getStatus().name",
+          "lineNumber": 109
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getStatus",
+          "lineNumber": 109
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "payload.put",
+          "lineNumber": 110
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getTerminationDate",
+          "lineNumber": 110
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getTerminationDate().toString",
+          "lineNumber": 110
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getTerminationDate",
+          "lineNumber": 110
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "publish",
+          "lineNumber": 111
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "buildEvent",
+          "lineNumber": 111
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getId",
+          "lineNumber": 114
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "Instant.now",
+          "lineNumber": 115
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getTerminationDate",
+          "lineNumber": 116
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "employee.getTerminationDate",
+          "lineNumber": 116
+        },
+        {
+          "caller": "publishEmployeeTerminationEvent",
+          "callee": "LocalDate.now",
+          "lineNumber": 116
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 122
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "payload.put",
+          "lineNumber": 123
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getId",
+          "lineNumber": 123
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "payload.put",
+          "lineNumber": 124
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getEmployeeId",
+          "lineNumber": 124
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "payload.put",
+          "lineNumber": 125
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getProjectId",
+          "lineNumber": 125
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "payload.put",
+          "lineNumber": 126
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getTeamId",
+          "lineNumber": 126
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "payload.put",
+          "lineNumber": 127
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getStartDate",
+          "lineNumber": 127
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getStartDate().toString",
+          "lineNumber": 127
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getStartDate",
+          "lineNumber": 127
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "payload.put",
+          "lineNumber": 128
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getEndDate",
+          "lineNumber": 128
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getEndDate().toString",
+          "lineNumber": 128
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getEndDate",
+          "lineNumber": 128
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "publish",
+          "lineNumber": 129
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "buildEvent",
+          "lineNumber": 129
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getId",
+          "lineNumber": 132
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "Instant.now",
+          "lineNumber": 133
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getStartDate",
+          "lineNumber": 134
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "assignment.getStartDate",
+          "lineNumber": 134
+        },
+        {
+          "caller": "publishProjectAssignmentEvent",
+          "callee": "LocalDate.now",
+          "lineNumber": 134
+        },
+        {
+          "caller": "publish",
+          "callee": "transactionalPublisher.publishAfterCommit",
+          "lineNumber": 140
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder()\n            .eventType(eventType)\n            .aggregateType(aggregateType)\n            .aggregateId(aggregateId)\n            .occurredAt(occurredAt)\n            .eventDate(eventDate != null ? eventDate : LocalDate.now(ZoneOffset.UTC))\n            .payload(serialize(payload)).build",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder()\n            .eventType(eventType)\n            .aggregateType(aggregateType)\n            .aggregateId(aggregateId)\n            .occurredAt(occurredAt)\n            .eventDate(eventDate != null ? eventDate : LocalDate.now(ZoneOffset.UTC)).payload",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder()\n            .eventType(eventType)\n            .aggregateType(aggregateType)\n            .aggregateId(aggregateId)\n            .occurredAt(occurredAt).eventDate",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder()\n            .eventType(eventType)\n            .aggregateType(aggregateType)\n            .aggregateId(aggregateId).occurredAt",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder()\n            .eventType(eventType)\n            .aggregateType(aggregateType).aggregateId",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder()\n            .eventType(eventType).aggregateType",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder().eventType",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "AnalyticsEvent.builder",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "LocalDate.now",
+          "lineNumber": 155
+        },
+        {
+          "caller": "buildEvent",
+          "callee": "serialize",
+          "lineNumber": 156
+        },
+        {
+          "caller": "computeDelayDays",
+          "callee": "end.isBefore",
+          "lineNumber": 161
+        },
+        {
+          "caller": "computeDelayDays",
+          "callee": "Math.max",
+          "lineNumber": 164
+        },
+        {
+          "caller": "computeDelayDays",
+          "callee": "Duration.between(start, end).toDays",
+          "lineNumber": 164
+        },
+        {
+          "caller": "computeDelayDays",
+          "callee": "Duration.between",
+          "lineNumber": 164
+        },
+        {
+          "caller": "serialize",
+          "callee": "objectMapper.writeValueAsString",
+          "lineNumber": 169
+        },
+        {
+          "caller": "serialize",
+          "callee": "new IllegalStateException",
+          "lineNumber": 171
+        }
+      ],
+      "metrics": {
+        "importCount": 7,
+        "exportCount": 7,
+        "functionCount": 10,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/AnalyticsIngestionService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 151,
+      "nonEmptyLines": 133,
+      "functions": [
+        {
+          "name": "ingestPending",
+          "startLine": 40,
+          "endLine": 48,
+          "params": []
+        },
+        {
+          "name": "ingest",
+          "startLine": 50,
+          "endLine": 67,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "ingestLeaveEvent",
+          "startLine": 69,
+          "endLine": 86,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "ingestApprovalEvent",
+          "startLine": 88,
+          "endLine": 104,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "computeApprovalDurationDays",
+          "startLine": 106,
+          "endLine": 118,
+          "params": [
+            "payload"
+          ]
+        },
+        {
+          "name": "parsePayload",
+          "startLine": 120,
+          "endLine": 127,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "uuid",
+          "startLine": 129,
+          "endLine": 131,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "uuidNullable",
+          "startLine": 133,
+          "endLine": 135,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "integer",
+          "startLine": 137,
+          "endLine": 139,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "localDate",
+          "startLine": 141,
+          "endLine": 150,
+          "params": [
+            "value",
+            "fallback"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "AnalyticsIngestionService",
+          "startLine": 30,
+          "endLine": 151,
+          "methods": [
+            "ingestPending",
+            "ingest",
+            "ingestLeaveEvent",
+            "ingestApprovalEvent",
+            "computeApprovalDurationDays",
+            "parsePayload",
+            "uuid",
+            "uuidNullable",
+            "integer",
+            "localDate"
+          ],
+          "properties": [
+            "analyticsEventRepository",
+            "leaveFactRepository",
+            "approvalFactRepository",
+            "objectMapper"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "ingestPending",
+          "line": 40,
+          "isDefault": false
+        },
+        {
+          "name": "ingest",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "AnalyticsIngestionService",
+          "line": 30,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ingestPending",
+          "callee": "analyticsEventRepository.findPending",
+          "lineNumber": 44
+        },
+        {
+          "caller": "ingestPending",
+          "callee": "PageRequest.of",
+          "lineNumber": 44
+        },
+        {
+          "caller": "ingestPending",
+          "callee": "ingest",
+          "lineNumber": 46
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.getEventType",
+          "lineNumber": 53
+        },
+        {
+          "caller": "ingest",
+          "callee": "ingestLeaveEvent",
+          "lineNumber": 54
+        },
+        {
+          "caller": "ingest",
+          "callee": "ingestApprovalEvent",
+          "lineNumber": 55
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.setProcessedAt",
+          "lineNumber": 59
+        },
+        {
+          "caller": "ingest",
+          "callee": "Instant.now",
+          "lineNumber": 59
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.setLastError",
+          "lineNumber": 60
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.setRetryCount",
+          "lineNumber": 62
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.getRetryCount",
+          "lineNumber": 62
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.setLastError",
+          "lineNumber": 63
+        },
+        {
+          "caller": "ingest",
+          "callee": "ex.getMessage",
+          "lineNumber": 63
+        },
+        {
+          "caller": "ingest",
+          "callee": "log.warn",
+          "lineNumber": 64
+        },
+        {
+          "caller": "ingest",
+          "callee": "event.getId",
+          "lineNumber": 64
+        },
+        {
+          "caller": "ingest",
+          "callee": "analyticsEventRepository.save",
+          "lineNumber": 66
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "parsePayload",
+          "lineNumber": 70
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "uuid",
+          "lineNumber": 71
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 71
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "leaveFactRepository.findByLeaveRequestId(leaveRequestId).orElseGet",
+          "lineNumber": 72
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "leaveFactRepository.findByLeaveRequestId",
+          "lineNumber": 72
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "LeaveFact.builder().leaveRequestId(leaveRequestId).build",
+          "lineNumber": 73
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "LeaveFact.builder().leaveRequestId",
+          "lineNumber": 73
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "LeaveFact.builder",
+          "lineNumber": 73
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setEventDate",
+          "lineNumber": 75
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "localDate",
+          "lineNumber": 75
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 75
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "event.getEventDate",
+          "lineNumber": 75
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setEmployeeId",
+          "lineNumber": 76
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "uuid",
+          "lineNumber": 76
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 76
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setDepartmentId",
+          "lineNumber": 77
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "uuidNullable",
+          "lineNumber": 77
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 77
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setProjectId",
+          "lineNumber": 78
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "uuidNullable",
+          "lineNumber": 78
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 78
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setTeamId",
+          "lineNumber": 79
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "uuidNullable",
+          "lineNumber": 79
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 79
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setLeaveTypeId",
+          "lineNumber": 80
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "uuid",
+          "lineNumber": 80
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 80
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setWorkingDays",
+          "lineNumber": 81
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "integer",
+          "lineNumber": 81
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 81
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setRequestStatus",
+          "lineNumber": 82
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "LeaveStatus.valueOf",
+          "lineNumber": 82
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "payload.get",
+          "lineNumber": 82
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "fact.setApprovalDurationDays",
+          "lineNumber": 83
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "computeApprovalDurationDays",
+          "lineNumber": 83
+        },
+        {
+          "caller": "ingestLeaveEvent",
+          "callee": "leaveFactRepository.save",
+          "lineNumber": 85
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "parsePayload",
+          "lineNumber": 89
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "uuid",
+          "lineNumber": 90
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 90
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "approvalFactRepository.findByApprovalStepId(stepId).orElseGet",
+          "lineNumber": 91
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "approvalFactRepository.findByApprovalStepId",
+          "lineNumber": 91
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "ApprovalFact.builder().approvalStepId(stepId).build",
+          "lineNumber": 92
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "ApprovalFact.builder().approvalStepId",
+          "lineNumber": 92
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "ApprovalFact.builder",
+          "lineNumber": 92
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setEventDate",
+          "lineNumber": 94
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "event.getEventDate",
+          "lineNumber": 94
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setWorkflowId",
+          "lineNumber": 95
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "uuid",
+          "lineNumber": 95
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 95
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setApproverId",
+          "lineNumber": 96
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "uuid",
+          "lineNumber": 96
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 96
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setSubjectType",
+          "lineNumber": 97
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 97
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setSourceType",
+          "lineNumber": 98
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "ApprovalSourceType.valueOf",
+          "lineNumber": 98
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 98
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setApproverLevel",
+          "lineNumber": 99
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "integer",
+          "lineNumber": 99
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 99
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setStepStatus",
+          "lineNumber": 100
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "StepStatus.valueOf",
+          "lineNumber": 100
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 100
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "fact.setDecisionDelayDays",
+          "lineNumber": 101
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "integer",
+          "lineNumber": 101
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "payload.get",
+          "lineNumber": 101
+        },
+        {
+          "caller": "ingestApprovalEvent",
+          "callee": "approvalFactRepository.save",
+          "lineNumber": 103
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "payload.get",
+          "lineNumber": 107
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "payload.get",
+          "lineNumber": 108
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "Instant.parse",
+          "lineNumber": 112
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "Instant.parse",
+          "lineNumber": 113
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "completedAt.isBefore",
+          "lineNumber": 114
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "Math.max",
+          "lineNumber": 117
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "java.time.Duration.between(submittedAt, completedAt).toDays",
+          "lineNumber": 117
+        },
+        {
+          "caller": "computeApprovalDurationDays",
+          "callee": "java.time.Duration.between",
+          "lineNumber": 117
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "objectMapper.readValue",
+          "lineNumber": 122
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "event.getPayload",
+          "lineNumber": 122
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "new TypeReference<>",
+          "lineNumber": 122
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "new IllegalStateException",
+          "lineNumber": 125
+        },
+        {
+          "caller": "uuid",
+          "callee": "UUID.fromString",
+          "lineNumber": 130
+        },
+        {
+          "caller": "uuidNullable",
+          "callee": "UUID.fromString",
+          "lineNumber": 134
+        },
+        {
+          "caller": "integer",
+          "callee": "number.intValue",
+          "lineNumber": 138
+        },
+        {
+          "caller": "integer",
+          "callee": "Integer.parseInt",
+          "lineNumber": 138
+        },
+        {
+          "caller": "integer",
+          "callee": "String.valueOf",
+          "lineNumber": 138
+        },
+        {
+          "caller": "localDate",
+          "callee": "String.valueOf",
+          "lineNumber": 145
+        },
+        {
+          "caller": "localDate",
+          "callee": "text.contains",
+          "lineNumber": 146
+        },
+        {
+          "caller": "localDate",
+          "callee": "Instant.parse(text).atZone(ZoneOffset.UTC).toLocalDate",
+          "lineNumber": 147
+        },
+        {
+          "caller": "localDate",
+          "callee": "Instant.parse(text).atZone",
+          "lineNumber": 147
+        },
+        {
+          "caller": "localDate",
+          "callee": "Instant.parse",
+          "lineNumber": 147
+        },
+        {
+          "caller": "localDate",
+          "callee": "LocalDate.parse",
+          "lineNumber": 149
+        }
+      ],
+      "metrics": {
+        "importCount": 10,
+        "exportCount": 3,
+        "functionCount": 10,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/TransactionalAnalyticsEventPublisher.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 30,
+      "nonEmptyLines": 25,
+      "functions": [
+        {
+          "name": "publishAfterCommit",
+          "startLine": 16,
+          "endLine": 29,
+          "params": [
+            "event"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "TransactionalAnalyticsEventPublisher",
+          "startLine": 10,
+          "endLine": 30,
+          "methods": [
+            "publishAfterCommit"
+          ],
+          "properties": [
+            "analyticsEventRepository"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "publishAfterCommit",
+          "line": 16,
+          "isDefault": false
+        },
+        {
+          "name": "TransactionalAnalyticsEventPublisher",
+          "line": 10,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "publishAfterCommit",
+          "callee": "TransactionSynchronizationManager.isSynchronizationActive",
+          "lineNumber": 17
+        },
+        {
+          "caller": "publishAfterCommit",
+          "callee": "TransactionSynchronizationManager.isActualTransactionActive",
+          "lineNumber": 18
+        },
+        {
+          "caller": "publishAfterCommit",
+          "callee": "TransactionSynchronizationManager.registerSynchronization",
+          "lineNumber": 19
+        },
+        {
+          "caller": "publishAfterCommit",
+          "callee": "new TransactionSynchronization",
+          "lineNumber": 19
+        },
+        {
+          "caller": "afterCommit",
+          "callee": "analyticsEventRepository.save",
+          "lineNumber": 22
+        },
+        {
+          "caller": "publishAfterCommit",
+          "callee": "analyticsEventRepository.save",
+          "lineNumber": 28
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/controller/ApprovalStepController.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 87,
+      "nonEmptyLines": 77,
+      "functions": [
+        {
+          "name": "getMyPending",
+          "startLine": 36,
+          "endLine": 44,
+          "params": [
+            "pageable",
+            "auth"
+          ]
+        },
+        {
+          "name": "approve",
+          "startLine": 46,
+          "endLine": 55,
+          "params": [
+            "id",
+            "dto",
+            "auth"
+          ]
+        },
+        {
+          "name": "reject",
+          "startLine": 57,
+          "endLine": 66,
+          "params": [
+            "id",
+            "dto",
+            "auth"
+          ]
+        },
+        {
+          "name": "bulkApprove",
+          "startLine": 68,
+          "endLine": 76,
+          "params": [
+            "dto",
+            "auth"
+          ]
+        },
+        {
+          "name": "bulkReject",
+          "startLine": 78,
+          "endLine": 86,
+          "params": [
+            "dto",
+            "auth"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalStepController",
+          "startLine": 27,
+          "endLine": 87,
+          "methods": [
+            "getMyPending",
+            "approve",
+            "reject",
+            "bulkApprove",
+            "bulkReject"
+          ],
+          "properties": [
+            "approvalStepService",
+            "approvalStepQueryService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getMyPending",
+          "line": 36,
+          "isDefault": false
+        },
+        {
+          "name": "approve",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "reject",
+          "line": 57,
+          "isDefault": false
+        },
+        {
+          "name": "bulkApprove",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "bulkReject",
+          "line": 78,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalStepController",
+          "line": 27,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getMyPending",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 40
+        },
+        {
+          "caller": "getMyPending",
+          "callee": "approvalStepService.getPendingForApprover",
+          "lineNumber": 41
+        },
+        {
+          "caller": "getMyPending",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getMyPending",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getMyPending",
+          "callee": "PageResponse.of",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getMyPending",
+          "callee": "approvalStepQueryService.toPendingPage",
+          "lineNumber": 43
+        },
+        {
+          "caller": "approve",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 52
+        },
+        {
+          "caller": "approve",
+          "callee": "approvalStepService.approve",
+          "lineNumber": 53
+        },
+        {
+          "caller": "approve",
+          "callee": "dto.comment",
+          "lineNumber": 53
+        },
+        {
+          "caller": "approve",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 54
+        },
+        {
+          "caller": "approve",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 54
+        },
+        {
+          "caller": "reject",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 63
+        },
+        {
+          "caller": "reject",
+          "callee": "approvalStepService.reject",
+          "lineNumber": 64
+        },
+        {
+          "caller": "reject",
+          "callee": "dto.comment",
+          "lineNumber": 64
+        },
+        {
+          "caller": "reject",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 65
+        },
+        {
+          "caller": "reject",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 65
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 73
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 74
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 74
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "approvalStepService.bulkApprove",
+          "lineNumber": 75
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "dto.approvalIds",
+          "lineNumber": 75
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "SecurityUtils.getCurrentUserId",
+          "lineNumber": 83
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "ResponseEntity.ok",
+          "lineNumber": 84
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "ApiResponse.ok",
+          "lineNumber": 84
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "approvalStepService.bulkReject",
+          "lineNumber": 85
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "dto.approvalIds",
+          "lineNumber": 85
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "dto.comment",
+          "lineNumber": 85
+        }
+      ],
+      "metrics": {
+        "importCount": 11,
+        "exportCount": 6,
+        "functionCount": 5,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalCommentDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalDecisionDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 5,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 28,
+      "nonEmptyLines": 25,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalWorkflowResponseDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 17,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/BulkActionResultDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 6,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/BulkApproveRequestDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 97,
+      "nonEmptyLines": 76,
+      "functions": [
+        {
+          "name": "isPending",
+          "startLine": 59,
+          "endLine": 61,
+          "params": []
+        },
+        {
+          "name": "isDecidable",
+          "startLine": 63,
+          "endLine": 65,
+          "params": []
+        },
+        {
+          "name": "approve",
+          "startLine": 67,
+          "endLine": 71,
+          "params": [
+            "comment"
+          ]
+        },
+        {
+          "name": "reject",
+          "startLine": 73,
+          "endLine": 77,
+          "params": [
+            "comment"
+          ]
+        },
+        {
+          "name": "skip",
+          "startLine": 79,
+          "endLine": 83,
+          "params": [
+            "comment"
+          ]
+        },
+        {
+          "name": "equals",
+          "startLine": 85,
+          "endLine": 91,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "hashCode",
+          "startLine": 93,
+          "endLine": 96,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalStep",
+          "startLine": 13,
+          "endLine": 97,
+          "methods": [
+            "isPending",
+            "isDecidable",
+            "approve",
+            "reject",
+            "skip",
+            "equals",
+            "hashCode"
+          ],
+          "properties": [
+            "id",
+            "workflowId",
+            "approverId",
+            "stepOrder",
+            "status",
+            "context",
+            "sourceType",
+            "approverLevel",
+            "routingSnapshot",
+            "comment",
+            "decidedAt"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isPending",
+          "line": 59,
+          "isDefault": false
+        },
+        {
+          "name": "isDecidable",
+          "line": 63,
+          "isDefault": false
+        },
+        {
+          "name": "approve",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "reject",
+          "line": 73,
+          "isDefault": false
+        },
+        {
+          "name": "skip",
+          "line": 79,
+          "isDefault": false
+        },
+        {
+          "name": "equals",
+          "line": 85,
+          "isDefault": false
+        },
+        {
+          "name": "hashCode",
+          "line": 93,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalStep",
+          "line": 13,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "approve",
+          "callee": "Instant.now",
+          "lineNumber": 70
+        },
+        {
+          "caller": "reject",
+          "callee": "Instant.now",
+          "lineNumber": 76
+        },
+        {
+          "caller": "skip",
+          "callee": "Instant.now",
+          "lineNumber": 82
+        },
+        {
+          "caller": "equals",
+          "callee": "getClass",
+          "lineNumber": 88
+        },
+        {
+          "caller": "equals",
+          "callee": "o.getClass",
+          "lineNumber": 88
+        },
+        {
+          "caller": "equals",
+          "callee": "Objects.equals",
+          "lineNumber": 90
+        },
+        {
+          "caller": "hashCode",
+          "callee": "Objects.hashCode",
+          "lineNumber": 95
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 8,
+        "functionCount": 7,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 73,
+      "nonEmptyLines": 57,
+      "functions": [
+        {
+          "name": "isComplete",
+          "startLine": 55,
+          "endLine": 59,
+          "params": []
+        },
+        {
+          "name": "equals",
+          "startLine": 61,
+          "endLine": 67,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "hashCode",
+          "startLine": 69,
+          "endLine": 72,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalWorkflow",
+          "startLine": 12,
+          "endLine": 73,
+          "methods": [
+            "isComplete",
+            "equals",
+            "hashCode"
+          ],
+          "properties": [
+            "id",
+            "subjectType",
+            "subjectId",
+            "status",
+            "workflowCode",
+            "validationMode",
+            "requiredApprovals",
+            "routingSnapshot",
+            "createdAt",
+            "completedAt"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isComplete",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "equals",
+          "line": 61,
+          "isDefault": false
+        },
+        {
+          "name": "hashCode",
+          "line": 69,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalWorkflow",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "equals",
+          "callee": "getClass",
+          "lineNumber": 64
+        },
+        {
+          "caller": "equals",
+          "callee": "o.getClass",
+          "lineNumber": 64
+        },
+        {
+          "caller": "equals",
+          "callee": "Objects.equals",
+          "lineNumber": 66
+        },
+        {
+          "caller": "hashCode",
+          "callee": "Objects.hashCode",
+          "lineNumber": 71
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 4,
+        "functionCount": 3,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/enums/ApprovalContext.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/enums/StepStatus.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/mapper/ApprovalMapper.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 29,
+      "nonEmptyLines": 23,
+      "classes": [
+        {
+          "name": "ApprovalMapper",
+          "startLine": 11,
+          "endLine": 29,
+          "methods": [
+            "toStepDto",
+            "toStepDtoList",
+            "toWorkflowDto"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ApprovalMapper",
+          "line": 11,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "toWorkflowDto",
+          "callee": "new ApprovalWorkflowResponseDto",
+          "lineNumber": 19
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "workflow.getId",
+          "lineNumber": 20
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 21
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 22
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "workflow.getStatus",
+          "lineNumber": 23
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "workflow.getCreatedAt",
+          "lineNumber": 24
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "workflow.getCompletedAt",
+          "lineNumber": 25
+        },
+        {
+          "caller": "toWorkflowDto",
+          "callee": "toStepDtoList",
+          "lineNumber": 26
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 100,
+      "nonEmptyLines": 80,
+      "classes": [
+        {
+          "name": "ApprovalStepRepository",
+          "startLine": 18,
+          "endLine": 100,
+          "methods": [
+            "existsByApproverId",
+            "findByWorkflowId",
+            "findByWorkflowIdOrderByStepOrder",
+            "findByWorkflowIdInOrderByWorkflowIdAscStepOrderAsc",
+            "findByWorkflowIdAndStatus",
+            "findByApproverIdAndStatus",
+            "findByStatus",
+            "findByApproverIdAndStatusOrderByStepOrderAsc",
+            "findTop5ByApproverIdAndStatusOrderByStepOrderAsc",
+            "findByIdForUpdate",
+            "countByWorkflowIdAndStatus",
+            "countByApproverIdAndStatus",
+            "countByStatus",
+            "existsByWorkflowIdAndStatus",
+            "findCompletedStepTimingStats",
+            "averageStepDecisionHoursBetween",
+            "findStalePendingSteps"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ApprovalStepRepository",
+          "line": 18,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 38,
+      "nonEmptyLines": 30,
+      "classes": [
+        {
+          "name": "ApprovalWorkflowRepository",
+          "startLine": 16,
+          "endLine": 38,
+          "methods": [
+            "findByIdForUpdate",
+            "findBySubjectTypeAndSubjectId",
+            "findBySubjectTypeAndSubjectIdIn",
+            "findBySubjectTypeAndSubjectIdForUpdate",
+            "findByStatus"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ApprovalWorkflowRepository",
+          "line": 16,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 183,
+      "nonEmptyLines": 158,
+      "functions": [
+        {
+          "name": "toPendingPage",
+          "startLine": 44,
+          "endLine": 47,
+          "params": [
+            "steps"
+          ]
+        },
+        {
+          "name": "toStepDto",
+          "startLine": 49,
+          "endLine": 72,
+          "params": [
+            "step"
+          ]
+        },
+        {
+          "name": "resolveApproverName",
+          "startLine": 74,
+          "endLine": 76,
+          "params": [
+            "approverId"
+          ]
+        },
+        {
+          "name": "resolveSubjectDetails",
+          "startLine": 78,
+          "endLine": 88,
+          "params": [
+            "workflow",
+            "step"
+          ]
+        },
+        {
+          "name": "resolveLeaveSubjectDetails",
+          "startLine": 90,
+          "endLine": 109,
+          "params": [
+            "subjectId",
+            "routingSnapshot"
+          ]
+        },
+        {
+          "name": "resolveAdminRequestSubjectDetails",
+          "startLine": 111,
+          "endLine": 127,
+          "params": [
+            "subjectId"
+          ]
+        },
+        {
+          "name": "resolveDepartmentName",
+          "startLine": 129,
+          "endLine": 138,
+          "params": [
+            "departmentId"
+          ]
+        },
+        {
+          "name": "resolveProjectNameFromSnapshot",
+          "startLine": 140,
+          "endLine": 154,
+          "params": [
+            "routingSnapshot"
+          ]
+        },
+        {
+          "name": "parseRoutingSnapshot",
+          "startLine": 156,
+          "endLine": 167,
+          "params": [
+            "routingSnapshot"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalStepQueryService",
+          "startLine": 30,
+          "endLine": 183,
+          "methods": [
+            "toPendingPage",
+            "toStepDto",
+            "resolveApproverName",
+            "resolveSubjectDetails",
+            "resolveLeaveSubjectDetails",
+            "resolveAdminRequestSubjectDetails",
+            "resolveDepartmentName",
+            "resolveProjectNameFromSnapshot",
+            "parseRoutingSnapshot"
+          ],
+          "properties": [
+            "approvalWorkflowRepository",
+            "userRepository",
+            "leaveRequestRepository",
+            "employeeRepository",
+            "departmentRepository",
+            "projectRepository",
+            "adminRequestRepository",
+            "objectMapper",
+            "userDisplayNameService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "toPendingPage",
+          "line": 44,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalStepQueryService",
+          "line": 30,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "toPendingPage",
+          "callee": "steps.map",
+          "lineNumber": 46
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "approvalWorkflowRepository.findById(step.getWorkflowId()).orElse",
+          "lineNumber": 50
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "approvalWorkflowRepository.findById",
+          "lineNumber": 50
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getWorkflowId",
+          "lineNumber": 50
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "resolveSubjectDetails",
+          "lineNumber": 51
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "new ApprovalStepResponseDto",
+          "lineNumber": 53
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getId",
+          "lineNumber": 54
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getWorkflowId",
+          "lineNumber": 55
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 56
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 57
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "subjectDetails.reference",
+          "lineNumber": 58
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "subjectDetails.requesterName",
+          "lineNumber": 59
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "subjectDetails.departmentName",
+          "lineNumber": 60
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "subjectDetails.projectName",
+          "lineNumber": 61
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getApproverId",
+          "lineNumber": 62
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "resolveApproverName",
+          "lineNumber": 63
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getApproverId",
+          "lineNumber": 63
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getStepOrder",
+          "lineNumber": 64
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getStatus",
+          "lineNumber": 65
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getContext",
+          "lineNumber": 66
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getRoutingSnapshot",
+          "lineNumber": 67
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getComment",
+          "lineNumber": 68
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 69
+        },
+        {
+          "caller": "toStepDto",
+          "callee": "workflow.getValidationMode",
+          "lineNumber": 70
+        },
+        {
+          "caller": "resolveApproverName",
+          "callee": "userDisplayNameService.resolveDisplayName",
+          "lineNumber": 75
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 79
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 79
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "SubjectDetails.empty",
+          "lineNumber": 80
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 83
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "resolveLeaveSubjectDetails",
+          "lineNumber": 84
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 84
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "step.getRoutingSnapshot",
+          "lineNumber": 84
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "resolveAdminRequestSubjectDetails",
+          "lineNumber": 85
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 85
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "SubjectDetails.withReference",
+          "lineNumber": 86
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectId().toString",
+          "lineNumber": 86
+        },
+        {
+          "caller": "resolveSubjectDetails",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 86
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "leaveRequestRepository.findById(subjectId).orElse",
+          "lineNumber": 91
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "leaveRequestRepository.findById",
+          "lineNumber": 91
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "SubjectDetails.withReference",
+          "lineNumber": 93
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "subjectId.toString",
+          "lineNumber": 93
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "employeeRepository.findById(request.getEmployeeId()).orElse",
+          "lineNumber": 96
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "employeeRepository.findById",
+          "lineNumber": 96
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "request.getEmployeeId",
+          "lineNumber": 96
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "userRepository.findById(employee.getUserId()).orElse",
+          "lineNumber": 97
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "userRepository.findById",
+          "lineNumber": 97
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "employee.getUserId",
+          "lineNumber": 97
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "userDisplayNameService.toDisplayName",
+          "lineNumber": 99
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "resolveDepartmentName",
+          "lineNumber": 100
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "employee.getDepartmentId",
+          "lineNumber": 100
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "resolveProjectNameFromSnapshot",
+          "lineNumber": 101
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "new SubjectDetails",
+          "lineNumber": 103
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "request.getId().toString",
+          "lineNumber": 104
+        },
+        {
+          "caller": "resolveLeaveSubjectDetails",
+          "callee": "request.getId",
+          "lineNumber": 104
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "adminRequestRepository.findById(subjectId).orElse",
+          "lineNumber": 112
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "adminRequestRepository.findById",
+          "lineNumber": 112
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "SubjectDetails.withReference",
+          "lineNumber": 114
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "subjectId.toString",
+          "lineNumber": 114
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "userRepository.findById(request.getRequesterUserId()).orElse",
+          "lineNumber": 117
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "userRepository.findById",
+          "lineNumber": 117
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getRequesterUserId",
+          "lineNumber": 117
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "new SubjectDetails",
+          "lineNumber": 119
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getRequestNumber",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getRequestNumber().isBlank",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getRequestNumber",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getRequestNumber",
+          "lineNumber": 121
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getId().toString",
+          "lineNumber": 122
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "request.getId",
+          "lineNumber": 122
+        },
+        {
+          "caller": "resolveAdminRequestSubjectDetails",
+          "callee": "userDisplayNameService.toDisplayName",
+          "lineNumber": 123
+        },
+        {
+          "caller": "resolveDepartmentName",
+          "callee": "departmentRepository.findById(departmentId)\n            .map(Department::getName)\n            .filter(name -> name != null && !name.isBlank()).orElse",
+          "lineNumber": 134
+        },
+        {
+          "caller": "resolveDepartmentName",
+          "callee": "departmentRepository.findById(departmentId)\n            .map(Department::getName).filter",
+          "lineNumber": 134
+        },
+        {
+          "caller": "resolveDepartmentName",
+          "callee": "departmentRepository.findById(departmentId).map",
+          "lineNumber": 134
+        },
+        {
+          "caller": "resolveDepartmentName",
+          "callee": "departmentRepository.findById",
+          "lineNumber": 134
+        },
+        {
+          "caller": "resolveDepartmentName",
+          "callee": "name.isBlank",
+          "lineNumber": 136
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "parseRoutingSnapshot(routingSnapshot).get",
+          "lineNumber": 141
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "parseRoutingSnapshot",
+          "lineNumber": 141
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "projectId.isBlank",
+          "lineNumber": 142
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "projectRepository.findById(UUID.fromString(projectId))\n                .map(Project::getName)\n                .filter(name -> name != null && !name.isBlank()).orElse",
+          "lineNumber": 147
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "projectRepository.findById(UUID.fromString(projectId))\n                .map(Project::getName).filter",
+          "lineNumber": 147
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "projectRepository.findById(UUID.fromString(projectId)).map",
+          "lineNumber": 147
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "projectRepository.findById",
+          "lineNumber": 147
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "UUID.fromString",
+          "lineNumber": 147
+        },
+        {
+          "caller": "resolveProjectNameFromSnapshot",
+          "callee": "name.isBlank",
+          "lineNumber": 149
+        },
+        {
+          "caller": "parseRoutingSnapshot",
+          "callee": "routingSnapshot.isBlank",
+          "lineNumber": 157
+        },
+        {
+          "caller": "parseRoutingSnapshot",
+          "callee": "Map.of",
+          "lineNumber": 158
+        },
+        {
+          "caller": "parseRoutingSnapshot",
+          "callee": "objectMapper.readValue",
+          "lineNumber": 162
+        },
+        {
+          "caller": "parseRoutingSnapshot",
+          "callee": "new TypeReference<>",
+          "lineNumber": 162
+        },
+        {
+          "caller": "parseRoutingSnapshot",
+          "callee": "Map.of",
+          "lineNumber": 165
+        },
+        {
+          "caller": "empty",
+          "callee": "new SubjectDetails",
+          "lineNumber": 176
+        },
+        {
+          "caller": "withReference",
+          "callee": "new SubjectDetails",
+          "lineNumber": 180
+        }
+      ],
+      "metrics": {
+        "importCount": 17,
+        "exportCount": 2,
+        "functionCount": 9,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/service/ApprovalStepService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 275,
+      "nonEmptyLines": 240,
+      "functions": [
+        {
+          "name": "getPendingForApprover",
+          "startLine": 42,
+          "endLine": 46,
+          "params": [
+            "approverId",
+            "pageable"
+          ]
+        },
+        {
+          "name": "approve",
+          "startLine": 48,
+          "endLine": 65,
+          "params": [
+            "stepId",
+            "comment",
+            "approverId"
+          ]
+        },
+        {
+          "name": "approve",
+          "startLine": 67,
+          "endLine": 70,
+          "params": [
+            "stepId",
+            "approverId",
+            "comment"
+          ]
+        },
+        {
+          "name": "reject",
+          "startLine": 72,
+          "endLine": 89,
+          "params": [
+            "stepId",
+            "comment",
+            "approverId"
+          ]
+        },
+        {
+          "name": "reject",
+          "startLine": 91,
+          "endLine": 94,
+          "params": [
+            "stepId",
+            "approverId",
+            "comment"
+          ]
+        },
+        {
+          "name": "bulkApprove",
+          "startLine": 96,
+          "endLine": 109,
+          "params": [
+            "ids",
+            "actorId"
+          ]
+        },
+        {
+          "name": "bulkReject",
+          "startLine": 111,
+          "endLine": 124,
+          "params": [
+            "ids",
+            "actorId",
+            "comment"
+          ]
+        },
+        {
+          "name": "validateStepOwnership",
+          "startLine": 126,
+          "endLine": 130,
+          "params": [
+            "step",
+            "approverId"
+          ]
+        },
+        {
+          "name": "validateLeaveApprovalPermission",
+          "startLine": 132,
+          "endLine": 139,
+          "params": [
+            "workflow",
+            "approverId"
+          ]
+        },
+        {
+          "name": "loadLockedApprovalContext",
+          "startLine": 141,
+          "endLine": 149,
+          "params": [
+            "stepId"
+          ]
+        },
+        {
+          "name": "validateStepPending",
+          "startLine": 151,
+          "endLine": 156,
+          "params": [
+            "step"
+          ]
+        },
+        {
+          "name": "validateWorkflowActive",
+          "startLine": 158,
+          "endLine": 162,
+          "params": [
+            "workflow"
+          ]
+        },
+        {
+          "name": "evaluateWorkflowAfterApproval",
+          "startLine": 164,
+          "endLine": 198,
+          "params": [
+            "workflowId",
+            "actorId"
+          ]
+        },
+        {
+          "name": "evaluateWorkflowAfterRejection",
+          "startLine": 200,
+          "endLine": 217,
+          "params": [
+            "workflowId",
+            "actorId"
+          ]
+        },
+        {
+          "name": "isLegacyWorkflowFullyApproved",
+          "startLine": 219,
+          "endLine": 221,
+          "params": [
+            "steps"
+          ]
+        },
+        {
+          "name": "skipPendingSteps",
+          "startLine": 223,
+          "endLine": 232,
+          "params": [
+            "workflowId",
+            "comment"
+          ]
+        },
+        {
+          "name": "completeWorkflow",
+          "startLine": 234,
+          "endLine": 249,
+          "params": [
+            "workflow",
+            "status",
+            "actorId"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalStepService",
+          "startLine": 30,
+          "endLine": 275,
+          "methods": [
+            "getPendingForApprover",
+            "approve",
+            "approve",
+            "reject",
+            "reject",
+            "bulkApprove",
+            "bulkReject",
+            "validateStepOwnership",
+            "validateLeaveApprovalPermission",
+            "loadLockedApprovalContext",
+            "validateStepPending",
+            "validateWorkflowActive",
+            "evaluateWorkflowAfterApproval",
+            "evaluateWorkflowAfterRejection",
+            "isLegacyWorkflowFullyApproved",
+            "skipPendingSteps",
+            "completeWorkflow"
+          ],
+          "properties": [
+            "approvalStepRepository",
+            "approvalWorkflowRepository",
+            "auditLogService",
+            "analyticsEventPublisher",
+            "accessResolutionService",
+            "completionHandlers"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getPendingForApprover",
+          "line": 42,
+          "isDefault": false
+        },
+        {
+          "name": "approve",
+          "line": 48,
+          "isDefault": false
+        },
+        {
+          "name": "approve",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "reject",
+          "line": 72,
+          "isDefault": false
+        },
+        {
+          "name": "reject",
+          "line": 91,
+          "isDefault": false
+        },
+        {
+          "name": "bulkApprove",
+          "line": 96,
+          "isDefault": false
+        },
+        {
+          "name": "bulkReject",
+          "line": 111,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalStepService",
+          "line": 30,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getPendingForApprover",
+          "callee": "approvalStepRepository.findByApproverIdAndStatusOrderByStepOrderAsc",
+          "lineNumber": 44
+        },
+        {
+          "caller": "approve",
+          "callee": "loadLockedApprovalContext",
+          "lineNumber": 50
+        },
+        {
+          "caller": "approve",
+          "callee": "context.step",
+          "lineNumber": 51
+        },
+        {
+          "caller": "approve",
+          "callee": "context.workflow",
+          "lineNumber": 52
+        },
+        {
+          "caller": "approve",
+          "callee": "validateWorkflowActive",
+          "lineNumber": 54
+        },
+        {
+          "caller": "approve",
+          "callee": "validateStepOwnership",
+          "lineNumber": 55
+        },
+        {
+          "caller": "approve",
+          "callee": "validateLeaveApprovalPermission",
+          "lineNumber": 56
+        },
+        {
+          "caller": "approve",
+          "callee": "validateStepPending",
+          "lineNumber": 57
+        },
+        {
+          "caller": "approve",
+          "callee": "step.approve",
+          "lineNumber": 59
+        },
+        {
+          "caller": "approve",
+          "callee": "approvalStepRepository.save",
+          "lineNumber": 60
+        },
+        {
+          "caller": "approve",
+          "callee": "analyticsEventPublisher.publishApprovalEvent",
+          "lineNumber": 61
+        },
+        {
+          "caller": "approve",
+          "callee": "auditLogService.log",
+          "lineNumber": 62
+        },
+        {
+          "caller": "approve",
+          "callee": "step.getId",
+          "lineNumber": 62
+        },
+        {
+          "caller": "approve",
+          "callee": "evaluateWorkflowAfterApproval",
+          "lineNumber": 64
+        },
+        {
+          "caller": "approve",
+          "callee": "step.getWorkflowId",
+          "lineNumber": 64
+        },
+        {
+          "caller": "approve",
+          "callee": "approve",
+          "lineNumber": 69
+        },
+        {
+          "caller": "reject",
+          "callee": "loadLockedApprovalContext",
+          "lineNumber": 74
+        },
+        {
+          "caller": "reject",
+          "callee": "context.step",
+          "lineNumber": 75
+        },
+        {
+          "caller": "reject",
+          "callee": "context.workflow",
+          "lineNumber": 76
+        },
+        {
+          "caller": "reject",
+          "callee": "validateWorkflowActive",
+          "lineNumber": 78
+        },
+        {
+          "caller": "reject",
+          "callee": "validateStepOwnership",
+          "lineNumber": 79
+        },
+        {
+          "caller": "reject",
+          "callee": "validateLeaveApprovalPermission",
+          "lineNumber": 80
+        },
+        {
+          "caller": "reject",
+          "callee": "validateStepPending",
+          "lineNumber": 81
+        },
+        {
+          "caller": "reject",
+          "callee": "step.reject",
+          "lineNumber": 83
+        },
+        {
+          "caller": "reject",
+          "callee": "approvalStepRepository.save",
+          "lineNumber": 84
+        },
+        {
+          "caller": "reject",
+          "callee": "analyticsEventPublisher.publishApprovalEvent",
+          "lineNumber": 85
+        },
+        {
+          "caller": "reject",
+          "callee": "auditLogService.log",
+          "lineNumber": 86
+        },
+        {
+          "caller": "reject",
+          "callee": "step.getId",
+          "lineNumber": 86
+        },
+        {
+          "caller": "reject",
+          "callee": "evaluateWorkflowAfterRejection",
+          "lineNumber": 88
+        },
+        {
+          "caller": "reject",
+          "callee": "step.getWorkflowId",
+          "lineNumber": 88
+        },
+        {
+          "caller": "reject",
+          "callee": "reject",
+          "lineNumber": 93
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "new java.util.ArrayList<>",
+          "lineNumber": 98
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "approve",
+          "lineNumber": 101
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "errors.add",
+          "lineNumber": 105
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "new com.hris.approval.dto.BulkActionResultDto.BulkError",
+          "lineNumber": 105
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "e.getMessage",
+          "lineNumber": 105
+        },
+        {
+          "caller": "bulkApprove",
+          "callee": "new com.hris.approval.dto.BulkActionResultDto",
+          "lineNumber": 108
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "new java.util.ArrayList<>",
+          "lineNumber": 113
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "reject",
+          "lineNumber": 116
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "errors.add",
+          "lineNumber": 120
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "new com.hris.approval.dto.BulkActionResultDto.BulkError",
+          "lineNumber": 120
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "e.getMessage",
+          "lineNumber": 120
+        },
+        {
+          "caller": "bulkReject",
+          "callee": "new com.hris.approval.dto.BulkActionResultDto",
+          "lineNumber": 123
+        },
+        {
+          "caller": "validateStepOwnership",
+          "callee": "step.getApproverId().equals",
+          "lineNumber": 127
+        },
+        {
+          "caller": "validateStepOwnership",
+          "callee": "step.getApproverId",
+          "lineNumber": 127
+        },
+        {
+          "caller": "validateStepOwnership",
+          "callee": "new AccessDeniedException",
+          "lineNumber": 128
+        },
+        {
+          "caller": "validateLeaveApprovalPermission",
+          "callee": "\"LEAVE\".equalsIgnoreCase",
+          "lineNumber": 133
+        },
+        {
+          "caller": "validateLeaveApprovalPermission",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 133
+        },
+        {
+          "caller": "validateLeaveApprovalPermission",
+          "callee": "accessResolutionService.hasPermissionName",
+          "lineNumber": 136
+        },
+        {
+          "caller": "validateLeaveApprovalPermission",
+          "callee": "new AccessDeniedException",
+          "lineNumber": 137
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "approvalStepRepository.findById(stepId).orElseThrow",
+          "lineNumber": 142
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "approvalStepRepository.findById",
+          "lineNumber": 142
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 143
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "approvalWorkflowRepository.findByIdForUpdate(stepSnapshot.getWorkflowId()).orElseThrow",
+          "lineNumber": 144
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "approvalWorkflowRepository.findByIdForUpdate",
+          "lineNumber": 144
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "stepSnapshot.getWorkflowId",
+          "lineNumber": 144
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 145
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "approvalStepRepository.findByIdForUpdate(stepId).orElseThrow",
+          "lineNumber": 146
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "approvalStepRepository.findByIdForUpdate",
+          "lineNumber": 146
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 147
+        },
+        {
+          "caller": "loadLockedApprovalContext",
+          "callee": "new LockedApprovalContext",
+          "lineNumber": 148
+        },
+        {
+          "caller": "validateStepPending",
+          "callee": "step.isDecidable",
+          "lineNumber": 152
+        },
+        {
+          "caller": "validateStepPending",
+          "callee": "new StepAlreadyDecidedException",
+          "lineNumber": 153
+        },
+        {
+          "caller": "validateStepPending",
+          "callee": "step.getStatus",
+          "lineNumber": 154
+        },
+        {
+          "caller": "validateWorkflowActive",
+          "callee": "workflow.isComplete",
+          "lineNumber": 159
+        },
+        {
+          "caller": "validateWorkflowActive",
+          "callee": "new InvalidWorkflowStateException",
+          "lineNumber": 160
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "approvalWorkflowRepository.findByIdForUpdate(workflowId).orElseThrow",
+          "lineNumber": 165
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "approvalWorkflowRepository.findByIdForUpdate",
+          "lineNumber": 165
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 166
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "approvalStepRepository.findByWorkflowIdOrderByStepOrder",
+          "lineNumber": 167
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "workflow.getValidationMode",
+          "lineNumber": 168
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "isLegacyWorkflowFullyApproved",
+          "lineNumber": 170
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "completeWorkflow",
+          "lineNumber": 171
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "WorkflowTally.from",
+          "lineNumber": 176
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "tally.approved",
+          "lineNumber": 179
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "skipPendingSteps",
+          "lineNumber": 180
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "completeWorkflow",
+          "lineNumber": 181
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "workflow.getRequiredApprovals",
+          "lineNumber": 185
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "tally.required",
+          "lineNumber": 185
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "workflow.getRequiredApprovals",
+          "lineNumber": 185
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "tally.approved",
+          "lineNumber": 186
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "tally.pending",
+          "lineNumber": 186
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "completeWorkflow",
+          "lineNumber": 187
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "workflow.getRequiredApprovals",
+          "lineNumber": 191
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "workflow.getRequiredApprovals",
+          "lineNumber": 191
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "tally.approved",
+          "lineNumber": 192
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "skipPendingSteps",
+          "lineNumber": 193
+        },
+        {
+          "caller": "evaluateWorkflowAfterApproval",
+          "callee": "completeWorkflow",
+          "lineNumber": 194
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "approvalWorkflowRepository.findByIdForUpdate(workflowId).orElseThrow",
+          "lineNumber": 201
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "approvalWorkflowRepository.findByIdForUpdate",
+          "lineNumber": 201
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "new EntityNotFoundException",
+          "lineNumber": 202
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "approvalStepRepository.findByWorkflowIdOrderByStepOrder",
+          "lineNumber": 203
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "workflow.getValidationMode",
+          "lineNumber": 204
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "skipPendingSteps",
+          "lineNumber": 206
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "completeWorkflow",
+          "lineNumber": 207
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "WorkflowTally.from",
+          "lineNumber": 211
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "workflow.getRequiredApprovals",
+          "lineNumber": 212
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "workflow.getRequiredApprovals",
+          "lineNumber": 212
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "tally.approved",
+          "lineNumber": 213
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "tally.pending",
+          "lineNumber": 213
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "skipPendingSteps",
+          "lineNumber": 214
+        },
+        {
+          "caller": "evaluateWorkflowAfterRejection",
+          "callee": "completeWorkflow",
+          "lineNumber": 215
+        },
+        {
+          "caller": "isLegacyWorkflowFullyApproved",
+          "callee": "steps.stream().noneMatch",
+          "lineNumber": 220
+        },
+        {
+          "caller": "isLegacyWorkflowFullyApproved",
+          "callee": "steps.stream",
+          "lineNumber": 220
+        },
+        {
+          "caller": "isLegacyWorkflowFullyApproved",
+          "callee": "step.getStatus",
+          "lineNumber": 220
+        },
+        {
+          "caller": "isLegacyWorkflowFullyApproved",
+          "callee": "step.getStatus",
+          "lineNumber": 220
+        },
+        {
+          "caller": "skipPendingSteps",
+          "callee": "approvalStepRepository.findByWorkflowIdAndStatus",
+          "lineNumber": 224
+        },
+        {
+          "caller": "skipPendingSteps",
+          "callee": "pendingSteps.isEmpty",
+          "lineNumber": 226
+        },
+        {
+          "caller": "skipPendingSteps",
+          "callee": "pendingSteps.forEach",
+          "lineNumber": 230
+        },
+        {
+          "caller": "skipPendingSteps",
+          "callee": "step.skip",
+          "lineNumber": 230
+        },
+        {
+          "caller": "skipPendingSteps",
+          "callee": "approvalStepRepository.saveAll",
+          "lineNumber": 231
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "workflow.isComplete",
+          "lineNumber": 235
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "workflow.setStatus",
+          "lineNumber": 239
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "workflow.setCompletedAt",
+          "lineNumber": 240
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "Instant.now",
+          "lineNumber": 240
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "approvalWorkflowRepository.save",
+          "lineNumber": 241
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "completionHandlers.stream()\r\n            .filter(handler -> handler.supports(workflow.getSubjectType()))\r\n            .findFirst().ifPresent",
+          "lineNumber": 243
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "completionHandlers.stream()\r\n            .filter(handler -> handler.supports(workflow.getSubjectType())).findFirst",
+          "lineNumber": 243
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "completionHandlers.stream().filter",
+          "lineNumber": 243
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "completionHandlers.stream",
+          "lineNumber": 243
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "handler.supports",
+          "lineNumber": 244
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 244
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "handler.handleCompletion",
+          "lineNumber": 246
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 246
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "log.info",
+          "lineNumber": 248
+        },
+        {
+          "caller": "completeWorkflow",
+          "callee": "workflow.getId",
+          "lineNumber": 248
+        },
+        {
+          "caller": "from",
+          "callee": "step.getStatus",
+          "lineNumber": 261
+        },
+        {
+          "caller": "from",
+          "callee": "step.getStatus",
+          "lineNumber": 264
+        },
+        {
+          "caller": "from",
+          "callee": "new WorkflowTally",
+          "lineNumber": 272
+        }
+      ],
+      "metrics": {
+        "importCount": 15,
+        "exportCount": 8,
+        "functionCount": 17,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/approval/service/ApprovalViewService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 128,
+      "nonEmptyLines": 111,
+      "functions": [
+        {
+          "name": "getStepsForSubject",
+          "startLine": 33,
+          "endLine": 45,
+          "params": [
+            "subjectType",
+            "subjectId"
+          ]
+        },
+        {
+          "name": "getStepsForSubjects",
+          "startLine": 47,
+          "endLine": 67,
+          "params": [
+            "subjectType",
+            "subjectIds"
+          ]
+        },
+        {
+          "name": "mapStepsForWorkflows",
+          "startLine": 69,
+          "endLine": 110,
+          "params": [
+            "workflows",
+            "steps"
+          ]
+        },
+        {
+          "name": "resolveApproverNames",
+          "startLine": 112,
+          "endLine": 127,
+          "params": [
+            "steps"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ApprovalViewService",
+          "startLine": 23,
+          "endLine": 128,
+          "methods": [
+            "getStepsForSubject",
+            "getStepsForSubjects",
+            "mapStepsForWorkflows",
+            "resolveApproverNames"
+          ],
+          "properties": [
+            "UNAVAILABLE_APPROVER",
+            "approvalWorkflowRepository",
+            "approvalStepRepository",
+            "userDisplayNameService"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getStepsForSubject",
+          "line": 33,
+          "isDefault": false
+        },
+        {
+          "name": "getStepsForSubjects",
+          "line": 47,
+          "isDefault": false
+        },
+        {
+          "name": "ApprovalViewService",
+          "line": 23,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getStepsForSubject",
+          "callee": "List.of",
+          "lineNumber": 36
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "approvalWorkflowRepository.findBySubjectTypeAndSubjectId(subjectType, subjectId)\n            .map(workflow -> mapStepsForWorkflows(\n                List.of(workflow),\n                approvalStepRepository.findByWorkflowIdOrderByStepOrder(workflow.getId())\n            ).getOrDefault(subjectId, List.of())).orElse",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "approvalWorkflowRepository.findBySubjectTypeAndSubjectId(subjectType, subjectId).map",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "approvalWorkflowRepository.findBySubjectTypeAndSubjectId",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "mapStepsForWorkflows(\n                List.of(workflow),\n                approvalStepRepository.findByWorkflowIdOrderByStepOrder(workflow.getId())\n            ).getOrDefault",
+          "lineNumber": 40
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "mapStepsForWorkflows",
+          "lineNumber": 40
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "List.of",
+          "lineNumber": 41
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "approvalStepRepository.findByWorkflowIdOrderByStepOrder",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "workflow.getId",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "List.of",
+          "lineNumber": 43
+        },
+        {
+          "caller": "getStepsForSubject",
+          "callee": "List.of",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "subjectIds.isEmpty",
+          "lineNumber": 51
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "Map.of",
+          "lineNumber": 52
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "approvalWorkflowRepository.findBySubjectTypeAndSubjectIdIn",
+          "lineNumber": 55
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "subjectIds.stream().distinct().toList",
+          "lineNumber": 57
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "subjectIds.stream().distinct",
+          "lineNumber": 57
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "subjectIds.stream",
+          "lineNumber": 57
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "workflows.isEmpty",
+          "lineNumber": 59
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "Map.of",
+          "lineNumber": 60
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "approvalStepRepository.findByWorkflowIdInOrderByWorkflowIdAscStepOrderAsc",
+          "lineNumber": 63
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "workflows.stream().map(ApprovalWorkflow::getId).toList",
+          "lineNumber": 64
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "workflows.stream().map",
+          "lineNumber": 64
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "workflows.stream",
+          "lineNumber": 64
+        },
+        {
+          "caller": "getStepsForSubjects",
+          "callee": "mapStepsForWorkflows",
+          "lineNumber": 66
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflows.stream().collect",
+          "lineNumber": 72
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflows.stream",
+          "lineNumber": 72
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "Collectors.toMap",
+          "lineNumber": 73
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "Function.identity",
+          "lineNumber": 73
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "resolveApproverNames",
+          "lineNumber": 74
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "new LinkedHashMap<>",
+          "lineNumber": 75
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflowsById.get",
+          "lineNumber": 78
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getWorkflowId",
+          "lineNumber": 78
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "stepsBySubjectId.computeIfAbsent(workflow.getSubjectId(), ignored -> new java.util.ArrayList<>()).add",
+          "lineNumber": 83
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "stepsBySubjectId.computeIfAbsent",
+          "lineNumber": 83
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 83
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "new java.util.ArrayList<>",
+          "lineNumber": 83
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "new ApprovalStepResponseDto",
+          "lineNumber": 84
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getId",
+          "lineNumber": 85
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getWorkflowId",
+          "lineNumber": 86
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflow.getSubjectType",
+          "lineNumber": 87
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 88
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getApproverId",
+          "lineNumber": 93
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "approverNamesById.getOrDefault",
+          "lineNumber": 94
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getApproverId",
+          "lineNumber": 94
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getStepOrder",
+          "lineNumber": 95
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getStatus",
+          "lineNumber": 96
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getContext",
+          "lineNumber": 97
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getRoutingSnapshot",
+          "lineNumber": 98
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getComment",
+          "lineNumber": 99
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "step.getDecidedAt",
+          "lineNumber": 100
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflow.getValidationMode",
+          "lineNumber": 101
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "stepsBySubjectId.putIfAbsent",
+          "lineNumber": 106
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "workflow.getSubjectId",
+          "lineNumber": 106
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "List.of",
+          "lineNumber": 106
+        },
+        {
+          "caller": "mapStepsForWorkflows",
+          "callee": "Collections.unmodifiableMap",
+          "lineNumber": 109
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "steps.stream()\n            .map(ApprovalStep::getApproverId).collect",
+          "lineNumber": 113
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "steps.stream().map",
+          "lineNumber": 113
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "steps.stream",
+          "lineNumber": 113
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "Collectors.toSet",
+          "lineNumber": 115
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "approverIds.isEmpty",
+          "lineNumber": 116
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "Map.of",
+          "lineNumber": 117
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "userDisplayNameService.resolveDisplayNames(approverIds).entrySet().stream().collect",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "userDisplayNameService.resolveDisplayNames(approverIds).entrySet().stream",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "userDisplayNameService.resolveDisplayNames(approverIds).entrySet",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "userDisplayNameService.resolveDisplayNames",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "Collectors.toMap",
+          "lineNumber": 121
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "entry.getValue",
+          "lineNumber": 123
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "entry.getValue().isBlank",
+          "lineNumber": 123
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "entry.getValue",
+          "lineNumber": 123
+        },
+        {
+          "caller": "resolveApproverNames",
+          "callee": "entry.getValue",
+          "lineNumber": 125
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 3,
+        "functionCount": 4,
+        "classCount": 1
+      }
+    }
+  ]
+}

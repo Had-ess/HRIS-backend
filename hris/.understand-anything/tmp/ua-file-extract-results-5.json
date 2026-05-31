@@ -1,0 +1,2757 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 26,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsAdminRequestReportDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 18,
+      "nonEmptyLines": 16,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsApprovalBottleneckDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 10,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsApprovalReportDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 17,
+      "nonEmptyLines": 15,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsCountDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 7,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsDashboardDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsDateCountDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 9,
+      "nonEmptyLines": 7,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsLeaveBalanceBreakdownDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 13,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsLeaveBalanceReportDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 13,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsLeaveRequestReportDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 16,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsLeaveTypeOverviewDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsOverviewBreakdownDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsOverviewDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 10,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsOverviewKpiDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 10,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsOverviewSeriesPointDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 6,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/AnalyticsSummaryDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/HeadcountMetricsSnapshotDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 9,
+      "nonEmptyLines": 8,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/HeadcountTrendPointDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 4,
+      "nonEmptyLines": 3,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/LeaveDistributionSnapshotDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 10,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/LeaveMetricsSnapshotDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 10,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/LeaveMetricsTimeseriesPointDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 14,
+      "nonEmptyLines": 12,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/LeaveMonthlyStatusPointDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 4,
+      "nonEmptyLines": 3,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/dto/ProjectAbsenceFactDto.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 17,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/ProjectAbsenceFact.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 61,
+      "nonEmptyLines": 47,
+      "functions": [
+        {
+          "name": "equals",
+          "startLine": 49,
+          "endLine": 55,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "hashCode",
+          "startLine": 57,
+          "endLine": 60,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "ProjectAbsenceFact",
+          "startLine": 11,
+          "endLine": 61,
+          "methods": [
+            "equals",
+            "hashCode"
+          ],
+          "properties": [
+            "id",
+            "snapshotDate",
+            "projectId",
+            "teamId",
+            "absentEmployees",
+            "absenceDays",
+            "affectedMembers",
+            "estimatedDelayDays",
+            "riskLevel"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "equals",
+          "line": 49,
+          "isDefault": false
+        },
+        {
+          "name": "hashCode",
+          "line": 57,
+          "isDefault": false
+        },
+        {
+          "name": "ProjectAbsenceFact",
+          "line": 11,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "equals",
+          "callee": "getClass",
+          "lineNumber": 52
+        },
+        {
+          "caller": "equals",
+          "callee": "o.getClass",
+          "lineNumber": 52
+        },
+        {
+          "caller": "equals",
+          "callee": "Objects.equals",
+          "lineNumber": 54
+        },
+        {
+          "caller": "hashCode",
+          "callee": "Objects.hashCode",
+          "lineNumber": 59
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/enums/RiskLevel.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/ProjectAbsenceFactRepository.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 12,
+      "classes": [
+        {
+          "name": "ProjectAbsenceFactRepository",
+          "startLine": 11,
+          "endLine": 15,
+          "methods": [
+            "findBySnapshotDate",
+            "deleteBySnapshotDate"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ProjectAbsenceFactRepository",
+          "line": 11,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/AnalyticsQueryService.java",
+      "language": "java",
+      "fileCategory": "code",
+      "totalLines": 1039,
+      "nonEmptyLines": 940,
+      "functions": [
+        {
+          "name": "getSummary",
+          "startLine": 46,
+          "endLine": 119,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getLeaveRequests",
+          "startLine": 121,
+          "endLine": 221,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getLeaveBalances",
+          "startLine": 223,
+          "endLine": 342,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getApprovals",
+          "startLine": 344,
+          "endLine": 451,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getAdminRequests",
+          "startLine": 453,
+          "endLine": 571,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getDashboard",
+          "startLine": 573,
+          "endLine": 589,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getOverview",
+          "startLine": 591,
+          "endLine": 663,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getLeaveMetrics",
+          "startLine": 665,
+          "endLine": 675,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getHeadcountMetrics",
+          "startLine": 677,
+          "endLine": 714,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getLeaveDistribution",
+          "startLine": 716,
+          "endLine": 742,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getLeaveMetricsTimeseries",
+          "startLine": 744,
+          "endLine": 772,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "getProjectAbsenceFacts",
+          "startLine": 774,
+          "endLine": 808,
+          "params": []
+        },
+        {
+          "name": "getHeadcountTrend",
+          "startLine": 810,
+          "endLine": 830,
+          "params": [
+            "year"
+          ]
+        },
+        {
+          "name": "buildHeadcountOverviewTrend",
+          "startLine": 832,
+          "endLine": 855,
+          "params": [
+            "firstMonth",
+            "to"
+          ]
+        },
+        {
+          "name": "buildLeaveTypeOverview",
+          "startLine": 857,
+          "endLine": 883,
+          "params": [
+            "params"
+          ]
+        },
+        {
+          "name": "buildApprovalOverview",
+          "startLine": 885,
+          "endLine": 918,
+          "params": [
+            "params"
+          ]
+        },
+        {
+          "name": "buildLeaveReasonOverview",
+          "startLine": 920,
+          "endLine": 944,
+          "params": [
+            "params"
+          ]
+        },
+        {
+          "name": "percentage",
+          "startLine": 946,
+          "endLine": 948,
+          "params": [
+            "value",
+            "total"
+          ]
+        },
+        {
+          "name": "trendDelta",
+          "startLine": 950,
+          "endLine": 958,
+          "params": [
+            "trend"
+          ]
+        },
+        {
+          "name": "monthLabel",
+          "startLine": 960,
+          "endLine": 962,
+          "params": [
+            "month"
+          ]
+        },
+        {
+          "name": "getLeaveMonthlyStatus",
+          "startLine": 964,
+          "endLine": 991,
+          "params": [
+            "year"
+          ]
+        },
+        {
+          "name": "params",
+          "startLine": 993,
+          "endLine": 1000,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "copy",
+          "startLine": 1002,
+          "endLine": 1004,
+          "params": [
+            "source"
+          ]
+        },
+        {
+          "name": "singleLong",
+          "startLine": 1006,
+          "endLine": 1009,
+          "params": [
+            "sql",
+            "params"
+          ]
+        },
+        {
+          "name": "singleDouble",
+          "startLine": 1011,
+          "endLine": 1014,
+          "params": [
+            "sql",
+            "params"
+          ]
+        },
+        {
+          "name": "normalizeFrom",
+          "startLine": 1016,
+          "endLine": 1024,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "normalizeTo",
+          "startLine": 1026,
+          "endLine": 1031,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "latestProjectAbsenceSnapshotDate",
+          "startLine": 1033,
+          "endLine": 1038,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "AnalyticsQueryService",
+          "startLine": 37,
+          "endLine": 1039,
+          "methods": [
+            "getSummary",
+            "getLeaveRequests",
+            "getLeaveBalances",
+            "getApprovals",
+            "getAdminRequests",
+            "getDashboard",
+            "getOverview",
+            "getLeaveMetrics",
+            "getHeadcountMetrics",
+            "getLeaveDistribution",
+            "getLeaveMetricsTimeseries",
+            "getProjectAbsenceFacts",
+            "getHeadcountTrend",
+            "buildHeadcountOverviewTrend",
+            "buildLeaveTypeOverview",
+            "buildApprovalOverview",
+            "buildLeaveReasonOverview",
+            "percentage",
+            "trendDelta",
+            "monthLabel",
+            "getLeaveMonthlyStatus",
+            "params",
+            "copy",
+            "singleLong",
+            "singleDouble",
+            "normalizeFrom",
+            "normalizeTo",
+            "latestProjectAbsenceSnapshotDate"
+          ],
+          "properties": [
+            "LEAVE_PENDING_STATUSES",
+            "ADMIN_PENDING_STATUSES",
+            "jdbcTemplate"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "getSummary",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "getLeaveRequests",
+          "line": 121,
+          "isDefault": false
+        },
+        {
+          "name": "getLeaveBalances",
+          "line": 223,
+          "isDefault": false
+        },
+        {
+          "name": "getApprovals",
+          "line": 344,
+          "isDefault": false
+        },
+        {
+          "name": "getAdminRequests",
+          "line": 453,
+          "isDefault": false
+        },
+        {
+          "name": "getDashboard",
+          "line": 573,
+          "isDefault": false
+        },
+        {
+          "name": "getOverview",
+          "line": 591,
+          "isDefault": false
+        },
+        {
+          "name": "getLeaveMetrics",
+          "line": 665,
+          "isDefault": false
+        },
+        {
+          "name": "getHeadcountMetrics",
+          "line": 677,
+          "isDefault": false
+        },
+        {
+          "name": "getLeaveDistribution",
+          "line": 716,
+          "isDefault": false
+        },
+        {
+          "name": "getLeaveMetricsTimeseries",
+          "line": 744,
+          "isDefault": false
+        },
+        {
+          "name": "getProjectAbsenceFacts",
+          "line": 774,
+          "isDefault": false
+        },
+        {
+          "name": "getHeadcountTrend",
+          "line": 810,
+          "isDefault": false
+        },
+        {
+          "name": "getLeaveMonthlyStatus",
+          "line": 964,
+          "isDefault": false
+        },
+        {
+          "name": "AnalyticsQueryService",
+          "line": 37,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getSummary",
+          "callee": "normalizeFrom",
+          "lineNumber": 48
+        },
+        {
+          "caller": "getSummary",
+          "callee": "normalizeTo",
+          "lineNumber": 49
+        },
+        {
+          "caller": "getSummary",
+          "callee": "params",
+          "lineNumber": 50
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 52
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 59
+        },
+        {
+          "caller": "getSummary",
+          "callee": "copy(params).addValue",
+          "lineNumber": 65
+        },
+        {
+          "caller": "getSummary",
+          "callee": "copy",
+          "lineNumber": 65
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 67
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 77
+        },
+        {
+          "caller": "getSummary",
+          "callee": "copy(params).addValue",
+          "lineNumber": 83
+        },
+        {
+          "caller": "getSummary",
+          "callee": "copy",
+          "lineNumber": 83
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 85
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 91
+        },
+        {
+          "caller": "getSummary",
+          "callee": "singleLong",
+          "lineNumber": 98
+        },
+        {
+          "caller": "getSummary",
+          "callee": "new AnalyticsSummaryDto",
+          "lineNumber": 110
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "normalizeFrom",
+          "lineNumber": 123
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "normalizeTo",
+          "lineNumber": 124
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "params",
+          "lineNumber": 125
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "singleLong",
+          "lineNumber": 127
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "singleLong",
+          "lineNumber": 134
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "singleLong",
+          "lineNumber": 142
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "singleLong",
+          "lineNumber": 150
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "copy(params).addValue",
+          "lineNumber": 156
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "copy",
+          "lineNumber": 156
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "singleDouble",
+          "lineNumber": 158
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 167
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 175
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getString",
+          "lineNumber": 175
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getString",
+          "lineNumber": 175
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 175
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 177
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 186
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getString",
+          "lineNumber": 186
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getString",
+          "lineNumber": 186
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 186
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 188
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 198
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getString",
+          "lineNumber": 198
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getString",
+          "lineNumber": 198
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 198
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 200
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "new AnalyticsDateCountDto",
+          "lineNumber": 208
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getDate(\"bucket\").toLocalDate",
+          "lineNumber": 208
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getDate",
+          "lineNumber": 208
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 208
+        },
+        {
+          "caller": "getLeaveRequests",
+          "callee": "new AnalyticsLeaveRequestReportDto",
+          "lineNumber": 210
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "normalizeFrom",
+          "lineNumber": 225
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "normalizeTo",
+          "lineNumber": 226
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "params",
+          "lineNumber": 227
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "singleLong",
+          "lineNumber": 229
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "singleLong",
+          "lineNumber": 235
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "singleLong",
+          "lineNumber": 241
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "singleLong",
+          "lineNumber": 247
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "singleLong",
+          "lineNumber": 254
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "singleLong",
+          "lineNumber": 261
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 269
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "new AnalyticsLeaveBalanceBreakdownDto",
+          "lineNumber": 289
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getObject",
+          "lineNumber": 290
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getString",
+          "lineNumber": 291
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getString",
+          "lineNumber": 292
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 293
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 294
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 295
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 296
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 297
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 300
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "new AnalyticsLeaveBalanceBreakdownDto",
+          "lineNumber": 321
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getObject",
+          "lineNumber": 322
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getString",
+          "lineNumber": 323
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getString",
+          "lineNumber": 324
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 325
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 326
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 327
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 328
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "rs.getLong",
+          "lineNumber": 329
+        },
+        {
+          "caller": "getLeaveBalances",
+          "callee": "new AnalyticsLeaveBalanceReportDto",
+          "lineNumber": 332
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "normalizeFrom",
+          "lineNumber": 346
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "normalizeTo",
+          "lineNumber": 347
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "params",
+          "lineNumber": 348
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 350
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 357
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 365
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 373
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 381
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 390
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleLong",
+          "lineNumber": 399
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "singleDouble",
+          "lineNumber": 408
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 416
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "new AnalyticsApprovalBottleneckDto",
+          "lineNumber": 431
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "rs.getObject",
+          "lineNumber": 432
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "rs.getString",
+          "lineNumber": 433
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "rs.getLong",
+          "lineNumber": 434
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "rs.getDouble",
+          "lineNumber": 435
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "rs.getLong",
+          "lineNumber": 436
+        },
+        {
+          "caller": "getApprovals",
+          "callee": "new AnalyticsApprovalReportDto",
+          "lineNumber": 439
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "normalizeFrom",
+          "lineNumber": 455
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "normalizeTo",
+          "lineNumber": 456
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "params",
+          "lineNumber": 457
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 459
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 466
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 474
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 482
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 490
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 498
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleDouble",
+          "lineNumber": 506
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "singleLong",
+          "lineNumber": 515
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 527
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 535
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getString",
+          "lineNumber": 535
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getString",
+          "lineNumber": 535
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 535
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 537
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 546
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getString",
+          "lineNumber": 546
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getString",
+          "lineNumber": 546
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 546
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 548
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "new AnalyticsDateCountDto",
+          "lineNumber": 556
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getDate(\"bucket\").toLocalDate",
+          "lineNumber": 556
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getDate",
+          "lineNumber": 556
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "rs.getLong",
+          "lineNumber": 556
+        },
+        {
+          "caller": "getAdminRequests",
+          "callee": "new AnalyticsAdminRequestReportDto",
+          "lineNumber": 558
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "getSummary",
+          "lineNumber": 575
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "params",
+          "lineNumber": 576
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "normalizeFrom",
+          "lineNumber": 576
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "normalizeTo",
+          "lineNumber": 576
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "singleLong",
+          "lineNumber": 577
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "new AnalyticsDashboardDto",
+          "lineNumber": 582
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "summary.leaveRequests",
+          "lineNumber": 584
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "summary.pendingApprovals",
+          "lineNumber": 585
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "summary.pendingAdminRequests",
+          "lineNumber": 586
+        },
+        {
+          "caller": "getDashboard",
+          "callee": "summary.availableBalanceDays",
+          "lineNumber": 587
+        },
+        {
+          "caller": "getOverview",
+          "callee": "normalizeFrom",
+          "lineNumber": 593
+        },
+        {
+          "caller": "getOverview",
+          "callee": "normalizeTo",
+          "lineNumber": 594
+        },
+        {
+          "caller": "getOverview",
+          "callee": "params",
+          "lineNumber": 595
+        },
+        {
+          "caller": "getOverview",
+          "callee": "singleLong",
+          "lineNumber": 597
+        },
+        {
+          "caller": "getOverview",
+          "callee": "copy(params).addValue(\"fromDate\", normalizedFrom).addValue",
+          "lineNumber": 603
+        },
+        {
+          "caller": "getOverview",
+          "callee": "copy(params).addValue",
+          "lineNumber": 603
+        },
+        {
+          "caller": "getOverview",
+          "callee": "copy",
+          "lineNumber": 603
+        },
+        {
+          "caller": "getOverview",
+          "callee": "buildHeadcountOverviewTrend",
+          "lineNumber": 605
+        },
+        {
+          "caller": "getOverview",
+          "callee": "normalizedTo.minusMonths(11).withDayOfMonth",
+          "lineNumber": 606
+        },
+        {
+          "caller": "getOverview",
+          "callee": "normalizedTo.minusMonths",
+          "lineNumber": 606
+        },
+        {
+          "caller": "getOverview",
+          "callee": "singleLong",
+          "lineNumber": 610
+        },
+        {
+          "caller": "getOverview",
+          "callee": "singleLong",
+          "lineNumber": 618
+        },
+        {
+          "caller": "getOverview",
+          "callee": "singleLong",
+          "lineNumber": 635
+        },
+        {
+          "caller": "getOverview",
+          "callee": "singleLong",
+          "lineNumber": 640
+        },
+        {
+          "caller": "getOverview",
+          "callee": "Math.round",
+          "lineNumber": 645
+        },
+        {
+          "caller": "getOverview",
+          "callee": "buildLeaveTypeOverview",
+          "lineNumber": 647
+        },
+        {
+          "caller": "getOverview",
+          "callee": "buildApprovalOverview",
+          "lineNumber": 648
+        },
+        {
+          "caller": "getOverview",
+          "callee": "buildLeaveReasonOverview",
+          "lineNumber": 649
+        },
+        {
+          "caller": "getOverview",
+          "callee": "new AnalyticsOverviewDto",
+          "lineNumber": 651
+        },
+        {
+          "caller": "getOverview",
+          "callee": "List.of",
+          "lineNumber": 652
+        },
+        {
+          "caller": "getOverview",
+          "callee": "new AnalyticsOverviewKpiDto",
+          "lineNumber": 653
+        },
+        {
+          "caller": "getOverview",
+          "callee": "Long.toString",
+          "lineNumber": 653
+        },
+        {
+          "caller": "getOverview",
+          "callee": "trendDelta",
+          "lineNumber": 653
+        },
+        {
+          "caller": "getOverview",
+          "callee": "new AnalyticsOverviewKpiDto",
+          "lineNumber": 654
+        },
+        {
+          "caller": "getOverview",
+          "callee": "Long.toString",
+          "lineNumber": 654
+        },
+        {
+          "caller": "getOverview",
+          "callee": "new AnalyticsOverviewKpiDto",
+          "lineNumber": 655
+        },
+        {
+          "caller": "getOverview",
+          "callee": "new AnalyticsOverviewKpiDto",
+          "lineNumber": 656
+        },
+        {
+          "caller": "getOverview",
+          "callee": "Long.toString",
+          "lineNumber": 656
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "getLeaveRequests",
+          "lineNumber": 667
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "new LeaveMetricsSnapshotDto",
+          "lineNumber": 668
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "report.totalRequests",
+          "lineNumber": 669
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "report.approvedCount",
+          "lineNumber": 670
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "report.rejectedCount",
+          "lineNumber": 671
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "report.pendingCount",
+          "lineNumber": 672
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "java.math.BigDecimal.valueOf(report.averageProcessingDays()).setScale",
+          "lineNumber": 673
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "java.math.BigDecimal.valueOf",
+          "lineNumber": 673
+        },
+        {
+          "caller": "getLeaveMetrics",
+          "callee": "report.averageProcessingDays",
+          "lineNumber": 673
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "normalizeFrom",
+          "lineNumber": 679
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "normalizeTo",
+          "lineNumber": 680
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "params",
+          "lineNumber": 681
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "singleLong",
+          "lineNumber": 683
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "singleLong",
+          "lineNumber": 688
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "singleLong",
+          "lineNumber": 694
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "copy(params)\r\n            .addValue(\"fromDate\", normalizedFrom).addValue",
+          "lineNumber": 699
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "copy(params).addValue",
+          "lineNumber": 699
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "copy",
+          "lineNumber": 699
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "singleLong",
+          "lineNumber": 703
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "copy(params)\r\n            .addValue(\"fromDate\", normalizedFrom).addValue",
+          "lineNumber": 709
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "copy(params).addValue",
+          "lineNumber": 709
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "copy",
+          "lineNumber": 709
+        },
+        {
+          "caller": "getHeadcountMetrics",
+          "callee": "new HeadcountMetricsSnapshotDto",
+          "lineNumber": 713
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "normalizeFrom",
+          "lineNumber": 718
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "normalizeTo",
+          "lineNumber": 719
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "params",
+          "lineNumber": 720
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 722
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "new LeaveDistributionSnapshotDto",
+          "lineNumber": 735
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "rs.getObject",
+          "lineNumber": 736
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "rs.getString",
+          "lineNumber": 737
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "rs.getString",
+          "lineNumber": 738
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "rs.getInt",
+          "lineNumber": 739
+        },
+        {
+          "caller": "getLeaveDistribution",
+          "callee": "rs.getInt",
+          "lineNumber": 740
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "normalizeFrom",
+          "lineNumber": 746
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "normalizeTo",
+          "lineNumber": 747
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "params",
+          "lineNumber": 748
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 750
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "new LeaveMetricsTimeseriesPointDto",
+          "lineNumber": 764
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getDate(\"snapshot_date\").toLocalDate",
+          "lineNumber": 765
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getDate",
+          "lineNumber": 765
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getInt",
+          "lineNumber": 766
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getInt",
+          "lineNumber": 767
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getInt",
+          "lineNumber": 768
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getInt",
+          "lineNumber": 769
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "java.math.BigDecimal.valueOf(rs.getDouble(\"average_processing_days\")).setScale",
+          "lineNumber": 770
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "java.math.BigDecimal.valueOf",
+          "lineNumber": 770
+        },
+        {
+          "caller": "getLeaveMetricsTimeseries",
+          "callee": "rs.getDouble",
+          "lineNumber": 770
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "latestProjectAbsenceSnapshotDate",
+          "lineNumber": 776
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "List.of",
+          "lineNumber": 778
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "new MapSqlParameterSource().addValue",
+          "lineNumber": 781
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "new MapSqlParameterSource",
+          "lineNumber": 781
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 784
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "new ProjectAbsenceFactDto",
+          "lineNumber": 798
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getObject",
+          "lineNumber": 799
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getString",
+          "lineNumber": 800
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getObject",
+          "lineNumber": 801
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getInt",
+          "lineNumber": 802
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getInt",
+          "lineNumber": 803
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getInt",
+          "lineNumber": 804
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getInt",
+          "lineNumber": 805
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "com.hris.analytics.enums.RiskLevel.valueOf",
+          "lineNumber": 806
+        },
+        {
+          "caller": "getProjectAbsenceFacts",
+          "callee": "rs.getString",
+          "lineNumber": 806
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "new java.util.ArrayList<>",
+          "lineNumber": 812
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "LocalDate.of",
+          "lineNumber": 814
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "firstDay.withDayOfMonth",
+          "lineNumber": 815
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "firstDay.lengthOfMonth",
+          "lineNumber": 815
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "singleLong",
+          "lineNumber": 816
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "new MapSqlParameterSource()\r\n                    .addValue(\"firstDay\", firstDay).addValue",
+          "lineNumber": 824
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "new MapSqlParameterSource().addValue",
+          "lineNumber": 824
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "new MapSqlParameterSource",
+          "lineNumber": 824
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "result.add",
+          "lineNumber": 827
+        },
+        {
+          "caller": "getHeadcountTrend",
+          "callee": "new HeadcountTrendPointDto",
+          "lineNumber": 827
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "IntStream.range(0, 12)\r\n            .mapToObj(firstMonth::plusMonths)\r\n            .map(month -> {\r\n                LocalDate firstDay = month.withDayOfMonth(1);\r\n                LocalDate lastDay = month.withDayOfMonth(month.lengthOfMonth());\r\n                MapSqlParameterSource params = new MapSqlParameterSource()\r\n                    .addValue(\"firstDay\", firstDay)\r\n                    .addValue(\"lastDay\", lastDay)\r\n                    .addValue(\"toExclusiveAt\", Timestamp.from(to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)))\r\n                    .addValue(\"fromAt\", Timestamp.from(firstDay.atStartOfDay().toInstant(ZoneOffset.UTC)))\r\n                    .addValue(\"balanceYear\", to.getYear());\r\n                long count = singleLong(\"\"\"\r\n                    SELECT COUNT(DISTINCT e.id)\r\n                    FROM employees e\r\n                    JOIN users u ON u.id = e.user_id\r\n                    WHERE e.hire_date <= :lastDay\r\n                      AND (e.termination_date IS NULL OR e.termination_date >= :firstDay)\r\n                      AND u.is_active = true\r\n                    \"\"\", params);\r\n                return new AnalyticsOverviewSeriesPointDto(monthLabel(month), count);\r\n            }).toList",
+          "lineNumber": 833
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "IntStream.range(0, 12)\r\n            .mapToObj(firstMonth::plusMonths).map",
+          "lineNumber": 833
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "IntStream.range(0, 12).mapToObj",
+          "lineNumber": 833
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "IntStream.range",
+          "lineNumber": 833
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "month.withDayOfMonth",
+          "lineNumber": 836
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "month.withDayOfMonth",
+          "lineNumber": 837
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "month.lengthOfMonth",
+          "lineNumber": 837
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new MapSqlParameterSource()\r\n                    .addValue(\"firstDay\", firstDay)\r\n                    .addValue(\"lastDay\", lastDay)\r\n                    .addValue(\"toExclusiveAt\", Timestamp.from(to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)))\r\n                    .addValue(\"fromAt\", Timestamp.from(firstDay.atStartOfDay().toInstant(ZoneOffset.UTC))).addValue",
+          "lineNumber": 838
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new MapSqlParameterSource()\r\n                    .addValue(\"firstDay\", firstDay)\r\n                    .addValue(\"lastDay\", lastDay)\r\n                    .addValue(\"toExclusiveAt\", Timestamp.from(to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC))).addValue",
+          "lineNumber": 838
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new MapSqlParameterSource()\r\n                    .addValue(\"firstDay\", firstDay)\r\n                    .addValue(\"lastDay\", lastDay).addValue",
+          "lineNumber": 838
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new MapSqlParameterSource()\r\n                    .addValue(\"firstDay\", firstDay).addValue",
+          "lineNumber": 838
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new MapSqlParameterSource().addValue",
+          "lineNumber": 838
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new MapSqlParameterSource",
+          "lineNumber": 838
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "Timestamp.from",
+          "lineNumber": 841
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "to.plusDays(1).atStartOfDay().toInstant",
+          "lineNumber": 841
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "to.plusDays(1).atStartOfDay",
+          "lineNumber": 841
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "to.plusDays",
+          "lineNumber": 841
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "Timestamp.from",
+          "lineNumber": 842
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "firstDay.atStartOfDay().toInstant",
+          "lineNumber": 842
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "firstDay.atStartOfDay",
+          "lineNumber": 842
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "to.getYear",
+          "lineNumber": 843
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "singleLong",
+          "lineNumber": 844
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "new AnalyticsOverviewSeriesPointDto",
+          "lineNumber": 852
+        },
+        {
+          "caller": "buildHeadcountOverviewTrend",
+          "callee": "monthLabel",
+          "lineNumber": 852
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 858
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 871
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rs.getString",
+          "lineNumber": 871
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rs.getString",
+          "lineNumber": 871
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rs.getLong",
+          "lineNumber": 871
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.stream().mapToLong(AnalyticsCountDto::value).sum",
+          "lineNumber": 872
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.stream().mapToLong",
+          "lineNumber": 872
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.stream",
+          "lineNumber": 872
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "List.of",
+          "lineNumber": 873
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "IntStream.range(0, rows.size())\r\n            .mapToObj(i -> new AnalyticsLeaveTypeOverviewDto(\r\n                rows.get(i).key(),\r\n                rows.get(i).label(),\r\n                rows.get(i).value(),\r\n                percentage(rows.get(i).value(), total),\r\n                colors.get(i % colors.size())\r\n            )).toList",
+          "lineNumber": 874
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "IntStream.range(0, rows.size()).mapToObj",
+          "lineNumber": 874
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "IntStream.range",
+          "lineNumber": 874
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.size",
+          "lineNumber": 874
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "new AnalyticsLeaveTypeOverviewDto",
+          "lineNumber": 875
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get(i).key",
+          "lineNumber": 876
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get",
+          "lineNumber": 876
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get(i).label",
+          "lineNumber": 877
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get",
+          "lineNumber": 877
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get(i).value",
+          "lineNumber": 878
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get",
+          "lineNumber": 878
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "percentage",
+          "lineNumber": 879
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get(i).value",
+          "lineNumber": 879
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "rows.get",
+          "lineNumber": 879
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "colors.get",
+          "lineNumber": 880
+        },
+        {
+          "caller": "buildLeaveTypeOverview",
+          "callee": "colors.size",
+          "lineNumber": 880
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 886
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "new AnalyticsApprovalBottleneckDto",
+          "lineNumber": 901
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rs.getObject",
+          "lineNumber": 902
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rs.getString",
+          "lineNumber": 903
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rs.getLong",
+          "lineNumber": 904
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rs.getDouble",
+          "lineNumber": 905
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rs.getLong",
+          "lineNumber": 906
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "Math.max",
+          "lineNumber": 908
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream().mapToLong(AnalyticsApprovalBottleneckDto::pendingCount).max().orElse",
+          "lineNumber": 908
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream().mapToLong(AnalyticsApprovalBottleneckDto::pendingCount).max",
+          "lineNumber": 908
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream().mapToLong",
+          "lineNumber": 908
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream",
+          "lineNumber": 908
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream()\r\n            .map(row -> new AnalyticsOverviewBreakdownDto(\r\n                row.approverUserId() == null ? row.approverName() : row.approverUserId().toString(),\r\n                row.approverName(),\r\n                row.pendingCount(),\r\n                percentage(row.pendingCount(), max),\r\n                String.format(java.util.Locale.US, \"%.1fh avg\", row.averageDecisionHours())\r\n            )).toList",
+          "lineNumber": 909
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream().map",
+          "lineNumber": 909
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "rows.stream",
+          "lineNumber": 909
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "new AnalyticsOverviewBreakdownDto",
+          "lineNumber": 910
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.approverUserId",
+          "lineNumber": 911
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.approverName",
+          "lineNumber": 911
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.approverUserId().toString",
+          "lineNumber": 911
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.approverUserId",
+          "lineNumber": 911
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.approverName",
+          "lineNumber": 912
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.pendingCount",
+          "lineNumber": 913
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "percentage",
+          "lineNumber": 914
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.pendingCount",
+          "lineNumber": 914
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "String.format",
+          "lineNumber": 915
+        },
+        {
+          "caller": "buildApprovalOverview",
+          "callee": "row.averageDecisionHours",
+          "lineNumber": 915
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 921
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "new AnalyticsCountDto",
+          "lineNumber": 933
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rs.getString",
+          "lineNumber": 933
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rs.getString",
+          "lineNumber": 933
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rs.getLong",
+          "lineNumber": 933
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rows.stream().mapToLong(AnalyticsCountDto::value).sum",
+          "lineNumber": 934
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rows.stream().mapToLong",
+          "lineNumber": 934
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rows.stream",
+          "lineNumber": 934
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rows.stream()\r\n            .map(row -> new AnalyticsOverviewBreakdownDto(\r\n                row.key(),\r\n                row.label(),\r\n                row.value(),\r\n                percentage(row.value(), total),\r\n                row.value() + \" requests\"\r\n            )).toList",
+          "lineNumber": 935
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rows.stream().map",
+          "lineNumber": 935
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "rows.stream",
+          "lineNumber": 935
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "new AnalyticsOverviewBreakdownDto",
+          "lineNumber": 936
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "row.key",
+          "lineNumber": 937
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "row.label",
+          "lineNumber": 938
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "row.value",
+          "lineNumber": 939
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "percentage",
+          "lineNumber": 940
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "row.value",
+          "lineNumber": 940
+        },
+        {
+          "caller": "buildLeaveReasonOverview",
+          "callee": "row.value",
+          "lineNumber": 941
+        },
+        {
+          "caller": "percentage",
+          "callee": "Math.round",
+          "lineNumber": 947
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "trend.size",
+          "lineNumber": 951
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "trend.get(0).value",
+          "lineNumber": 954
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "trend.get",
+          "lineNumber": 954
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "trend.get(trend.size() - 1).value",
+          "lineNumber": 955
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "trend.get",
+          "lineNumber": 955
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "trend.size",
+          "lineNumber": 955
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "Math.round",
+          "lineNumber": 956
+        },
+        {
+          "caller": "trendDelta",
+          "callee": "Math.abs",
+          "lineNumber": 957
+        },
+        {
+          "caller": "monthLabel",
+          "callee": "month.getMonth().getDisplayName",
+          "lineNumber": 961
+        },
+        {
+          "caller": "monthLabel",
+          "callee": "month.getMonth",
+          "lineNumber": 961
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 967
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "new MapSqlParameterSource().addValue",
+          "lineNumber": 976
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "new MapSqlParameterSource",
+          "lineNumber": 976
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "new Row",
+          "lineNumber": 977
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "rs.getInt",
+          "lineNumber": 977
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "rs.getString",
+          "lineNumber": 977
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "rs.getLong",
+          "lineNumber": 977
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "new java.util.TreeMap<>",
+          "lineNumber": 979
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "byMonth.computeIfAbsent",
+          "lineNumber": 981
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "row.month",
+          "lineNumber": 981
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "byMonth.get",
+          "lineNumber": 982
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "row.month",
+          "lineNumber": 982
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "row.status",
+          "lineNumber": 983
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "\"APPROVED\".equals",
+          "lineNumber": 984
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "row.count",
+          "lineNumber": 984
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "\"REJECTED\".equals",
+          "lineNumber": 985
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "row.count",
+          "lineNumber": 985
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "row.count",
+          "lineNumber": 986
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "byMonth.entrySet().stream()\r\n            .map(e -> new LeaveMonthlyStatusPointDto(e.getKey(), e.getValue()[0], e.getValue()[1], e.getValue()[2])).toList",
+          "lineNumber": 988
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "byMonth.entrySet().stream().map",
+          "lineNumber": 988
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "byMonth.entrySet().stream",
+          "lineNumber": 988
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "byMonth.entrySet",
+          "lineNumber": 988
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "new LeaveMonthlyStatusPointDto",
+          "lineNumber": 989
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "e.getKey",
+          "lineNumber": 989
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "e.getValue",
+          "lineNumber": 989
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "e.getValue",
+          "lineNumber": 989
+        },
+        {
+          "caller": "getLeaveMonthlyStatus",
+          "callee": "e.getValue",
+          "lineNumber": 989
+        },
+        {
+          "caller": "params",
+          "callee": "normalizeFrom",
+          "lineNumber": 994
+        },
+        {
+          "caller": "params",
+          "callee": "normalizeTo",
+          "lineNumber": 995
+        },
+        {
+          "caller": "params",
+          "callee": "new MapSqlParameterSource()\r\n            .addValue(\"fromAt\", Timestamp.from(normalizedFrom.atStartOfDay().toInstant(ZoneOffset.UTC)))\r\n            .addValue(\"toExclusiveAt\", Timestamp.from(normalizedTo.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC))).addValue",
+          "lineNumber": 996
+        },
+        {
+          "caller": "params",
+          "callee": "new MapSqlParameterSource()\r\n            .addValue(\"fromAt\", Timestamp.from(normalizedFrom.atStartOfDay().toInstant(ZoneOffset.UTC))).addValue",
+          "lineNumber": 996
+        },
+        {
+          "caller": "params",
+          "callee": "new MapSqlParameterSource().addValue",
+          "lineNumber": 996
+        },
+        {
+          "caller": "params",
+          "callee": "new MapSqlParameterSource",
+          "lineNumber": 996
+        },
+        {
+          "caller": "params",
+          "callee": "Timestamp.from",
+          "lineNumber": 997
+        },
+        {
+          "caller": "params",
+          "callee": "normalizedFrom.atStartOfDay().toInstant",
+          "lineNumber": 997
+        },
+        {
+          "caller": "params",
+          "callee": "normalizedFrom.atStartOfDay",
+          "lineNumber": 997
+        },
+        {
+          "caller": "params",
+          "callee": "Timestamp.from",
+          "lineNumber": 998
+        },
+        {
+          "caller": "params",
+          "callee": "normalizedTo.plusDays(1).atStartOfDay().toInstant",
+          "lineNumber": 998
+        },
+        {
+          "caller": "params",
+          "callee": "normalizedTo.plusDays(1).atStartOfDay",
+          "lineNumber": 998
+        },
+        {
+          "caller": "params",
+          "callee": "normalizedTo.plusDays",
+          "lineNumber": 998
+        },
+        {
+          "caller": "params",
+          "callee": "normalizedTo.getYear",
+          "lineNumber": 999
+        },
+        {
+          "caller": "copy",
+          "callee": "new MapSqlParameterSource",
+          "lineNumber": 1003
+        },
+        {
+          "caller": "copy",
+          "callee": "source.getValues",
+          "lineNumber": 1003
+        },
+        {
+          "caller": "singleLong",
+          "callee": "jdbcTemplate.queryForObject",
+          "lineNumber": 1007
+        },
+        {
+          "caller": "singleDouble",
+          "callee": "jdbcTemplate.queryForObject",
+          "lineNumber": 1012
+        },
+        {
+          "caller": "normalizeFrom",
+          "callee": "to.withDayOfMonth",
+          "lineNumber": 1021
+        },
+        {
+          "caller": "normalizeFrom",
+          "callee": "LocalDate.now().minusDays",
+          "lineNumber": 1023
+        },
+        {
+          "caller": "normalizeFrom",
+          "callee": "LocalDate.now",
+          "lineNumber": 1023
+        },
+        {
+          "caller": "normalizeTo",
+          "callee": "to.isBefore",
+          "lineNumber": 1028
+        },
+        {
+          "caller": "normalizeTo",
+          "callee": "normalizeFrom",
+          "lineNumber": 1028
+        },
+        {
+          "caller": "normalizeTo",
+          "callee": "normalizeFrom",
+          "lineNumber": 1028
+        },
+        {
+          "caller": "normalizeTo",
+          "callee": "LocalDate.now",
+          "lineNumber": 1030
+        },
+        {
+          "caller": "latestProjectAbsenceSnapshotDate",
+          "callee": "jdbcTemplate.query",
+          "lineNumber": 1034
+        },
+        {
+          "caller": "latestProjectAbsenceSnapshotDate",
+          "callee": "rs.next",
+          "lineNumber": 1036
+        },
+        {
+          "caller": "latestProjectAbsenceSnapshotDate",
+          "callee": "rs.getObject",
+          "lineNumber": 1036
+        }
+      ],
+      "metrics": {
+        "importCount": 22,
+        "exportCount": 15,
+        "functionCount": 28,
+        "classCount": 1
+      }
+    }
+  ]
+}

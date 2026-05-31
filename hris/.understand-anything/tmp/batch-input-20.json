@@ -1,0 +1,121 @@
+{
+  "batchIndex": 20,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/analytics/dto/HeadcountMetricsTimeseriesPointDto.java",
+      "language": "java",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/enums/PermissionAction.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/event/DomainEvent.java",
+      "language": "java",
+      "sizeLines": 52,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/event/DomainEventType.java",
+      "language": "java",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/config/CorrelationIdFilter.java",
+      "language": "java",
+      "sizeLines": 40,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/config/JacksonConfig.java",
+      "language": "java",
+      "sizeLines": 26,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/config/RetryConfig.java",
+      "language": "java",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/config/SchedulingConfig.java",
+      "language": "java",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/health/StorageHealthIndicator.java",
+      "language": "java",
+      "sizeLines": 49,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/HrisApplication.java",
+      "language": "java",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/dto/NotificationParamsDto.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/enums/LeaveTypeCode.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/resources/application-local.yml",
+      "language": "yaml",
+      "sizeLines": 8,
+      "fileCategory": "config"
+    },
+    {
+      "path": "src/main/resources/application.yml",
+      "language": "yaml",
+      "sizeLines": 178,
+      "fileCategory": "config"
+    },
+    {
+      "path": "src/main/resources/i18n/messages_en.properties",
+      "language": "properties",
+      "sizeLines": 29,
+      "fileCategory": "config"
+    },
+    {
+      "path": "src/main/resources/i18n/messages_fr.properties",
+      "language": "properties",
+      "sizeLines": 31,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/analytics/dto/HeadcountMetricsTimeseriesPointDto.java": [],
+    "src/main/java/com/hris/auth/enums/PermissionAction.java": [],
+    "src/main/java/com/hris/common/event/DomainEvent.java": [],
+    "src/main/java/com/hris/common/event/DomainEventType.java": [],
+    "src/main/java/com/hris/config/CorrelationIdFilter.java": [],
+    "src/main/java/com/hris/config/JacksonConfig.java": [],
+    "src/main/java/com/hris/config/RetryConfig.java": [],
+    "src/main/java/com/hris/config/SchedulingConfig.java": [],
+    "src/main/java/com/hris/health/StorageHealthIndicator.java": [],
+    "src/main/java/com/hris/HrisApplication.java": [],
+    "src/main/java/com/hris/leave/dto/NotificationParamsDto.java": [],
+    "src/main/java/com/hris/leave/enums/LeaveTypeCode.java": [],
+    "src/main/resources/application-local.yml": [],
+    "src/main/resources/application.yml": [],
+    "src/main/resources/i18n/messages_en.properties": [],
+    "src/main/resources/i18n/messages_fr.properties": []
+  },
+  "neighborMap": {}
+}

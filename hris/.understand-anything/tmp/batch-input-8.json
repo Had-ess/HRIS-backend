@@ -1,0 +1,1401 @@
+{
+  "batchIndex": 8,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+      "language": "java",
+      "sizeLines": 37,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+      "language": "java",
+      "sizeLines": 149,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/ApiResponse.java",
+      "language": "java",
+      "sizeLines": 18,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/PageResponse.java",
+      "language": "java",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/controller/TeamController.java",
+      "language": "java",
+      "sizeLines": 86,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/controller/WorkScheduleController.java",
+      "language": "java",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/TeamCreateDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/TeamDto.java",
+      "language": "java",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java",
+      "language": "java",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java",
+      "language": "java",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/controller/TeamHierarchyController.java",
+      "language": "java",
+      "sizeLines": 64,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java",
+      "language": "java",
+      "sizeLines": 26,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "language": "java",
+      "sizeLines": 101,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/controller/ValidationWorkflowController.java",
+      "language": "java",
+      "sizeLines": 101,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowDto.java",
+      "language": "java",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java",
+      "language": "java",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java",
+      "language": "java",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+      "language": "java",
+      "sizeLines": 291,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/auth/repository/PermissionRepository.java": [
+      "src/main/java/com/hris/auth/entity/Permission.java"
+    ],
+    "src/main/java/com/hris/auth/service/PermissionService.java": [
+      "src/main/java/com/hris/access/repository/ProfilePermissionRepository.java",
+      "src/main/java/com/hris/auth/dto/PermissionCreateDto.java",
+      "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+      "src/main/java/com/hris/auth/dto/PermissionUpdateDto.java",
+      "src/main/java/com/hris/auth/entity/Permission.java",
+      "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java"
+    ],
+    "src/main/java/com/hris/common/ApiResponse.java": [],
+    "src/main/java/com/hris/common/PageResponse.java": [],
+    "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java": [],
+    "src/main/java/com/hris/organisation/controller/TeamController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/organisation/dto/TeamCreateDto.java",
+      "src/main/java/com/hris/organisation/dto/TeamDto.java",
+      "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java",
+      "src/main/java/com/hris/organisation/service/TeamService.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/organisation/controller/WorkScheduleController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java",
+      "src/main/java/com/hris/organisation/service/WorkScheduleService.java"
+    ],
+    "src/main/java/com/hris/organisation/dto/TeamCreateDto.java": [],
+    "src/main/java/com/hris/organisation/dto/TeamDto.java": [],
+    "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java": [],
+    "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java": [],
+    "src/main/java/com/hris/organisation/hierarchy/controller/TeamHierarchyController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java",
+      "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java",
+      "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java": [],
+    "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java": [],
+    "src/main/java/com/hris/security/PermissionAuthorizationService.java": [
+      "src/main/java/com/hris/access/service/AccessResolutionService.java"
+    ],
+    "src/main/java/com/hris/settings/validation/controller/ValidationWorkflowController.java": [
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java",
+      "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowDto.java",
+      "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java",
+      "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+      "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java"
+    ],
+    "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowDto.java": [],
+    "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java": [
+      "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java"
+    ],
+    "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java": [
+      "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+      "src/main/java/com/hris/auth/dto/PermissionResponseDto.java"
+    ],
+    "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java": [],
+    "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java": [],
+    "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java": [
+      "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+      "src/main/java/com/hris/access/entity/AccessProfile.java",
+      "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+      "src/main/java/com/hris/auth/entity/Permission.java",
+      "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/leave/repository/LeaveTypeRepository.java",
+      "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowDto.java",
+      "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java",
+      "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java",
+      "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/auth/repository/PermissionRepository.java": [
+      {
+        "path": "src/main/java/com/hris/auth/entity/Permission.java",
+        "batchIndex": 6,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Permission"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessProfileService.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getAllMenus",
+          "getAllMenus",
+          "AccessProfileService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/service/PermissionService.java": [
+      {
+        "path": "src/main/java/com/hris/access/repository/ProfilePermissionRepository.java",
+        "batchIndex": 6,
+        "symbols": [
+          "ProfilePermissionRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/PermissionCreateDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/PermissionUpdateDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Permission.java",
+        "batchIndex": 6,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Permission"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/PermissionController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "PermissionController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/ApiResponse.java": [
+      {
+        "path": "src/main/java/com/hris/access/controller/AccessController.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAccess",
+          "getNavigation",
+          "AccessController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/controller/AccessProfileController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getMenuItems",
+          "AccessProfileController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/controller/ProfileAssignmentRuleController.java",
+        "batchIndex": 12,
+        "symbols": [
+          "getAll",
+          "getById",
+          "update",
+          "ProfileAssignmentRuleController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/controller/UserAccessAssignmentController.java",
+        "batchIndex": 12,
+        "symbols": [
+          "getProfiles",
+          "assignProfile",
+          "removeProfile",
+          "UserAccessAssignmentController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getMyRequests",
+          "getMyRequest",
+          "create",
+          "update",
+          "submit",
+          "cancel",
+          "uploadAttachment",
+          "getInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "AdminRequestController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestTypeController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "AdminRequestTypeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/controller/AnalyticsV2Controller.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getSummary",
+          "getLeaveRequests",
+          "getLeaveBalances",
+          "getApprovals",
+          "getAdminRequests",
+          "getDashboard",
+          "getOverview",
+          "getHeadcountTrend",
+          "getLeaveMonthlyStatus",
+          "AnalyticsV2Controller"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/controller/AuditLogController.java",
+        "batchIndex": 12,
+        "symbols": [
+          "search",
+          "exportCsv",
+          "AuditLogController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/controller/ApprovalStepController.java",
+        "batchIndex": 3,
+        "symbols": [
+          "getMyPending",
+          "approve",
+          "reject",
+          "bulkApprove",
+          "bulkReject",
+          "ApprovalStepController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/DepartmentController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getById",
+          "getAll",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "activate",
+          "DepartmentController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/EmployeeController.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "getProfileSummary",
+          "update",
+          "delete",
+          "resendActivation",
+          "EmployeeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/PermissionController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "PermissionController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/UserController.java",
+        "batchIndex": 7,
+        "symbols": [
+          "getCurrentUser",
+          "updateCurrentUser",
+          "updateLocale",
+          "UserController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/controller/DashboardController.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getMyDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveAccrualRunController.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getRunHistory",
+          "getDuePolicies",
+          "runDuePolicies",
+          "LeaveAccrualRunController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveAcquisitionPolicyController.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "LeaveAcquisitionPolicyController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveBalanceController.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getMyBalances",
+          "getMyLedger",
+          "getMyProjection",
+          "getVisibleBalances",
+          "getForEmployeeByPath",
+          "getForEmployee",
+          "getTransactions",
+          "adjustBalance",
+          "LeaveBalanceController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveRequestController.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "cancel",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveTypeController.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAll",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getAcquisitionPolicies",
+          "LeaveTypeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/notification/controller/NotificationController.java",
+        "batchIndex": 7,
+        "symbols": [
+          "getMyNotifications",
+          "getUnreadCount",
+          "markAsRead",
+          "markAllAsRead",
+          "NotificationController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/controller/ProjectController.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getAssignments",
+          "getTeams",
+          "createTeam",
+          "assignEmployee",
+          "removeAssignment",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/quick/controller/QuickSettingsController.java",
+        "batchIndex": 15,
+        "symbols": [
+          "get",
+          "update",
+          "QuickSettingsController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/PageResponse.java": [
+      {
+        "path": "src/main/java/com/hris/access/controller/AccessProfileController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getMenuItems",
+          "AccessProfileController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/service/AccessProfileService.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getAllMenus",
+          "getAllMenus",
+          "AccessProfileService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getMyRequests",
+          "getMyRequest",
+          "create",
+          "update",
+          "submit",
+          "cancel",
+          "uploadAttachment",
+          "getInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "AdminRequestController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/controller/AuditLogController.java",
+        "batchIndex": 12,
+        "symbols": [
+          "search",
+          "exportCsv",
+          "AuditLogController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/approval/controller/ApprovalStepController.java",
+        "batchIndex": 3,
+        "symbols": [
+          "getMyPending",
+          "approve",
+          "reject",
+          "bulkApprove",
+          "bulkReject",
+          "ApprovalStepController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/DepartmentController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getById",
+          "getAll",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "activate",
+          "DepartmentController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/EmployeeController.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "getProfileSummary",
+          "update",
+          "delete",
+          "resendActivation",
+          "EmployeeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveAccrualRunController.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getRunHistory",
+          "getDuePolicies",
+          "runDuePolicies",
+          "LeaveAccrualRunController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveRequestController.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "cancel",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/notification/controller/NotificationController.java",
+        "batchIndex": 7,
+        "symbols": [
+          "getMyNotifications",
+          "getUnreadCount",
+          "markAsRead",
+          "markAllAsRead",
+          "NotificationController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/controller/ProjectController.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getAssignments",
+          "getTeams",
+          "createTeam",
+          "assignEmployee",
+          "removeAssignment",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/TeamService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "TeamService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/exception/PermissionDeletionNotAllowedException.java": [
+      {
+        "path": "src/main/java/com/hris/common/GlobalExceptionHandler.java",
+        "batchIndex": 14,
+        "symbols": [
+          "handleInsufficientBalance",
+          "handleNotFound",
+          "handleStepAlreadyDecided",
+          "handleInvalidWorkflowState",
+          "handleMissingDepartmentHead",
+          "handleFileAttachmentValidation",
+          "handleInvalidProjectAssignment",
+          "handleDepartmentDeletionNotAllowed",
+          "handleDuplicateProjectDepartmentAssignment",
+          "handleInvalidAdminRequestState",
+          "handlePermissionAlreadyAssigned",
+          "handlePermissionDeletionNotAllowed",
+          "handleInvalidLeavePeriod",
+          "handleOptimisticLock",
+          "handleValidation",
+          "handleIllegalArgument",
+          "handleKeycloakProvisioning",
+          "handleEmailDelivery",
+          "handleIllegalState",
+          "handleAccessDenied",
+          "handleAuthentication",
+          "handleGeneric",
+          "GlobalExceptionHandler"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/controller/TeamController.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/TeamService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "TeamService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/controller/WorkScheduleController.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/WorkScheduleService.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "computeWorkingDays",
+          "getHoursPerDay",
+          "isWorkingDay",
+          "WorkScheduleService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/dto/TeamCreateDto.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/TeamService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "TeamService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/dto/TeamDto.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/TeamService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "TeamService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/dto/TeamUpdateDto.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/TeamService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "TeamService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/dto/WorkScheduleDto.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/service/WorkScheduleService.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "computeWorkingDays",
+          "getHoursPerDay",
+          "isWorkingDay",
+          "WorkScheduleService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/controller/TeamHierarchyController.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getHierarchy",
+          "create",
+          "update",
+          "endRelation",
+          "TeamHierarchyService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyMutationDto.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getHierarchy",
+          "create",
+          "update",
+          "endRelation",
+          "TeamHierarchyService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/organisation/hierarchy/dto/TeamHierarchyNodeDto.java": [
+      {
+        "path": "src/main/java/com/hris/organisation/hierarchy/service/TeamHierarchyService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getHierarchy",
+          "create",
+          "update",
+          "endRelation",
+          "TeamHierarchyService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/security/PermissionAuthorizationService.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/controller/AccessProfileController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getPermissions",
+          "assignPermissions",
+          "getMenus",
+          "assignMenus",
+          "getMenuItems",
+          "AccessProfileController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/controller/ProfileAssignmentRuleController.java",
+        "batchIndex": 12,
+        "symbols": [
+          "getAll",
+          "getById",
+          "update",
+          "ProfileAssignmentRuleController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/controller/UserAccessAssignmentController.java",
+        "batchIndex": 12,
+        "symbols": [
+          "getProfiles",
+          "assignProfile",
+          "removeProfile",
+          "UserAccessAssignmentController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getMyRequests",
+          "getMyRequest",
+          "create",
+          "update",
+          "submit",
+          "cancel",
+          "uploadAttachment",
+          "getInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "AdminRequestController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestTypeController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "AdminRequestTypeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/controller/AnalyticsV2Controller.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getSummary",
+          "getLeaveRequests",
+          "getLeaveBalances",
+          "getApprovals",
+          "getAdminRequests",
+          "getDashboard",
+          "getOverview",
+          "getHeadcountTrend",
+          "getLeaveMonthlyStatus",
+          "AnalyticsV2Controller"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/DepartmentController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getById",
+          "getAll",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "activate",
+          "DepartmentController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/EmployeeController.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "getProfileSummary",
+          "update",
+          "delete",
+          "resendActivation",
+          "EmployeeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/controller/PermissionController.java",
+        "batchIndex": 6,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "PermissionController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/controller/DashboardController.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getMyDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveAcquisitionPolicyController.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "LeaveAcquisitionPolicyController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveBalanceController.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getMyBalances",
+          "getMyLedger",
+          "getMyProjection",
+          "getVisibleBalances",
+          "getForEmployeeByPath",
+          "getForEmployee",
+          "getTransactions",
+          "adjustBalance",
+          "LeaveBalanceController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveRequestController.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "cancel",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/controller/LeaveTypeController.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getAll",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getAcquisitionPolicies",
+          "LeaveTypeController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/controller/ProjectController.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "create",
+          "getById",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getAssignments",
+          "getTeams",
+          "createTeam",
+          "assignEmployee",
+          "removeAssignment",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/calendar/controller/HrCalendarController.java",
+        "batchIndex": 14,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getHolidays",
+          "createHoliday",
+          "updateHoliday",
+          "deleteHoliday",
+          "HrCalendarController"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/quick/controller/QuickSettingsController.java",
+        "batchIndex": 15,
+        "symbols": [
+          "get",
+          "update",
+          "QuickSettingsController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/controller/ValidationWorkflowController.java": [
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+        "batchIndex": 15,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowMutationDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationUsage.java",
+        "batchIndex": 15,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java": [
+      {
+        "path": "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/entity/ValidationFallbackMode.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/entity/ValidatorSource.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java": [
+      {
+        "path": "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/access/entity/AccessProfile.java",
+        "batchIndex": 12,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AccessProfile"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+        "batchIndex": 12,
+        "symbols": [
+          "AccessProfileRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+        "batchIndex": 6,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Permission.java",
+        "batchIndex": 6,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Permission"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/repository/LeaveTypeRepository.java",
+        "batchIndex": 9,
+        "symbols": [
+          "LeaveTypeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/repository/ValidationWorkflowRepository.java",
+        "batchIndex": 15,
+        "symbols": [
+          "ValidationWorkflowRepository"
+        ]
+      }
+    ]
+  }
+}

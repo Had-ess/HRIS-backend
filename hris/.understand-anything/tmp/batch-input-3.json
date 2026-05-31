@@ -1,0 +1,1124 @@
+{
+  "batchIndex": 3,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/analytics/dto/ApprovalBottleneckSnapshotDto.java",
+      "language": "java",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java",
+      "language": "java",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/ApprovalFact.java",
+      "language": "java",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/LeaveFact.java",
+      "language": "java",
+      "sizeLines": 67,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/AnalyticsEventRepository.java",
+      "language": "java",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/ApprovalFactRepository.java",
+      "language": "java",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/LeaveFactRepository.java",
+      "language": "java",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "language": "java",
+      "sizeLines": 174,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/AnalyticsIngestionService.java",
+      "language": "java",
+      "sizeLines": 151,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/service/TransactionalAnalyticsEventPublisher.java",
+      "language": "java",
+      "sizeLines": 30,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/controller/ApprovalStepController.java",
+      "language": "java",
+      "sizeLines": 87,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalCommentDto.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalDecisionDto.java",
+      "language": "java",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java",
+      "language": "java",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/ApprovalWorkflowResponseDto.java",
+      "language": "java",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/BulkActionResultDto.java",
+      "language": "java",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/dto/BulkApproveRequestDto.java",
+      "language": "java",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "language": "java",
+      "sizeLines": 97,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "language": "java",
+      "sizeLines": 73,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/enums/ApprovalContext.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/enums/StepStatus.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+      "language": "java",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/mapper/ApprovalMapper.java",
+      "language": "java",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "language": "java",
+      "sizeLines": 100,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "language": "java",
+      "sizeLines": 38,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java",
+      "language": "java",
+      "sizeLines": 183,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/service/ApprovalStepService.java",
+      "language": "java",
+      "sizeLines": 275,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/approval/service/ApprovalViewService.java",
+      "language": "java",
+      "sizeLines": 128,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/analytics/dto/ApprovalBottleneckSnapshotDto.java": [
+      "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java"
+    ],
+    "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java": [
+      "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java"
+    ],
+    "src/main/java/com/hris/analytics/entity/ApprovalFact.java": [
+      "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java"
+    ],
+    "src/main/java/com/hris/analytics/entity/LeaveFact.java": [
+      "src/main/java/com/hris/leave/enums/LeaveStatus.java"
+    ],
+    "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java": [],
+    "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java": [],
+    "src/main/java/com/hris/analytics/repository/AnalyticsEventRepository.java": [
+      "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java"
+    ],
+    "src/main/java/com/hris/analytics/repository/ApprovalFactRepository.java": [
+      "src/main/java/com/hris/analytics/entity/ApprovalFact.java"
+    ],
+    "src/main/java/com/hris/analytics/repository/LeaveFactRepository.java": [
+      "src/main/java/com/hris/analytics/entity/LeaveFact.java"
+    ],
+    "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java": [
+      "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/leave/entity/LeaveRequest.java",
+      "src/main/java/com/hris/organisation/entity/ProjectAssignment.java"
+    ],
+    "src/main/java/com/hris/analytics/service/AnalyticsIngestionService.java": [
+      "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java",
+      "src/main/java/com/hris/analytics/entity/ApprovalFact.java",
+      "src/main/java/com/hris/analytics/entity/LeaveFact.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "src/main/java/com/hris/analytics/repository/AnalyticsEventRepository.java",
+      "src/main/java/com/hris/analytics/repository/ApprovalFactRepository.java",
+      "src/main/java/com/hris/analytics/repository/LeaveFactRepository.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java",
+      "src/main/java/com/hris/leave/enums/LeaveStatus.java"
+    ],
+    "src/main/java/com/hris/analytics/service/TransactionalAnalyticsEventPublisher.java": [
+      "src/main/java/com/hris/analytics/entity/AnalyticsEvent.java",
+      "src/main/java/com/hris/analytics/repository/AnalyticsEventRepository.java"
+    ],
+    "src/main/java/com/hris/approval/controller/ApprovalStepController.java": [
+      "src/main/java/com/hris/approval/dto/ApprovalCommentDto.java",
+      "src/main/java/com/hris/approval/dto/ApprovalDecisionDto.java",
+      "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java",
+      "src/main/java/com/hris/approval/dto/BulkActionResultDto.java",
+      "src/main/java/com/hris/approval/dto/BulkApproveRequestDto.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java",
+      "src/main/java/com/hris/approval/service/ApprovalStepService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/approval/dto/ApprovalCommentDto.java": [],
+    "src/main/java/com/hris/approval/dto/ApprovalDecisionDto.java": [],
+    "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java": [
+      "src/main/java/com/hris/approval/enums/ApprovalContext.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationMode.java"
+    ],
+    "src/main/java/com/hris/approval/dto/ApprovalWorkflowResponseDto.java": [
+      "src/main/java/com/hris/approval/enums/WorkflowStatus.java"
+    ],
+    "src/main/java/com/hris/approval/dto/BulkActionResultDto.java": [],
+    "src/main/java/com/hris/approval/dto/BulkApproveRequestDto.java": [],
+    "src/main/java/com/hris/approval/entity/ApprovalStep.java": [
+      "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "src/main/java/com/hris/approval/enums/ApprovalContext.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java"
+    ],
+    "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java": [
+      "src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationMode.java"
+    ],
+    "src/main/java/com/hris/approval/enums/ApprovalContext.java": [],
+    "src/main/java/com/hris/approval/enums/StepStatus.java": [],
+    "src/main/java/com/hris/approval/enums/WorkflowStatus.java": [],
+    "src/main/java/com/hris/approval/mapper/ApprovalMapper.java": [
+      "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java",
+      "src/main/java/com/hris/approval/dto/ApprovalWorkflowResponseDto.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java"
+    ],
+    "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java": [
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java"
+    ],
+    "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java": [
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "src/main/java/com/hris/approval/enums/WorkflowStatus.java"
+    ],
+    "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequest.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestRepository.java",
+      "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "src/main/java/com/hris/auth/entity/Department.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/auth/service/UserDisplayNameService.java",
+      "src/main/java/com/hris/leave/entity/LeaveRequest.java",
+      "src/main/java/com/hris/leave/repository/LeaveRequestRepository.java",
+      "src/main/java/com/hris/organisation/entity/Project.java",
+      "src/main/java/com/hris/organisation/repository/ProjectRepository.java"
+    ],
+    "src/main/java/com/hris/approval/service/ApprovalStepService.java": [
+      "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "src/main/java/com/hris/approval/enums/StepStatus.java",
+      "src/main/java/com/hris/approval/enums/WorkflowStatus.java",
+      "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+      "src/main/java/com/hris/common/exception/StepAlreadyDecidedException.java",
+      "src/main/java/com/hris/settings/validation/entity/ValidationMode.java"
+    ],
+    "src/main/java/com/hris/approval/service/ApprovalViewService.java": [
+      "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java",
+      "src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java",
+      "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java",
+      "src/main/java/com/hris/auth/service/UserDisplayNameService.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/analytics/entity/LeaveFact.java": [
+      {
+        "path": "src/main/java/com/hris/leave/enums/LeaveStatus.java",
+        "batchIndex": 4,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/analytics/enums/AnalyticsEventType.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/entity/ApprovalBottleneckSnapshot.java",
+        "batchIndex": 17,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "ApprovalBottleneckSnapshot"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java": [
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveRequest.java",
+        "batchIndex": 4,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "LeaveRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+        "batchIndex": 2,
+        "symbols": [
+          "isActiveOn",
+          "equals",
+          "hashCode",
+          "ProjectAssignment"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "onboard",
+          "resendActivationEmail",
+          "EmployeeOnboardingService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/EmployeeService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getProfileSummary",
+          "getById",
+          "update",
+          "delete",
+          "initializeLeaveBalancesForNewEmployee",
+          "EmployeeService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/analytics/service/AnalyticsIngestionService.java": [
+      {
+        "path": "src/main/java/com/hris/leave/enums/LeaveStatus.java",
+        "batchIndex": 4,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/approval/controller/ApprovalStepController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/dto/ApprovalStepResponseDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/leave/dto/LeaveRequestResponseDto.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestQueryService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "toDto",
+          "toDtoPage",
+          "toAttachmentDto",
+          "toAttachmentDtos",
+          "LeaveRequestQueryService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/entity/ApprovalStep.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/entity/ApprovalWorkflow.java": [
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/enums/ApprovalContext.java": [
+      {
+        "path": "src/main/java/com/hris/dashboard/dto/ApprovalSummaryDto.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/enums/StepStatus.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/dto/ApprovalSummaryDto.java",
+        "batchIndex": 4,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/enums/WorkflowStatus.java": [
+      {
+        "path": "src/main/java/com/hris/approval/service/WorkflowCompletionHandler.java",
+        "batchIndex": 4,
+        "symbols": [
+          "WorkflowCompletionHandler"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveWorkflowCompletionHandler.java",
+        "batchIndex": 4,
+        "symbols": [
+          "supports",
+          "handleCompletion",
+          "LeaveWorkflowCompletionHandler"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/repository/ApprovalStepRepository.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDeletionService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "deleteUser",
+          "UserDeletionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/repository/ApprovalWorkflowRepository.java": [
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveApprovalWorkflowService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "instantiate",
+          "LeaveApprovalWorkflowService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequest.java",
+        "batchIndex": 10,
+        "symbols": [
+          "generateRequestNumber",
+          "equals",
+          "hashCode",
+          "AdminRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/repository/AdminRequestRepository.java",
+        "batchIndex": 11,
+        "symbols": [
+          "AdminRequestRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Department.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Department"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "DepartmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDisplayNameService.java",
+        "batchIndex": 7,
+        "symbols": [
+          "toDisplayName",
+          "resolveDisplayName",
+          "resolveDisplayNames",
+          "UserDisplayNameService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/entity/LeaveRequest.java",
+        "batchIndex": 4,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "LeaveRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/repository/LeaveRequestRepository.java",
+        "batchIndex": 4,
+        "symbols": [
+          "LeaveRequestRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/entity/Project.java",
+        "batchIndex": 2,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Project"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/repository/ProjectRepository.java",
+        "batchIndex": 2,
+        "symbols": [
+          "ProjectRepository"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/approval/service/ApprovalStepService.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/InvalidWorkflowStateException.java",
+        "batchIndex": 14,
+        "symbols": [
+          "InvalidWorkflowStateException",
+          "InvalidWorkflowStateException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/StepAlreadyDecidedException.java",
+        "batchIndex": 14,
+        "symbols": [
+          "StepAlreadyDecidedException",
+          "StepAlreadyDecidedException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/entity/ValidationMode.java",
+        "batchIndex": 4,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/approval/service/ApprovalViewService.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDisplayNameService.java",
+        "batchIndex": 7,
+        "symbols": [
+          "toDisplayName",
+          "resolveDisplayName",
+          "resolveDisplayNames",
+          "UserDisplayNameService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestQueryService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "toDto",
+          "toDtoPage",
+          "toAttachmentDto",
+          "toAttachmentDtos",
+          "LeaveRequestQueryService"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "batchIndex": 17,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/analytics/entity/ApprovalBottleneckSnapshot.java",
+      "language": "java",
+      "sizeLines": 64,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/HeadcountMetricsSnapshot.java",
+      "language": "java",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/LeaveDistributionSnapshot.java",
+      "language": "java",
+      "sizeLines": 55,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/entity/LeaveMetricsSnapshot.java",
+      "language": "java",
+      "sizeLines": 62,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java",
+      "language": "java",
+      "sizeLines": 9,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/ApprovalBottleneckSnapshotRepository.java",
+      "language": "java",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/HeadcountMetricsSnapshotRepository.java",
+      "language": "java",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/LeaveDistributionSnapshotRepository.java",
+      "language": "java",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/repository/LeaveMetricsSnapshotRepository.java",
+      "language": "java",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/analytics/entity/ApprovalBottleneckSnapshot.java": [
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java",
+      "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java"
+    ],
+    "src/main/java/com/hris/analytics/entity/HeadcountMetricsSnapshot.java": [
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ],
+    "src/main/java/com/hris/analytics/entity/LeaveDistributionSnapshot.java": [
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ],
+    "src/main/java/com/hris/analytics/entity/LeaveMetricsSnapshot.java": [
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ],
+    "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java": [],
+    "src/main/java/com/hris/analytics/repository/ApprovalBottleneckSnapshotRepository.java": [
+      "src/main/java/com/hris/analytics/entity/ApprovalBottleneckSnapshot.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ],
+    "src/main/java/com/hris/analytics/repository/HeadcountMetricsSnapshotRepository.java": [
+      "src/main/java/com/hris/analytics/entity/HeadcountMetricsSnapshot.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ],
+    "src/main/java/com/hris/analytics/repository/LeaveDistributionSnapshotRepository.java": [
+      "src/main/java/com/hris/analytics/entity/LeaveDistributionSnapshot.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ],
+    "src/main/java/com/hris/analytics/repository/LeaveMetricsSnapshotRepository.java": [
+      "src/main/java/com/hris/analytics/entity/LeaveMetricsSnapshot.java",
+      "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/analytics/entity/ApprovalBottleneckSnapshot.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+        "batchIndex": 3,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "rebuildCurrentSnapshots",
+          "rebuildHeadcountFacts",
+          "rebuildProjectAbsenceFacts",
+          "rebuildLeaveMetrics",
+          "rebuildHeadcountMetrics",
+          "rebuildLeaveDistribution",
+          "rebuildApprovalBottlenecks",
+          "AnalyticsAggregationService"
+        ]
+      }
+    ]
+  }
+}

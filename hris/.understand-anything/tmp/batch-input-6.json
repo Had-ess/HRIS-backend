@@ -1,0 +1,784 @@
+{
+  "batchIndex": 6,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/access/controller/AccessProfileController.java",
+      "language": "java",
+      "sizeLines": 137,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/AccessProfileCreateDto.java",
+      "language": "java",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+      "language": "java",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/AccessProfileUpdateDto.java",
+      "language": "java",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/MenuAssignmentUpdateDto.java",
+      "language": "java",
+      "sizeLines": 9,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/MenuItemResponseDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/dto/PermissionAssignmentUpdateDto.java",
+      "language": "java",
+      "sizeLines": 9,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/entity/MenuItem.java",
+      "language": "java",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/entity/ProfileMenuAccess.java",
+      "language": "java",
+      "sizeLines": 68,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/entity/ProfilePermission.java",
+      "language": "java",
+      "sizeLines": 69,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/repository/MenuItemRepository.java",
+      "language": "java",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/repository/ProfileMenuAccessRepository.java",
+      "language": "java",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/repository/ProfilePermissionRepository.java",
+      "language": "java",
+      "sizeLines": 31,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/access/service/AccessProfileService.java",
+      "language": "java",
+      "sizeLines": 311,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/analytics/controller/AnalyticsV2Controller.java",
+      "language": "java",
+      "sizeLines": 115,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/controller/DepartmentController.java",
+      "language": "java",
+      "sizeLines": 95,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/controller/PermissionController.java",
+      "language": "java",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/dto/DepartmentCreateDto.java",
+      "language": "java",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/dto/PermissionCreateDto.java",
+      "language": "java",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+      "language": "java",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/dto/PermissionUpdateDto.java",
+      "language": "java",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/auth/entity/Permission.java",
+      "language": "java",
+      "sizeLines": 74,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/access/controller/AccessProfileController.java": [
+      "src/main/java/com/hris/access/dto/AccessProfileCreateDto.java",
+      "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+      "src/main/java/com/hris/access/dto/AccessProfileUpdateDto.java",
+      "src/main/java/com/hris/access/dto/MenuAssignmentUpdateDto.java",
+      "src/main/java/com/hris/access/dto/MenuItemResponseDto.java",
+      "src/main/java/com/hris/access/dto/PermissionAssignmentUpdateDto.java",
+      "src/main/java/com/hris/access/service/AccessProfileService.java",
+      "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/access/dto/AccessProfileCreateDto.java": [],
+    "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java": [],
+    "src/main/java/com/hris/access/dto/AccessProfileUpdateDto.java": [],
+    "src/main/java/com/hris/access/dto/MenuAssignmentUpdateDto.java": [],
+    "src/main/java/com/hris/access/dto/MenuItemResponseDto.java": [],
+    "src/main/java/com/hris/access/dto/PermissionAssignmentUpdateDto.java": [],
+    "src/main/java/com/hris/access/entity/MenuItem.java": [],
+    "src/main/java/com/hris/access/entity/ProfileMenuAccess.java": [],
+    "src/main/java/com/hris/access/entity/ProfilePermission.java": [
+      "src/main/java/com/hris/auth/entity/Permission.java"
+    ],
+    "src/main/java/com/hris/access/repository/MenuItemRepository.java": [
+      "src/main/java/com/hris/access/entity/MenuItem.java"
+    ],
+    "src/main/java/com/hris/access/repository/ProfileMenuAccessRepository.java": [
+      "src/main/java/com/hris/access/entity/ProfileMenuAccess.java"
+    ],
+    "src/main/java/com/hris/access/repository/ProfilePermissionRepository.java": [
+      "src/main/java/com/hris/access/entity/ProfilePermission.java"
+    ],
+    "src/main/java/com/hris/access/service/AccessProfileService.java": [
+      "src/main/java/com/hris/access/dto/AccessProfileCreateDto.java",
+      "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java",
+      "src/main/java/com/hris/access/dto/AccessProfileUpdateDto.java",
+      "src/main/java/com/hris/access/dto/MenuItemResponseDto.java",
+      "src/main/java/com/hris/access/entity/AccessProfile.java",
+      "src/main/java/com/hris/access/entity/MenuItem.java",
+      "src/main/java/com/hris/access/entity/ProfileMenuAccess.java",
+      "src/main/java/com/hris/access/entity/ProfilePermission.java",
+      "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+      "src/main/java/com/hris/access/repository/MenuItemRepository.java",
+      "src/main/java/com/hris/access/repository/ProfileMenuAccessRepository.java",
+      "src/main/java/com/hris/access/repository/ProfilePermissionRepository.java",
+      "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+      "src/main/java/com/hris/auth/entity/Permission.java",
+      "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/PageResponse.java"
+    ],
+    "src/main/java/com/hris/analytics/controller/AnalyticsV2Controller.java": [
+      "src/main/java/com/hris/analytics/service/AnalyticsQueryService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java"
+    ],
+    "src/main/java/com/hris/auth/controller/DepartmentController.java": [
+      "src/main/java/com/hris/auth/dto/DepartmentCreateDto.java",
+      "src/main/java/com/hris/auth/dto/DepartmentDto.java",
+      "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/common/PageResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "src/main/java/com/hris/security/SecurityUtils.java"
+    ],
+    "src/main/java/com/hris/auth/controller/PermissionController.java": [
+      "src/main/java/com/hris/auth/dto/PermissionCreateDto.java",
+      "src/main/java/com/hris/auth/dto/PermissionResponseDto.java",
+      "src/main/java/com/hris/auth/dto/PermissionUpdateDto.java",
+      "src/main/java/com/hris/auth/service/PermissionService.java",
+      "src/main/java/com/hris/common/ApiResponse.java",
+      "src/main/java/com/hris/security/PermissionAuthorizationService.java"
+    ],
+    "src/main/java/com/hris/auth/dto/DepartmentCreateDto.java": [],
+    "src/main/java/com/hris/auth/dto/PermissionCreateDto.java": [],
+    "src/main/java/com/hris/auth/dto/PermissionResponseDto.java": [],
+    "src/main/java/com/hris/auth/dto/PermissionUpdateDto.java": [],
+    "src/main/java/com/hris/auth/entity/Permission.java": []
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/access/controller/AccessProfileController.java": [
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/dto/AccessProfileResponseDto.java": [
+      {
+        "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/entity/MenuItem.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/entity/ProfileMenuAccess.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/entity/ProfilePermission.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/repository/MenuItemRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/repository/ProfileMenuAccessRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/repository/ProfilePermissionRepository.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "getEntityById",
+          "PermissionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/access/service/AccessProfileService.java": [
+      {
+        "path": "src/main/java/com/hris/access/entity/AccessProfile.java",
+        "batchIndex": 12,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AccessProfile"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/repository/AccessProfileRepository.java",
+        "batchIndex": 12,
+        "symbols": [
+          "AccessProfileRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java",
+        "batchIndex": 12,
+        "symbols": [
+          "UserProfileAssignmentRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/analytics/controller/AnalyticsV2Controller.java": [
+      {
+        "path": "src/main/java/com/hris/analytics/service/AnalyticsQueryService.java",
+        "batchIndex": 5,
+        "symbols": [
+          "getSummary",
+          "getLeaveRequests",
+          "getLeaveBalances",
+          "getApprovals",
+          "getAdminRequests",
+          "getDashboard",
+          "getOverview",
+          "getLeaveMetrics",
+          "getHeadcountMetrics",
+          "getLeaveDistribution",
+          "getLeaveMetricsTimeseries",
+          "getProjectAbsenceFacts",
+          "getHeadcountTrend",
+          "getLeaveMonthlyStatus",
+          "AnalyticsQueryService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/controller/DepartmentController.java": [
+      {
+        "path": "src/main/java/com/hris/auth/dto/DepartmentDto.java",
+        "batchIndex": 1,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/common/PageResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/SecurityUtils.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getCurrentUserId",
+          "getKeycloakId",
+          "SecurityUtils"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/controller/PermissionController.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "getEntityById",
+          "PermissionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/ApiResponse.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/security/PermissionAuthorizationService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionAuthorizationService",
+          "hasPermission",
+          "authorize",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "authorizePermissionName",
+          "authorizeAnyPermissionName",
+          "hasPermissionInScope",
+          "authorizePermissionInScope",
+          "PermissionAuthorizationService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/dto/DepartmentCreateDto.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/DepartmentService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "deactivate",
+          "reactivate",
+          "DepartmentService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/dto/PermissionCreateDto.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "getEntityById",
+          "PermissionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/dto/PermissionResponseDto.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "getEntityById",
+          "PermissionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/dto/ValidationWorkflowOptionsDto.java",
+        "batchIndex": 8,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/dto/PermissionUpdateDto.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "getEntityById",
+          "PermissionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/auth/entity/Permission.java": [
+      {
+        "path": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+        "batchIndex": 1,
+        "symbols": [
+          "getEffectiveAssignments",
+          "getEffectiveProfiles",
+          "getEffectivePermissions",
+          "getEffectivePermissionNames",
+          "getEffectiveProfileCodes",
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyManualPermissionName",
+          "resolvePermissionDepartmentScope",
+          "resolveSystemSourcedDepartmentIds",
+          "resolveScopedDepartmentIds",
+          "hasPermissionInScope",
+          "resolveApprovalScope",
+          "findEmployeesWithScopedProfile",
+          "resolveAccess",
+          "resolveNavigation",
+          "AccessResolutionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/PermissionRepository.java",
+        "batchIndex": 8,
+        "symbols": [
+          "PermissionRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/PermissionService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "delete",
+          "getEntityById",
+          "PermissionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/settings/validation/service/ValidationWorkflowService.java",
+        "batchIndex": 8,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "getOptions",
+          "ValidationWorkflowService"
+        ]
+      }
+    ]
+  }
+}

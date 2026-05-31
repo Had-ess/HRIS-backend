@@ -1,0 +1,1279 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "type": "file",
+      "name": "EmployeeUpdateDto.java",
+      "filePath": "src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "summary": "Inbound DTO for partial employee updates with optional, validated fields.",
+      "tags": [
+        "dto",
+        "employee",
+        "validation",
+        "update"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "file",
+      "name": "Department.java",
+      "filePath": "src/main/java/com/hris/auth/entity/Department.java",
+      "summary": "JPA entity representing an organisational department with hierarchy, head reference, and active flag.",
+      "tags": [
+        "entity",
+        "department",
+        "jpa",
+        "organisation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "file",
+      "name": "Employee.java",
+      "filePath": "src/main/java/com/hris/auth/entity/Employee.java",
+      "summary": "Core JPA entity capturing employee identity, department, manager, contract, and account-status fields used across the HRIS.",
+      "tags": [
+        "entity",
+        "employee",
+        "jpa",
+        "core-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "type": "file",
+      "name": "EmployeeDepartmentHistory.java",
+      "filePath": "src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "summary": "JPA history entity recording each department transfer of an employee with timestamps and reason.",
+      "tags": [
+        "entity",
+        "history",
+        "department",
+        "audit"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "type": "file",
+      "name": "EmployeeStatusHistory.java",
+      "filePath": "src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "summary": "JPA history entity logging changes to an employee status (active, suspended, terminated) over time.",
+      "tags": [
+        "entity",
+        "history",
+        "status",
+        "audit"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/enums/AccountStatus.java",
+      "type": "file",
+      "name": "AccountStatus.java",
+      "filePath": "src/main/java/com/hris/auth/enums/AccountStatus.java",
+      "summary": "Enum capturing Keycloak-mirrored account lifecycle states (PENDING, ACTIVE, DISABLED).",
+      "tags": [
+        "enum",
+        "account",
+        "status"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "file",
+      "name": "ContractType.java",
+      "filePath": "src/main/java/com/hris/auth/enums/ContractType.java",
+      "summary": "Enum enumerating supported employee contract types (CDI, CDD, internship, freelance).",
+      "tags": [
+        "enum",
+        "contract",
+        "employee"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "file",
+      "name": "EmployeeStatus.java",
+      "filePath": "src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "summary": "Enum representing employee operational states such as ACTIVE, ON_LEAVE, or TERMINATED.",
+      "tags": [
+        "enum",
+        "employee",
+        "status"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "type": "file",
+      "name": "DepartmentMapper.java",
+      "filePath": "src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "summary": "Mapper utility converting Department entities to DepartmentDto for API responses.",
+      "tags": [
+        "mapper",
+        "department",
+        "dto-conversion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "type": "file",
+      "name": "EmployeeMapper.java",
+      "filePath": "src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "summary": "Mapper component converting Employee entities to outbound DTOs and applying create/update DTOs onto entities.",
+      "tags": [
+        "mapper",
+        "employee",
+        "dto-conversion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "file",
+      "name": "DepartmentRepository.java",
+      "filePath": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "summary": "Spring Data JPA repository for Department with name uniqueness checks and head-based lookups.",
+      "tags": [
+        "repository",
+        "department",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+      "type": "file",
+      "name": "EmployeeDepartmentHistoryRepository.java",
+      "filePath": "src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+      "summary": "Spring Data JPA repository for querying department-transfer history records.",
+      "tags": [
+        "repository",
+        "history",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "file",
+      "name": "EmployeeRepository.java",
+      "filePath": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "summary": "Spring Data JPA repository for Employee with rich finder methods used across auth, leave, and approval modules.",
+      "tags": [
+        "repository",
+        "employee",
+        "data-access",
+        "core"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+      "type": "file",
+      "name": "EmployeeStatusHistoryRepository.java",
+      "filePath": "src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+      "summary": "Spring Data JPA repository providing access to employee status change history.",
+      "tags": [
+        "repository",
+        "history",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "type": "file",
+      "name": "DepartmentService.java",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "summary": "Department management service handling CRUD, deactivation, reactivation, deletion guards, and DTO assembly for the HR console.",
+      "tags": [
+        "service",
+        "department",
+        "crud",
+        "organisation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "type": "file",
+      "name": "EmployeeHistoryService.java",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "summary": "Service that records hire events, department transfers, and status changes into the corresponding history tables.",
+      "tags": [
+        "service",
+        "history",
+        "audit",
+        "employee"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "type": "file",
+      "name": "EmployeeOnboardingService.java",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "summary": "Orchestrates new-employee onboarding: persists employee, provisions Keycloak account, assigns default access profile, and dispatches activation email.",
+      "tags": [
+        "service",
+        "onboarding",
+        "employee",
+        "provisioning"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/entity/Department.java:Department",
+      "type": "class",
+      "name": "Department",
+      "filePath": "src/main/java/com/hris/auth/entity/Department.java",
+      "lineRange": [
+        9,
+        56
+      ],
+      "summary": "JPA entity representing a department with hierarchy and head linkage.",
+      "tags": [
+        "entity",
+        "jpa",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/entity/Employee.java:Employee",
+      "type": "class",
+      "name": "Employee",
+      "filePath": "src/main/java/com/hris/auth/entity/Employee.java",
+      "lineRange": [
+        12,
+        87
+      ],
+      "summary": "Core JPA entity for an HRIS employee.",
+      "tags": [
+        "entity",
+        "jpa",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java:EmployeeDepartmentHistory",
+      "type": "class",
+      "name": "EmployeeDepartmentHistory",
+      "filePath": "src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "lineRange": [
+        19,
+        49
+      ],
+      "summary": "JPA entity tracking department transfers per employee.",
+      "tags": [
+        "entity",
+        "history",
+        "audit"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java:EmployeeStatusHistory",
+      "type": "class",
+      "name": "EmployeeStatusHistory",
+      "filePath": "src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "lineRange": [
+        22,
+        57
+      ],
+      "summary": "JPA entity tracking status changes per employee.",
+      "tags": [
+        "entity",
+        "history",
+        "audit"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/mapper/DepartmentMapper.java:DepartmentMapper",
+      "type": "class",
+      "name": "DepartmentMapper",
+      "filePath": "src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "lineRange": [
+        7,
+        27
+      ],
+      "summary": "Mapper converting Department entities to DepartmentDto.",
+      "tags": [
+        "mapper",
+        "dto-conversion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/mapper/EmployeeMapper.java:EmployeeMapper",
+      "type": "class",
+      "name": "EmployeeMapper",
+      "filePath": "src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "lineRange": [
+        10,
+        40
+      ],
+      "summary": "Mapper between Employee entities and DTOs.",
+      "tags": [
+        "mapper",
+        "dto-conversion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/repository/DepartmentRepository.java:DepartmentRepository",
+      "type": "class",
+      "name": "DepartmentRepository",
+      "filePath": "src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "lineRange": [
+        16,
+        29
+      ],
+      "summary": "Spring Data repository for Department.",
+      "tags": [
+        "repository",
+        "data-access",
+        "jpa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/repository/EmployeeRepository.java:EmployeeRepository",
+      "type": "class",
+      "name": "EmployeeRepository",
+      "filePath": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "lineRange": [
+        17,
+        63
+      ],
+      "summary": "Spring Data repository for Employee with custom finders.",
+      "tags": [
+        "repository",
+        "data-access",
+        "jpa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/service/DepartmentService.java:DepartmentService",
+      "type": "class",
+      "name": "DepartmentService",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        34,
+        273
+      ],
+      "summary": "Service implementing department lifecycle operations.",
+      "tags": [
+        "service",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:getAll",
+      "type": "function",
+      "name": "getAll",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        47,
+        67
+      ],
+      "summary": "Method getAll in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:getById",
+      "type": "function",
+      "name": "getById",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        69,
+        85
+      ],
+      "summary": "Method getById in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:create",
+      "type": "function",
+      "name": "create",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        87,
+        103
+      ],
+      "summary": "Method create in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        105,
+        135
+      ],
+      "summary": "Method update in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:delete",
+      "type": "function",
+      "name": "delete",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        137,
+        151
+      ],
+      "summary": "Method delete in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:deactivate",
+      "type": "function",
+      "name": "deactivate",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        153,
+        171
+      ],
+      "summary": "Method deactivate in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:reactivate",
+      "type": "function",
+      "name": "reactivate",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        173,
+        195
+      ],
+      "summary": "Method reactivate in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:validateDeletion",
+      "type": "function",
+      "name": "validateDeletion",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        197,
+        208
+      ],
+      "summary": "Method validateDeletion in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/DepartmentService.java:toDto",
+      "type": "function",
+      "name": "toDto",
+      "filePath": "src/main/java/com/hris/auth/service/DepartmentService.java",
+      "lineRange": [
+        219,
+        236
+      ],
+      "summary": "Method toDto in DepartmentService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:EmployeeHistoryService",
+      "type": "class",
+      "name": "EmployeeHistoryService",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "lineRange": [
+        15,
+        75
+      ],
+      "summary": "Service that records employee history events.",
+      "tags": [
+        "service",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:recordHire",
+      "type": "function",
+      "name": "recordHire",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "lineRange": [
+        22,
+        43
+      ],
+      "summary": "Method recordHire in EmployeeHistoryService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:recordDepartmentTransfer",
+      "type": "function",
+      "name": "recordDepartmentTransfer",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "lineRange": [
+        45,
+        58
+      ],
+      "summary": "Method recordDepartmentTransfer in EmployeeHistoryService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:recordStatusChange",
+      "type": "function",
+      "name": "recordStatusChange",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "lineRange": [
+        60,
+        74
+      ],
+      "summary": "Method recordStatusChange in EmployeeHistoryService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:EmployeeOnboardingService",
+      "type": "class",
+      "name": "EmployeeOnboardingService",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "lineRange": [
+        27,
+        102
+      ],
+      "summary": "Orchestrates onboarding of new employees including Keycloak provisioning.",
+      "tags": [
+        "service",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:onboard",
+      "type": "function",
+      "name": "onboard",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "lineRange": [
+        42,
+        86
+      ],
+      "summary": "Method onboard in EmployeeOnboardingService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:resendActivationEmail",
+      "type": "function",
+      "name": "resendActivationEmail",
+      "filePath": "src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "lineRange": [
+        88,
+        101
+      ],
+      "summary": "Method resendActivationEmail in EmployeeOnboardingService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "target": "class:src/main/java/com/hris/auth/entity/Department.java:Department",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "target": "class:src/main/java/com/hris/auth/entity/Department.java:Department",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "target": "class:src/main/java/com/hris/auth/entity/Employee.java:Employee",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "target": "class:src/main/java/com/hris/auth/entity/Employee.java:Employee",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "target": "class:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java:EmployeeDepartmentHistory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "target": "class:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java:EmployeeDepartmentHistory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "target": "class:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java:EmployeeStatusHistory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "target": "class:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java:EmployeeStatusHistory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "target": "class:src/main/java/com/hris/auth/mapper/DepartmentMapper.java:DepartmentMapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "target": "class:src/main/java/com/hris/auth/mapper/DepartmentMapper.java:DepartmentMapper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "target": "class:src/main/java/com/hris/auth/mapper/EmployeeMapper.java:EmployeeMapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "target": "class:src/main/java/com/hris/auth/mapper/EmployeeMapper.java:EmployeeMapper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "target": "class:src/main/java/com/hris/auth/repository/DepartmentRepository.java:DepartmentRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "target": "class:src/main/java/com/hris/auth/repository/DepartmentRepository.java:DepartmentRepository",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "target": "class:src/main/java/com/hris/auth/repository/EmployeeRepository.java:EmployeeRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "target": "class:src/main/java/com/hris/auth/repository/EmployeeRepository.java:EmployeeRepository",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "class:src/main/java/com/hris/auth/service/DepartmentService.java:DepartmentService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "class:src/main/java/com/hris/auth/service/DepartmentService.java:DepartmentService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:getAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:getById",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:create",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:delete",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:deactivate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:reactivate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:validateDeletion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "function:src/main/java/com/hris/auth/service/DepartmentService.java:toDto",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "class:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:EmployeeHistoryService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "class:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:EmployeeHistoryService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:recordHire",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:recordDepartmentTransfer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeHistoryService.java:recordStatusChange",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "class:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:EmployeeOnboardingService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "class:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:EmployeeOnboardingService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:onboard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "function:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java:resendActivationEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "target": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "target": "file:src/main/java/com/hris/auth/dto/DepartmentDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "target": "file:src/main/java/com/hris/auth/entity/User.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "target": "file:src/main/java/com/hris/auth/enums/AccountStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+      "target": "file:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+      "target": "file:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/DepartmentCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/DepartmentDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/mapper/DepartmentMapper.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/common/exception/DepartmentDeletionNotAllowedException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/DepartmentService.java",
+      "target": "file:src/main/java/com/hris/security/service/AccessScopeService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/EmployeeDepartmentHistory.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/EmployeeStatusHistory.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeDepartmentHistoryRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeHistoryService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeStatusHistoryRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AnalyticsEventPublisher.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/AccountProvisioningRequest.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/User.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/mapper/EmployeeMapper.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/UserRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "target": "file:src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}
