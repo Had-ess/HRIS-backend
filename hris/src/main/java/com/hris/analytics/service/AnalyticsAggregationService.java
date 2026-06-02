@@ -57,6 +57,7 @@ public class AnalyticsAggregationService {
     @Transactional
     public void rebuildHeadcountFacts(LocalDate snapshotDate) {
         headcountFactRepository.deleteBySnapshotDate(snapshotDate);
+        headcountFactRepository.flush();
         for (Employee employee : employeeRepository.findAll()) {
             UUID teamId = resolveCurrentTeamId(employee.getId(), snapshotDate);
             headcountFactRepository.save(HeadcountFact.builder()

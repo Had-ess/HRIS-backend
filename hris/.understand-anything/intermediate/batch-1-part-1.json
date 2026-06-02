@@ -1,0 +1,1537 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "type": "file",
+      "name": "AccessController.java",
+      "filePath": "src/main/java/com/hris/access/controller/AccessController.java",
+      "summary": "REST controller exposing /access endpoints so the current user can fetch effective permissions and dynamic navigation menus.",
+      "tags": [
+        "api-handler",
+        "controller",
+        "access-control",
+        "rest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/dto/AccessMeResponseDto.java",
+      "type": "file",
+      "name": "AccessMeResponseDto.java",
+      "filePath": "src/main/java/com/hris/access/dto/AccessMeResponseDto.java",
+      "summary": "DTO returned by the access /me endpoint, bundling user permissions and navigation tree for the front-end shell.",
+      "tags": [
+        "dto",
+        "access-control",
+        "response-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/dto/AccessPermissionDto.java",
+      "type": "file",
+      "name": "AccessPermissionDto.java",
+      "filePath": "src/main/java/com/hris/access/dto/AccessPermissionDto.java",
+      "summary": "DTO describing a single resolved permission with scope and originating profile, sent to the front-end.",
+      "tags": [
+        "dto",
+        "access-control",
+        "permission"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/dto/NavigationItemDto.java",
+      "type": "file",
+      "name": "NavigationItemDto.java",
+      "filePath": "src/main/java/com/hris/access/dto/NavigationItemDto.java",
+      "summary": "DTO representing a single navigation menu item (label, route, icon) gated by permissions.",
+      "tags": [
+        "dto",
+        "navigation",
+        "ui-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/dto/NavigationSectionDto.java",
+      "type": "file",
+      "name": "NavigationSectionDto.java",
+      "filePath": "src/main/java/com/hris/access/dto/NavigationSectionDto.java",
+      "summary": "DTO grouping navigation items into a labeled section of the application sidebar.",
+      "tags": [
+        "dto",
+        "navigation",
+        "ui-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "file",
+      "name": "StructuralEventType.java",
+      "filePath": "src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "summary": "Enum classifying structural change events (team, department, employee, project) that trigger access-profile recomputation.",
+      "tags": [
+        "enum",
+        "event",
+        "access-control"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "type": "file",
+      "name": "StructuralChangeEvent.java",
+      "filePath": "src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "summary": "Domain event payload published when organisational structure changes, consumed by the access bootstrap migration logic.",
+      "tags": [
+        "event",
+        "access-control",
+        "domain-event"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "file",
+      "name": "AccessResolutionService.java",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "summary": "Core authorization engine computing a user effective permissions, department scopes, and navigation tree by combining access profiles, manual grants, and team-hierarchy data.",
+      "tags": [
+        "service",
+        "access-control",
+        "authorization",
+        "core"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Heavy use of Java streams and CollectionUtils to merge multi-source permission sets; this is the central authorization resolver referenced by the security layer."
+    },
+    {
+      "id": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "type": "file",
+      "name": "ProfileBootstrapMigration.java",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "summary": "Idempotent migration runner that replays employees, department heads, team chain leads, and project managers into the access-profile assignment tables.",
+      "tags": [
+        "service",
+        "migration",
+        "bootstrap",
+        "access-control"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "type": "file",
+      "name": "HeadcountFact.java",
+      "filePath": "src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "summary": "JPA entity persisting headcount snapshots per department and date for analytics dashboards.",
+      "tags": [
+        "entity",
+        "analytics",
+        "jpa",
+        "fact-table"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java",
+      "type": "file",
+      "name": "HeadcountFactRepository.java",
+      "filePath": "src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java",
+      "summary": "Spring Data JPA repository for HeadcountFact rows with bulk delete and recent-snapshot lookup.",
+      "tags": [
+        "repository",
+        "analytics",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "type": "file",
+      "name": "AnalyticsAggregationService.java",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "summary": "Scheduled aggregation service that rebuilds analytics snapshots (headcount, leave distribution, approval bottlenecks, project absences) from operational tables.",
+      "tags": [
+        "service",
+        "analytics",
+        "aggregation",
+        "reporting"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "type": "file",
+      "name": "TeamHierarchyResolver.java",
+      "filePath": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "summary": "Resolves the chain of approvers above a leave requester by walking the team hierarchy upward through team leads.",
+      "tags": [
+        "service",
+        "approval",
+        "team-hierarchy",
+        "workflow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "type": "file",
+      "name": "EmployeeController.java",
+      "filePath": "src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "summary": "REST controller for employee CRUD, onboarding triggers, activation email resend, and listings, secured by permission checks.",
+      "tags": [
+        "api-handler",
+        "controller",
+        "employee",
+        "rest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/dto/AccountProvisioningRequest.java",
+      "type": "file",
+      "name": "AccountProvisioningRequest.java",
+      "filePath": "src/main/java/com/hris/auth/dto/AccountProvisioningRequest.java",
+      "summary": "Inbound DTO carrying credentials and profile data to provision a new Keycloak account alongside an HRIS employee.",
+      "tags": [
+        "dto",
+        "provisioning",
+        "request-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/dto/DepartmentDto.java",
+      "type": "file",
+      "name": "DepartmentDto.java",
+      "filePath": "src/main/java/com/hris/auth/dto/DepartmentDto.java",
+      "summary": "DTO carrying department identity, name, and head metadata between the API and clients.",
+      "tags": [
+        "dto",
+        "department",
+        "response-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/dto/EmployeeCreateDto.java",
+      "type": "file",
+      "name": "EmployeeCreateDto.java",
+      "filePath": "src/main/java/com/hris/auth/dto/EmployeeCreateDto.java",
+      "summary": "Validated inbound DTO with all fields required to create a new employee including identity, contract, and assignment data.",
+      "tags": [
+        "dto",
+        "employee",
+        "validation",
+        "request-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "type": "file",
+      "name": "EmployeeResponseDto.java",
+      "filePath": "src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "summary": "Outbound DTO exposing employee details enriched with department, manager, and account status fields.",
+      "tags": [
+        "dto",
+        "employee",
+        "response-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/access/controller/AccessController.java:AccessController",
+      "type": "class",
+      "name": "AccessController",
+      "filePath": "src/main/java/com/hris/access/controller/AccessController.java",
+      "lineRange": [
+        18,
+        36
+      ],
+      "summary": "REST controller exposing /access/me and navigation lookup endpoints.",
+      "tags": [
+        "controller",
+        "rest",
+        "api-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/access/service/AccessResolutionService.java:AccessResolutionService",
+      "type": "class",
+      "name": "AccessResolutionService",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        40,
+        498
+      ],
+      "summary": "Central authorization service computing effective permissions, scopes, and navigation per user.",
+      "tags": [
+        "service",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:getEffectivePermissions",
+      "type": "function",
+      "name": "getEffectivePermissions",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        90,
+        105
+      ],
+      "summary": "Method getEffectivePermissions in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:hasAnyManualPermissionName",
+      "type": "function",
+      "name": "hasAnyManualPermissionName",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        138,
+        153
+      ],
+      "summary": "Method hasAnyManualPermissionName in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolvePermissionDepartmentScope",
+      "type": "function",
+      "name": "resolvePermissionDepartmentScope",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        159,
+        188
+      ],
+      "summary": "Method resolvePermissionDepartmentScope in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveSystemSourcedDepartmentIds",
+      "type": "function",
+      "name": "resolveSystemSourcedDepartmentIds",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        195,
+        208
+      ],
+      "summary": "Method resolveSystemSourcedDepartmentIds in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveScopedDepartmentIds",
+      "type": "function",
+      "name": "resolveScopedDepartmentIds",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        216,
+        236
+      ],
+      "summary": "Method resolveScopedDepartmentIds in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:hasPermissionInScope",
+      "type": "function",
+      "name": "hasPermissionInScope",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        249,
+        277
+      ],
+      "summary": "Method hasPermissionInScope in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:profileIdsGrantingAnyPermission",
+      "type": "function",
+      "name": "profileIdsGrantingAnyPermission",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        279,
+        304
+      ],
+      "summary": "Method profileIdsGrantingAnyPermission in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveDepartmentIdsFromScopeRef",
+      "type": "function",
+      "name": "resolveDepartmentIdsFromScopeRef",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        306,
+        338
+      ],
+      "summary": "Method resolveDepartmentIdsFromScopeRef in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveAccess",
+      "type": "function",
+      "name": "resolveAccess",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        406,
+        444
+      ],
+      "summary": "Method resolveAccess in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveNavigation",
+      "type": "function",
+      "name": "resolveNavigation",
+      "filePath": "src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "lineRange": [
+        446,
+        492
+      ],
+      "summary": "Method resolveNavigation in AccessResolutionService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:ProfileBootstrapMigration",
+      "type": "class",
+      "name": "ProfileBootstrapMigration",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "lineRange": [
+        39,
+        171
+      ],
+      "summary": "Startup component that backfills access profile assignments from existing org data.",
+      "tags": [
+        "service",
+        "migration",
+        "bootstrap"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "lineRange": [
+        55,
+        77
+      ],
+      "summary": "Method run in ProfileBootstrapMigration.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayEmployees",
+      "type": "function",
+      "name": "replayEmployees",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "lineRange": [
+        87,
+        98
+      ],
+      "summary": "Method replayEmployees in ProfileBootstrapMigration.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayDepartmentHeads",
+      "type": "function",
+      "name": "replayDepartmentHeads",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "lineRange": [
+        100,
+        115
+      ],
+      "summary": "Method replayDepartmentHeads in ProfileBootstrapMigration.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayTeamChainHeads",
+      "type": "function",
+      "name": "replayTeamChainHeads",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "lineRange": [
+        117,
+        143
+      ],
+      "summary": "Method replayTeamChainHeads in ProfileBootstrapMigration.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayProjectManagers",
+      "type": "function",
+      "name": "replayProjectManagers",
+      "filePath": "src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "lineRange": [
+        145,
+        170
+      ],
+      "summary": "Method replayProjectManagers in ProfileBootstrapMigration.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/analytics/entity/HeadcountFact.java:HeadcountFact",
+      "type": "class",
+      "name": "HeadcountFact",
+      "filePath": "src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "lineRange": [
+        11,
+        55
+      ],
+      "summary": "JPA entity storing per-department, per-date headcount snapshots.",
+      "tags": [
+        "entity",
+        "analytics",
+        "fact-table"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java:HeadcountFactRepository",
+      "type": "class",
+      "name": "HeadcountFactRepository",
+      "filePath": "src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java",
+      "lineRange": [
+        11,
+        15
+      ],
+      "summary": "Repository for HeadcountFact bulk operations.",
+      "tags": [
+        "repository",
+        "data-access",
+        "jpa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:AnalyticsAggregationService",
+      "type": "class",
+      "name": "AnalyticsAggregationService",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        28,
+        307
+      ],
+      "summary": "Aggregates operational tables into analytics fact tables and snapshots.",
+      "tags": [
+        "service",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildCurrentSnapshots",
+      "type": "function",
+      "name": "rebuildCurrentSnapshots",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        44,
+        55
+      ],
+      "summary": "Method rebuildCurrentSnapshots in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildHeadcountFacts",
+      "type": "function",
+      "name": "rebuildHeadcountFacts",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        57,
+        71
+      ],
+      "summary": "Method rebuildHeadcountFacts in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildProjectAbsenceFacts",
+      "type": "function",
+      "name": "rebuildProjectAbsenceFacts",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        73,
+        88
+      ],
+      "summary": "Method rebuildProjectAbsenceFacts in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildLeaveDistribution",
+      "type": "function",
+      "name": "rebuildLeaveDistribution",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        104,
+        122
+      ],
+      "summary": "Method rebuildLeaveDistribution in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildApprovalBottlenecks",
+      "type": "function",
+      "name": "rebuildApprovalBottlenecks",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        124,
+        168
+      ],
+      "summary": "Method rebuildApprovalBottlenecks in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:buildLeaveMetricsSnapshot",
+      "type": "function",
+      "name": "buildLeaveMetricsSnapshot",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        170,
+        191
+      ],
+      "summary": "Method buildLeaveMetricsSnapshot in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:buildHeadcountSnapshot",
+      "type": "function",
+      "name": "buildHeadcountSnapshot",
+      "filePath": "src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "lineRange": [
+        193,
+        215
+      ],
+      "summary": "Method buildHeadcountSnapshot in AnalyticsAggregationService.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java:TeamHierarchyResolver",
+      "type": "class",
+      "name": "TeamHierarchyResolver",
+      "filePath": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "lineRange": [
+        12,
+        58
+      ],
+      "summary": "Resolves the upward chain of team leads above a given employee.",
+      "tags": [
+        "service",
+        "resolver",
+        "workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java:resolveAboveRequester",
+      "type": "function",
+      "name": "resolveAboveRequester",
+      "filePath": "src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "lineRange": [
+        18,
+        43
+      ],
+      "summary": "Method resolveAboveRequester in TeamHierarchyResolver.java.",
+      "tags": [
+        "method",
+        "java",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/auth/controller/EmployeeController.java:EmployeeController",
+      "type": "class",
+      "name": "EmployeeController",
+      "filePath": "src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "lineRange": [
+        22,
+        96
+      ],
+      "summary": "REST endpoints for employee CRUD, onboarding, and listing.",
+      "tags": [
+        "controller",
+        "rest",
+        "api-handler"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "class:src/main/java/com/hris/access/controller/AccessController.java:AccessController",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "class:src/main/java/com/hris/access/controller/AccessController.java:AccessController",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "class:src/main/java/com/hris/access/service/AccessResolutionService.java:AccessResolutionService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "class:src/main/java/com/hris/access/service/AccessResolutionService.java:AccessResolutionService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:getEffectivePermissions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:hasAnyManualPermissionName",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolvePermissionDepartmentScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveSystemSourcedDepartmentIds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveScopedDepartmentIds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:hasPermissionInScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:profileIdsGrantingAnyPermission",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveDepartmentIdsFromScopeRef",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveAccess",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "function:src/main/java/com/hris/access/service/AccessResolutionService.java:resolveNavigation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "class:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:ProfileBootstrapMigration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "class:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:ProfileBootstrapMigration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:run",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayEmployees",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayDepartmentHeads",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayTeamChainHeads",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "function:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java:replayProjectManagers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "target": "class:src/main/java/com/hris/analytics/entity/HeadcountFact.java:HeadcountFact",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "target": "class:src/main/java/com/hris/analytics/entity/HeadcountFact.java:HeadcountFact",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java",
+      "target": "class:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java:HeadcountFactRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java",
+      "target": "class:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java:HeadcountFactRepository",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "class:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:AnalyticsAggregationService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "class:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:AnalyticsAggregationService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildCurrentSnapshots",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildHeadcountFacts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildProjectAbsenceFacts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildLeaveDistribution",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:rebuildApprovalBottlenecks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:buildLeaveMetricsSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "function:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java:buildHeadcountSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "target": "class:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java:TeamHierarchyResolver",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "target": "class:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java:TeamHierarchyResolver",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "target": "function:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java:resolveAboveRequester",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "class:src/main/java/com/hris/auth/controller/EmployeeController.java:EmployeeController",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "class:src/main/java/com/hris/auth/controller/EmployeeController.java:EmployeeController",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "file:src/main/java/com/hris/access/dto/AccessMeResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "file:src/main/java/com/hris/access/dto/NavigationSectionDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "file:src/main/java/com/hris/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/controller/AccessController.java",
+      "target": "file:src/main/java/com/hris/security/SecurityUtils.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "target": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/dto/AccessMeResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/dto/AccessPermissionDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/dto/NavigationItemDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/dto/NavigationSectionDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/entity/AccessProfile.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/entity/MenuItem.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/entity/ProfileMenuAccess.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/entity/ProfilePermission.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/entity/UserProfileAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/repository/MenuItemRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/repository/ProfileMenuAccessRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/repository/ProfilePermissionRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/access/repository/UserProfileAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Permission.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectDepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/AccessResolutionService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/TeamRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/access/enums/StructuralEventType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/access/event/StructuralChangeEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Department.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/auth/repository/DepartmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/access/service/ProfileBootstrapMigration.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/repository/HeadcountFactRepository.java",
+      "target": "file:src/main/java/com/hris/analytics/entity/HeadcountFact.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/AnalyticsScopeType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/ApprovalSourceType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/analytics/enums/RiskLevel.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/approval/entity/ApprovalStep.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/approval/enums/StepStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/approval/repository/ApprovalStepRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/auth/entity/Employee.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/leave/enums/LeaveStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/analytics/service/AnalyticsAggregationService.java",
+      "target": "file:src/main/java/com/hris/organisation/repository/ProjectAssignmentRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyRelation.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/entity/TeamHierarchyStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/approval/service/TeamHierarchyResolver.java",
+      "target": "file:src/main/java/com/hris/organisation/hierarchy/repository/TeamHierarchyRelationRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeCreateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/auth/dto/EmployeeUpdateDto.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/auth/service/EmployeeOnboardingService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/auth/service/EmployeeService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/common/PageResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/security/PermissionAuthorizationService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/controller/EmployeeController.java",
+      "target": "file:src/main/java/com/hris/security/SecurityUtils.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeCreateDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeCreateDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/AccountStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/ContractType.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/auth/dto/EmployeeResponseDto.java",
+      "target": "file:src/main/java/com/hris/auth/enums/EmployeeStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

@@ -1,0 +1,1065 @@
+{
+  "batchIndex": 11,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/java/com/hris/admin/repository/AdminRequestAttachmentRepository.java",
+      "language": "java",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/repository/AdminRequestCommentRepository.java",
+      "language": "java",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/repository/AdminRequestRepository.java",
+      "language": "java",
+      "sizeLines": 51,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/repository/AdminRequestTypeRepository.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/service/AdminRequestAttachmentService.java",
+      "language": "java",
+      "sizeLines": 134,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/service/AdminRequestQueryService.java",
+      "language": "java",
+      "sizeLines": 194,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/service/AdminRequestService.java",
+      "language": "java",
+      "sizeLines": 587,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/service/AdminRequestSlaService.java",
+      "language": "java",
+      "sizeLines": 138,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/admin/service/AdminRequestTypeService.java",
+      "language": "java",
+      "sizeLines": 145,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/common/event/SystemActor.java",
+      "language": "java",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/config/RabbitMQConfig.java",
+      "language": "java",
+      "sizeLines": 107,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/dashboard/dto/AdminRequestSummaryDto.java",
+      "language": "java",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/leave/service/FileStorageService.java",
+      "language": "java",
+      "sizeLines": 125,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "language": "java",
+      "sizeLines": 31,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/enums/NotificationEventType.java",
+      "language": "java",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/repository/NotificationEventRepository.java",
+      "language": "java",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/service/DeadLetterQueueHandler.java",
+      "language": "java",
+      "sizeLines": 41,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/service/NotificationOutboxWorker.java",
+      "language": "java",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/service/NotificationPublisher.java",
+      "language": "java",
+      "sizeLines": 77,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java",
+      "language": "java",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/main/java/com/hris/admin/repository/AdminRequestAttachmentRepository.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java"
+    ],
+    "src/main/java/com/hris/admin/repository/AdminRequestCommentRepository.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequestComment.java"
+    ],
+    "src/main/java/com/hris/admin/repository/AdminRequestRepository.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequest.java",
+      "src/main/java/com/hris/admin/enums/AdminRequestStatus.java"
+    ],
+    "src/main/java/com/hris/admin/repository/AdminRequestTypeRepository.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequestType.java"
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestAttachmentService.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestAttachmentRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/common/exception/FileAttachmentValidationException.java",
+      "src/main/java/com/hris/leave/service/FileStorageService.java"
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestQueryService.java": [
+      "src/main/java/com/hris/admin/dto/AdminRequestAttachmentDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestCommentDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestResponseDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestStatusHistoryDto.java",
+      "src/main/java/com/hris/admin/entity/AdminRequest.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestComment.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+      "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestAttachmentRepository.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestCommentRepository.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestTypeRepository.java",
+      "src/main/java/com/hris/auth/service/UserDisplayNameService.java"
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestService.java": [
+      "src/main/java/com/hris/admin/dto/AdminRequestCommentCreateDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestInboxSummaryDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestRejectDto.java",
+      "src/main/java/com/hris/admin/dto/CreateAdminRequestDto.java",
+      "src/main/java/com/hris/admin/dto/UpdateAdminRequestDto.java",
+      "src/main/java/com/hris/admin/entity/AdminRequest.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestComment.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+      "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestAttachmentRepository.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestCommentRepository.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestRepository.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestTypeRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/entity/Employee.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+      "src/main/java/com/hris/common/exception/InvalidAdminRequestStateException.java",
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "src/main/java/com/hris/notification/enums/NotificationEventType.java",
+      "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java",
+      "src/main/java/com/hris/security/service/AccessScopeService.java"
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestSlaService.java": [
+      "src/main/java/com/hris/admin/entity/AdminRequest.java",
+      "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestRepository.java",
+      "src/main/java/com/hris/analytics/enums/AuditAction.java",
+      "src/main/java/com/hris/analytics/service/AuditLogService.java",
+      "src/main/java/com/hris/auth/entity/User.java",
+      "src/main/java/com/hris/auth/repository/UserRepository.java",
+      "src/main/java/com/hris/common/event/ActorType.java",
+      "src/main/java/com/hris/common/event/SystemActor.java",
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "src/main/java/com/hris/notification/enums/NotificationEventType.java",
+      "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java"
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestTypeService.java": [
+      "src/main/java/com/hris/admin/dto/AdminRequestTypeCreateDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestTypeDto.java",
+      "src/main/java/com/hris/admin/dto/AdminRequestTypeUpdateDto.java",
+      "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestRepository.java",
+      "src/main/java/com/hris/admin/repository/AdminRequestTypeRepository.java",
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java"
+    ],
+    "src/main/java/com/hris/common/event/SystemActor.java": [],
+    "src/main/java/com/hris/config/RabbitMQConfig.java": [],
+    "src/main/java/com/hris/dashboard/dto/AdminRequestSummaryDto.java": [
+      "src/main/java/com/hris/admin/enums/AdminRequestStatus.java"
+    ],
+    "src/main/java/com/hris/leave/service/FileStorageService.java": [
+      "src/main/java/com/hris/common/exception/EntityNotFoundException.java"
+    ],
+    "src/main/java/com/hris/notification/entity/NotificationEvent.java": [
+      "src/main/java/com/hris/notification/enums/NotificationEventType.java"
+    ],
+    "src/main/java/com/hris/notification/enums/NotificationEventType.java": [],
+    "src/main/java/com/hris/notification/repository/NotificationEventRepository.java": [
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java"
+    ],
+    "src/main/java/com/hris/notification/service/DeadLetterQueueHandler.java": [
+      "src/main/java/com/hris/config/RabbitMQConfig.java"
+    ],
+    "src/main/java/com/hris/notification/service/NotificationOutboxWorker.java": [
+      "src/main/java/com/hris/config/RabbitMQConfig.java",
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "src/main/java/com/hris/notification/repository/NotificationEventRepository.java"
+    ],
+    "src/main/java/com/hris/notification/service/NotificationPublisher.java": [
+      "src/main/java/com/hris/config/RabbitMQConfig.java",
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java",
+      "src/main/java/com/hris/notification/repository/NotificationEventRepository.java"
+    ],
+    "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java": [
+      "src/main/java/com/hris/notification/entity/NotificationEvent.java"
+    ]
+  },
+  "neighborMap": {
+    "src/main/java/com/hris/admin/repository/AdminRequestAttachmentRepository.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestAttachment"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/repository/AdminRequestCommentRepository.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestComment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestComment"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/repository/AdminRequestRepository.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequest.java",
+        "batchIndex": 10,
+        "symbols": [
+          "generateRequestNumber",
+          "equals",
+          "hashCode",
+          "AdminRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/approval/service/ApprovalStepQueryService.java",
+        "batchIndex": 3,
+        "symbols": [
+          "toPendingPage",
+          "ApprovalStepQueryService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDeletionService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "deleteUser",
+          "UserDeletionService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/repository/AdminRequestTypeRepository.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestAttachmentService.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestAttachment"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/FileAttachmentValidationException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "FileAttachmentValidationException",
+          "FileAttachmentValidationException"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestQueryService.java": [
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestAttachmentDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestCommentDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestResponseDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestStatusHistoryDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequest.java",
+        "batchIndex": 10,
+        "symbols": [
+          "generateRequestNumber",
+          "equals",
+          "hashCode",
+          "AdminRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestAttachment"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestComment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestComment"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDisplayNameService.java",
+        "batchIndex": 7,
+        "symbols": [
+          "toDisplayName",
+          "resolveDisplayName",
+          "resolveDisplayNames",
+          "UserDisplayNameService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getMyRequests",
+          "getMyRequest",
+          "create",
+          "update",
+          "submit",
+          "cancel",
+          "uploadAttachment",
+          "getInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "AdminRequestController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestService.java": [
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestCommentCreateDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestInboxSummaryDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestRejectDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/CreateAdminRequestDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/UpdateAdminRequestDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequest.java",
+        "batchIndex": 10,
+        "symbols": [
+          "generateRequestNumber",
+          "equals",
+          "hashCode",
+          "AdminRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestAttachment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestAttachment"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestComment.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestComment"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/Employee.java",
+        "batchIndex": 1,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "Employee"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/EmployeeRepository.java",
+        "batchIndex": 1,
+        "symbols": [
+          "EmployeeRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/InvalidAdminRequestStateException.java",
+        "batchIndex": 14,
+        "symbols": [
+          "InvalidAdminRequestStateException",
+          "InvalidAdminRequestStateException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/security/service/AccessScopeService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "hasPermission",
+          "hasPermissionName",
+          "hasAnyPermissionName",
+          "findEmployee",
+          "getEmployeeOrThrow",
+          "resolveDepartmentManagerDepartmentId",
+          "resolveApprovalScope",
+          "resolveDepartmentDataScope",
+          "hasGlobalAnalyticsVisibility",
+          "hasGlobalBusinessRead",
+          "hasUnrestrictedProjectPortfolioManagement",
+          "hasAdministrationOrHrVisibility",
+          "hasProjectScopedManagement",
+          "hasManagerInboxAccess",
+          "AccessScopeService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getMyRequests",
+          "getMyRequest",
+          "create",
+          "update",
+          "submit",
+          "cancel",
+          "uploadAttachment",
+          "getInbox",
+          "getInboxSummary",
+          "getInboxRequest",
+          "startReview",
+          "approve",
+          "reject",
+          "complete",
+          "addComment",
+          "uploadResponseAttachment",
+          "AdminRequestController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestSlaService.java": [
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequest.java",
+        "batchIndex": 10,
+        "symbols": [
+          "generateRequestNumber",
+          "equals",
+          "hashCode",
+          "AdminRequest"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/enums/AuditAction.java",
+        "batchIndex": 13,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/analytics/service/AuditLogService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "log",
+          "log",
+          "getByResource",
+          "getByActor",
+          "getAll",
+          "search",
+          "AuditLogService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/entity/User.java",
+        "batchIndex": 7,
+        "symbols": [
+          "updateLastLogin",
+          "equals",
+          "hashCode",
+          "User"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/auth/repository/UserRepository.java",
+        "batchIndex": 7,
+        "symbols": [
+          "UserRepository"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/event/ActorType.java",
+        "batchIndex": 9,
+        "symbols": []
+      }
+    ],
+    "src/main/java/com/hris/admin/service/AdminRequestTypeService.java": [
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestTypeCreateDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestTypeDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/dto/AdminRequestTypeUpdateDto.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/admin/entity/AdminRequestType.java",
+        "batchIndex": 10,
+        "symbols": [
+          "equals",
+          "hashCode",
+          "AdminRequestType"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/admin/controller/AdminRequestTypeController.java",
+        "batchIndex": 10,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "AdminRequestTypeController"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/common/event/SystemActor.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveAccrualService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getRunHistory",
+          "findDuePolicies",
+          "calculateAccrualForPolicy",
+          "applyAccrualForPolicy",
+          "runDuePoliciesWithTracking",
+          "runDuePolicies",
+          "runScheduledAccrual",
+          "LeaveAccrualService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/config/RabbitMQConfig.java": [
+      {
+        "path": "src/main/java/com/hris/notification/service/NotificationConsumer.java",
+        "batchIndex": 7,
+        "symbols": [
+          "onLeaveEvent",
+          "onAdminEvent",
+          "onSystemEvent",
+          "NotificationConsumer"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/dashboard/dto/AdminRequestSummaryDto.java": [
+      {
+        "path": "src/main/java/com/hris/admin/enums/AdminRequestStatus.java",
+        "batchIndex": 10,
+        "symbols": []
+      },
+      {
+        "path": "src/main/java/com/hris/dashboard/service/DashboardService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "getEmployeeDashboard",
+          "getSupervisorDashboard",
+          "getHrDashboard",
+          "getDirectorDashboard",
+          "DashboardService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/leave/service/FileStorageService.java": [
+      {
+        "path": "src/main/java/com/hris/common/exception/EntityNotFoundException.java",
+        "batchIndex": 13,
+        "symbols": [
+          "EntityNotFoundException",
+          "EntityNotFoundException"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/notification/entity/NotificationEvent.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveAccrualService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getRunHistory",
+          "findDuePolicies",
+          "calculateAccrualForPolicy",
+          "applyAccrualForPolicy",
+          "runDuePoliciesWithTracking",
+          "runDuePolicies",
+          "runScheduledAccrual",
+          "LeaveAccrualService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceLedgerService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getTransactions",
+          "getLedgerForEmployee",
+          "getProjection",
+          "getAvailableBalance",
+          "adjustBalance",
+          "reserveForLeaveRequest",
+          "confirmApprovedLeaveRequest",
+          "releaseRejectedLeaveRequest",
+          "releaseCancelledLeaveRequest",
+          "applyAccrual",
+          "LeaveBalanceLedgerService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/notification/service/NotificationConsumer.java",
+        "batchIndex": 7,
+        "symbols": [
+          "onLeaveEvent",
+          "onAdminEvent",
+          "onSystemEvent",
+          "NotificationConsumer"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/notification/enums/NotificationEventType.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveAccrualService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getRunHistory",
+          "findDuePolicies",
+          "calculateAccrualForPolicy",
+          "applyAccrualForPolicy",
+          "runDuePoliciesWithTracking",
+          "runDuePolicies",
+          "runScheduledAccrual",
+          "LeaveAccrualService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceLedgerService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getTransactions",
+          "getLedgerForEmployee",
+          "getProjection",
+          "getAvailableBalance",
+          "adjustBalance",
+          "reserveForLeaveRequest",
+          "confirmApprovedLeaveRequest",
+          "releaseRejectedLeaveRequest",
+          "releaseCancelledLeaveRequest",
+          "applyAccrual",
+          "LeaveBalanceLedgerService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/notification/repository/NotificationEventRepository.java": [
+      {
+        "path": "src/main/java/com/hris/auth/service/UserDeletionService.java",
+        "batchIndex": 13,
+        "symbols": [
+          "deleteUser",
+          "UserDeletionService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/notification/service/NotificationPublisher.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveAccrualService.java",
+        "batchIndex": 9,
+        "symbols": [
+          "getRunHistory",
+          "findDuePolicies",
+          "calculateAccrualForPolicy",
+          "applyAccrualForPolicy",
+          "runDuePoliciesWithTracking",
+          "runDuePolicies",
+          "runScheduledAccrual",
+          "LeaveAccrualService"
+        ]
+      }
+    ],
+    "src/main/java/com/hris/notification/service/TransactionalNotificationPublisher.java": [
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveBalanceLedgerService.java",
+        "batchIndex": 16,
+        "symbols": [
+          "getTransactions",
+          "getLedgerForEmployee",
+          "getProjection",
+          "getAvailableBalance",
+          "adjustBalance",
+          "reserveForLeaveRequest",
+          "confirmApprovedLeaveRequest",
+          "releaseRejectedLeaveRequest",
+          "releaseCancelledLeaveRequest",
+          "applyAccrual",
+          "LeaveBalanceLedgerService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/leave/service/LeaveRequestService.java",
+        "batchIndex": 4,
+        "symbols": [
+          "create",
+          "createDraft",
+          "updateDraft",
+          "submitDraft",
+          "deleteDraft",
+          "preview",
+          "getMyRequests",
+          "getVisibleRequests",
+          "getById",
+          "canUploadAttachment",
+          "cancel",
+          "handleWorkflowCompletion",
+          "handleWorkflowCompletion",
+          "uploadAttachment",
+          "getAttachments",
+          "downloadAttachment",
+          "deleteAttachment",
+          "LeaveRequestService"
+        ]
+      },
+      {
+        "path": "src/main/java/com/hris/organisation/service/ProjectService.java",
+        "batchIndex": 2,
+        "symbols": [
+          "getAll",
+          "getById",
+          "create",
+          "update",
+          "deactivate",
+          "hardDelete",
+          "assignEmployee",
+          "getTeams",
+          "createTeam",
+          "removeAssignment",
+          "getAssignments",
+          "getDepartments",
+          "assignDepartment",
+          "removeDepartment",
+          "ProjectService"
+        ]
+      }
+    ]
+  }
+}

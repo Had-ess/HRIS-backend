@@ -1,0 +1,246 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "type": "file",
+      "name": "ProjectDepartmentAssignDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectDepartmentAssignDto.java",
+      "summary": "Request DTO linking a department to a project.",
+      "tags": [
+        "dto",
+        "project",
+        "department",
+        "request"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "type": "file",
+      "name": "ProjectDepartmentResponseDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectDepartmentResponseDto.java",
+      "summary": "Response DTO returning a project-department link with department metadata.",
+      "tags": [
+        "dto",
+        "project",
+        "department",
+        "response"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "type": "file",
+      "name": "ProjectResponseDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "summary": "Response DTO describing a project with code, name, status, and dates.",
+      "tags": [
+        "dto",
+        "project",
+        "response"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "type": "file",
+      "name": "ProjectTeamCreateDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectTeamCreateDto.java",
+      "summary": "Request DTO for creating a project-scoped team including leader, parent supervisor, and date window.",
+      "tags": [
+        "dto",
+        "project",
+        "team",
+        "request"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "type": "file",
+      "name": "ProjectTeamResponseDto.java",
+      "filePath": "src/main/java/com/hris/organisation/dto/ProjectTeamResponseDto.java",
+      "summary": "Response DTO returning a project-team including code, name, and leadership references.",
+      "tags": [
+        "dto",
+        "project",
+        "team",
+        "response"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "type": "file",
+      "name": "Project.java",
+      "filePath": "src/main/java/com/hris/organisation/entity/Project.java",
+      "summary": "JPA entity representing a project with code, status, lifecycle dates, and relationships to assignments and teams.",
+      "tags": [
+        "entity",
+        "jpa",
+        "project",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "type": "file",
+      "name": "ProjectAssignment.java",
+      "filePath": "src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "summary": "JPA entity linking an employee to a project with a role and effective date range.",
+      "tags": [
+        "entity",
+        "jpa",
+        "project",
+        "assignment",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "type": "file",
+      "name": "ProjectDepartment.java",
+      "filePath": "src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "summary": "JPA join entity associating a department with a project to scope project visibility.",
+      "tags": [
+        "entity",
+        "jpa",
+        "project",
+        "department",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/hris/organisation/entity/Team.java",
+      "type": "file",
+      "name": "Team.java",
+      "filePath": "src/main/java/com/hris/organisation/entity/Team.java",
+      "summary": "JPA entity representing an organisational team with leader, parent team, and project link references.",
+      "tags": [
+        "entity",
+        "jpa",
+        "team",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/entity/Project.java:Project",
+      "type": "class",
+      "name": "Project",
+      "filePath": "src/main/java/com/hris/organisation/entity/Project.java",
+      "lineRange": [
+        11,
+        52
+      ],
+      "summary": "Class Project declared in Project.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/entity/ProjectAssignment.java:ProjectAssignment",
+      "type": "class",
+      "name": "ProjectAssignment",
+      "filePath": "src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "lineRange": [
+        11,
+        66
+      ],
+      "summary": "Class ProjectAssignment declared in ProjectAssignment.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/entity/ProjectDepartment.java:ProjectDepartment",
+      "type": "class",
+      "name": "ProjectDepartment",
+      "filePath": "src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "lineRange": [
+        9,
+        48
+      ],
+      "summary": "Class ProjectDepartment declared in ProjectDepartment.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/hris/organisation/entity/Team.java:Team",
+      "type": "class",
+      "name": "Team",
+      "filePath": "src/main/java/com/hris/organisation/entity/Team.java",
+      "lineRange": [
+        9,
+        52
+      ],
+      "summary": "Class Team declared in Team.java.",
+      "tags": [
+        "class",
+        "java"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "target": "class:src/main/java/com/hris/organisation/entity/Project.java:Project",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "target": "class:src/main/java/com/hris/organisation/entity/ProjectAssignment.java:ProjectAssignment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/ProjectDepartment.java",
+      "target": "class:src/main/java/com/hris/organisation/entity/ProjectDepartment.java:ProjectDepartment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/Team.java",
+      "target": "class:src/main/java/com/hris/organisation/entity/Team.java:Team",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/dto/ProjectResponseDto.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/Project.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectStatus.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/hris/organisation/entity/ProjectAssignment.java",
+      "target": "file:src/main/java/com/hris/organisation/enums/ProjectRole.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

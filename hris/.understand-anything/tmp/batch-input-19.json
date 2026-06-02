@@ -1,0 +1,30 @@
+{
+  "batchIndex": 19,
+  "totalBatches": 20,
+  "files": [
+    {
+      "path": "src/main/resources/db/seed/01_reference_data.sql",
+      "language": "sql",
+      "sizeLines": 51,
+      "fileCategory": "data"
+    },
+    {
+      "path": "src/main/resources/db/seed/02_access_profiles.sql",
+      "language": "sql",
+      "sizeLines": 47,
+      "fileCategory": "data"
+    },
+    {
+      "path": "src/main/resources/db/seed/03_demo_data.sql",
+      "language": "sql",
+      "sizeLines": 159,
+      "fileCategory": "data"
+    }
+  ],
+  "batchImportData": {
+    "src/main/resources/db/seed/01_reference_data.sql": [],
+    "src/main/resources/db/seed/02_access_profiles.sql": [],
+    "src/main/resources/db/seed/03_demo_data.sql": []
+  },
+  "neighborMap": {}
+}
