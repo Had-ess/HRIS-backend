@@ -54,6 +54,7 @@ public class ApprovalWorkflow {
 
     public boolean isComplete() {
         return status == WorkflowStatus.APPROVED
+            || status == WorkflowStatus.COMPLETED
             || status == WorkflowStatus.REJECTED
             || status == WorkflowStatus.CANCELLED;
     }
