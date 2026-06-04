@@ -23,12 +23,10 @@ import com.hris.common.exception.InvalidWorkflowStateException;
 import com.hris.leave.entity.LeaveRequest;
 import com.hris.leave.entity.LeaveType;
 import com.hris.organisation.entity.ProjectAssignment;
-import com.hris.organisation.entity.TeamProjectLink;
 import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
 import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
 import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
-import com.hris.organisation.repository.TeamProjectLinkRepository;
 import com.hris.settings.validation.entity.ValidationFallbackMode;
 import com.hris.settings.validation.entity.ValidationMode;
 import com.hris.settings.validation.entity.ValidationWorkflow;
@@ -55,7 +53,6 @@ public class LeaveApprovalWorkflowService {
     private final AccessResolutionService accessResolutionService;
     private final TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
-    private final TeamProjectLinkRepository teamProjectLinkRepository;
     private final TeamHierarchyResolver teamHierarchyResolver;
     private final LeaveValidationWorkflowResolver leaveValidationWorkflowResolver;
     private final ObjectMapper objectMapper;
@@ -98,34 +95,14 @@ public class LeaveApprovalWorkflowService {
             return teamIdFromAssignment;
         }
 
-        // Fallback for data gaps: derive team from active hierarchy membership, but
-        // only keep teams effectively linked to at least one active project.
-        List<TeamHierarchyRelation> activeMemberships =
-            teamHierarchyRelationRepository.findByCollaboratorEmployeeIdAndStatusOrderByStartDateAscTeamIdAsc(
+        // Fallback: derive team from active hierarchy membership during the leave period.
+        return teamHierarchyRelationRepository.findByCollaboratorEmployeeIdAndStatusOrderByStartDateAscTeamIdAsc(
                 requesterEmployeeId,
-                TeamHierarchyStatus.ACTIVE);
-
-        List<UUID> membershipTeamIds = activeMemberships.stream()
+                TeamHierarchyStatus.ACTIVE)
+            .stream()
             .filter(relation -> isRelationEffectiveDuring(relation, startDate, endDate))
             .map(TeamHierarchyRelation::getTeamId)
             .filter(Objects::nonNull)
-            .distinct()
-            .toList();
-
-        if (membershipTeamIds.isEmpty()) {
-            return null;
-        }
-
-        Set<UUID> activeLinkedTeamIds = new LinkedHashSet<>(
-            teamProjectLinkRepository.findActiveTeamIdsDuringPeriod(membershipTeamIds, startDate, endDate)
-        );
-
-        if (activeLinkedTeamIds.isEmpty()) {
-            return null;
-        }
-
-        return membershipTeamIds.stream()
-            .filter(activeLinkedTeamIds::contains)
             .findFirst()
             .orElse(null);
     }

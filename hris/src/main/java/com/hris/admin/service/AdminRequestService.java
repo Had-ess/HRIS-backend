@@ -469,7 +469,8 @@ public class AdminRequestService {
                 routingKey,
                 request,
                 type.getName(),
-                null
+                null,
+                "/admin/admin-requests"
             ));
         }
     }
@@ -485,6 +486,9 @@ public class AdminRequestService {
         String typeName = adminRequestTypeRepository.findById(request.getTypeId())
             .map(AdminRequestType::getName)
             .orElse(null);
+        String linkPath = accessScopeService.hasPermissionName(targetUserId, "ADMIN_REQUEST_INBOX_READ")
+            ? "/admin/admin-requests"
+            : "/requests";
         notificationPublisher.publishAfterCommit(buildEvent(
             eventType,
             targetUserId,
@@ -494,7 +498,8 @@ public class AdminRequestService {
             routingKey,
             request,
             typeName,
-            request.getRejectionReason()
+            request.getRejectionReason(),
+            linkPath
         ));
     }
 
@@ -528,13 +533,14 @@ public class AdminRequestService {
             String routingKey,
             AdminRequest request,
             String typeName,
-            String rejectionReason) {
+            String rejectionReason,
+            String linkPath) {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("requestNumber", request.getRequestNumber());
         params.put("subject", request.getSubject());
         params.put("requestType", typeName == null ? "" : typeName);
         params.put("rejectionReason", rejectionReason == null ? "" : rejectionReason);
-        params.put("linkPath", "/requests");
+        params.put("linkPath", linkPath);
 
         return NotificationEvent.builder()
             .eventType(eventType)
