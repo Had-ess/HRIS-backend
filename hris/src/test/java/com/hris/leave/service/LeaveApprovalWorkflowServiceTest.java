@@ -60,7 +60,6 @@ class LeaveApprovalWorkflowServiceTest {
     @Mock private AccessResolutionService accessResolutionService;
     @Mock private TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
-    @Mock private TeamProjectLinkRepository teamProjectLinkRepository;
     @Mock private TeamHierarchyResolver teamHierarchyResolver;
     @Mock private LeaveValidationWorkflowResolver leaveValidationWorkflowResolver;
 
@@ -83,7 +82,6 @@ class LeaveApprovalWorkflowServiceTest {
             accessResolutionService,
             teamHierarchyRelationRepository,
             projectAssignmentRepository,
-            teamProjectLinkRepository,
             teamHierarchyResolver,
             leaveValidationWorkflowResolver,
             new ObjectMapper().findAndRegisterModules()
@@ -289,8 +287,6 @@ class LeaveApprovalWorkflowServiceTest {
                     .endDate(null)
                     .build()
             ));
-        when(teamProjectLinkRepository.findActiveTeamIdsDuringPeriod(List.of(teamId), leaveRequest.getStartDate(), leaveRequest.getEndDate()))
-            .thenReturn(List.of(teamId));
         when(teamHierarchyResolver.resolveAboveRequester(teamId, requester.getId(), leaveRequest.getStartDate()))
             .thenReturn(new TeamHierarchyResolver.RouteCandidateList(
                 List.of(new TeamHierarchyResolver.RouteCandidate(managerEmployeeId, 1, null)),
