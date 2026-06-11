@@ -67,9 +67,9 @@ class ActionTokenServiceTest {
             issued.getValue().getTokenHash(), UserActionToken.Purpose.PASSWORD_RESET))
             .thenReturn(Optional.of(issued.getValue()));
 
-        UUID resolved = actionTokenService.consume(rawToken, UserActionToken.Purpose.PASSWORD_RESET);
+        UserActionToken resolved = actionTokenService.consume(rawToken, UserActionToken.Purpose.PASSWORD_RESET);
 
-        assertThat(resolved).isEqualTo(userId);
+        assertThat(resolved.getUserId()).isEqualTo(userId);
         assertThat(issued.getValue().getUsedAt()).isNotNull();
     }
 

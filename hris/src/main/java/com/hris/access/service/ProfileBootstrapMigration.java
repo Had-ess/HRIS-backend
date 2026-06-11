@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,17 +47,23 @@ public class ProfileBootstrapMigration implements CommandLineRunner {
     private final EmployeeRepository employeeRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final JdbcTemplate jdbcTemplate;
+    private final com.hris.tenancy.TenantJobRunner tenantJobRunner;
 
     @Value("${hris.profile-assignment.bootstrap-on-startup:true}")
     private boolean bootstrapEnabled;
 
     @Override
-    @Transactional
     public void run(String... args) {
         if (!bootstrapEnabled) {
             log.info("ProfileBootstrapMigration disabled via hris.profile-assignment.bootstrap-on-startup=false");
             return;
         }
+        // Structural facts are per-tenant; the startup thread has no context.
+        tenantJobRunner.forEachActiveTenantInTransaction("profileBootstrapMigration",
+            tenant -> bootstrapCurrentTenant());
+    }
+
+    private void bootstrapCurrentTenant() {
         if (alreadyBootstrapped()) {
             log.info("ProfileBootstrapMigration: SYSTEM-sourced assignments already exist — skipping replay");
             return;

@@ -51,11 +51,12 @@ public class ActionTokenService {
     }
 
     /**
-     * Validates and burns the token; returns the owning user id.
-     * Failure modes are deliberately indistinguishable to the caller.
+     * Validates and burns the token; returns it (caller reads userId and —
+     * for the anonymous flows — the tenant to continue under). Failure modes
+     * are deliberately indistinguishable to the caller.
      */
     @Transactional
-    public UUID consume(String rawToken, UserActionToken.Purpose purpose) {
+    public UserActionToken consume(String rawToken, UserActionToken.Purpose purpose) {
         UserActionToken token = userActionTokenRepository
             .findByTokenHashAndPurpose(sha256Hex(rawToken), purpose)
             .filter(UserActionToken::isUsable)
@@ -63,7 +64,7 @@ public class ActionTokenService {
 
         token.setUsedAt(Instant.now());
         userActionTokenRepository.save(token);
-        return token.getUserId();
+        return token;
     }
 
     private String sha256Hex(String value) {

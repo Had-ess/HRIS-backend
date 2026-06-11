@@ -23,6 +23,12 @@ spring:
     username: ${DATASOURCE_USER}
     password: ${DATASOURCE_PASS}
 
+  flyway:
+    # Owner/BYPASSRLS role for schema migrations — never the runtime role.
+    url: ${DATASOURCE_URL}
+    user: ${FLYWAY_USER}
+    password: ${FLYWAY_PASS}
+
   mail:
     host: ${SPRING_MAIL_HOST}
     port: ${SPRING_MAIL_PORT}

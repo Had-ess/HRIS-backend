@@ -1,6 +1,8 @@
 package com.hris.identity.authserver;
 
 import com.hris.identity.security.AuthRateLimitFilter;
+import com.hris.tenancy.LoginTenantFilter;
+import com.hris.tenancy.TenantResolver;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -36,6 +38,7 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -65,7 +68,8 @@ public class AuthorizationServerConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(
-            HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+            HttpSecurity http, CorsConfigurationSource corsConfigurationSource,
+            TenantResolver tenantResolver) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
             OAuth2AuthorizationServerConfigurer.authorizationServer();
 
@@ -77,7 +81,11 @@ public class AuthorizationServerConfig {
             .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
             .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
                 new LoginUrlAuthenticationEntryPoint("/login"),
-                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+            // Remembers ?tenant= from /oauth2/authorize in the session so the
+            // /login redirect renders the right tenant (no-subdomain dev mode),
+            // and gives the token endpoint's claim customization its context.
+            .addFilterBefore(new LoginTenantFilter(tenantResolver), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -88,12 +96,15 @@ public class AuthorizationServerConfig {
      */
     @Bean
     @Order(2)
-    public SecurityFilterChain loginSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain loginSecurityFilterChain(
+            HttpSecurity http, TenantResolver tenantResolver) throws Exception {
         http
             .securityMatcher("/login", "/logout")
             .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
             .formLogin(form -> form.loginPage("/login").permitAll())
-            .logout(logout -> logout.logoutSuccessUrl("/login?logout"));
+            .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
+            // Tenant the visitor signs in to: form field / subdomain / default
+            .addFilterBefore(new LoginTenantFilter(tenantResolver), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -4,6 +4,8 @@ import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.repository.UserRepository;
 import com.hris.identity.account.repository.UserCredentialRepository;
+import com.hris.tenancy.TenantContext;
+import com.hris.tenancy.TenantPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Brute-force lockout, replacing Keycloak's built-in protection:
@@ -48,9 +50,12 @@ public class LoginAttemptListener {
         if (!(event.getAuthentication() instanceof UsernamePasswordAuthenticationToken)) {
             return;
         }
-        String email = normalize(event.getAuthentication().getName());
+        // Failure events carry the raw typed email; the tenant is the ambient
+        // login context. Success events carry the composite principal.
+        TenantPrincipal principal = TenantPrincipal.parse(event.getAuthentication().getName());
+        UUID tenantId = TenantContext.get() != null ? TenantContext.get() : principal.tenantId();
 
-        userRepository.findByEmail(email).ifPresent(user ->
+        userRepository.findByTenantIdAndEmail(tenantId, principal.email()).ifPresent(user ->
             userCredentialRepository.findById(user.getId()).ifPresent(credential -> {
                 credential.setFailedAttempts(credential.getFailedAttempts() + 1);
                 auditLogService.log(user.getId(), AuditAction.LOGIN_FAIL,
@@ -58,7 +63,7 @@ public class LoginAttemptListener {
                 if (credential.getFailedAttempts() >= maxAttempts) {
                     credential.setLockedUntil(Instant.now().plus(Duration.ofMinutes(lockMinutes)));
                     log.warn("Account {} locked for {} minutes after {} failed login attempts",
-                        email, lockMinutes, credential.getFailedAttempts());
+                        user.getEmail(), lockMinutes, credential.getFailedAttempts());
                 }
                 userCredentialRepository.save(credential);
             }));
@@ -70,9 +75,9 @@ public class LoginAttemptListener {
         if (!(event.getAuthentication() instanceof UsernamePasswordAuthenticationToken)) {
             return;
         }
-        String email = normalize(event.getAuthentication().getName());
+        TenantPrincipal principal = TenantPrincipal.parse(event.getAuthentication().getName());
 
-        userRepository.findByEmail(email).ifPresent(user -> {
+        userRepository.findByTenantIdAndEmail(principal.tenantId(), principal.email()).ifPresent(user -> {
             userCredentialRepository.findById(user.getId()).ifPresent(credential -> {
                 if (credential.getFailedAttempts() > 0 || credential.getLockedUntil() != null) {
                     credential.setFailedAttempts(0);
@@ -87,7 +92,4 @@ public class LoginAttemptListener {
         });
     }
 
-    private String normalize(String value) {
-        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
-    }
 }

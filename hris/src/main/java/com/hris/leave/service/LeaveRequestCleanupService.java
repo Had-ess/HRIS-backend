@@ -21,6 +21,7 @@ import java.util.List;
 public class LeaveRequestCleanupService {
 
     private final LeaveRequestRepository leaveRequestRepository;
+    private final com.hris.tenancy.TenantJobRunner tenantJobRunner;
 
     @Value("${app.leave.cancelled-cleanup.retention-hours:24}")
     private long retentionHours;
@@ -28,11 +29,8 @@ public class LeaveRequestCleanupService {
     @Scheduled(cron = "${app.leave.cancelled-cleanup.cron:0 0 * * * *}")
     @SchedulerLock(name = "leaveRequestCancelledCleanupJob", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     public void cleanupCancelledRequestsJob() {
-        try {
-            cleanupCancelledRequestsOlderThan(Duration.ofHours(retentionHours));
-        } catch (RuntimeException ex) {
-            log.error("Cancelled leave request cleanup job failed", ex);
-        }
+        tenantJobRunner.forEachActiveTenant("leaveRequestCancelledCleanupJob", tenant ->
+            cleanupCancelledRequestsOlderThan(Duration.ofHours(retentionHours)));
     }
 
     @Transactional

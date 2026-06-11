@@ -55,6 +55,7 @@ public class LeaveAccrualService {
     private final TransactionalNotificationPublisher notificationPublisher;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final com.hris.tenancy.TenantJobRunner tenantJobRunner;
 
     @Value("${app.leave.accrual.enabled:false}")
     private boolean accrualEnabled;
@@ -240,10 +241,13 @@ public class LeaveAccrualService {
         if (!accrualEnabled) {
             return;
         }
-        log.info("Starting scheduled accrual run");
-        LeaveAccrualRunDto result = runDuePoliciesWithTracking(
-            LocalDate.now(), SystemActor.SYSTEM_ACTOR_ID, ActorType.SYSTEM);
-        log.info("Scheduled accrual run completed: {} transactions created", result.transactionsCreated());
+        tenantJobRunner.forEachActiveTenant("leaveAccrualJob", tenant -> {
+            log.info("Starting scheduled accrual run for tenant {}", tenant.getSlug());
+            LeaveAccrualRunDto result = runDuePoliciesWithTracking(
+                LocalDate.now(), SystemActor.SYSTEM_ACTOR_ID, ActorType.SYSTEM);
+            log.info("Scheduled accrual run completed for tenant {}: {} transactions created",
+                tenant.getSlug(), result.transactionsCreated());
+        });
     }
 
     // --- Notification ---

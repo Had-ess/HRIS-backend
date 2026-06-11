@@ -40,11 +40,16 @@ public class AnalyticsAggregationService {
     private final EmployeeRepository employeeRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
     private final ApprovalStepRepository approvalStepRepository;
+    private final com.hris.tenancy.TenantJobRunner tenantJobRunner;
 
     @Scheduled(cron = "0 */15 * * * *")
     @SchedulerLock(name = "analyticsAggregationJob", lockAtMostFor = "PT10M", lockAtLeastFor = "PT1M")
-    @Transactional
     public void rebuildCurrentSnapshots() {
+        tenantJobRunner.forEachActiveTenantInTransaction("analyticsAggregationJob",
+            tenant -> rebuildCurrentSnapshotsForCurrentTenant());
+    }
+
+    public void rebuildCurrentSnapshotsForCurrentTenant() {
         LocalDate today = LocalDate.now();
         rebuildHeadcountFacts(today);
         rebuildProjectAbsenceFacts(today);

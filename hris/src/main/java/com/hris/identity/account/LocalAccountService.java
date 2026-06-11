@@ -8,6 +8,8 @@ import com.hris.common.exception.EntityNotFoundException;
 import com.hris.identity.account.entity.UserActionToken;
 import com.hris.identity.account.repository.UserActionTokenRepository;
 import com.hris.identity.account.repository.UserCredentialRepository;
+import com.hris.tenancy.TenantContext;
+import com.hris.tenancy.TenantPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -37,6 +40,7 @@ public class LocalAccountService {
     private final AccountEmailService accountEmailService;
     private final AuditLogService auditLogService;
     private final JdbcTemplate jdbcTemplate;
+    private final TransactionTemplate transactionTemplate;
 
     /**
      * Issues an activation token for a freshly provisioned user. The token row
@@ -57,18 +61,28 @@ public class LocalAccountService {
         return userCredentialRepository.existsById(userId);
     }
 
-    @Transactional
+    /**
+     * Anonymous flow: no ambient tenant context exists when an activation
+     * link is opened. The token row (RLS-exempt, guarded by its 256-bit hash)
+     * carries the tenant; the actual account mutation runs in a fresh
+     * transaction inside that tenant's context. A new transaction is required
+     * because the RLS setting binds at connection checkout — joining an
+     * already-open transaction would keep the contextless connection.
+     */
     public void activate(String rawToken, String newPassword) {
-        UUID userId = actionTokenService.consume(rawToken, UserActionToken.Purpose.ACTIVATION);
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserActionToken token = actionTokenService.consume(rawToken, UserActionToken.Purpose.ACTIVATION);
+        runInTenant(tokenTenant(token), () -> {
+            UUID userId = token.getUserId();
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        credentialService.setPassword(userId, newPassword);
-        user.setSeed(false);
-        userRepository.save(user);
+            credentialService.setPassword(userId, newPassword);
+            user.setSeed(false);
+            userRepository.save(user);
 
-        auditLogService.log(userId, AuditAction.UPDATE, "user_credentials", userId, null, null);
-        log.info("Account activated for user {}", user.getEmail());
+            auditLogService.log(userId, AuditAction.UPDATE, "user_credentials", userId, null, null);
+            log.info("Account activated for user {}", user.getEmail());
+        });
     }
 
     /**
@@ -88,17 +102,20 @@ public class LocalAccountService {
             });
     }
 
-    @Transactional
+    /** Anonymous flow — same tenant-from-token pattern as {@link #activate}. */
     public void resetPassword(String rawToken, String newPassword) {
-        UUID userId = actionTokenService.consume(rawToken, UserActionToken.Purpose.PASSWORD_RESET);
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserActionToken token = actionTokenService.consume(rawToken, UserActionToken.Purpose.PASSWORD_RESET);
+        runInTenant(tokenTenant(token), () -> {
+            UUID userId = token.getUserId();
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        credentialService.setPassword(userId, newPassword);
-        revokeAllSessions(user.getEmail());
+            credentialService.setPassword(userId, newPassword);
+            revokeAllSessions(user);
 
-        auditLogService.log(userId, AuditAction.UPDATE, "user_credentials", userId, null, null);
-        log.info("Password reset completed for user {}", user.getEmail());
+            auditLogService.log(userId, AuditAction.UPDATE, "user_credentials", userId, null, null);
+            log.info("Password reset completed for user {}", user.getEmail());
+        });
     }
 
     /**
@@ -119,7 +136,7 @@ public class LocalAccountService {
         }
 
         credentialService.setPassword(userId, newPassword);
-        revokeOtherSessions(user.getEmail(), currentAccessToken);
+        revokeOtherSessions(user, currentAccessToken);
 
         auditLogService.log(userId, AuditAction.UPDATE, "user_credentials", userId, null, null);
     }
@@ -132,16 +149,17 @@ public class LocalAccountService {
     public void deleteAccount(User user) {
         userActionTokenRepository.deleteByUserId(user.getId());
         userCredentialRepository.deleteById(user.getId());
-        revokeAllSessions(user.getEmail());
+        revokeAllSessions(user);
     }
 
-    public void revokeAllSessions(String email) {
+    public void revokeAllSessions(User user) {
+        String principal = principalOf(user);
         int revoked = jdbcTemplate.update(
-            "DELETE FROM oauth2_authorization WHERE principal_name = ?", email);
-        int formSessions = deleteFormLoginSessions(email);
+            "DELETE FROM oauth2_authorization WHERE principal_name = ?", principal);
+        int formSessions = deleteFormLoginSessions(principal);
         if (revoked > 0 || formSessions > 0) {
             log.info("Revoked {} authorization(s) and {} login session(s) for {}",
-                revoked, formSessions, email);
+                revoked, formSessions, user.getEmail());
         }
     }
 
@@ -150,20 +168,42 @@ public class LocalAccountService {
      * token, plus ALL form-login sessions (they cannot be tied to a single
      * authorization; every device — including this one — re-authenticates).
      */
-    public void revokeOtherSessions(String email, String currentAccessToken) {
+    public void revokeOtherSessions(User user, String currentAccessToken) {
         if (currentAccessToken == null || currentAccessToken.isBlank()) {
-            revokeAllSessions(email);
+            revokeAllSessions(user);
             return;
         }
+        String principal = principalOf(user);
         int revoked = jdbcTemplate.update(
             "DELETE FROM oauth2_authorization WHERE principal_name = ? "
                 + "AND (access_token_value IS NULL OR access_token_value <> ?)",
-            email, currentAccessToken);
-        int formSessions = deleteFormLoginSessions(email);
+            principal, currentAccessToken);
+        int formSessions = deleteFormLoginSessions(principal);
         if (revoked > 0 || formSessions > 0) {
             log.info("Revoked {} other authorization(s) and {} login session(s) for {}",
-                revoked, formSessions, email);
+                revoked, formSessions, user.getEmail());
         }
+    }
+
+    /**
+     * Session/authorization stores key on the composite tenant principal
+     * (see TenantPrincipal). tenant_id may be null for entities created
+     * before V62 in stale unit-test fixtures — default tenant then.
+     */
+    private String principalOf(User user) {
+        UUID tenantId = user.getTenantId() != null
+            ? user.getTenantId()
+            : TenantContext.DEFAULT_TENANT_ID;
+        return new TenantPrincipal(tenantId, user.getEmail()).format();
+    }
+
+    private UUID tokenTenant(UserActionToken token) {
+        return token.getTenantId() != null ? token.getTenantId() : TenantContext.DEFAULT_TENANT_ID;
+    }
+
+    /** Fresh transaction inside the tenant context (RLS binds at checkout). */
+    private void runInTenant(UUID tenantId, Runnable action) {
+        TenantContext.runAs(tenantId, () -> transactionTemplate.executeWithoutResult(status -> action.run()));
     }
 
     /**
@@ -171,9 +211,9 @@ public class LocalAccountService {
      * deleting them ends those sessions on the next request (attributes
      * cascade via FK).
      */
-    private int deleteFormLoginSessions(String email) {
+    private int deleteFormLoginSessions(String principal) {
         return jdbcTemplate.update(
-            "DELETE FROM spring_session WHERE principal_name = ?", email);
+            "DELETE FROM spring_session WHERE principal_name = ?", principal);
     }
 
     private String displayName(User user) {

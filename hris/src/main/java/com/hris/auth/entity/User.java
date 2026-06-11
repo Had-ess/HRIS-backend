@@ -21,6 +21,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * Read-only mapping: the value is assigned by the database (column DEFAULT
+     * derived from the request's tenant context), never by application code.
+     */
+    @Column(name = "tenant_id", insertable = false, updatable = false)
+    private UUID tenantId;
+
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 

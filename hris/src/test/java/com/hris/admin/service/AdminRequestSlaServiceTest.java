@@ -47,7 +47,8 @@ class AdminRequestSlaServiceTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         slaService = new AdminRequestSlaService(
             adminRequestRepository, notificationPublisher, userRepository,
-            auditLogService, objectMapper
+            auditLogService, objectMapper,
+            null  // TenantJobRunner: only the scheduled entry point uses it
         );
     }
 

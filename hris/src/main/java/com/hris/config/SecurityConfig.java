@@ -1,6 +1,8 @@
 package com.hris.config;
 
 import com.hris.security.DbRbacJwtConverter;
+import com.hris.tenancy.TenantContextFilter;
+import com.hris.tenancy.TenantResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -45,7 +48,8 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            @Qualifier("localJwtDecoder") JwtDecoder localJwtDecoder) throws Exception {
+            @Qualifier("localJwtDecoder") JwtDecoder localJwtDecoder,
+            TenantResolver tenantResolver) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
@@ -66,7 +70,9 @@ public class SecurityConfig {
                 .jwt(jwt -> jwt
                     .decoder(localJwtDecoder)
                     .jwtAuthenticationConverter(dbRbacJwtConverter))
-            );
+            )
+            // Tenant context from the validated JWT's tid claim (RLS boundary)
+            .addFilterAfter(new TenantContextFilter(tenantResolver), BearerTokenAuthenticationFilter.class);
 
         http.headers(headers -> headers
             .contentSecurityPolicy(csp -> csp.policyDirectives(

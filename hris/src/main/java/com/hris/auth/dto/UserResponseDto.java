@@ -13,6 +13,8 @@ public record UserResponseDto(
     boolean isActive,
     Instant createdAt,
     Instant lastLogin,
-    List<String> profileCodes
+    List<String> profileCodes,
+    String tenantSlug,
+    String tenantName
 ) {
 }

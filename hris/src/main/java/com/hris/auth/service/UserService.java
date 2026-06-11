@@ -9,6 +9,8 @@ import com.hris.auth.dto.UserResponseDto;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.tenancy.Tenant;
+import com.hris.tenancy.TenantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final AccessResolutionService accessResolutionService;
     private final AuditLogService auditLogService;
+    private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
     public UserResponseDto getCurrentUser(UUID userId) {
@@ -83,6 +86,10 @@ public class UserService {
                 .map(profile -> profile.getCode())
                 .toList();
 
+        Tenant tenant = user.getTenantId() == null || tenantRepository == null
+            ? null
+            : tenantRepository.findById(user.getTenantId()).orElse(null);
+
         return new UserResponseDto(
             user.getId(),
             user.getEmail(),
@@ -92,7 +99,9 @@ public class UserService {
             user.isActive(),
             user.getCreatedAt(),
             user.getLastLogin(),
-            effectiveProfiles
+            effectiveProfiles,
+            tenant == null ? null : tenant.getSlug(),
+            tenant == null ? null : tenant.getName()
         );
     }
 

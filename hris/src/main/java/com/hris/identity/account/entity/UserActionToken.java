@@ -38,6 +38,15 @@ public class UserActionToken {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * Read-only: assigned by the database from the issuing request's tenant
+     * context. The anonymous consume flows (activation/reset links carry no
+     * session) read this to establish their tenant — which is why this table
+     * stays RLS-exempt: the 256-bit token hash is the access control.
+     */
+    @Column(name = "tenant_id", insertable = false, updatable = false)
+    private UUID tenantId;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 

@@ -66,7 +66,8 @@ class AnalyticsIngestionServiceTest {
             analyticsEventRepository,
             leaveFactRepository,
             approvalFactRepository,
-            objectMapper
+            objectMapper,
+            null  // TenantJobRunner: only the scheduled entry point uses it
         );
 
         analyticsIngestionService.ingest(event);

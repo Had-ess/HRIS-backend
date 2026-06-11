@@ -16,6 +16,14 @@ public final class SecurityUtils {
 
     private SecurityUtils() {}
 
+    /**
+     * Tenant of the current request — established by TenantContextFilter from
+     * the token's {@code tid} claim. Null outside a tenant-scoped request.
+     */
+    public static UUID getCurrentTenantId() {
+        return com.hris.tenancy.TenantContext.get();
+    }
+
     public static UUID getCurrentUserId(Authentication authentication) {
         if (authentication == null) {
             throw new IllegalStateException("No authentication context");

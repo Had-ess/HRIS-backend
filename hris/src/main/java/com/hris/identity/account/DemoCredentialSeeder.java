@@ -1,12 +1,13 @@
 package com.hris.identity.account;
 
 import com.hris.auth.repository.UserRepository;
+import com.hris.tenancy.TenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Map;
 
@@ -40,13 +41,22 @@ public class DemoCredentialSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final CredentialService credentialService;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
-    @Transactional
     public void run(String... args) {
+        // Startup thread has no tenant context; demo data lives in the
+        // default tenant. The transaction must begin inside runAs (RLS
+        // setting binds at connection checkout), hence the template.
+        TenantContext.runAs(TenantContext.DEFAULT_TENANT_ID, () ->
+            transactionTemplate.executeWithoutResult(status -> seedDemoCredentials()));
+    }
+
+    private void seedDemoCredentials() {
         int seeded = 0;
         for (Map.Entry<String, String> entry : DEMO_PASSWORDS.entrySet()) {
-            var user = userRepository.findByEmail(entry.getKey()).orElse(null);
+            var user = userRepository.findByTenantIdAndEmail(
+                TenantContext.DEFAULT_TENANT_ID, entry.getKey()).orElse(null);
             if (user == null || credentialService.hasCredentials(user.getId())) {
                 continue;
             }

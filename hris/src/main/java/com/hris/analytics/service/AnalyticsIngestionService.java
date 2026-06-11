@@ -36,15 +36,17 @@ public class AnalyticsIngestionService {
     private final LeaveFactRepository leaveFactRepository;
     private final ApprovalFactRepository approvalFactRepository;
     private final ObjectMapper objectMapper;
+    private final com.hris.tenancy.TenantJobRunner tenantJobRunner;
 
     @Scheduled(cron = "0 * * * * *")
     @SchedulerLock(name = "analyticsIngestionJob", lockAtMostFor = "PT3M", lockAtLeastFor = "PT30S")
-    @Transactional
     public void ingestPending() {
-        List<AnalyticsEvent> events = analyticsEventRepository.findPending(PageRequest.of(0, 200));
-        for (AnalyticsEvent event : events) {
-            ingest(event);
-        }
+        tenantJobRunner.forEachActiveTenantInTransaction("analyticsIngestionJob", tenant -> {
+            List<AnalyticsEvent> events = analyticsEventRepository.findPending(PageRequest.of(0, 200));
+            for (AnalyticsEvent event : events) {
+                ingest(event);
+            }
+        });
     }
 
     @Transactional

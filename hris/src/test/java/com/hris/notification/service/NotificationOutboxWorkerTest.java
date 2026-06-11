@@ -3,6 +3,8 @@ package com.hris.notification.service;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.repository.NotificationEventRepository;
+import com.hris.tenancy.Tenant;
+import com.hris.tenancy.TenantJobRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,9 +17,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,12 +37,20 @@ class NotificationOutboxWorkerTest {
     @Mock
     private NotificationEventProcessor notificationEventProcessor;
 
+    @Mock
+    private TenantJobRunner tenantJobRunner;
+
     @InjectMocks
     private NotificationOutboxWorker worker;
 
     @BeforeEach
-    void configureMaxAttempts() {
+    void configureWorker() {
         ReflectionTestUtils.setField(worker, "maxAttempts", 3);
+        // Run the per-tenant body once, as if a single active tenant existed.
+        doAnswer(invocation -> {
+            invocation.<Consumer<Tenant>>getArgument(1).accept(null);
+            return null;
+        }).when(tenantJobRunner).forEachActiveTenant(anyString(), any());
     }
 
     private NotificationEvent pendingEvent(NotificationEventType type, String routingKey) {

@@ -2,6 +2,7 @@ package com.hris.notification.service;
 
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.repository.NotificationEventRepository;
+import com.hris.tenancy.TenantJobRunner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -27,6 +28,7 @@ public class NotificationOutboxWorker {
 
     private final NotificationEventRepository notificationEventRepository;
     private final NotificationEventProcessor notificationEventProcessor;
+    private final TenantJobRunner tenantJobRunner;
 
     @Value("${app.notification.outbox.max-attempts:10}")
     private int maxAttempts;
@@ -34,6 +36,10 @@ public class NotificationOutboxWorker {
     @Scheduled(fixedDelayString = "${app.notification.outbox.interval-ms:30000}")
     @SchedulerLock(name = "notificationOutboxWorker", lockAtMostFor = "PT5M", lockAtLeastFor = "PT25S")
     public void retryUndelivered() {
+        tenantJobRunner.forEachActiveTenant("notificationOutboxWorker", tenant -> retryUndeliveredForCurrentTenant());
+    }
+
+    private void retryUndeliveredForCurrentTenant() {
         Instant cutoff = Instant.now().minusSeconds(60);
         List<NotificationEvent> pending = notificationEventRepository.findUndeliveredBefore(cutoff);
 

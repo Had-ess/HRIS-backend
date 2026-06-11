@@ -17,9 +17,10 @@ spring:
       enabled: true
 
   datasource:
+    # Runtime role: NOT the table owner — RLS policies apply (fail-closed).
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5433/hris_db}
-    username: ${DATASOURCE_USER:hris_user}
-    password: ${DATASOURCE_PASS:hris_pass}
+    username: ${DATASOURCE_USER:hris_app}
+    password: ${DATASOURCE_PASS:hris_app_pass}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -47,6 +48,12 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     schemas: public
+    # Migrations run as the schema owner (RLS-exempt superuser in dev;
+    # a BYPASSRLS role in prod), separate from the runtime hris_app role.
+    # Explicit url: Boot cannot derive a datasource from the tenant-aware wrapper.
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5433/hris_db}
+    user: ${FLYWAY_USER:hris_user}
+    password: ${FLYWAY_PASS:hris_pass}
 
   # Form-login sessions of the embedded authorization server live in Postgres
   # (V60), so password change/reset can terminate them on every device.

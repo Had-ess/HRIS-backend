@@ -1,28 +1,29 @@
+-- Consolidated demo seed (recovered from the merged branch's V56, adapted
+-- post-Keycloak-decommission: no keycloak_id column, tenant-composite
+-- conflict targets; tenant_id comes from the column default). Idempotent.
 BEGIN;
 
 -- ============================================================================
--- Seeded users for Keycloak JIT provisioning
--- keycloak_id uses unique placeholder strings (non-null to satisfy DB
--- constraint). UserProvisioningService.canAdoptKeycloakIdentity allows
--- seed users to adopt the real Keycloak UUID on first login.
+-- Demo users (credentials attach via DemoCredentialSeeder when
+-- app.auth.demo-seed.enabled is true — local profile only)
 -- ============================================================================
 
-INSERT INTO users (id, keycloak_id, email, first_name, last_name, locale_preference, is_seed, is_active)
+INSERT INTO users (id, email, first_name, last_name, locale_preference, is_seed, is_active)
 VALUES
-    ('33333333-3333-3333-3333-333333333301', 'SEED_ADMIN',         'admin@demo.hris.local',              'Nadia',  'Ben Salem',   'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333302', 'SEED_HR',            'hr.admin@demo.hris.local',            'Sami',   'Khadhraoui',  'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333303', 'SEED_MANAGER',       'manager.engineering@demo.hris.local', 'Karim',  'Jlassi',      'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333304', 'SEED_DEVELOPER',     'developer@demo.hris.local',           'Yasmine','Trabelsi',    'en', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333305', 'SEED_PRODUCT',       'product@demo.hris.local',             'Rim',    'Ayedi',       'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333306', 'SEED_OFFICE',        'office@demo.hris.local',              'Hedi',   'Gharbi',      'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333307', 'SEED_ANALYST',       'analyst@demo.hris.local',             'Walid',  'Mrad',        'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333308', 'SEED_SUPERVISOR',    'supervisor.operations@demo.hris.local','Amine',  'Zouari',      'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333309', 'SEED_DIRECTOR',      'director@demo.hris.local',            'Fawzi',  'Drissi',      'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333310', 'SEED_QA',            'qa@demo.hris.local',                  'Ines',   'Karoui',      'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333311', 'SEED_LEGAL',         'legal@demo.hris.local',               'Hela',   'Nasri',       'fr', TRUE, TRUE),
-    ('33333333-3333-3333-3333-333333333312', 'SEED_FINANCE',       'finance.viewer@demo.hris.local',      'Mehdi',  'Saadi',       'en', TRUE, TRUE)
-ON CONFLICT (email) DO UPDATE
-SET keycloak_id = COALESCE(EXCLUDED.keycloak_id, users.keycloak_id),
+    ('33333333-3333-3333-3333-333333333301', 'admin@demo.hris.local',              'Nadia',  'Ben Salem',   'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333302', 'hr.admin@demo.hris.local',            'Sami',   'Khadhraoui',  'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333303', 'manager.engineering@demo.hris.local', 'Karim',  'Jlassi',      'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333304', 'developer@demo.hris.local',           'Yasmine','Trabelsi',    'en', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333305', 'product@demo.hris.local',             'Rim',    'Ayedi',       'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333306', 'office@demo.hris.local',              'Hedi',   'Gharbi',      'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333307', 'analyst@demo.hris.local',             'Walid',  'Mrad',        'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333308', 'supervisor.operations@demo.hris.local','Amine',  'Zouari',      'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333309', 'director@demo.hris.local',            'Fawzi',  'Drissi',      'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333310', 'qa@demo.hris.local',                  'Ines',   'Karoui',      'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333311', 'legal@demo.hris.local',               'Hela',   'Nasri',       'fr', TRUE, TRUE),
+    ('33333333-3333-3333-3333-333333333312', 'finance.viewer@demo.hris.local',      'Mehdi',  'Saadi',       'en', TRUE, TRUE)
+ON CONFLICT (tenant_id, email) DO UPDATE
+SET
     first_name = EXCLUDED.first_name,
     last_name = EXCLUDED.last_name,
     locale_preference = EXCLUDED.locale_preference,
@@ -37,7 +38,7 @@ INSERT INTO departments (id, name, code, head_employee_id, is_active)
 VALUES
     ('44444444-4444-4444-4444-444444444401', 'Engineering', 'ENG', NULL, TRUE),
     ('44444444-4444-4444-4444-444444444402', 'Operations', 'OPS', NULL, TRUE)
-ON CONFLICT (code) DO NOTHING;
+ON CONFLICT (tenant_id, code) DO NOTHING;
 
 -- ============================================================================
 -- Employees

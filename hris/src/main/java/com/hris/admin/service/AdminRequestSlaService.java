@@ -42,6 +42,7 @@ public class AdminRequestSlaService {
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
+    private final com.hris.tenancy.TenantJobRunner tenantJobRunner;
 
     @Value("${app.admin.sla-check.enabled:false}")
     private boolean slaCheckEnabled;
@@ -56,9 +57,12 @@ public class AdminRequestSlaService {
         if (!slaCheckEnabled) {
             return;
         }
-        log.info("Starting scheduled SLA check for overdue admin requests");
-        int notified = checkAndNotifySlaExceeded();
-        log.info("SLA check completed: {} overdue requests notified", notified);
+        tenantJobRunner.forEachActiveTenant("adminSlaCheckJob", tenant -> {
+            log.info("Starting scheduled SLA check for tenant {}", tenant.getSlug());
+            int notified = checkAndNotifySlaExceeded();
+            log.info("SLA check completed for tenant {}: {} overdue requests notified",
+                tenant.getSlug(), notified);
+        });
     }
 
     @Transactional

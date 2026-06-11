@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByTenantIdAndEmail(UUID tenantId, String email);
+
     @Modifying
     @Query("UPDATE User u SET u.lastLogin = :timestamp WHERE u.id = :userId")
     void updateLastLogin(@Param("userId") UUID userId, @Param("timestamp") Instant timestamp);
