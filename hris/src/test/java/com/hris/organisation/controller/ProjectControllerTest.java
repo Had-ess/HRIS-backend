@@ -1,11 +1,9 @@
 package com.hris.organisation.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.organisation.dto.ProjectResponseDto;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.service.ProjectService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
@@ -45,8 +43,6 @@ class ProjectControllerTest {
 
     @MockBean private ProjectService projectService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

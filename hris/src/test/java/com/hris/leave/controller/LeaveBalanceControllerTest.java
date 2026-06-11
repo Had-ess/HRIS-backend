@@ -1,12 +1,10 @@
 package com.hris.leave.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.dto.LeaveBalanceAdjustmentDto;
 import com.hris.leave.dto.LeaveBalanceSummaryDto;
 import com.hris.leave.service.LeaveBalanceLedgerService;
 import com.hris.leave.service.LeaveBalanceService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
@@ -49,8 +47,6 @@ class LeaveBalanceControllerTest {
     @MockBean private LeaveBalanceService leaveBalanceService;
     @MockBean private LeaveBalanceLedgerService leaveBalanceLedgerService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

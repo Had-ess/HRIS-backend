@@ -58,7 +58,6 @@ class LeaveBalanceRepositoryTest {
     @DisplayName("searchSummariesForYear returns computed available days")
     void searchSummariesForYearReturnsComputedAvailableDays() {
         User user = userRepository.save(User.builder()
-            .keycloakId("kc-test-user")
             .email("alice.doe@demo.hris.local")
             .firstName("Alice")
             .lastName("Doe")
@@ -109,7 +108,9 @@ class LeaveBalanceRepositoryTest {
         );
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).availableDays()).isEqualTo(16);
+        // isEqualByComparingTo: the DB returns NUMERIC with scale (16.000), and
+        // BigDecimal.equals() is scale-sensitive.
+        assertThat(result.getContent().get(0).availableDays()).isEqualByComparingTo("16");
         assertThat(result.getContent().get(0).employeeId()).isEqualTo(employee.getId());
         assertThat(result.getContent().get(0).leaveTypeId()).isEqualTo(leaveType.getId());
     }

@@ -14,6 +14,7 @@ import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.identity.account.LocalAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,7 +33,7 @@ public class EmployeeOnboardingService {
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
     private final AccountProvisioningService accountProvisioningService;
-    private final KeycloakAdminClient keycloakAdminClient;
+    private final LocalAccountService localAccountService;
     private final AuditLogService auditLogService;
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
@@ -57,46 +57,41 @@ public class EmployeeOnboardingService {
             dto.profileIds()
         ), actorId);
 
-        try {
-            Employee saved = employeeRepository.save(Employee.builder()
-                .userId(user.getId())
-                .employeeCode(dto.employeeCode().trim())
-                .hireDate(dto.hireDate())
-                .jobTitle(dto.jobTitle().trim())
-                .status(dto.status())
-                .contractType(dto.contractType())
-                .departmentId(dto.departmentId())
-                .supervisorEmployeeId(dto.supervisorEmployeeId())
-                .workScheduleId(dto.workScheduleId())
-                .location(dto.location() != null && !dto.location().isBlank() ? dto.location().trim() : null)
-                .cin(dto.cin() != null && !dto.cin().isBlank() ? dto.cin().trim() : null)
-                .build());
+        // User, employee, profiles, and activation token share this transaction:
+        // any failure rolls back everything (no external-account compensation
+        // needed since the owned-auth migration).
+        Employee saved = employeeRepository.save(Employee.builder()
+            .userId(user.getId())
+            .employeeCode(dto.employeeCode().trim())
+            .hireDate(dto.hireDate())
+            .jobTitle(dto.jobTitle().trim())
+            .status(dto.status())
+            .contractType(dto.contractType())
+            .departmentId(dto.departmentId())
+            .supervisorEmployeeId(dto.supervisorEmployeeId())
+            .workScheduleId(dto.workScheduleId())
+            .location(dto.location() != null && !dto.location().isBlank() ? dto.location().trim() : null)
+            .cin(dto.cin() != null && !dto.cin().isBlank() ? dto.cin().trim() : null)
+            .build());
 
-            employeeHistoryService.recordHire(saved, actorId);
-            employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
-            analyticsEventPublisher.publishEmployeeHireEvent(saved);
-            auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
-            applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
-                StructuralEventType.EMPLOYEE_ONBOARDED, user.getId(), saved.getId(), actorId));
-            return employeeMapper.toDto(saved);
-        } catch (RuntimeException ex) {
-            accountProvisioningService.rollbackExternalAccount(user.getKeycloakId());
-            throw ex;
-        }
+        employeeHistoryService.recordHire(saved, actorId);
+        employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
+        analyticsEventPublisher.publishEmployeeHireEvent(saved);
+        auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
+        applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
+            StructuralEventType.EMPLOYEE_ONBOARDED, user.getId(), saved.getId(), actorId));
+        return employeeMapper.toDto(saved);
     }
 
+    @Transactional
     public void resendActivationEmail(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         User user = userRepository.findById(employee.getUserId())
             .orElseThrow(() -> new EntityNotFoundException("User not found for employee"));
-        if (!user.isSeed()) {
+        if (localAccountService.isActivated(user.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ALREADY_ACTIVE");
         }
-        keycloakAdminClient.sendExecuteActionsEmail(
-            user.getKeycloakId(),
-            List.of("UPDATE_PASSWORD", "VERIFY_EMAIL"),
-            86400
-        );
+        localAccountService.initiateActivation(user);
     }
 }

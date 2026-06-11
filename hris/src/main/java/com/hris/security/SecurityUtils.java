@@ -7,21 +7,15 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.util.UUID;
 
 /**
- * GAP-B-01 FIXED: No longer casts JWT sub directly to UUID.
- * The local user UUID is injected into the JWT authentication object
- * by the JwtAuthenticationFilter after JIT provisioning.
- *
- * The principal name is set to the local user UUID after provisioning.
+ * Resolves the local user id from the authentication. Tokens issued by the
+ * embedded authorization server carry the local users.id both as {@code sub}
+ * and as the {@code local_user_id} claim (kept for compatibility with code
+ * written during the Keycloak era).
  */
 public final class SecurityUtils {
 
     private SecurityUtils() {}
 
-    /**
-     * Gets the local user UUID from the authentication.
-     * After JwtAuthenticationFilter runs, the token carries a
-     * "local_user_id" claim or we fall back to resolving via name.
-     */
     public static UUID getCurrentUserId(Authentication authentication) {
         if (authentication == null) {
             throw new IllegalStateException("No authentication context");
@@ -29,31 +23,19 @@ public final class SecurityUtils {
 
         if (authentication instanceof JwtAuthenticationToken jwtAuth) {
             Jwt jwt = jwtAuth.getToken();
-            // Check for local_user_id claim injected by JwtAuthenticationFilter
             String localId = jwt.getClaimAsString("local_user_id");
             if (localId != null) {
                 return UUID.fromString(localId);
             }
         }
 
-        // Fallback: principal name should be the local user UUID (set by filter)
+        // Fallback: principal name is the subject, which is the local user id.
         String name = authentication.getName();
         try {
             return UUID.fromString(name);
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(
-                "Cannot resolve local user ID from authentication. " +
-                "Ensure JwtAuthenticationFilter is registered before this call.", e);
+                "Cannot resolve local user ID from authentication", e);
         }
-    }
-
-    /**
-     * Gets the Keycloak subject (sub claim) from the JWT.
-     */
-    public static String getKeycloakId(Authentication authentication) {
-        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
-            return jwtAuth.getToken().getSubject();
-        }
-        throw new IllegalStateException("Authentication is not JWT-based");
     }
 }

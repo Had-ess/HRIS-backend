@@ -8,9 +8,7 @@ import com.hris.admin.entity.AdminRequest;
 import com.hris.admin.enums.AdminRequestStatus;
 import com.hris.admin.service.AdminRequestQueryService;
 import com.hris.admin.service.AdminRequestService;
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
@@ -58,8 +56,6 @@ class AdminRequestControllerTest {
     @MockBean private AdminRequestService adminRequestService;
     @MockBean private AdminRequestQueryService adminRequestQueryService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

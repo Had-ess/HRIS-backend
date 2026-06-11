@@ -1,10 +1,8 @@
 package com.hris.organisation.hierarchy.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.organisation.hierarchy.dto.TeamHierarchyNodeDto;
 import com.hris.organisation.hierarchy.service.TeamHierarchyService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,8 +47,6 @@ class TeamHierarchyControllerTest {
 
     @MockBean private TeamHierarchyService teamHierarchyService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

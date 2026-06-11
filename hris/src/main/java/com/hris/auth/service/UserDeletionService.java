@@ -12,6 +12,7 @@ import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
+import com.hris.identity.account.LocalAccountService;
 import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.notification.repository.NotificationEventRepository;
 import com.hris.notification.repository.NotificationRepository;
@@ -35,7 +36,7 @@ public class UserDeletionService {
     private final NotificationEventRepository notificationEventRepository;
     private final AuditLogRepository auditLogRepository;
     private final ExportRecordRepository exportRecordRepository;
-    private final KeycloakAdminClient keycloakAdminClient;
+    private final LocalAccountService localAccountService;
     private final AuditLogService auditLogService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -50,9 +51,8 @@ public class UserDeletionService {
 
         boolean hasImmutableReferences = hasImmutableReferences(userId);
 
-        if (user.getKeycloakId() != null && !user.getKeycloakId().isBlank()) {
-            keycloakAdminClient.deleteUser(user.getKeycloakId());
-        }
+        // Remove credentials, action tokens, and revoke server-side sessions.
+        localAccountService.deleteAccount(user);
 
         notificationRepository.deleteByUserId(userId);
         notificationEventRepository.deleteByTargetUserId(userId);
@@ -90,6 +90,5 @@ public class UserDeletionService {
         user.setFirstName("Deleted");
         user.setLastName("User");
         user.setEmail("deleted+" + userId + "@hris.local");
-        user.setKeycloakId("deleted-" + userId);
     }
 }

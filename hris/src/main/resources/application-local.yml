@@ -6,3 +6,8 @@ spring:
           auth: false
           starttls:
             enable: false
+
+app:
+  auth:
+    demo-seed:
+      enabled: true

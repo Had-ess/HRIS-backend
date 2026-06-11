@@ -1,8 +1,6 @@
 package com.hris.settings.quick.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.settings.quick.dto.QuickSettingsDto;
 import com.hris.settings.quick.service.QuickSettingsService;
@@ -45,8 +43,6 @@ class QuickSettingsControllerTest {
 
     @MockBean private QuickSettingsService quickSettingsService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

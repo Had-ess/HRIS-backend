@@ -1,8 +1,6 @@
 package com.hris.settings.calendar.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.settings.calendar.dto.HrCalendarDto;
 import com.hris.settings.calendar.service.HrCalendarService;
@@ -46,8 +44,6 @@ class HrCalendarControllerTest {
 
     @MockBean private HrCalendarService hrCalendarService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

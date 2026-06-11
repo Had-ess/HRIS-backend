@@ -1,9 +1,7 @@
 package com.hris.settings.validation.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.common.PageResponse;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.settings.validation.dto.ValidationWorkflowDto;
 import com.hris.settings.validation.dto.ValidationWorkflowOptionsDto;
@@ -51,8 +49,6 @@ class ValidationWorkflowControllerTest {
 
     @MockBean private ValidationWorkflowService validationWorkflowService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

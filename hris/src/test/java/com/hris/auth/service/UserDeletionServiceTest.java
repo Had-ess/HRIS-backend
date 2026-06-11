@@ -8,6 +8,7 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.approval.repository.ApprovalStepRepository;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
+import com.hris.identity.account.LocalAccountService;
 import com.hris.leave.repository.FileAttachmentRepository;
 import com.hris.notification.repository.NotificationEventRepository;
 import com.hris.notification.repository.NotificationRepository;
@@ -41,8 +42,9 @@ class UserDeletionServiceTest {
     @Mock private NotificationEventRepository notificationEventRepository;
     @Mock private AuditLogRepository auditLogRepository;
     @Mock private ExportRecordRepository exportRecordRepository;
-    @Mock private KeycloakAdminClient keycloakAdminClient;
+    @Mock private LocalAccountService localAccountService;
     @Mock private AuditLogService auditLogService;
+    @Mock private org.springframework.context.ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private UserDeletionService userDeletionService;
@@ -54,7 +56,6 @@ class UserDeletionServiceTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder()
             .id(userId)
-            .keycloakId("kc-user-123")
             .email("remove.me@demo.hris.local")
             .firstName("Remove")
             .lastName("Me")
@@ -74,7 +75,7 @@ class UserDeletionServiceTest {
 
         userDeletionService.deleteUser(userId, actorId);
 
-        verify(keycloakAdminClient).deleteUser("kc-user-123");
+        verify(localAccountService).deleteAccount(user);
         verify(notificationRepository).deleteByUserId(userId);
         verify(notificationEventRepository).deleteByTargetUserId(userId);
         verify(userAccessAssignmentService).removeProfile(eq(userId), any(UUID.class), eq(actorId));

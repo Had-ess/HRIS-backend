@@ -5,7 +5,6 @@ import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
 import com.hris.approval.service.ApprovalViewService;
 import com.hris.auth.repository.EmployeeRepository;
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.dto.LeaveTypeDto;
 import com.hris.leave.entity.LeaveRequest;
@@ -15,7 +14,6 @@ import com.hris.leave.dto.LeaveRequestResponseDto;
 import com.hris.leave.service.LeaveTypeService;
 import com.hris.leave.service.LeaveRequestService;
 import com.hris.leave.service.LeaveRequestQueryService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
@@ -66,11 +64,7 @@ class LeaveRequestControllerTest {
     @MockBean
     private LeaveRequestService leaveRequestService;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @MockBean
-    private UserProvisioningService userProvisioningService;
 
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;

@@ -5,9 +5,7 @@ import com.hris.approval.enums.ApprovalContext;
 import com.hris.approval.enums.StepStatus;
 import com.hris.approval.service.ApprovalStepQueryService;
 import com.hris.approval.service.ApprovalStepService;
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,10 +54,6 @@ class ApprovalStepControllerTest {
     private ApprovalStepService approvalStepService;
     @MockBean
     private ApprovalStepQueryService approvalStepQueryService;
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean
-    private UserProvisioningService userProvisioningService;
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 

@@ -4,11 +4,8 @@
 # This file contains placeholder defaults intended for local development only.
 # Before deploying to any non-local environment, ROTATE the following secrets:
 #   - spring.datasource.password           (default: hris_pass)
-#   - spring.rabbitmq.password             (default: hris_pass)
-#   - app.keycloak.admin-client-secret     (default: hris-backend-secret)
-#   - app.keycloak.admin-password          (default: admin)
-# Also rotate all demo user passwords in keycloak/realm-export.json
-# (Admin123!, etc.) before any non-local deployment.
+# Demo credentials (Admin123!, etc.) exist only when app.auth.demo-seed.enabled
+# is true — never enable it outside local development.
 # =============================================================================
 
 spring:
@@ -51,29 +48,12 @@ spring:
     baseline-on-migrate: true
     schemas: public
 
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:hris_user}
-    password: ${RABBITMQ_PASS:hris_pass}
-    virtual-host: ${RABBITMQ_VHOST:hris_vhost}
-    publisher-confirm-type: correlated
-    publisher-returns: true
-    listener:
-      simple:
-        retry:
-          enabled: true
-          max-attempts: 3
-          initial-interval: 2000ms
-          multiplier: 2.0
-          max-interval: 10000ms
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/hris/protocol/openid-connect/certs}
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/hris}
+  # Form-login sessions of the embedded authorization server live in Postgres
+  # (V60), so password change/reset can terminate them on every device.
+  session:
+    timeout: 30m
+    jdbc:
+      initialize-schema: never
 
   messages:
     basename: i18n/messages
@@ -109,6 +89,16 @@ spring:
             enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:true}
 
 app:
+  auth:
+    # Issuer of our own tokens (embedded Spring Authorization Server)
+    issuer: ${APP_AUTH_ISSUER:http://localhost:8081}
+    frontend-url: ${APP_AUTH_FRONTEND_URL:http://localhost:4200}
+    lockout:
+      max-attempts: ${APP_AUTH_LOCKOUT_MAX_ATTEMPTS:5}
+      lock-minutes: ${APP_AUTH_LOCKOUT_LOCK_MINUTES:15}
+    demo-seed:
+      # Dev-only: seeds BCrypt credentials for the demo users (see DemoCredentialSeeder).
+      enabled: ${APP_AUTH_DEMO_SEED_ENABLED:false}
   storage:
     attachments-root: ${APP_STORAGE_ATTACHMENTS_ROOT:./storage/attachments}
     exports-root: ${APP_STORAGE_EXPORTS_ROOT:./storage/exports}
@@ -128,13 +118,6 @@ app:
       enabled: ${APP_ADMIN_SLA_CHECK_ENABLED:false}
       cron: ${APP_ADMIN_SLA_CHECK_CRON:0 0 */4 * * *}
 
-keycloak:
-  admin:
-    server-url: ${KEYCLOAK_ADMIN_SERVER_URL:http://localhost:8180}
-    realm: ${KEYCLOAK_ADMIN_REALM:hris}
-    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:hris-backend}
-    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:hris-backend-secret}
-
 management:
   endpoint:
     health:
@@ -145,7 +128,7 @@ management:
         liveness:
           include: livenessState,ping
         readiness:
-          include: readinessState,db,rabbit,storage
+          include: readinessState,db,storage
   endpoints:
     web:
       exposure:
@@ -156,8 +139,6 @@ management:
     readinessstate:
       enabled: true
     db:
-      enabled: true
-    rabbitmq:
       enabled: true
 
 cors:
@@ -171,8 +152,6 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] [%X{requestId}] %-5level %logger{36} - %msg%n"
   level:
     com.hris: ${LOG_LEVEL_APP:INFO}
-    com.hris.notification: DEBUG
     org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
     org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:INFO}
     org.springframework.retry: ${LOG_LEVEL_SPRING_RETRY:INFO}
-    org.springframework.amqp: DEBUG

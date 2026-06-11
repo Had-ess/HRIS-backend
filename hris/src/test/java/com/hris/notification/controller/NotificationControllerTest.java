@@ -5,6 +5,7 @@ import com.hris.common.exception.EntityNotFoundException;
 import com.hris.notification.dto.NotificationResponseDto;
 import com.hris.notification.enums.NotificationType;
 import com.hris.notification.service.NotificationService;
+import com.hris.notification.service.NotificationStreamService;
 import com.hris.support.TestAuthenticationFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,11 +33,14 @@ class NotificationControllerTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private NotificationStreamService notificationStreamService;
+
     @Test
     @DisplayName("unread count only returns the current user's count")
     void unreadCountOnlyReturnsTheCurrentUsersCount() {
         UUID userId = UUID.randomUUID();
-        NotificationController controller = new NotificationController(notificationService);
+        NotificationController controller = new NotificationController(notificationService, notificationStreamService);
         when(notificationService.getUnreadCount(userId)).thenReturn(4L);
 
         ResponseEntity<ApiResponse<Long>> response = controller.getUnreadCount(
@@ -54,7 +58,7 @@ class NotificationControllerTest {
     void markAsReadOnlyUpdatesNotificationOwnedByCurrentUser() {
         UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
-        NotificationController controller = new NotificationController(notificationService);
+        NotificationController controller = new NotificationController(notificationService, notificationStreamService);
 
         ResponseEntity<ApiResponse<Void>> response = controller.markAsRead(
             notificationId,
@@ -70,7 +74,7 @@ class NotificationControllerTest {
     void markAsReadRejectsNotificationsOwnedByAnotherUser() {
         UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
-        NotificationController controller = new NotificationController(notificationService);
+        NotificationController controller = new NotificationController(notificationService, notificationStreamService);
 
         org.mockito.Mockito.doThrow(new EntityNotFoundException("Notification not found"))
             .when(notificationService).markAsRead(notificationId, userId);
@@ -101,7 +105,7 @@ class NotificationControllerTest {
             false,
             Instant.now()
         );
-        NotificationController controller = new NotificationController(notificationService);
+        NotificationController controller = new NotificationController(notificationService, notificationStreamService);
 
         when(notificationService.getMyNotifications(eq(userId), eq(false), eq((NotificationType) null), eq(PageRequest.of(0, 20))))
             .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 20), 1));

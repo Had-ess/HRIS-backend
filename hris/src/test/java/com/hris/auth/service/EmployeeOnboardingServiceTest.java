@@ -41,6 +41,7 @@ class EmployeeOnboardingServiceTest {
     @Mock private AuditLogService auditLogService;
     @Mock private AnalyticsEventPublisher analyticsEventPublisher;
     @Mock private EmployeeHistoryService employeeHistoryService;
+    @Mock private org.springframework.context.ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks private EmployeeOnboardingService employeeOnboardingService;
 
@@ -68,7 +69,6 @@ class EmployeeOnboardingServiceTest {
 
         User provisionedUser = User.builder()
             .id(userId)
-            .keycloakId("kc-user-001")
             .email(dto.email())
             .firstName(dto.firstName())
             .lastName(dto.lastName())
@@ -114,8 +114,8 @@ class EmployeeOnboardingServiceTest {
     }
 
     @Test
-    @DisplayName("rolls back external account when employee save fails")
-    void rollsBackExternalAccountWhenEmployeeSaveFails() {
+    @DisplayName("propagates employee save failure so the shared transaction rolls back")
+    void propagatesEmployeeSaveFailure() {
         UUID actorId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
 
@@ -138,7 +138,6 @@ class EmployeeOnboardingServiceTest {
         when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(
             User.builder()
                 .id(UUID.randomUUID())
-                .keycloakId("kc-user-rollback")
                 .email(dto.email())
                 .firstName(dto.firstName())
                 .lastName(dto.lastName())
@@ -148,16 +147,16 @@ class EmployeeOnboardingServiceTest {
         doThrow(new IllegalStateException("Employee save failed"))
             .when(employeeRepository).save(any(Employee.class));
 
+        // User, employee, and activation token share one transaction since the
+        // owned-auth migration: propagation IS the rollback (no compensation call).
         assertThatThrownBy(() -> employeeOnboardingService.onboard(dto, actorId))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Employee save failed");
-
-        verify(accountProvisioningService).rollbackExternalAccount("kc-user-rollback");
     }
 
     @Test
-    @DisplayName("rolls back external account when post-save step fails")
-    void rollsBackExternalAccountWhenPostSaveStepFails() {
+    @DisplayName("propagates post-save step failure so the shared transaction rolls back")
+    void propagatesPostSaveStepFailure() {
         UUID actorId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
 
@@ -178,7 +177,6 @@ class EmployeeOnboardingServiceTest {
 
         User provisionedUser = User.builder()
             .id(UUID.randomUUID())
-            .keycloakId("kc-user-post-save-failure")
             .email(dto.email())
             .firstName(dto.firstName())
             .lastName(dto.lastName())
@@ -206,7 +204,5 @@ class EmployeeOnboardingServiceTest {
         assertThatThrownBy(() -> employeeOnboardingService.onboard(dto, actorId))
             .isInstanceOf(RuntimeException.class)
             .hasMessage("History recording failed");
-
-        verify(accountProvisioningService).rollbackExternalAccount("kc-user-post-save-failure");
     }
 }

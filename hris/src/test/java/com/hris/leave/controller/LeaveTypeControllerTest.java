@@ -1,11 +1,9 @@
 package com.hris.leave.controller;
 
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.leave.dto.LeaveTypeDto;
 import com.hris.leave.service.LeaveAcquisitionPolicyService;
 import com.hris.leave.service.LeaveTypeService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,10 +48,6 @@ class LeaveTypeControllerTest {
     private LeaveTypeService leaveTypeService;
     @MockBean
     private LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean
-    private UserProvisioningService userProvisioningService;
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
     @MockBean

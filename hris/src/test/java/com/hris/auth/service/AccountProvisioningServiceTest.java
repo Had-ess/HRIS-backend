@@ -7,25 +7,23 @@ import com.hris.access.service.UserAccessAssignmentService;
 import com.hris.auth.dto.AccountProvisioningRequest;
 import com.hris.auth.entity.User;
 import com.hris.auth.repository.UserRepository;
-import com.hris.common.exception.KeycloakProvisioningException;
+import com.hris.identity.account.LocalAccountService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,155 +34,121 @@ class AccountProvisioningServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private AccessProfileRepository accessProfileRepository;
     @Mock private UserAccessAssignmentService userAccessAssignmentService;
-    @Mock private KeycloakAdminClient keycloakAdminClient;
+    @Mock private LocalAccountService localAccountService;
     @Mock private AuditLogService auditLogService;
 
     @InjectMocks private AccountProvisioningService accountProvisioningService;
 
-    @Test
-    @DisplayName("propagates Keycloak provisioning conflict without wrapping it")
-    void propagatesKeycloakProvisioningConflictWithoutWrappingIt() {
-        UUID profileId = UUID.randomUUID();
-        UUID actorId = UUID.randomUUID();
-
-        AccountProvisioningRequest request = new AccountProvisioningRequest(
+    private AccountProvisioningRequest request(UUID profileId) {
+        return new AccountProvisioningRequest(
             "new.user",
             "new.user@demo.hris.local",
             "New",
             "User",
             List.of(profileId)
         );
-        AccessProfile profile = AccessProfile.builder()
+    }
+
+    private AccessProfile activeProfile(UUID profileId) {
+        return AccessProfile.builder()
             .id(profileId)
             .code("SELF_SERVICE")
             .displayKey("profile.selfService")
             .isActive(true)
             .build();
+    }
 
-        KeycloakProvisioningException exception = new KeycloakProvisioningException(
-            HttpStatus.CONFLICT,
-            "A Keycloak user with this username already exists",
-            "create user",
-            HttpStatus.CONFLICT,
-            "{\"errorMessage\":\"User exists with same username\"}",
-            null
-        );
+    @Test
+    @DisplayName("rejects provisioning when email already exists")
+    void rejectsDuplicateEmail() {
+        UUID profileId = UUID.randomUUID();
+        when(userRepository.findByEmail("new.user@demo.hris.local"))
+            .thenReturn(Optional.of(User.builder().id(UUID.randomUUID()).build()));
 
-        when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
-        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
-        when(keycloakAdminClient.createUser(any())).thenThrow(exception);
-
-        assertThatThrownBy(() -> accountProvisioningService.provision(request, actorId))
-            .isSameAs(exception)
-            .hasMessage("A Keycloak user with this username already exists");
+        assertThatThrownBy(() -> accountProvisioningService.provision(request(profileId), UUID.randomUUID()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("User email must be unique");
 
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    @DisplayName("deletes created Keycloak user when local user save fails")
-    void deletesCreatedKeycloakUserWhenLocalUserSaveFails() {
+    @DisplayName("creates local user, assigns profiles, and initiates activation in one flow")
+    void createsUserAssignsProfilesAndInitiatesActivation() {
         UUID profileId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
 
-        AccountProvisioningRequest request = new AccountProvisioningRequest(
-            "new.user",
-            "new.user@demo.hris.local",
-            "New",
-            "User",
-            List.of(profileId)
-        );
-        AccessProfile profile = AccessProfile.builder()
+        when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
+        when(accessProfileRepository.findByIdIn(List.of(profileId)))
+            .thenReturn(List.of(activeProfile(profileId)));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User user = inv.getArgument(0);
+            user.setId(UUID.randomUUID());
+            return user;
+        });
+
+        User saved = accountProvisioningService.provision(request(profileId), actorId);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        assertThat(captor.getValue().getEmail()).isEqualTo("new.user@demo.hris.local");
+        assertThat(captor.getValue().isSeed()).isTrue();
+
+        verify(userAccessAssignmentService).assignProfile(saved.getId(), profileId, actorId);
+        verify(localAccountService).initiateActivation(saved);
+    }
+
+    @Test
+    @DisplayName("rejects inactive access profiles")
+    void rejectsInactiveProfiles() {
+        UUID profileId = UUID.randomUUID();
+        AccessProfile inactive = AccessProfile.builder()
             .id(profileId)
             .code("SELF_SERVICE")
             .displayKey("profile.selfService")
-            .isActive(true)
+            .isActive(false)
             .build();
 
         when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
-        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
-        when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-123");
-        when(userRepository.save(any(User.class))).thenThrow(new IllegalStateException("Local save failed"));
+        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(inactive));
 
-        assertThatThrownBy(() -> accountProvisioningService.provision(request, actorId))
+        assertThatThrownBy(() -> accountProvisioningService.provision(request(profileId), UUID.randomUUID()))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Local save failed");
+            .hasMessage("Only active access profiles can be assigned");
 
-        verify(keycloakAdminClient).deleteUser("kc-user-123");
+        verify(userRepository, never()).save(any(User.class));
+        verify(localAccountService, never()).initiateActivation(any());
     }
 
     @Test
-    @DisplayName("sends activation email with UPDATE_PASSWORD and VERIFY_EMAIL after user creation (C2)")
-    void sendsActivationEmailAfterUserCreation() {
-        UUID profileId = UUID.randomUUID();
-        UUID actorId = UUID.randomUUID();
+    @DisplayName("requires at least one access profile")
+    void requiresAtLeastOneProfile() {
+        AccountProvisioningRequest emptyProfiles = new AccountProvisioningRequest(
+            "new.user", "new.user@demo.hris.local", "New", "User", List.of());
 
-        AccountProvisioningRequest request = new AccountProvisioningRequest(
-            "new.user",
-            "new.user@demo.hris.local",
-            "New",
-            "User",
-            List.of(profileId)
-        );
-        AccessProfile profile = AccessProfile.builder()
-            .id(profileId)
-            .code("SELF_SERVICE")
-            .displayKey("profile.selfService")
-            .isActive(true)
-            .build();
+        assertThatThrownBy(() -> accountProvisioningService.provision(emptyProfiles, UUID.randomUUID()))
+            .isInstanceOf(IllegalArgumentException.class);
 
-        when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
-        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
-        when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-abc");
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        accountProvisioningService.provision(request, actorId);
-
-        verify(keycloakAdminClient).sendExecuteActionsEmail(
-            eq("kc-user-abc"),
-            eq(List.of("UPDATE_PASSWORD", "VERIFY_EMAIL")),
-            eq(86400)
-        );
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    @DisplayName("keeps local user creation successful when activation email fails")
-    void keepsLocalUserCreationSuccessfulWhenActivationEmailFails() {
+    @DisplayName("audits the provisioning with the acting user")
+    void auditsProvisioning() {
         UUID profileId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
 
-        AccountProvisioningRequest request = new AccountProvisioningRequest(
-            "new.user",
-            "new.user@demo.hris.local",
-            "New",
-            "User",
-            List.of(profileId)
-        );
-        AccessProfile profile = AccessProfile.builder()
-            .id(profileId)
-            .code("SELF_SERVICE")
-            .displayKey("profile.selfService")
-            .isActive(true)
-            .build();
-
-        KeycloakProvisioningException emailFailure = new KeycloakProvisioningException(
-            HttpStatus.BAD_GATEWAY,
-            "Keycloak is unavailable. Please retry later.",
-            "send activation email",
-            null,
-            null,
-            null
-        );
-
         when(userRepository.findByEmail("new.user@demo.hris.local")).thenReturn(Optional.empty());
-        when(accessProfileRepository.findByIdIn(List.of(profileId))).thenReturn(List.of(profile));
-        when(keycloakAdminClient.createUser(any())).thenReturn("kc-user-abc");
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        doThrow(emailFailure).when(keycloakAdminClient).sendExecuteActionsEmail(any(), anyList(), anyInt());
+        when(accessProfileRepository.findByIdIn(List.of(profileId)))
+            .thenReturn(List.of(activeProfile(profileId)));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User user = inv.getArgument(0);
+            user.setId(UUID.randomUUID());
+            return user;
+        });
 
-        accountProvisioningService.provision(request, actorId);
+        User saved = accountProvisioningService.provision(request(profileId), actorId);
 
-        verify(keycloakAdminClient, never()).deleteUser("kc-user-abc");
-        verify(userRepository).save(any(User.class));
+        verify(auditLogService).log(eq(actorId), any(), eq("user"), eq(saved.getId()), any(), any());
     }
 }

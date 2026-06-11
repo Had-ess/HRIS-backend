@@ -1,6 +1,5 @@
 package com.hris.common;
 
-import com.hris.common.exception.KeycloakProvisioningException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -13,22 +12,24 @@ class GlobalExceptionHandlerTest {
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    @DisplayName("returns the safe Keycloak provisioning response status and message")
-    void returnsSafeKeycloakProvisioningResponse() {
-        KeycloakProvisioningException exception = new KeycloakProvisioningException(
-            HttpStatus.BAD_GATEWAY,
-            "Keycloak admin authentication failed. Contact support.",
-            "obtain access token",
-            HttpStatus.UNAUTHORIZED,
-            "{\"error\":\"unauthorized_client\"}",
-            null
-        );
+    @DisplayName("maps IllegalArgumentException to 400 with the message")
+    void mapsIllegalArgumentToBadRequest() {
+        ResponseEntity<ApiResponse<Void>> response =
+            handler.handleIllegalArgument(new IllegalArgumentException("PASSWORD_POLICY_TOO_SHORT"));
 
-        ResponseEntity<ApiResponse<Void>> response = handler.handleKeycloakProvisioning(exception);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message())
-            .isEqualTo("Keycloak admin authentication failed. Contact support.");
+        assertThat(response.getBody().message()).isEqualTo("PASSWORD_POLICY_TOO_SHORT");
+    }
+
+    @Test
+    @DisplayName("maps IllegalStateException to 409 with the message")
+    void mapsIllegalStateToConflict() {
+        ResponseEntity<ApiResponse<Void>> response =
+            handler.handleIllegalState(new IllegalStateException("User email must be unique"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("User email must be unique");
     }
 }

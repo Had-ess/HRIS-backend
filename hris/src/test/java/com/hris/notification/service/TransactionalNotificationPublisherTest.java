@@ -15,7 +15,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,7 +27,7 @@ import static org.mockito.Mockito.when;
 class TransactionalNotificationPublisherTest {
 
     @Mock
-    private NotificationPublisher notificationPublisher;
+    private NotificationEventProcessor notificationEventProcessor;
 
     @Mock
     private NotificationEventRepository notificationEventRepository;
@@ -39,24 +41,25 @@ class TransactionalNotificationPublisherTest {
     }
 
     @Test
-    @DisplayName("persists + sends inline when no transaction is active")
-    void publishesImmediatelyWhenNoTransactionIsActive() {
+    @DisplayName("persists + processes inline when no transaction is active")
+    void processesImmediatelyWhenNoTransactionIsActive() {
         TransactionalNotificationPublisher publisher =
-            new TransactionalNotificationPublisher(notificationPublisher, notificationEventRepository);
+            new TransactionalNotificationPublisher(notificationEventRepository, notificationEventProcessor);
         NotificationEvent event = buildEvent();
+        NotificationEvent saved = buildEvent();
+        when(notificationEventRepository.save(event)).thenReturn(saved);
 
         publisher.publishAfterCommit(event);
 
-        // No transaction → fall back to the inline persist-and-send path.
-        verify(notificationPublisher).publish(event);
-        verify(notificationEventRepository, never()).save(any());
+        verify(notificationEventRepository).save(event);
+        verify(notificationEventProcessor).process(saved);
     }
 
     @Test
-    @DisplayName("persists the event in the current transaction and sends only after commit")
-    void persistsInTransactionThenSendsAfterCommit() {
+    @DisplayName("persists the event in the current transaction and processes only after commit")
+    void persistsInTransactionThenProcessesAfterCommit() {
         TransactionalNotificationPublisher publisher =
-            new TransactionalNotificationPublisher(notificationPublisher, notificationEventRepository);
+            new TransactionalNotificationPublisher(notificationEventRepository, notificationEventProcessor);
         NotificationEvent event = buildEvent();
         NotificationEvent saved = buildEvent();
         when(notificationEventRepository.save(event)).thenReturn(saved);
@@ -68,16 +71,29 @@ class TransactionalNotificationPublisherTest {
 
         // The row is written atomically with the business change, before commit...
         verify(notificationEventRepository).save(event);
-        // ...but nothing is sent to the broker until the transaction commits.
-        verify(notificationPublisher, never()).sendNow(any());
+        // ...but nothing is processed until the transaction commits.
+        verify(notificationEventProcessor, never()).process(any());
 
         for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
             synchronization.afterCommit();
         }
 
-        verify(notificationPublisher).sendNow(saved);
-        // The inline persist-and-send path is never used inside a transaction.
-        verify(notificationPublisher, never()).publish(any());
+        verify(notificationEventProcessor).process(saved);
+    }
+
+    @Test
+    @DisplayName("processing failures are swallowed so business flows never break")
+    void processingFailuresAreSwallowed() {
+        TransactionalNotificationPublisher publisher =
+            new TransactionalNotificationPublisher(notificationEventRepository, notificationEventProcessor);
+        NotificationEvent event = buildEvent();
+        NotificationEvent saved = buildEvent();
+        when(notificationEventRepository.save(event)).thenReturn(saved);
+        doThrow(new IllegalStateException("processing failed"))
+            .when(notificationEventProcessor).process(saved);
+
+        // The outbox row is persisted; the worker will retry the failed processing.
+        assertThatCode(() -> publisher.publishAfterCommit(event)).doesNotThrowAnyException();
     }
 
     private NotificationEvent buildEvent() {

@@ -18,6 +18,7 @@ public interface NotificationEventRepository extends JpaRepository<NotificationE
     @Query("""
         SELECT ne FROM NotificationEvent ne
         WHERE ne.deliveredAt IS NULL
+          AND ne.failedAt IS NULL
           AND ne.publishedAt < :cutoff
         ORDER BY ne.publishedAt ASC
         """)

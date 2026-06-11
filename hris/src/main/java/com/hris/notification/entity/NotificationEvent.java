@@ -21,6 +21,8 @@ public class NotificationEvent {
     @Column(name = "routing_key", nullable = false, length = 100) private String routingKey;
     @Column(name = "published_at", nullable = false) @Builder.Default private Instant publishedAt = Instant.now();
     @Column(name = "delivered_at") private Instant deliveredAt;
+    @Column(name = "attempts", nullable = false) @Builder.Default private int attempts = 0;
+    @Column(name = "failed_at") private Instant failedAt;
 
     @Override public boolean equals(Object o) {
         if (this == o) return true;

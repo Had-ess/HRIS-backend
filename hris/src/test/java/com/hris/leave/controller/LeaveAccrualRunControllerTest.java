@@ -6,7 +6,6 @@ import com.hris.leave.accrual.entity.AccrualRunStatus;
 import com.hris.leave.dto.LeaveAccrualRunDto;
 import com.hris.leave.service.LeaveAccrualService;
 import com.hris.leave.service.LeaveAcquisitionPolicyService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.support.TestAuthenticationFactory;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -42,7 +41,6 @@ class LeaveAccrualRunControllerTest {
 
     @MockBean private LeaveAccrualService leaveAccrualService;
     @MockBean private LeaveAcquisitionPolicyService leaveAcquisitionPolicyService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @Test

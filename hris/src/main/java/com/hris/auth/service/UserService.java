@@ -26,7 +26,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final AccessResolutionService accessResolutionService;
     private final AuditLogService auditLogService;
-    private final KeycloakAdminClient keycloakAdminClient;
 
     @Transactional(readOnly = true)
     public UserResponseDto getCurrentUser(UUID userId) {
@@ -53,8 +52,8 @@ public class UserService {
         String firstName = dto.firstName().trim();
         String lastName = dto.lastName().trim();
 
-        keycloakAdminClient.updateUserProfile(user.getKeycloakId(), normalizedEmail, firstName, lastName);
-
+        // users table is the identity store since the owned-auth migration:
+        // the next issued token picks the new profile claims up automatically.
         user.setEmail(normalizedEmail);
         user.setFirstName(firstName);
         user.setLastName(lastName);

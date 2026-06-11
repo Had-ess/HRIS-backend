@@ -28,6 +28,11 @@ public class DashboardController {
     private final DashboardService dashboardService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
+    /**
+     * Deliberately has no permission check: it is the personal dashboard,
+     * scoped to the caller's own userId — every authenticated employee may
+     * read their own data. The role-specific views below are permission-gated.
+     */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<EmployeeDashboardDto>> getMyDashboard(
             Authentication auth,

@@ -5,8 +5,6 @@ import com.hris.access.dto.AccessPermissionDto;
 import com.hris.access.dto.NavigationItemDto;
 import com.hris.access.dto.NavigationSectionDto;
 import com.hris.access.service.AccessResolutionService;
-import com.hris.auth.service.UserProvisioningService;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.common.GlobalExceptionHandler;
 import com.hris.support.TestAuthenticationFactory;
 import jakarta.servlet.FilterChain;
@@ -45,11 +43,7 @@ class AccessControllerTest {
     @MockBean
     private AccessResolutionService accessResolutionService;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @MockBean
-    private UserProvisioningService userProvisioningService;
 
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;

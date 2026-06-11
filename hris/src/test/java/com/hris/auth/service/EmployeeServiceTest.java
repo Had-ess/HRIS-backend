@@ -9,7 +9,9 @@ import com.hris.auth.enums.ContractType;
 import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.DepartmentRepository;
+import com.hris.auth.repository.EmployeeDepartmentHistoryRepository;
 import com.hris.auth.repository.EmployeeRepository;
+import com.hris.auth.repository.EmployeeStatusHistoryRepository;
 import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveRequestRepository;
@@ -43,6 +45,8 @@ class EmployeeServiceTest {
     @Mock private LeavePolicyRepository leavePolicyRepository;
     @Mock private LeaveBalanceRepository leaveBalanceRepository;
     @Mock private LeaveRequestRepository leaveRequestRepository;
+    @Mock private EmployeeDepartmentHistoryRepository employeeDepartmentHistoryRepository;
+    @Mock private EmployeeStatusHistoryRepository employeeStatusHistoryRepository;
     @Mock private DepartmentRepository departmentRepository;
     @Mock private ProjectAssignmentRepository projectAssignmentRepository;
     @Mock private UserDeletionService userDeletionService;
@@ -86,7 +90,7 @@ class EmployeeServiceTest {
 
         assertThatThrownBy(() -> employeeService.delete(employeeId, actorId))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Only terminated employees can be deleted");
+            .hasMessage("Only deactivated or terminated employees can be deleted");
 
         verify(employeeRepository, never()).delete(employee);
         verify(userDeletionService, never()).deleteUser(employee.getUserId(), actorId);

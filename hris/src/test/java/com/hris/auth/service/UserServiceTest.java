@@ -33,18 +33,16 @@ class UserServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private AccessResolutionService accessResolutionService;
     @Mock private AuditLogService auditLogService;
-    @Mock private KeycloakAdminClient keycloakAdminClient;
 
     @InjectMocks
     private UserService userService;
 
     @Test
-    @DisplayName("updates current user profile and propagates it to Keycloak")
-    void updatesCurrentUserProfileAndPropagatesItToKeycloak() {
+    @DisplayName("updates current user profile")
+    void updatesCurrentUserProfile() {
         UUID userId = UUID.randomUUID();
         User user = User.builder()
             .id(userId)
-            .keycloakId("kc-user-123")
             .email("old@demo.hris.local")
             .firstName("Old")
             .lastName("Name")
@@ -67,7 +65,6 @@ class UserServiceTest {
         assertThat(response.email()).isEqualTo("new@demo.hris.local");
         assertThat(response.firstName()).isEqualTo("New");
         assertThat(response.lastName()).isEqualTo("Person");
-        verify(keycloakAdminClient).updateUserProfile("kc-user-123", "new@demo.hris.local", "New", "Person");
     }
 
     @Test
@@ -76,7 +73,6 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder()
             .id(userId)
-            .keycloakId("kc-user-123")
             .email("old@demo.hris.local")
             .firstName("Old")
             .lastName("Name")
@@ -86,7 +82,6 @@ class UserServiceTest {
             .build();
         User otherUser = User.builder()
             .id(UUID.randomUUID())
-            .keycloakId("kc-user-999")
             .email("taken@demo.hris.local")
             .firstName("Taken")
             .lastName("User")
@@ -106,7 +101,7 @@ class UserServiceTest {
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("User email must be unique");
 
-        verify(keycloakAdminClient, never()).updateUserProfile(any(), any(), any(), any());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -115,7 +110,6 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder()
             .id(userId)
-            .keycloakId("kc-user-123")
             .email("user@demo.hris.local")
             .firstName("Demo")
             .lastName("User")

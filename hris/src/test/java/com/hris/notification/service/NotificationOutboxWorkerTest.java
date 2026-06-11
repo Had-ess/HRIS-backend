@@ -3,24 +3,21 @@ package com.hris.notification.service;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.repository.NotificationEventRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.springframework.amqp.core.MessagePostProcessor;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,57 +30,94 @@ class NotificationOutboxWorkerTest {
     private NotificationEventRepository notificationEventRepository;
 
     @Mock
-    private RabbitTemplate rabbitTemplate;
+    private NotificationEventProcessor notificationEventProcessor;
 
     @InjectMocks
     private NotificationOutboxWorker worker;
 
-    @Test
-    @DisplayName("retryUndelivered marks event as delivered when AMQP publish succeeds")
-    void retryUndeliveredMarksEventAsDeliveredOnSuccess() {
-        NotificationEvent event = NotificationEvent.builder()
+    @BeforeEach
+    void configureMaxAttempts() {
+        ReflectionTestUtils.setField(worker, "maxAttempts", 3);
+    }
+
+    private NotificationEvent pendingEvent(NotificationEventType type, String routingKey) {
+        return NotificationEvent.builder()
             .id(UUID.randomUUID())
-            .eventType(NotificationEventType.LEAVE_SUBMITTED)
+            .eventType(type)
             .targetUserId(UUID.randomUUID())
-            .titleKey("leave.submitted.title")
-            .bodyKey("leave.submitted.body")
+            .titleKey("key.title")
+            .bodyKey("key.body")
             .params("{}")
             .locale("fr")
-            .routingKey("leave.submitted")
+            .routingKey(routingKey)
             .publishedAt(Instant.now().minusSeconds(120))
             .build();
+    }
+
+    @Test
+    @DisplayName("retryUndelivered delegates pending events to the processor")
+    void retryUndeliveredDelegatesToProcessor() {
+        NotificationEvent event = pendingEvent(NotificationEventType.LEAVE_SUBMITTED, "leave.submitted");
 
         when(notificationEventRepository.findUndeliveredBefore(any(Instant.class)))
             .thenReturn(List.of(event));
 
         worker.retryUndelivered();
 
-        assertThat(event.getDeliveredAt()).isNotNull();
+        verify(notificationEventProcessor).process(event);
+        assertThat(event.getAttempts()).isZero();
+        assertThat(event.getFailedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("retryUndelivered increments attempts when processing fails")
+    void retryUndeliveredIncrementsAttemptsOnFailure() {
+        NotificationEvent event = pendingEvent(NotificationEventType.LEAVE_APPROVED, "leave.approved");
+
+        when(notificationEventRepository.findUndeliveredBefore(any(Instant.class)))
+            .thenReturn(List.of(event));
+        doThrow(new IllegalStateException("processing failed"))
+            .when(notificationEventProcessor).process(event);
+
+        worker.retryUndelivered();
+
+        assertThat(event.getAttempts()).isEqualTo(1);
+        assertThat(event.getFailedAt()).isNull();
+        assertThat(event.getDeliveredAt()).isNull();
         verify(notificationEventRepository).save(event);
     }
 
     @Test
-    @DisplayName("retryUndelivered leaves deliveredAt null when AMQP publish fails")
-    void retryUndeliveredLeavesDeliveredAtNullOnAmqpFailure() {
-        NotificationEvent event = NotificationEvent.builder()
-            .id(UUID.randomUUID())
-            .eventType(NotificationEventType.LEAVE_APPROVED)
-            .targetUserId(UUID.randomUUID())
-            .titleKey("leave.approved.title")
-            .bodyKey("leave.approved.body")
-            .params("{}")
-            .locale("fr")
-            .routingKey("leave.approved")
-            .publishedAt(Instant.now().minusSeconds(120))
-            .build();
+    @DisplayName("retryUndelivered dead-letters the event after max attempts")
+    void retryUndeliveredDeadLettersAfterMaxAttempts() {
+        NotificationEvent event = pendingEvent(NotificationEventType.LEAVE_REJECTED, "leave.rejected");
+        event.setAttempts(2); // next failure is attempt 3 of 3
 
         when(notificationEventRepository.findUndeliveredBefore(any(Instant.class)))
             .thenReturn(List.of(event));
-        doThrow(new AmqpException("broker unavailable"))
-            .when(rabbitTemplate).convertAndSend(any(String.class), any(String.class), eq(event), any(MessagePostProcessor.class));
+        doThrow(new IllegalStateException("processing failed"))
+            .when(notificationEventProcessor).process(event);
 
         worker.retryUndelivered();
 
-        assertThat(event.getDeliveredAt()).isNull();
+        assertThat(event.getAttempts()).isEqualTo(3);
+        assertThat(event.getFailedAt()).isNotNull();
+        verify(notificationEventRepository).save(event);
+    }
+
+    @Test
+    @DisplayName("one poison event does not prevent the rest of the batch from processing")
+    void poisonEventDoesNotBlockBatch() {
+        NotificationEvent poison = pendingEvent(NotificationEventType.LEAVE_SUBMITTED, "leave.submitted");
+        NotificationEvent healthy = pendingEvent(NotificationEventType.LEAVE_APPROVED, "leave.approved");
+
+        when(notificationEventRepository.findUndeliveredBefore(any(Instant.class)))
+            .thenReturn(List.of(poison, healthy));
+        doThrow(new IllegalStateException("processing failed"))
+            .when(notificationEventProcessor).process(poison);
+
+        worker.retryUndelivered();
+
+        verify(notificationEventProcessor).process(healthy);
     }
 }

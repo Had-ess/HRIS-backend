@@ -3,9 +3,7 @@ package com.hris.analytics.controller;
 import com.hris.analytics.dto.AuditLogDto;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogQueryService;
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.security.JwtAuthenticationFilter;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,10 +43,6 @@ class AuditLogControllerTest {
 
     @MockBean
     private AuditLogQueryService auditLogQueryService;
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean
-    private UserProvisioningService userProvisioningService;
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 

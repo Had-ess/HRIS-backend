@@ -37,6 +37,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -129,7 +130,7 @@ class LeaveRequestServiceTest {
     class CreateTests {
 
         @Test
-        @DisplayName("should use leave request start year for balance lookup when creating")
+        @DisplayName("should reserve balance for the request's own start year when creating")
         void shouldUseStartYearForBalanceLookup_WhenCreatingRequest() throws Exception {
             CreateLeaveRequestDto dto = new CreateLeaveRequestDto(
                 leaveTypeId,
@@ -141,21 +142,10 @@ class LeaveRequestServiceTest {
                 null, null, null
             );
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2027)
-                .totalDays(BigDecimal.valueOf(20))
-                .usedDays(BigDecimal.ZERO)
-                .pendingDays(BigDecimal.ZERO)
-                .build();
-
             UUID savedRequestId = UUID.randomUUID();
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(5);
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2027)).thenReturn(Optional.of(balance));
             when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(inv -> {
                 LeaveRequest request = inv.getArgument(0);
                 request.setId(savedRequestId);
@@ -195,8 +185,12 @@ class LeaveRequestServiceTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getStatus()).isEqualTo(LeaveStatus.IN_APPROVAL);
-            verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2027);
+            // The ledger receives the saved request, whose start date carries
+            // the balance year (2027) — the request year, not the current one.
+            ArgumentCaptor<LeaveRequest> reservedRequest = ArgumentCaptor.forClass(LeaveRequest.class);
+            verify(leaveBalanceLedgerService).reserveForLeaveRequest(
+                eq(employee), eq(leaveType), reservedRequest.capture(), any(BigDecimal.class), eq(requesterId));
+            assertThat(reservedRequest.getValue().getStartDate().getYear()).isEqualTo(2027);
         }
 
         @Test
@@ -212,21 +206,10 @@ class LeaveRequestServiceTest {
                 null, null, null
             );
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2027)
-                .totalDays(BigDecimal.valueOf(20))
-                .usedDays(BigDecimal.ZERO)
-                .pendingDays(BigDecimal.ZERO)
-                .build();
-
             UUID savedRequestId = UUID.randomUUID();
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(5);
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2027)).thenReturn(Optional.of(balance));
             when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(inv -> {
                 LeaveRequest request = inv.getArgument(0);
                 request.setId(savedRequestId);
@@ -270,10 +253,12 @@ class LeaveRequestServiceTest {
             assertThat(result.getWorkingDays()).isEqualTo(5);
             assertThat(result.getStatus()).isEqualTo(LeaveStatus.IN_APPROVAL);
 
-            verify(leaveBalanceRepository).findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2027);
+            // Captor + isEqualByComparingTo: durationDays is a BigDecimal whose
+            // scale depends on the computation, so eq() would be brittle.
+            ArgumentCaptor<BigDecimal> reservedDays = ArgumentCaptor.forClass(BigDecimal.class);
             verify(leaveBalanceLedgerService).reserveForLeaveRequest(
-                employee, leaveType, result, BigDecimal.valueOf(5), requesterId);
+                eq(employee), eq(leaveType), eq(result), reservedDays.capture(), eq(requesterId));
+            assertThat(reservedDays.getValue()).isEqualByComparingTo("5");
         }
 
         @Test
@@ -289,23 +274,12 @@ class LeaveRequestServiceTest {
                 null, null, null
             );
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2026)
-                .totalDays(BigDecimal.valueOf(3))
-                .usedDays(BigDecimal.ZERO)
-                .pendingDays(BigDecimal.ZERO)
-                .build();
-
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(8);
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2026)).thenReturn(Optional.of(balance));
             when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(leaveBalanceLedgerService.reserveForLeaveRequest(
-                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(BigDecimal.valueOf(8)), eq(requesterId)))
+                eq(employee), eq(leaveType), any(LeaveRequest.class), any(BigDecimal.class), eq(requesterId)))
                 .thenThrow(new InsufficientLeaveBalanceException("Insufficient balance"));
 
             assertThatThrownBy(() -> leaveRequestService.create(dto, requesterId))
@@ -349,8 +323,10 @@ class LeaveRequestServiceTest {
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(5);
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2026)).thenReturn(Optional.empty());
+            when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(leaveBalanceLedgerService.reserveForLeaveRequest(
+                eq(employee), eq(leaveType), any(LeaveRequest.class), any(BigDecimal.class), eq(requesterId)))
+                .thenThrow(new InsufficientLeaveBalanceException("No balance found for this leave type"));
 
             assertThatThrownBy(() -> leaveRequestService.create(dto, requesterId))
                 .isInstanceOf(InsufficientLeaveBalanceException.class)
@@ -370,28 +346,14 @@ class LeaveRequestServiceTest {
                 null, null, null
             );
 
-            LeaveBalance balance = LeaveBalance.builder()
-                .employeeId(employeeId)
-                .leaveTypeId(leaveTypeId)
-                .year(2026)
-                .totalDays(BigDecimal.valueOf(20))
-                .usedDays(BigDecimal.ZERO)
-                .pendingDays(BigDecimal.ZERO)
-                .build();
-
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(leaveTypeRepository.findById(leaveTypeId)).thenReturn(Optional.of(leaveType));
             when(workScheduleService.computeWorkingDays(any(), any(), eq(scheduleId))).thenReturn(3);
-            when(leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(
-                employeeId, leaveTypeId, 2026)).thenReturn(Optional.of(balance));
             when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(inv -> {
                 LeaveRequest request = inv.getArgument(0);
                 request.setId(UUID.randomUUID());
                 return request;
             });
-            when(leaveBalanceLedgerService.reserveForLeaveRequest(
-                eq(employee), eq(leaveType), any(LeaveRequest.class), eq(BigDecimal.valueOf(3)), eq(requesterId)))
-                .thenReturn(balance);
             when(leaveApprovalWorkflowService.instantiate(any(), eq(employee), eq(leaveType)))
                 .thenThrow(new InvalidWorkflowStateException("No approvers could be resolved for this leave request"));
 
@@ -623,9 +585,6 @@ class LeaveRequestServiceTest {
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
-            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
-            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
-            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
 
             LeaveRequest result = leaveRequestService.getById(requestId, requesterId);
 
@@ -652,9 +611,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
-            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
-            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
 
             assertThatThrownBy(() -> leaveRequestService.getById(requestId, requesterId))
@@ -674,9 +630,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(accessScopeService.hasGlobalBusinessRead(approverUserId)).thenReturn(false);
-            when(accessScopeService.findEmployee(approverUserId)).thenReturn(Optional.empty());
-            when(accessScopeService.resolveDepartmentManagerDepartmentId(eq(approverUserId), eq(null))).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(approverUserId)).thenReturn(Optional.empty());
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
@@ -789,9 +742,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
-            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
-            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.empty());
@@ -814,9 +764,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
-            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
-            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()
@@ -863,9 +810,6 @@ class LeaveRequestServiceTest {
                 .build();
 
             when(leaveRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-            when(accessScopeService.hasGlobalBusinessRead(requesterId)).thenReturn(false);
-            when(accessScopeService.findEmployee(requesterId)).thenReturn(Optional.of(employee));
-            when(accessScopeService.resolveDepartmentManagerDepartmentId(requesterId, employee)).thenReturn(Optional.empty());
             when(employeeRepository.findByUserId(requesterId)).thenReturn(Optional.of(employee));
             when(approvalWorkflowRepository.findBySubjectTypeAndSubjectId("LEAVE", requestId))
                 .thenReturn(Optional.of(ApprovalWorkflow.builder()

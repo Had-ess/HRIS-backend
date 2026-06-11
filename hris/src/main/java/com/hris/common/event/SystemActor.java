@@ -12,7 +12,7 @@ public final class SystemActor {
 
     /**
      * Fixed UUID representing the system actor.
-     * Used as actorId for scheduled jobs and RabbitMQ consumers that operate without a human user.
+     * Used as actorId for scheduled jobs and event processors that operate without a human user.
      */
     public static final UUID SYSTEM_ACTOR_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 

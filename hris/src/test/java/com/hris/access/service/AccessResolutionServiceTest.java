@@ -9,7 +9,13 @@ import com.hris.access.repository.MenuItemRepository;
 import com.hris.access.repository.ProfileMenuAccessRepository;
 import com.hris.access.repository.ProfilePermissionRepository;
 import com.hris.access.repository.UserProfileAssignmentRepository;
+import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Permission;
+import com.hris.auth.repository.DepartmentRepository;
+import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.organisation.repository.ProjectDepartmentRepository;
+import com.hris.organisation.repository.TeamRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +49,21 @@ class AccessResolutionServiceTest {
 
     @Mock
     private MenuItemRepository menuItemRepository;
+
+    @Mock
+    private DepartmentRepository departmentRepository;
+
+    @Mock
+    private TeamRepository teamRepository;
+
+    @Mock
+    private TeamHierarchyRelationRepository teamHierarchyRelationRepository;
+
+    @Mock
+    private ProjectAssignmentRepository projectAssignmentRepository;
+
+    @Mock
+    private ProjectDepartmentRepository projectDepartmentRepository;
 
     @InjectMocks
     private AccessResolutionService accessResolutionService;
@@ -96,7 +117,8 @@ class AccessResolutionServiceTest {
         var navigation = accessResolutionService.resolveNavigation(userId);
 
         assertThat(access.profileCodes()).containsExactly("HR_CONSOLE");
-        assertThat(access.scopedDepartmentIds()).isEmpty();
+        // MANUAL grants are unrestricted: null signals "global", not "no departments".
+        assertThat(access.scopedDepartmentIds()).isNull();
         assertThat(access.permissions()).extracting(permissionDto -> permissionDto.name())
             .containsExactly("ACCESS_PROFILE_READ");
         assertThat(navigation).hasSize(1);
@@ -126,6 +148,8 @@ class AccessResolutionServiceTest {
                 .sourceRefId(departmentId)
                 .build()));
         when(profilePermissionRepository.findByProfileIdIn(List.of(profileId))).thenReturn(List.of());
+        when(departmentRepository.findById(departmentId)).thenReturn(java.util.Optional.of(
+            Department.builder().id(departmentId).name("Engineering").code("ENG").isActive(true).build()));
 
         var access = accessResolutionService.resolveAccess(userId);
 

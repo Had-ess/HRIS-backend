@@ -226,20 +226,24 @@ class LeaveApprovalWorkflowServiceTest {
         UUID departmentId = UUID.randomUUID();
         UUID scopedApproverEmployeeId = UUID.randomUUID();
         UUID scopedApproverUserId = UUID.randomUUID();
+        UUID outOfScopeUserId = UUID.randomUUID();
         requester.setDepartmentId(departmentId);
         workflow.setValidatorSource(ValidatorSource.PROFILE_BASED);
 
         when(leaveValidationWorkflowResolver.resolveForLeaveType(leaveType)).thenReturn(workflow);
         when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(any(), any(), any())).thenReturn(List.of());
-        when(accessResolutionService.findEmployeesWithScopedProfile(
-            eq("DEPT_APPROVER_PROFILE"),
-            eq(departmentId),
-            eq(requester.getUserId()),
-            any()
-        )).thenReturn(List.of(Employee.builder()
-            .id(scopedApproverEmployeeId)
-            .userId(scopedApproverUserId)
-            .build()));
+        when(userRepository.findByPermissionNames(List.of("LEAVE_REQUEST_APPROVE"))).thenReturn(List.of(
+            User.builder().id(scopedApproverUserId).isActive(true).build(),
+            User.builder().id(outOfScopeUserId).isActive(true).build()
+        ));
+        when(employeeRepository.findByUserId(scopedApproverUserId)).thenReturn(Optional.of(
+            Employee.builder().id(scopedApproverEmployeeId).userId(scopedApproverUserId).build()));
+        when(employeeRepository.findByUserId(outOfScopeUserId)).thenReturn(Optional.of(
+            Employee.builder().id(UUID.randomUUID()).userId(outOfScopeUserId).build()));
+        when(accessResolutionService.resolveApprovalScope(scopedApproverUserId))
+            .thenReturn(AccessResolutionService.ScopeResolution.department(List.of(departmentId)));
+        when(accessResolutionService.resolveApprovalScope(outOfScopeUserId))
+            .thenReturn(AccessResolutionService.ScopeResolution.department(List.of(UUID.randomUUID())));
         when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(approvalStepRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
 

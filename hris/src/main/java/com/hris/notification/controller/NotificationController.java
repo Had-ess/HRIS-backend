@@ -5,6 +5,8 @@ import com.hris.common.PageResponse;
 import com.hris.notification.dto.NotificationResponseDto;
 import com.hris.notification.enums.NotificationType;
 import com.hris.notification.service.NotificationService;
+import com.hris.notification.service.NotificationStreamService;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.hris.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,18 @@ import java.util.UUID;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final NotificationStreamService notificationStreamService;
+
+    /**
+     * Server-Sent Events stream for real-time notification delivery.
+     * EventSource cannot set an Authorization header, so this endpoint also accepts the
+     * access token as an {@code access_token} query parameter (see SecurityConfig).
+     */
+    @GetMapping(value = "/stream", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(Authentication auth) {
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return notificationStreamService.subscribe(userId);
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<NotificationResponseDto>>> getMyNotifications(

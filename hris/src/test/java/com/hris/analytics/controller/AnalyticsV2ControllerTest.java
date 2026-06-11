@@ -5,9 +5,7 @@ import com.hris.analytics.dto.AnalyticsOverviewDto;
 import com.hris.analytics.dto.AnalyticsOverviewKpiDto;
 import com.hris.analytics.dto.AnalyticsSummaryDto;
 import com.hris.analytics.service.AnalyticsQueryService;
-import com.hris.auth.service.UserProvisioningService;
 import com.hris.common.GlobalExceptionHandler;
-import com.hris.security.JwtAuthenticationFilter;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.support.TestAuthenticationFactory;
 import java.util.List;
@@ -45,8 +43,6 @@ class AnalyticsV2ControllerTest {
 
     @MockBean private AnalyticsQueryService analyticsQueryService;
     @MockBean private PermissionAuthorizationService permissionAuthorizationService;
-    @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockBean private UserProvisioningService userProvisioningService;
     @MockBean private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach

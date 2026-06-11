@@ -3,12 +3,12 @@
 
 BEGIN;
 
-INSERT INTO users (id, keycloak_id, email, first_name, last_name, locale_preference, is_active)
+INSERT INTO users (id, email, first_name, last_name, locale_preference, is_active)
 VALUES
-    ('33333333-3333-3333-3333-333333333301', 'KC_DEMO_ADMIN', 'admin@demo.hris.local', 'Nadia', 'Ben Salem', 'fr', TRUE),
-    ('33333333-3333-3333-3333-333333333302', 'KC_DEMO_HR', 'hr.admin@demo.hris.local', 'Sami', 'Khadhraoui', 'fr', TRUE),
-    ('33333333-3333-3333-3333-333333333303', 'KC_DEMO_MANAGER', 'manager.engineering@demo.hris.local', 'Karim', 'Jlassi', 'fr', TRUE),
-    ('33333333-3333-3333-3333-333333333304', 'KC_DEMO_EMPLOYEE', 'employee@demo.hris.local', 'Leila', 'Mansour', 'en', TRUE)
+    ('33333333-3333-3333-3333-333333333301', 'admin@demo.hris.local', 'Nadia', 'Ben Salem', 'fr', TRUE),
+    ('33333333-3333-3333-3333-333333333302', 'hr.admin@demo.hris.local', 'Sami', 'Khadhraoui', 'fr', TRUE),
+    ('33333333-3333-3333-3333-333333333303', 'manager.engineering@demo.hris.local', 'Karim', 'Jlassi', 'fr', TRUE),
+    ('33333333-3333-3333-3333-333333333304', 'employee@demo.hris.local', 'Leila', 'Mansour', 'en', TRUE)
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO departments (id, name, code, head_employee_id, is_active)

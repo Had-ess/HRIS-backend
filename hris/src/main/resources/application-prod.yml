@@ -1,0 +1,59 @@
+# =============================================================================
+# PRODUCTION PROFILE — NO DEFAULT SECRETS
+# =============================================================================
+# Every placeholder below has NO fallback: the application refuses to start
+# unless the environment provides a value. This is deliberate — the dev
+# defaults in application.yml (hris_pass, localhost URLs, demo accounts) must
+# never reach production by omission.
+#
+# Required environment:
+#   DATASOURCE_URL            jdbc:postgresql://<host>:<port>/<db>
+#   DATASOURCE_USER           database user
+#   DATASOURCE_PASS           database password
+#   APP_AUTH_ISSUER           public https URL of this backend (token issuer)
+#   APP_AUTH_FRONTEND_URL     public https URL of the SPA
+#   CORS_ALLOWED_ORIGINS      comma-separated SPA origins
+#   SPRING_MAIL_HOST / SPRING_MAIL_PORT / SPRING_MAIL_USERNAME / SPRING_MAIL_PASSWORD
+#   APP_MAIL_FROM             sender address for account emails
+# =============================================================================
+
+spring:
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USER}
+    password: ${DATASOURCE_PASS}
+
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+
+app:
+  auth:
+    issuer: ${APP_AUTH_ISSUER}
+    frontend-url: ${APP_AUTH_FRONTEND_URL}
+    demo-seed:
+      # Hard off: demo credentials must never exist in production.
+      enabled: false
+  mail:
+    from: ${APP_MAIL_FROM}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+server:
+  # TLS terminates at the reverse proxy; honor its X-Forwarded-* headers so
+  # issuer/redirect URLs are built as https.
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: lax
+
+logging:
+  level:
+    com.hris: INFO
+    org.springframework.security: WARN
