@@ -217,6 +217,16 @@ public class EmployeeService {
             employee.setJobTitle(dto.jobTitle());
         }
         if (dto.status() != null) {
+            // Termination owns side effects (contract closure, account deactivation,
+            // session revocation) — it must go through the lifecycle endpoints.
+            if (dto.status() == EmployeeStatus.TERMINATED) {
+                throw new IllegalArgumentException(
+                    "Use POST /api/employees/{id}/terminate to terminate an employee");
+            }
+            if (employee.getStatus() == EmployeeStatus.TERMINATED && dto.status() != employee.getStatus()) {
+                throw new IllegalArgumentException(
+                    "Use POST /api/employees/{id}/reactivate to reactivate a terminated employee");
+            }
             employee.setStatus(dto.status());
         }
         if (dto.contractType() != null) {

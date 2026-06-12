@@ -229,6 +229,17 @@ public class NotificationEventProcessor {
             case PROJECT_ASSIGNED -> new Object[] {
                 map.getOrDefault("projectName", "")
             };
+            case TIMESHEET_SUBMITTED, TIMESHEET_APPROVED, TIMESHEET_REJECTED -> new Object[] {
+                map.getOrDefault("employeeName", ""),
+                map.getOrDefault("periodStart", ""),
+                map.getOrDefault("periodEnd", ""),
+                map.getOrDefault("rejectionReason", "")
+            };
+            case EMPLOYEE_TERMINATED, CONTRACT_EXPIRING, CONTRACT_EXPIRED, PROBATION_ENDING -> new Object[] {
+                map.getOrDefault("employeeName", ""),
+                map.getOrDefault("date", ""),
+                map.getOrDefault("contractType", "")
+            };
         };
     }
 
@@ -260,12 +271,16 @@ public class NotificationEventProcessor {
                  ADMIN_REQUEST_ATTACHMENT_ADDED, ADMIN_REQUEST_RESPONSE_ATTACHMENT_ADDED,
                  ADMIN_REQUEST_SLA_EXCEEDED -> NotificationType.REQUEST;
             case PROJECT_ASSIGNED -> NotificationType.TEAM;
+            case TIMESHEET_SUBMITTED -> NotificationType.APPROVAL;
+            case TIMESHEET_APPROVED, TIMESHEET_REJECTED -> NotificationType.REQUEST;
+            case EMPLOYEE_TERMINATED -> NotificationType.TEAM;
+            case CONTRACT_EXPIRING, CONTRACT_EXPIRED, PROBATION_ENDING -> NotificationType.SYSTEM;
         };
     }
 
     private String extractActorDisplayName(com.hris.notification.enums.NotificationEventType eventType, Object[] params) {
         return switch (eventType) {
-            case LEAVE_SUBMITTED, LEAVE_APPROVED, LEAVE_REJECTED, LEAVE_CANCELLED ->
+            case LEAVE_SUBMITTED, LEAVE_APPROVED, LEAVE_REJECTED, LEAVE_CANCELLED, TIMESHEET_SUBMITTED ->
                 params.length > 0 ? String.valueOf(params[0]) : null;
             default -> null;
         };

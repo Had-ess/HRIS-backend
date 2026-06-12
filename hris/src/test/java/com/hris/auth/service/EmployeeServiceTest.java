@@ -147,33 +147,33 @@ class EmployeeServiceTest {
     }
 
     @Test
-    @DisplayName("records termination history and analytics when employee is terminated")
-    void recordsTerminationHistoryAndAnalyticsWhenEmployeeIsTerminated() {
+    @DisplayName("rejects TERMINATED through the generic update path — lifecycle endpoint owns it")
+    void rejectsTerminationThroughGenericUpdate() {
         UUID employeeId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
         UUID departmentId = UUID.randomUUID();
         Employee employee = activeEmployee(employeeId, departmentId);
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
-        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(employeeMapper.toDto(any(Employee.class))).thenReturn(responseFor(employeeId, departmentId, EmployeeStatus.TERMINATED));
 
-        employeeService.update(employeeId, new EmployeeUpdateDto(
-            null,
-            null,
-            null,
-            EmployeeStatus.TERMINATED,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        ), actorId);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
+            employeeService.update(employeeId, new EmployeeUpdateDto(
+                null,
+                null,
+                null,
+                EmployeeStatus.TERMINATED,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ), actorId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("terminate");
 
-        verify(employeeHistoryService).recordStatusChange(any(Employee.class), any(Employee.class), eq(actorId), any(LocalDate.class), eq("TERMINATION"));
-        verify(analyticsEventPublisher).publishEmployeeTerminationEvent(any(Employee.class));
-        verify(employeeRepository, times(2)).save(any(Employee.class));
+        verify(employeeHistoryService, never()).recordStatusChange(any(Employee.class), any(Employee.class), eq(actorId), any(LocalDate.class), any());
+        verify(analyticsEventPublisher, never()).publishEmployeeTerminationEvent(any(Employee.class));
     }
 
     private Employee terminatedEmployee(UUID employeeId) {

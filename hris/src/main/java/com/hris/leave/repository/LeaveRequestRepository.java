@@ -28,6 +28,10 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
     Page<LeaveRequest> findByStatusOrderBySubmittedAtDesc(LeaveStatus status, Pageable pageable);
     List<LeaveRequest> findByEmployeeId(UUID employeeId);
     List<LeaveRequest> findTop5ByEmployeeIdOrderBySubmittedAtDesc(UUID employeeId);
+
+    /** Requests of a status overlapping [from, to] — timesheet expected-hours math. */
+    List<LeaveRequest> findByEmployeeIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+        UUID employeeId, LeaveStatus status, LocalDate to, LocalDate from);
     boolean existsByEmployeeId(UUID employeeId);
     List<LeaveRequest> findByStatusAndCancelledAtLessThanEqualAndDeletedAtIsNull(LeaveStatus status, Instant cutoff);
 

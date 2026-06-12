@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface EmployeeDepartmentHistoryRepository extends JpaRepository<EmployeeDepartmentHistory, UUID> {
     void deleteByEmployeeId(UUID employeeId);
+
+    java.util.List<EmployeeDepartmentHistory> findByEmployeeIdOrderByRecordedAtDesc(UUID employeeId);
 }

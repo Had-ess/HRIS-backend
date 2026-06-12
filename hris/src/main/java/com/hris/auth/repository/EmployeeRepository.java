@@ -41,6 +41,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     Page<Employee> findAll(Pageable pageable);
 
+    /** Scheduled terminations that have become due (lifecycle job). */
+    @Query("""
+        SELECT e FROM Employee e
+        WHERE e.terminationDate IS NOT NULL
+          AND e.terminationDate <= :asOf
+          AND e.status <> com.hris.auth.enums.EmployeeStatus.TERMINATED
+        """)
+    List<Employee> findDueScheduledTerminations(@Param("asOf") java.time.LocalDate asOf);
+
     @Query("SELECT COUNT(e) FROM Employee e WHERE e.hireDate >= :since")
     long countHiredAfter(@Param("since") java.time.LocalDate since);
 
