@@ -51,6 +51,23 @@ public final class LifecycleDtos {
     ) {
     }
 
+    /** Department and/or supervisor change; at least one target must be set. */
+    public record TransferRequest(
+        @NotNull LocalDate effectiveDate,
+        UUID departmentId,
+        UUID supervisorEmployeeId
+    ) {
+    }
+
+    public record ScheduledTransferDto(
+        LocalDate effectiveDate,
+        UUID departmentId,
+        String departmentName,
+        UUID supervisorEmployeeId,
+        String supervisorName
+    ) {
+    }
+
     /**
      * One entry of the merged lifecycle timeline. kind = STATUS | TRANSFER | CONTRACT.
      * Field meaning depends on kind; unused fields are null.
@@ -74,6 +91,7 @@ public final class LifecycleDtos {
         EmployeeStatus status,
         LocalDate terminationDate,
         boolean terminationScheduled,
+        ScheduledTransferDto scheduledTransfer,
         ContractDto activeContract,
         List<LifecycleEventDto> timeline
     ) {

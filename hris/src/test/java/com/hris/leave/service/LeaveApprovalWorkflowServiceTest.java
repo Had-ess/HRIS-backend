@@ -266,6 +266,44 @@ class LeaveApprovalWorkflowServiceTest {
     }
 
     @Test
+    @DisplayName("dept-head requester escalates to the parent department head before scoped HR")
+    void deptHeadEscalatesToParentDeptHead() {
+        UUID deptAId = UUID.randomUUID();
+        UUID deptBId = UUID.randomUUID();
+        UUID parentHeadEmployeeId = UUID.randomUUID();
+        UUID parentHeadUserId = UUID.randomUUID();
+        requester.setDepartmentId(deptAId);
+
+        when(leaveValidationWorkflowResolver.resolveForLeaveType(leaveType)).thenReturn(workflow);
+        when(projectAssignmentRepository.findActiveAssignmentsDuringPeriod(any(), any(), any()))
+            .thenReturn(List.of());
+        // requester heads department A whose parent is department B
+        when(departmentRepository.existsByHeadEmployeeId(requester.getId())).thenReturn(true);
+        com.hris.auth.entity.Department deptA = com.hris.auth.entity.Department.builder()
+            .id(deptAId).name("Platform").code("PLT").isActive(true)
+            .headEmployeeId(requester.getId()).parentDepartmentId(deptBId).build();
+        com.hris.auth.entity.Department deptB = com.hris.auth.entity.Department.builder()
+            .id(deptBId).name("Engineering").code("ENG").isActive(true)
+            .headEmployeeId(parentHeadEmployeeId).build();
+        when(departmentRepository.findByHeadEmployeeIdAndIsActiveTrue(requester.getId()))
+            .thenReturn(List.of(deptA));
+        when(departmentRepository.findById(deptAId)).thenReturn(Optional.of(deptA));
+        when(departmentRepository.findById(deptBId)).thenReturn(Optional.of(deptB));
+        when(employeeRepository.findById(parentHeadEmployeeId)).thenReturn(Optional.of(
+            Employee.builder().id(parentHeadEmployeeId).userId(parentHeadUserId).build()));
+        when(approvalWorkflowRepository.save(any(ApprovalWorkflow.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(approvalStepRepository.saveAll(any()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.instantiate(leaveRequest, requester, leaveType);
+
+        assertThat(result.steps()).hasSize(1);
+        assertThat(result.steps().getFirst().getApproverId()).isEqualTo(parentHeadUserId);
+        assertThat(result.steps().getFirst().getSourceType()).isEqualTo(ApprovalSourceType.PROFILE_BASED);
+    }
+
+    @Test
     @DisplayName("instantiate resolves team from hierarchy membership when assignment row is missing")
     void instantiateResolvesTeamFromHierarchyMembershipWhenAssignmentMissing() {
         UUID teamId = UUID.randomUUID();

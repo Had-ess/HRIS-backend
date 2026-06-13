@@ -7,8 +7,10 @@ import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.service.AuditLogService;
 import com.hris.auth.dto.DepartmentCreateDto;
 import com.hris.auth.dto.DepartmentDto;
+import com.hris.auth.dto.DepartmentUpdateDto;
 import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
+import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.DepartmentMapper;
 import com.hris.auth.repository.DepartmentRepository;
 import com.hris.auth.repository.EmployeeRepository;
@@ -17,6 +19,7 @@ import com.hris.common.exception.EntityNotFoundException;
 import com.hris.organisation.enums.ProjectStatus;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectDepartmentRepository;
+import com.hris.organisation.repository.TeamRepository;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,8 +30,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -39,6 +44,7 @@ public class DepartmentService {
     private final EmployeeRepository employeeRepository;
     private final ProjectDepartmentRepository projectDepartmentRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final TeamRepository teamRepository;
     private final AccessScopeService accessScopeService;
     private final DepartmentMapper departmentMapper;
     private final AuditLogService auditLogService;
@@ -86,10 +92,19 @@ public class DepartmentService {
 
     @Transactional
     public DepartmentDto create(DepartmentCreateDto dto, UUID actorId) {
+        if (dto.headEmployeeId() != null) {
+            // membership check is skipped at create: the department has no members yet
+            validateHeadAssignment(dto.headEmployeeId(), null);
+        }
+        if (dto.parentDepartmentId() != null) {
+            validateParentAssignment(null, dto.parentDepartmentId());
+        }
+
         Department dept = Department.builder()
             .name(dto.name())
             .code(dto.code())
             .headEmployeeId(dto.headEmployeeId())
+            .parentDepartmentId(dto.parentDepartmentId())
             .isActive(dto.isActive() != null ? dto.isActive() : true)
             .build();
 
@@ -103,19 +118,31 @@ public class DepartmentService {
     }
 
     @Transactional
-    public DepartmentDto update(UUID id, DepartmentCreateDto dto, UUID actorId) {
+    public DepartmentDto update(UUID id, DepartmentUpdateDto dto, UUID actorId) {
         Department dept = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
 
         Department previous = Department.builder()
             .name(dept.getName()).code(dept.getCode())
-            .headEmployeeId(dept.getHeadEmployeeId()).isActive(dept.isActive())
+            .headEmployeeId(dept.getHeadEmployeeId())
+            .parentDepartmentId(dept.getParentDepartmentId())
+            .isActive(dept.isActive())
             .build();
 
         if (dto.name() != null) dept.setName(dto.name());
         if (dto.code() != null) dept.setCode(dto.code());
-        if (dto.headEmployeeId() != null) dept.setHeadEmployeeId(dto.headEmployeeId());
         if (dto.isActive() != null) dept.setActive(dto.isActive());
+
+        // head and parent are full-apply: the form sends the complete payload, null clears
+        if (dto.headEmployeeId() != null && !dto.headEmployeeId().equals(dept.getHeadEmployeeId())) {
+            validateHeadAssignment(dto.headEmployeeId(), dept);
+        }
+        dept.setHeadEmployeeId(dto.headEmployeeId());
+
+        if (dto.parentDepartmentId() != null && !dto.parentDepartmentId().equals(dept.getParentDepartmentId())) {
+            validateParentAssignment(dept.getId(), dto.parentDepartmentId());
+        }
+        dept.setParentDepartmentId(dto.parentDepartmentId());
 
         Department saved = departmentRepository.save(dept);
         auditLogService.log(actorId, AuditAction.UPDATE, "department",
@@ -160,6 +187,7 @@ public class DepartmentService {
             .name(department.getName())
             .code(department.getCode())
             .headEmployeeId(department.getHeadEmployeeId())
+            .parentDepartmentId(department.getParentDepartmentId())
             .isActive(department.isActive())
             .build();
 
@@ -180,6 +208,7 @@ public class DepartmentService {
             .name(department.getName())
             .code(department.getCode())
             .headEmployeeId(department.getHeadEmployeeId())
+            .parentDepartmentId(department.getParentDepartmentId())
             .isActive(department.isActive())
             .build();
 
@@ -205,6 +234,53 @@ public class DepartmentService {
             throw new DepartmentDeletionNotAllowedException(
                 "Department cannot be deleted because it is linked to active projects");
         }
+
+        if (departmentRepository.existsByParentDepartmentId(departmentId)) {
+            throw new DepartmentDeletionNotAllowedException(
+                "Department cannot be deleted because it has child departments");
+        }
+
+        if (teamRepository.existsByDepartmentId(departmentId)) {
+            throw new DepartmentDeletionNotAllowedException(
+                "Department cannot be deleted because teams belong to it");
+        }
+    }
+
+    private void validateHeadAssignment(UUID headEmployeeId, Department department) {
+        Employee head = employeeRepository.findById(headEmployeeId)
+            .orElseThrow(() -> new IllegalArgumentException("Head employee not found"));
+        if (head.getStatus() != EmployeeStatus.ACTIVE) {
+            throw new IllegalArgumentException("Department head must be an active employee");
+        }
+        if (department != null && !Objects.equals(head.getDepartmentId(), department.getId())) {
+            throw new IllegalArgumentException("Department head must be a member of the department");
+        }
+    }
+
+    private void validateParentAssignment(UUID departmentId, UUID parentDepartmentId) {
+        if (parentDepartmentId.equals(departmentId)) {
+            throw new IllegalArgumentException("A department cannot be its own parent");
+        }
+        Department parent = departmentRepository.findById(parentDepartmentId)
+            .orElseThrow(() -> new IllegalArgumentException("Parent department not found"));
+        if (!parent.isActive()) {
+            throw new IllegalArgumentException("Parent department must be active");
+        }
+        if (departmentId == null) {
+            return;
+        }
+        // walk up from the proposed parent; reaching this department means a cycle
+        Set<UUID> visited = new HashSet<>();
+        UUID cursor = parent.getParentDepartmentId();
+        while (cursor != null && visited.add(cursor)) {
+            if (cursor.equals(departmentId)) {
+                throw new IllegalArgumentException(
+                    "Parent assignment would create a cycle in the department hierarchy");
+            }
+            cursor = departmentRepository.findById(cursor)
+                .map(Department::getParentDepartmentId)
+                .orElse(null);
+        }
     }
 
     private void publishDeptHeadEvent(StructuralEventType type, UUID employeeId, UUID departmentId, UUID actorId) {
@@ -227,6 +303,7 @@ public class DepartmentService {
             base.name(),
             base.code(),
             base.headEmployeeId(),
+            base.parentDepartmentId(),
             base.isActive(),
             employeeRepository.countByDepartmentId(base.id()),
             projectDepartmentRepository.countByDepartmentId(base.id()),

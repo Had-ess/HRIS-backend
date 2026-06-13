@@ -79,6 +79,7 @@ class LeaveBalanceRepositoryTest {
             .employeeCode("EMP-TDD-001")
             .hireDate(LocalDate.of(2024, 1, 1))
             .jobTitle("Engineer")
+            .jobTitleId(java.util.UUID.randomUUID())
             .status(EmployeeStatus.ACTIVE)
             .contractType(ContractType.PERMANENT)
             .departmentId(department.getId())

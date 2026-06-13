@@ -24,6 +24,13 @@ import com.hris.lifecycle.repository.EmployeeContractRepository;
 import com.hris.notification.entity.NotificationEvent;
 import com.hris.notification.enums.NotificationEventType;
 import com.hris.notification.service.TransactionalNotificationPublisher;
+import com.hris.organisation.entity.ProjectAssignment;
+import com.hris.organisation.enums.ProjectRole;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
+import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
+import com.hris.organisation.repository.ProjectAssignmentRepository;
+import com.hris.organisation.repository.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +62,9 @@ class EmployeeLifecycleServiceTest {
     @Mock private EmployeeStatusHistoryRepository statusHistoryRepository;
     @Mock private EmployeeDepartmentHistoryRepository departmentHistoryRepository;
     @Mock private DepartmentRepository departmentRepository;
+    @Mock private TeamRepository teamRepository;
+    @Mock private ProjectAssignmentRepository projectAssignmentRepository;
+    @Mock private TeamHierarchyRelationRepository teamHierarchyRelationRepository;
     @Mock private UserRepository userRepository;
     @Mock private EmployeeService employeeService;
     @Mock private EmployeeHistoryService employeeHistoryService;
@@ -159,6 +169,67 @@ class EmployeeLifecycleServiceTest {
     }
 
     @Test
+    void terminationBlockedWhileEmployeeStillHasResponsibilities() {
+        when(departmentRepository.existsByHeadEmployeeId(employeeId)).thenReturn(true);
+        when(employeeRepository.existsBySupervisorEmployeeIdAndStatusNot(employeeId, EmployeeStatus.TERMINATED))
+            .thenReturn(true);
+        when(teamRepository.existsBySupervisorEmployeeIdAndIsActiveTrue(employeeId)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.terminate(employeeId,
+            new TerminateRequest(LocalDate.now(), "Resignation"), actorId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("department head")
+            .hasMessageContaining("supervises other employees")
+            .hasMessageContaining("teams");
+
+        assertThat(employee.getStatus()).isEqualTo(EmployeeStatus.ACTIVE);
+        verify(employeeRepository, never()).save(any());
+        verify(localAccountService, never()).revokeAllSessions(any());
+    }
+
+    @Test
+    void schedulingTerminationIsAlsoBlockedByResponsibilities() {
+        when(projectAssignmentRepository.countActiveDistinctEmployeesBySupervisorId(eq(employeeId), any()))
+            .thenReturn(2L);
+
+        assertThatThrownBy(() -> service.terminate(employeeId,
+            new TerminateRequest(LocalDate.now().plusDays(30), "End of contract"), actorId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("project assignments");
+
+        assertThat(employee.getTerminationDate()).isNull();
+    }
+
+    @Test
+    void terminationEndsProjectAssignmentsAndHierarchyMemberships() {
+        LocalDate today = LocalDate.now();
+        ProjectAssignment assignment = ProjectAssignment.builder()
+            .id(UUID.randomUUID()).employeeId(employeeId).projectId(UUID.randomUUID())
+            .supervisorId(supervisorEmployeeId).assignmentRole(ProjectRole.MEMBER)
+            .startDate(today.minusMonths(3)).isActive(true)
+            .build();
+        when(projectAssignmentRepository.findByEmployeeIdAndIsActiveTrue(employeeId))
+            .thenReturn(List.of(assignment));
+        TeamHierarchyRelation relation = TeamHierarchyRelation.builder()
+            .id(UUID.randomUUID()).teamId(UUID.randomUUID())
+            .responsibleEmployeeId(supervisorEmployeeId).collaboratorEmployeeId(employeeId)
+            .status(TeamHierarchyStatus.ACTIVE).startDate(today.minusMonths(3))
+            .build();
+        when(teamHierarchyRelationRepository
+            .findByCollaboratorEmployeeIdAndStatusOrderByStartDateAscTeamIdAsc(employeeId, TeamHierarchyStatus.ACTIVE))
+            .thenReturn(List.of(relation));
+
+        service.terminate(employeeId, new TerminateRequest(today, "Resignation"), actorId);
+
+        assertThat(assignment.isActive()).isFalse();
+        assertThat(assignment.getEndDate()).isEqualTo(today);
+        verify(projectAssignmentRepository).save(assignment);
+        assertThat(relation.getStatus()).isEqualTo(TeamHierarchyStatus.ENDED);
+        assertThat(relation.getEndDate()).isEqualTo(today);
+        verify(teamHierarchyRelationRepository).save(relation);
+    }
+
+    @Test
     void cancelScheduledTerminationClearsDate() {
         employee.setTerminationDate(LocalDate.now().plusDays(10));
 
@@ -202,5 +273,140 @@ class EmployeeLifecycleServiceTest {
         service.getLifecycleState(employeeId, requesterId);
 
         verify(employeeService).getById(employeeId, requesterId);
+    }
+
+    // ---- scheduled transfers (ORG_BACKBONE_DESIGN.md §6) ----
+
+    private com.hris.auth.entity.Department activeDepartment(UUID id, String name) {
+        return com.hris.auth.entity.Department.builder()
+            .id(id).name(name).code(name.toUpperCase()).isActive(true).build();
+    }
+
+    @Test
+    void immediateTransferMovesEmployeeAndRecordsHistory() {
+        UUID previousDepartmentId = UUID.randomUUID();
+        UUID newDepartmentId = UUID.randomUUID();
+        UUID newSupervisorId = UUID.randomUUID();
+        UUID newSupervisorUserId = UUID.randomUUID();
+        employee.setDepartmentId(previousDepartmentId);
+        when(departmentRepository.findById(newDepartmentId))
+            .thenReturn(Optional.of(activeDepartment(newDepartmentId, "Data")));
+        Employee newSupervisor = Employee.builder()
+            .id(newSupervisorId).userId(newSupervisorUserId).employeeCode("SUP-2").build();
+        when(employeeRepository.findById(newSupervisorId)).thenReturn(Optional.of(newSupervisor));
+        when(userRepository.findById(newSupervisorUserId)).thenReturn(Optional.of(
+            User.builder().id(newSupervisorUserId).email("s2@x").firstName("New").lastName("Boss").build()));
+
+        LifecycleStateDto state = service.transfer(employeeId,
+            new com.hris.lifecycle.dto.LifecycleDtos.TransferRequest(
+                LocalDate.now(), newDepartmentId, newSupervisorId), actorId);
+
+        assertThat(employee.getDepartmentId()).isEqualTo(newDepartmentId);
+        assertThat(employee.getSupervisorEmployeeId()).isEqualTo(newSupervisorId);
+        assertThat(employee.getScheduledTransferDate()).isNull();
+        assertThat(state.scheduledTransfer()).isNull();
+        verify(employeeService).validateSupervisorAssignment(employeeId, newSupervisorId);
+        verify(employeeHistoryService).recordDepartmentTransfer(any(), any(), eq(actorId), eq(LocalDate.now()));
+        verify(analyticsEventPublisher).publishEmployeeTransferEvent(any(), any());
+
+        ArgumentCaptor<NotificationEvent> captor = ArgumentCaptor.forClass(NotificationEvent.class);
+        verify(notificationPublisher, org.mockito.Mockito.times(2)).publishAfterCommit(captor.capture());
+        assertThat(captor.getAllValues())
+            .extracting(NotificationEvent::getEventType)
+            .containsOnly(NotificationEventType.EMPLOYEE_TRANSFERRED);
+        assertThat(captor.getAllValues())
+            .extracting(NotificationEvent::getTargetUserId)
+            .containsExactlyInAnyOrder(userId, newSupervisorUserId);
+    }
+
+    @Test
+    void futureDatedTransferOnlySchedules() {
+        UUID newDepartmentId = UUID.randomUUID();
+        LocalDate future = LocalDate.now().plusDays(15);
+        employee.setDepartmentId(UUID.randomUUID());
+        when(departmentRepository.findById(newDepartmentId))
+            .thenReturn(Optional.of(activeDepartment(newDepartmentId, "Data")));
+
+        LifecycleStateDto state = service.transfer(employeeId,
+            new com.hris.lifecycle.dto.LifecycleDtos.TransferRequest(
+                future, newDepartmentId, null), actorId);
+
+        assertThat(employee.getScheduledTransferDate()).isEqualTo(future);
+        assertThat(employee.getScheduledTransferDepartmentId()).isEqualTo(newDepartmentId);
+        assertThat(employee.getDepartmentId()).isNotEqualTo(newDepartmentId);
+        assertThat(state.scheduledTransfer()).isNotNull();
+        assertThat(state.scheduledTransfer().departmentName()).isEqualTo("Data");
+        verify(employeeHistoryService, never()).recordDepartmentTransfer(any(), any(), any(), any());
+        verify(notificationPublisher, never()).publishAfterCommit(any());
+    }
+
+    @Test
+    void secondScheduledTransferIsRejected() {
+        UUID newDepartmentId = UUID.randomUUID();
+        employee.setDepartmentId(UUID.randomUUID());
+        employee.setScheduledTransferDate(LocalDate.now().plusDays(5));
+
+        assertThatThrownBy(() -> service.transfer(employeeId,
+            new com.hris.lifecycle.dto.LifecycleDtos.TransferRequest(
+                LocalDate.now().plusDays(20), newDepartmentId, null), actorId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("already scheduled");
+    }
+
+    @Test
+    void transferToSameDepartmentIsRejected() {
+        UUID departmentId = UUID.randomUUID();
+        employee.setDepartmentId(departmentId);
+
+        assertThatThrownBy(() -> service.transfer(employeeId,
+            new com.hris.lifecycle.dto.LifecycleDtos.TransferRequest(
+                LocalDate.now(), departmentId, null), actorId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("already in the target department");
+    }
+
+    @Test
+    void transferToInactiveDepartmentIsRejected() {
+        UUID newDepartmentId = UUID.randomUUID();
+        employee.setDepartmentId(UUID.randomUUID());
+        com.hris.auth.entity.Department inactive = activeDepartment(newDepartmentId, "Old");
+        inactive.setActive(false);
+        when(departmentRepository.findById(newDepartmentId)).thenReturn(Optional.of(inactive));
+
+        assertThatThrownBy(() -> service.transfer(employeeId,
+            new com.hris.lifecycle.dto.LifecycleDtos.TransferRequest(
+                LocalDate.now(), newDepartmentId, null), actorId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("active");
+    }
+
+    @Test
+    void terminatedEmployeeCannotBeTransferred() {
+        employee.setStatus(EmployeeStatus.TERMINATED);
+
+        assertThatThrownBy(() -> service.transfer(employeeId,
+            new com.hris.lifecycle.dto.LifecycleDtos.TransferRequest(
+                LocalDate.now(), UUID.randomUUID(), null), actorId))
+            .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void cancelScheduledTransferClearsAllColumns() {
+        employee.setScheduledTransferDate(LocalDate.now().plusDays(5));
+        employee.setScheduledTransferDepartmentId(UUID.randomUUID());
+        employee.setScheduledTransferSupervisorId(UUID.randomUUID());
+
+        LifecycleStateDto state = service.cancelScheduledTransfer(employeeId, actorId);
+
+        assertThat(employee.getScheduledTransferDate()).isNull();
+        assertThat(employee.getScheduledTransferDepartmentId()).isNull();
+        assertThat(employee.getScheduledTransferSupervisorId()).isNull();
+        assertThat(state.scheduledTransfer()).isNull();
+    }
+
+    @Test
+    void cancelWithoutScheduledTransferFails() {
+        assertThatThrownBy(() -> service.cancelScheduledTransfer(employeeId, actorId))
+            .isInstanceOf(IllegalStateException.class);
     }
 }

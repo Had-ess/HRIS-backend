@@ -8,6 +8,7 @@ public record DepartmentDto(
     String name,
     String code,
     UUID headEmployeeId,
+    UUID parentDepartmentId,
     boolean isActive,
     long employeeCount,
     long projectCount,

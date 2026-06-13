@@ -21,6 +21,8 @@ public interface TeamHierarchyRelationRepository extends JpaRepository<TeamHiera
 
     boolean existsByTeamId(UUID teamId);
 
+    boolean existsByResponsibleEmployeeIdAndStatus(UUID responsibleEmployeeId, TeamHierarchyStatus status);
+
     void deleteByTeamId(UUID teamId);
 
     void deleteByTeamIdIn(List<UUID> teamIds);

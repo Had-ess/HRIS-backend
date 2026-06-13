@@ -53,6 +53,7 @@ public class TenantProvisioningService {
     /** Configuration tables cloned from the default tenant, in FK dependency order. */
     private static final List<String> TEMPLATE_TABLES = List.of(
         "work_schedules",
+        "job_titles",
         "public_holidays",
         "admin_request_types",
         "hr_calendars",

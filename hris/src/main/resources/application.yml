@@ -124,6 +124,17 @@ app:
     sla-check:
       enabled: ${APP_ADMIN_SLA_CHECK_ENABLED:false}
       cron: ${APP_ADMIN_SLA_CHECK_CRON:0 0 */4 * * *}
+  # Daily sweep: due scheduled terminations + contract expiry/probation alerts.
+  # Enabled by default because future-dated terminations depend on it to execute.
+  lifecycle:
+    daily:
+      enabled: ${APP_LIFECYCLE_DAILY_ENABLED:true}
+      cron: ${APP_LIFECYCLE_DAILY_CRON:0 0 5 * * *}
+  # Daily document-expiry alerts (employee + HR), deduped per document.
+  documents:
+    daily:
+      enabled: ${APP_DOCUMENTS_DAILY_ENABLED:true}
+      cron: ${APP_DOCUMENTS_DAILY_CRON:0 15 5 * * *}
 
 management:
   endpoint:

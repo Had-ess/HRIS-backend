@@ -53,6 +53,9 @@ class EmployeeServiceTest {
     @Mock private AuditLogService auditLogService;
     @Mock private AnalyticsEventPublisher analyticsEventPublisher;
     @Mock private EmployeeHistoryService employeeHistoryService;
+    @Mock private com.hris.security.service.AccessScopeService accessScopeService;
+    @Mock private com.hris.auth.repository.UserRepository userRepository;
+    @Mock private com.hris.organisation.repository.JobTitleRepository jobTitleRepository;
 
     @InjectMocks
     private EmployeeService employeeService;
@@ -125,6 +128,9 @@ class EmployeeServiceTest {
         Employee employee = activeEmployee(employeeId, previousDepartmentId);
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(departmentRepository.findById(newDepartmentId)).thenReturn(Optional.of(
+            com.hris.auth.entity.Department.builder()
+                .id(newDepartmentId).name("Target").code("TGT").isActive(true).build()));
         when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(employeeMapper.toDto(any(Employee.class))).thenReturn(responseFor(employeeId, newDepartmentId, EmployeeStatus.ACTIVE));
 
@@ -135,6 +141,7 @@ class EmployeeServiceTest {
             null,
             null,
             newDepartmentId,
+            null,
             null,
             null,
             null,
@@ -167,6 +174,7 @@ class EmployeeServiceTest {
                 null,
                 null,
                 null,
+                null,
                 null
             ), actorId))
             .isInstanceOf(IllegalArgumentException.class)
@@ -174,6 +182,54 @@ class EmployeeServiceTest {
 
         verify(employeeHistoryService, never()).recordStatusChange(any(Employee.class), any(Employee.class), eq(actorId), any(LocalDate.class), any());
         verify(analyticsEventPublisher, never()).publishEmployeeTerminationEvent(any(Employee.class));
+    }
+
+    @Test
+    @DisplayName("rejects a terminated or inactive supervisor")
+    void rejectsInactiveSupervisor() {
+        UUID employeeId = UUID.randomUUID();
+        UUID supervisorId = UUID.randomUUID();
+        Employee supervisor = terminatedEmployee(supervisorId);
+        when(employeeRepository.findById(supervisorId)).thenReturn(Optional.of(supervisor));
+
+        assertThatThrownBy(() -> employeeService.validateSupervisorAssignment(employeeId, supervisorId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("active");
+    }
+
+    @Test
+    @DisplayName("rejects a supervisor assignment that closes a cycle in the supervision chain")
+    void rejectsSupervisorCycle() {
+        UUID employeeId = UUID.randomUUID();
+        UUID supervisorId = UUID.randomUUID();
+        // supervisor already reports (indirectly) to the employee: A→B→employee
+        UUID middleId = UUID.randomUUID();
+        Employee supervisor = activeEmployee(supervisorId, UUID.randomUUID());
+        supervisor.setSupervisorEmployeeId(middleId);
+        Employee middle = activeEmployee(middleId, UUID.randomUUID());
+        middle.setSupervisorEmployeeId(employeeId);
+        when(employeeRepository.findById(supervisorId)).thenReturn(Optional.of(supervisor));
+        when(employeeRepository.findById(middleId)).thenReturn(Optional.of(middle));
+
+        assertThatThrownBy(() -> employeeService.validateSupervisorAssignment(employeeId, supervisorId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("cycle");
+    }
+
+    @Test
+    @DisplayName("profile summary enforces the requester's department read scope")
+    void profileSummaryEnforcesReadScope() {
+        UUID employeeId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+        Employee employee = activeEmployee(employeeId, UUID.randomUUID());
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        // requester is scoped to a different department
+        when(accessScopeService.resolveDepartmentDataScope(requesterId)).thenReturn(
+            com.hris.access.service.AccessResolutionService.ScopeResolution.department(
+                java.util.List.of(UUID.randomUUID())));
+
+        assertThatThrownBy(() -> employeeService.getProfileSummary(employeeId, requesterId))
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
     }
 
     private Employee terminatedEmployee(UUID employeeId) {
@@ -211,6 +267,7 @@ class EmployeeServiceTest {
             "EMP-ACT",
             LocalDate.of(2022, 1, 1),
             "Analyst",
+            null,
             status,
             ContractType.PERMANENT,
             departmentId,

@@ -34,6 +34,9 @@ public class Employee {
     @Column(name = "job_title", nullable = false, length = 255)
     private String jobTitle;
 
+    @Column(name = "job_title_id", nullable = false)
+    private UUID jobTitleId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private EmployeeStatus status;
@@ -50,6 +53,15 @@ public class Employee {
 
     @Column(name = "termination_date")
     private LocalDate terminationDate;
+
+    @Column(name = "scheduled_transfer_date")
+    private LocalDate scheduledTransferDate;
+
+    @Column(name = "scheduled_transfer_department_id")
+    private UUID scheduledTransferDepartmentId;
+
+    @Column(name = "scheduled_transfer_supervisor_id")
+    private UUID scheduledTransferSupervisorId;
 
     @Column(name = "work_schedule_id", nullable = false)
     private UUID workScheduleId;

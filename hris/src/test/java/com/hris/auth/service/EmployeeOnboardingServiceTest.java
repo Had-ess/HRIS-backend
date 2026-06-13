@@ -37,6 +37,7 @@ class EmployeeOnboardingServiceTest {
     @Mock private EmployeeRepository employeeRepository;
     @Mock private EmployeeMapper employeeMapper;
     @Mock private EmployeeService employeeService;
+    @Mock private com.hris.lifecycle.service.EmployeeContractService employeeContractService;
     @Mock private AccountProvisioningService accountProvisioningService;
     @Mock private AuditLogService auditLogService;
     @Mock private AnalyticsEventPublisher analyticsEventPublisher;
@@ -45,12 +46,21 @@ class EmployeeOnboardingServiceTest {
 
     @InjectMocks private EmployeeOnboardingService employeeOnboardingService;
 
+    private static com.hris.organisation.entity.JobTitle jobTitle(UUID jobTitleId) {
+        return com.hris.organisation.entity.JobTitle.builder()
+            .id(jobTitleId)
+            .name("Software Engineer")
+            .isActive(true)
+            .build();
+    }
+
     @Test
     @DisplayName("onboards employee with linked provisioned account")
     void onboardsEmployeeWithLinkedProvisionedAccount() {
         UUID actorId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        UUID jobTitleId = UUID.randomUUID();
 
         EmployeeCreateDto dto = new EmployeeCreateDto(
             "yasmine.dev",
@@ -60,8 +70,7 @@ class EmployeeOnboardingServiceTest {
             List.of(roleId),
             "EMP-900",
             LocalDate.of(2026, 4, 22),
-            "Software Engineer",
-            EmployeeStatus.ACTIVE,
+            jobTitleId,
             ContractType.PERMANENT,
             UUID.randomUUID(),
             UUID.randomUUID()
@@ -80,8 +89,9 @@ class EmployeeOnboardingServiceTest {
             .userId(userId)
             .employeeCode(dto.employeeCode())
             .hireDate(dto.hireDate())
-            .jobTitle(dto.jobTitle())
-            .status(dto.status())
+            .jobTitle("Software Engineer")
+            .jobTitleId(jobTitleId)
+            .status(EmployeeStatus.ACTIVE)
             .contractType(dto.contractType())
             .departmentId(dto.departmentId())
             .workScheduleId(dto.workScheduleId())
@@ -101,6 +111,7 @@ class EmployeeOnboardingServiceTest {
         );
 
         when(employeeRepository.findByEmployeeCode("EMP-900")).thenReturn(Optional.empty());
+        when(employeeService.resolveActiveJobTitle(jobTitleId)).thenReturn(jobTitle(jobTitleId));
         when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(provisionedUser);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
         when(employeeMapper.toDto(savedEmployee)).thenReturn(response);
@@ -109,6 +120,8 @@ class EmployeeOnboardingServiceTest {
 
         assertThat(result.userId()).isEqualTo(userId);
         verify(employeeHistoryService).recordHire(savedEmployee, actorId);
+        verify(employeeContractService).createContract(eq(savedEmployee.getId()),
+            any(com.hris.lifecycle.dto.LifecycleDtos.CreateContractRequest.class), eq(actorId));
         verify(employeeService).initializeLeaveBalancesForNewEmployee(savedEmployee.getId());
         verify(accountProvisioningService).provision(any(AccountProvisioningRequest.class), eq(actorId));
     }
@@ -118,6 +131,7 @@ class EmployeeOnboardingServiceTest {
     void propagatesEmployeeSaveFailure() {
         UUID actorId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
+        UUID jobTitleId = UUID.randomUUID();
 
         EmployeeCreateDto dto = new EmployeeCreateDto(
             "yasmine.dev",
@@ -127,14 +141,14 @@ class EmployeeOnboardingServiceTest {
             List.of(roleId),
             "EMP-900",
             LocalDate.of(2026, 4, 22),
-            "Software Engineer",
-            EmployeeStatus.ACTIVE,
+            jobTitleId,
             ContractType.PERMANENT,
             UUID.randomUUID(),
             UUID.randomUUID()
         );
 
         when(employeeRepository.findByEmployeeCode("EMP-900")).thenReturn(Optional.empty());
+        when(employeeService.resolveActiveJobTitle(jobTitleId)).thenReturn(jobTitle(jobTitleId));
         when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(
             User.builder()
                 .id(UUID.randomUUID())
@@ -159,6 +173,7 @@ class EmployeeOnboardingServiceTest {
     void propagatesPostSaveStepFailure() {
         UUID actorId = UUID.randomUUID();
         UUID roleId = UUID.randomUUID();
+        UUID jobTitleId = UUID.randomUUID();
 
         EmployeeCreateDto dto = new EmployeeCreateDto(
             "yasmine.dev",
@@ -168,8 +183,7 @@ class EmployeeOnboardingServiceTest {
             List.of(roleId),
             "EMP-900",
             LocalDate.of(2026, 4, 22),
-            "Software Engineer",
-            EmployeeStatus.ACTIVE,
+            jobTitleId,
             ContractType.PERMANENT,
             UUID.randomUUID(),
             UUID.randomUUID()
@@ -188,14 +202,16 @@ class EmployeeOnboardingServiceTest {
             .userId(provisionedUser.getId())
             .employeeCode(dto.employeeCode())
             .hireDate(dto.hireDate())
-            .jobTitle(dto.jobTitle())
-            .status(dto.status())
+            .jobTitle("Software Engineer")
+            .jobTitleId(jobTitleId)
+            .status(EmployeeStatus.ACTIVE)
             .contractType(dto.contractType())
             .departmentId(dto.departmentId())
             .workScheduleId(dto.workScheduleId())
             .build();
 
         when(employeeRepository.findByEmployeeCode("EMP-900")).thenReturn(Optional.empty());
+        when(employeeService.resolveActiveJobTitle(jobTitleId)).thenReturn(jobTitle(jobTitleId));
         when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(provisionedUser);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
         doThrow(new RuntimeException("History recording failed"))

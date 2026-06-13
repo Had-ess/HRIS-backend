@@ -6,6 +6,7 @@ import com.hris.analytics.service.AuditLogService;
 import com.hris.access.service.AccessResolutionService;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.dto.EmployeeUpdateDto;
+import com.hris.auth.entity.Department;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.enums.AccountStatus;
 import com.hris.auth.enums.EmployeeStatus;
@@ -23,6 +24,8 @@ import com.hris.leave.repository.LeaveBalanceRepository;
 import com.hris.leave.repository.LeavePolicyRepository;
 import com.hris.leave.repository.LeaveTypeRepository;
 import com.hris.leave.repository.LeaveRequestRepository;
+import com.hris.organisation.entity.JobTitle;
+import com.hris.organisation.repository.JobTitleRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.security.service.AccessScopeService;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -54,6 +59,7 @@ public class EmployeeService {
     private final EmployeeStatusHistoryRepository employeeStatusHistoryRepository;
     private final DepartmentRepository departmentRepository;
     private final ProjectAssignmentRepository projectAssignmentRepository;
+    private final JobTitleRepository jobTitleRepository;
     private final UserDeletionService userDeletionService;
     private final AuditLogService auditLogService;
     private final AnalyticsEventPublisher analyticsEventPublisher;
@@ -96,21 +102,21 @@ public class EmployeeService {
     public com.hris.auth.dto.EmployeeProfileSummaryDto getProfileSummary(UUID employeeId, UUID requesterId) {
         Employee employee = employeeRepository.findById(employeeId)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        assertWithinReadScope(employee, requesterId);
 
         // Department name
         String deptName = employee.getDepartmentId() != null
             ? departmentRepository.findById(employee.getDepartmentId()).map(d -> d.getName()).orElse(null)
             : null;
 
-        // Supervisor name
+        // Supervisor display name (falls back to employee code)
         String supervisorName = employee.getSupervisorEmployeeId() != null
             ? employeeRepository.findById(employee.getSupervisorEmployeeId())
-                .map(sup -> {
-                    var u = sup.getUserId() != null
-                        ? com.hris.auth.entity.User.class.cast(null) // resolved below
-                        : null;
-                    return sup.getEmployeeCode();
-                }).orElse(null)
+                .map(sup -> userRepository.findById(sup.getUserId())
+                    .map(u -> (nullToEmpty(u.getFirstName()) + " " + nullToEmpty(u.getLastName())).trim())
+                    .filter(name -> !name.isBlank())
+                    .orElse(sup.getEmployeeCode()))
+                .orElse(null)
             : null;
 
         // Leave balances (current year, max 6)
@@ -168,9 +174,15 @@ public class EmployeeService {
 
     @Transactional(readOnly = true)
     public EmployeeResponseDto getById(UUID id, UUID requesterId) {
-        EmployeeReadScope scope = resolveReadScope(requesterId);
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        assertWithinReadScope(employee, requesterId);
+        return employeeMapper.toDto(employee);
+    }
+
+    /** Department/self read-scope enforcement shared by every single-employee read. */
+    private void assertWithinReadScope(Employee employee, UUID requesterId) {
+        EmployeeReadScope scope = resolveReadScope(requesterId);
         if (scope.type() == EmployeeReadScopeType.DEPARTMENT
             && scope.departmentId() != null
             && !scope.departmentId().equals(employee.getDepartmentId())) {
@@ -186,7 +198,6 @@ public class EmployeeService {
                 throw new AccessDeniedException("You are not allowed to access this employee");
             }
         }
-        return employeeMapper.toDto(employee);
     }
 
     @Transactional
@@ -200,6 +211,7 @@ public class EmployeeService {
             .employeeCode(employee.getEmployeeCode())
             .hireDate(employee.getHireDate())
             .jobTitle(employee.getJobTitle())
+            .jobTitleId(employee.getJobTitleId())
             .status(employee.getStatus())
             .contractType(employee.getContractType())
             .departmentId(employee.getDepartmentId())
@@ -213,8 +225,10 @@ public class EmployeeService {
         if (dto.hireDate() != null) {
             employee.setHireDate(dto.hireDate());
         }
-        if (dto.jobTitle() != null) {
-            employee.setJobTitle(dto.jobTitle());
+        if (dto.jobTitleId() != null && !dto.jobTitleId().equals(employee.getJobTitleId())) {
+            JobTitle jobTitle = resolveActiveJobTitle(dto.jobTitleId());
+            employee.setJobTitleId(jobTitle.getId());
+            employee.setJobTitle(jobTitle.getName());
         }
         if (dto.status() != null) {
             // Termination owns side effects (contract closure, account deactivation,
@@ -232,11 +246,18 @@ public class EmployeeService {
         if (dto.contractType() != null) {
             employee.setContractType(dto.contractType());
         }
-        if (dto.departmentId() != null) {
+        if (dto.departmentId() != null && !dto.departmentId().equals(employee.getDepartmentId())) {
+            Department target = departmentRepository.findById(dto.departmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+            if (!target.isActive()) {
+                throw new IllegalArgumentException("Target department must be active");
+            }
             employee.setDepartmentId(dto.departmentId());
         }
-        if (dto.supervisorEmployeeId() != null) {
-            validateSupervisor(employee.getId(), dto.supervisorEmployeeId());
+        if (Boolean.TRUE.equals(dto.clearSupervisor())) {
+            employee.setSupervisorEmployeeId(null);
+        } else if (dto.supervisorEmployeeId() != null) {
+            validateSupervisorAssignment(employee.getId(), dto.supervisorEmployeeId());
             employee.setSupervisorEmployeeId(dto.supervisorEmployeeId());
         }
         if (dto.workScheduleId() != null) {
@@ -339,13 +360,54 @@ public class EmployeeService {
             "leave_balance_initialization", employeeId, null, null);
     }
 
-    private void validateSupervisor(UUID employeeId, UUID supervisorEmployeeId) {
-        if (employeeId.equals(supervisorEmployeeId)) {
+    /**
+     * Shared by update and onboarding. The supervisor must exist, must not be
+     * terminated or deactivated, and assigning them must not create a cycle in
+     * the supervision chain (the approval escalation walks this chain upward).
+     *
+     * @param employeeId the employee being (re)assigned — null for a new hire,
+     *                   for whom a cycle is impossible
+     */
+    public void validateSupervisorAssignment(UUID employeeId, UUID supervisorEmployeeId) {
+        if (supervisorEmployeeId.equals(employeeId)) {
             throw new IllegalArgumentException("Employee cannot supervise themselves");
         }
-        if (employeeRepository.findById(supervisorEmployeeId).isEmpty()) {
-            throw new EntityNotFoundException("Supervisor employee not found");
+        Employee supervisor = employeeRepository.findById(supervisorEmployeeId)
+            .orElseThrow(() -> new EntityNotFoundException("Supervisor employee not found"));
+        if (supervisor.getStatus() == EmployeeStatus.TERMINATED
+            || supervisor.getStatus() == EmployeeStatus.INACTIVE) {
+            throw new IllegalArgumentException("Supervisor must be an active employee");
         }
+        if (employeeId == null) {
+            return;
+        }
+        // Walk up from the proposed supervisor: reaching the employee means the
+        // assignment would close a loop (A→B→…→A).
+        Set<UUID> visited = new HashSet<>();
+        UUID current = supervisor.getSupervisorEmployeeId();
+        while (current != null && visited.add(current)) {
+            if (current.equals(employeeId)) {
+                throw new IllegalArgumentException(
+                    "Supervisor assignment would create a cycle in the supervision chain");
+            }
+            current = employeeRepository.findById(current)
+                .map(Employee::getSupervisorEmployeeId)
+                .orElse(null);
+        }
+    }
+
+    /** Shared by update and onboarding: the job title must exist in the catalog and be active. */
+    public JobTitle resolveActiveJobTitle(UUID jobTitleId) {
+        JobTitle jobTitle = jobTitleRepository.findById(jobTitleId)
+            .orElseThrow(() -> new IllegalArgumentException("Job title not found"));
+        if (!jobTitle.isActive()) {
+            throw new IllegalArgumentException("Job title is not active");
+        }
+        return jobTitle;
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     private EmployeeReadScope resolveReadScope(UUID requesterId) {

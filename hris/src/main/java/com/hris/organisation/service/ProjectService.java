@@ -33,6 +33,7 @@ import com.hris.organisation.entity.ProjectAssignment;
 import com.hris.organisation.entity.ProjectDepartment;
 import com.hris.organisation.entity.Team;
 import com.hris.organisation.entity.TeamProjectLink;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
 import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.mapper.ProjectMapper;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
@@ -162,22 +163,19 @@ public class ProjectService {
         if (projectAssignmentRepository.existsByProjectIdAndIsActiveTrue(projectId)) {
             throw new IllegalStateException("Project cannot be deleted because it has active assignments");
         }
-        if (teamRepository.existsByProjectIdAndIsActiveTrue(projectId)) {
-            throw new IllegalStateException("Project cannot be deleted because it has active teams");
-        }
         try {
-            List<UUID> teamIds = teamRepository.findByProjectId(projectId).stream()
-                .map(Team::getId)
-                .toList();
-
-            if (!teamIds.isEmpty()) {
-                teamHierarchyRelationRepository.deleteByTeamIdIn(teamIds);
+            // Standing teams (V72): teams survive project deletion — they are
+            // detached (project_id cleared, links removed) and keep their
+            // hierarchy relations instead of being cascaded away.
+            List<Team> teams = teamRepository.findByProjectId(projectId);
+            for (Team team : teams) {
+                team.setProjectId(null);
+            }
+            if (!teams.isEmpty()) {
+                teamRepository.saveAll(teams);
             }
             projectAssignmentRepository.deleteByProjectId(projectId);
             teamProjectLinkRepository.deleteByProjectId(projectId);
-            if (!teamIds.isEmpty()) {
-                teamRepository.deleteAllById(teamIds);
-            }
             projectDepartmentRepository.deleteByProjectId(projectId);
             projectRepository.delete(project);
             projectRepository.flush();
@@ -286,7 +284,46 @@ public class ProjectService {
                 com.hris.organisation.enums.ProjectRole.MEMBER);
         }
 
+        seedTeamHierarchy(savedTeam, supervisor, members, dto.startDate());
+
         return toTeamDto(savedTeam, projectId);
+    }
+
+    /**
+     * Seeds the in-team approval waterfall from the canonical supervisor spine:
+     * the leader is the chain head; a member reports to their spine supervisor
+     * when that supervisor is also in this team, otherwise to the leader. The
+     * relations remain hand-editable afterwards (legitimate overlay).
+     */
+    void seedTeamHierarchy(Team team, Employee leader, List<Employee> members, LocalDate startDate) {
+        LocalDate effectiveStart = startDate != null ? startDate : LocalDate.now();
+        Set<UUID> inTeam = new LinkedHashSet<>();
+        inTeam.add(leader.getId());
+        members.forEach(member -> inTeam.add(member.getId()));
+
+        List<TeamHierarchyRelation> relations = new java.util.ArrayList<>();
+        relations.add(TeamHierarchyRelation.builder()
+            .teamId(team.getId())
+            .collaboratorEmployeeId(leader.getId())
+            .responsibleEmployeeId(null)
+            .startDate(effectiveStart)
+            .build());
+        for (Employee member : members) {
+            if (member.getId().equals(leader.getId())) {
+                continue;
+            }
+            UUID spineSupervisor = member.getSupervisorEmployeeId();
+            UUID responsible = spineSupervisor != null && inTeam.contains(spineSupervisor)
+                ? spineSupervisor
+                : leader.getId();
+            relations.add(TeamHierarchyRelation.builder()
+                .teamId(team.getId())
+                .collaboratorEmployeeId(member.getId())
+                .responsibleEmployeeId(responsible)
+                .startDate(effectiveStart)
+                .build());
+        }
+        teamHierarchyRelationRepository.saveAll(relations);
     }
 
     @Transactional

@@ -10,11 +10,14 @@ import com.hris.auth.dto.EmployeeCreateDto;
 import com.hris.auth.dto.EmployeeResponseDto;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.entity.User;
+import com.hris.auth.enums.EmployeeStatus;
 import com.hris.auth.mapper.EmployeeMapper;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.auth.repository.UserRepository;
 import com.hris.common.exception.EntityNotFoundException;
 import com.hris.identity.account.LocalAccountService;
+import com.hris.lifecycle.dto.LifecycleDtos.CreateContractRequest;
+import com.hris.lifecycle.service.EmployeeContractService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -32,6 +35,7 @@ public class EmployeeOnboardingService {
     private final UserRepository userRepository;
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
+    private final EmployeeContractService employeeContractService;
     private final AccountProvisioningService accountProvisioningService;
     private final LocalAccountService localAccountService;
     private final AuditLogService auditLogService;
@@ -44,10 +48,10 @@ public class EmployeeOnboardingService {
         if (employeeRepository.findByEmployeeCode(dto.employeeCode().trim()).isPresent()) {
             throw new IllegalStateException("Employee code must be unique");
         }
-        if (dto.supervisorEmployeeId() != null
-            && employeeRepository.findById(dto.supervisorEmployeeId()).isEmpty()) {
-            throw new EntityNotFoundException("Supervisor employee not found");
+        if (dto.supervisorEmployeeId() != null) {
+            employeeService.validateSupervisorAssignment(null, dto.supervisorEmployeeId());
         }
+        var jobTitle = employeeService.resolveActiveJobTitle(dto.jobTitleId());
 
         User user = accountProvisioningService.provision(new AccountProvisioningRequest(
             dto.username(),
@@ -60,12 +64,15 @@ public class EmployeeOnboardingService {
         // User, employee, profiles, and activation token share this transaction:
         // any failure rolls back everything (no external-account compensation
         // needed since the owned-auth migration).
+        // New hires always start ACTIVE: lifecycle transitions (termination,
+        // deactivation) own every other status and their side effects.
         Employee saved = employeeRepository.save(Employee.builder()
             .userId(user.getId())
             .employeeCode(dto.employeeCode().trim())
             .hireDate(dto.hireDate())
-            .jobTitle(dto.jobTitle().trim())
-            .status(dto.status())
+            .jobTitle(jobTitle.getName())
+            .jobTitleId(jobTitle.getId())
+            .status(EmployeeStatus.ACTIVE)
             .contractType(dto.contractType())
             .departmentId(dto.departmentId())
             .supervisorEmployeeId(dto.supervisorEmployeeId())
@@ -75,6 +82,10 @@ public class EmployeeOnboardingService {
             .build());
 
         employeeHistoryService.recordHire(saved, actorId);
+        // The contract table is the source of truth for employment terms — every
+        // employee gets an initial ACTIVE contract starting on the hire date.
+        employeeContractService.createContract(saved.getId(), new CreateContractRequest(
+            dto.contractType(), dto.hireDate(), dto.contractEndDate(), dto.probationEndDate(), null), actorId);
         employeeService.initializeLeaveBalancesForNewEmployee(saved.getId());
         analyticsEventPublisher.publishEmployeeHireEvent(saved);
         auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);

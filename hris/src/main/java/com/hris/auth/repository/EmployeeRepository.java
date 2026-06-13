@@ -29,7 +29,19 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     boolean existsBySupervisorEmployeeId(UUID supervisorEmployeeId);
 
+    boolean existsBySupervisorEmployeeIdAndStatusNot(
+        UUID supervisorEmployeeId, com.hris.auth.enums.EmployeeStatus status);
+
     long countByDepartmentId(UUID departmentId);
+
+    boolean existsByJobTitleId(UUID jobTitleId);
+
+    long countByJobTitleId(UUID jobTitleId);
+
+    /** Re-syncs the denormalized employees.job_title copy after a catalog rename. */
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE Employee e SET e.jobTitle = :name WHERE e.jobTitleId = :jobTitleId")
+    int syncJobTitleName(@Param("jobTitleId") UUID jobTitleId, @Param("name") String name);
 
     List<Employee> findByDepartmentId(UUID departmentId);
 
@@ -49,6 +61,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
           AND e.status <> com.hris.auth.enums.EmployeeStatus.TERMINATED
         """)
     List<Employee> findDueScheduledTerminations(@Param("asOf") java.time.LocalDate asOf);
+
+    /** Scheduled transfers that have become due (lifecycle job). */
+    @Query("""
+        SELECT e FROM Employee e
+        WHERE e.scheduledTransferDate IS NOT NULL
+          AND e.scheduledTransferDate <= :asOf
+          AND e.status <> com.hris.auth.enums.EmployeeStatus.TERMINATED
+        """)
+    List<Employee> findDueScheduledTransfers(@Param("asOf") java.time.LocalDate asOf);
 
     @Query("SELECT COUNT(e) FROM Employee e WHERE e.hireDate >= :since")
     long countHiredAfter(@Param("since") java.time.LocalDate since);

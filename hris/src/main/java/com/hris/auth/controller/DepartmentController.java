@@ -2,6 +2,7 @@ package com.hris.auth.controller;
 
 import com.hris.auth.dto.DepartmentCreateDto;
 import com.hris.auth.dto.DepartmentDto;
+import com.hris.auth.dto.DepartmentUpdateDto;
 import com.hris.auth.service.DepartmentService;
 import com.hris.common.ApiResponse;
 import com.hris.common.PageResponse;
@@ -56,7 +57,7 @@ public class DepartmentController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<DepartmentDto>> update(
             @PathVariable UUID id,
-            @Valid @RequestBody DepartmentCreateDto dto,
+            @Valid @RequestBody DepartmentUpdateDto dto,
             Authentication auth) {
         permissionAuthorizationService.authorize(auth, "DEPARTMENT", "MANAGE");
         UUID userId = SecurityUtils.getCurrentUserId(auth);

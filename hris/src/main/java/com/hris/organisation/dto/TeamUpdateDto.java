@@ -7,6 +7,8 @@ public record TeamUpdateDto(
     String name,
     UUID departmentId,
     UUID projectId,
+    /** PATCH null means keep, so detaching the project needs an explicit flag. */
+    Boolean clearProject,
     UUID supervisorEmployeeId,
     Boolean active
 ) {

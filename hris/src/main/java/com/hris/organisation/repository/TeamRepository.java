@@ -22,6 +22,8 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
 
     List<Team> findBySupervisorEmployeeIdAndIsActiveTrue(UUID supervisorEmployeeId);
 
+    boolean existsBySupervisorEmployeeIdAndIsActiveTrue(UUID supervisorEmployeeId);
+
     List<Team> findByProjectId(UUID projectId);
 
     boolean existsByProjectIdAndIsActiveTrue(UUID projectId);
@@ -46,4 +48,8 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
     Page<Team> findByDepartmentIdInOrderByNameAsc(List<UUID> departmentIds, Pageable pageable);
 
     Page<Team> findByDepartmentIdOrderByNameAsc(UUID departmentId, Pageable pageable);
+
+    boolean existsByDepartmentId(UUID departmentId);
+
+    List<Team> findByDepartmentIdAndIsActiveTrueOrderByNameAsc(UUID departmentId);
 }

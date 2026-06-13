@@ -227,7 +227,17 @@ public class LeaveApprovalWorkflowService {
             }
         }
 
-        if (approvers.isEmpty() || deptHead) {
+        // Dept-head requester: walk the department parent chain ("director" level)
+        // before falling back to scoped HR approvers.
+        if (approvers.isEmpty() && deptHead) {
+            RouteApprover parentHead = resolveParentDeptHeadApprover(requesterEmployee, level);
+            if (parentHead != null) {
+                approvers.add(parentHead);
+                level++;
+            }
+        }
+
+        if (approvers.isEmpty()) {
             UUID scopeDepartmentId = requesterEmployee.getDepartmentId();
             if (scopeDepartmentId == null) {
                 return approvers;
@@ -254,6 +264,53 @@ public class LeaveApprovalWorkflowService {
         }
 
         return approvers;
+    }
+
+    /**
+     * Walks up the department parent chain starting from the department the
+     * requester heads (falling back to their own department) and returns the
+     * first parent-department head who is a valid distinct approver.
+     */
+    private RouteApprover resolveParentDeptHeadApprover(Employee requesterEmployee, int level) {
+        UUID startDepartmentId = departmentRepository
+            .findByHeadEmployeeIdAndIsActiveTrue(requesterEmployee.getId())
+            .stream()
+            .findFirst()
+            .map(Department::getId)
+            .orElse(requesterEmployee.getDepartmentId());
+        if (startDepartmentId == null) {
+            return null;
+        }
+
+        Set<UUID> visited = new HashSet<>();
+        UUID cursor = departmentRepository.findById(startDepartmentId)
+            .map(Department::getParentDepartmentId)
+            .orElse(null);
+        while (cursor != null && visited.add(cursor)) {
+            Department parent = departmentRepository.findById(cursor).orElse(null);
+            if (parent == null) {
+                return null;
+            }
+            UUID headId = parent.getHeadEmployeeId();
+            if (headId != null && !headId.equals(requesterEmployee.getId())) {
+                Employee head = employeeRepository.findById(headId).orElse(null);
+                if (head != null && head.getUserId() != null
+                    && !head.getUserId().equals(requesterEmployee.getUserId())) {
+                    return new RouteApprover(
+                        head.getId(),
+                        head.getUserId(),
+                        level,
+                        "PROFILE_BASED",
+                        "PARENT_DEPT_HEAD",
+                        ApprovalSourceType.PROFILE_BASED,
+                        false,
+                        null
+                    );
+                }
+            }
+            cursor = parent.getParentDepartmentId();
+        }
+        return null;
     }
 
     private List<Employee> findScopedApprovalApprovers(UUID scopeDepartmentId, UUID excludeUserId) {

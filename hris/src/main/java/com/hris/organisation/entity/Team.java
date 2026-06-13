@@ -24,7 +24,8 @@ public class Team {
     @Column(name = "department_id", nullable = false)
     private UUID departmentId;
 
-    @Column(name = "project_id", nullable = false)
+    // nullable since V72: standing teams exist independently of projects
+    @Column(name = "project_id")
     private UUID projectId;
 
     @Column(nullable = false, length = 255)

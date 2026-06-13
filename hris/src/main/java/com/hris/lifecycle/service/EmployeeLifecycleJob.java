@@ -57,9 +57,10 @@ public class EmployeeLifecycleJob {
         }
         tenantJobRunner.forEachActiveTenant("employeeLifecycleJob", tenant -> {
             int terminated = executeDueTerminations();
+            int transferred = executeDueTransfers();
             int contracts = sweepContracts();
-            log.info("Lifecycle sweep for tenant {}: {} terminations executed, {} contract alerts",
-                tenant.getSlug(), terminated, contracts);
+            log.info("Lifecycle sweep for tenant {}: {} terminations executed, {} transfers executed, {} contract alerts",
+                tenant.getSlug(), terminated, transferred, contracts);
         });
     }
 
@@ -69,11 +70,35 @@ public class EmployeeLifecycleJob {
         int count = 0;
         for (Employee employee : due) {
             try {
+                // Responsibilities may have been gained since the termination was
+                // scheduled — the termination stays pending until HR reassigns them.
+                lifecycleService.assertNoActiveResponsibilities(employee);
                 lifecycleService.executeTermination(employee, employee.getTerminationDate(),
                     "SCHEDULED_TERMINATION", SystemActor.SYSTEM_ACTOR_ID);
                 count++;
             } catch (Exception e) {
                 log.error("Failed to execute scheduled termination for employee {}", employee.getId(), e);
+            }
+        }
+        return count;
+    }
+
+    @Transactional
+    public int executeDueTransfers() {
+        List<Employee> due = employeeRepository.findDueScheduledTransfers(LocalDate.now());
+        int count = 0;
+        for (Employee employee : due) {
+            try {
+                // executeTransfer re-validates the targets — a transfer whose
+                // department was deactivated or supervisor terminated since it
+                // was scheduled stays pending until HR fixes or cancels it.
+                lifecycleService.executeTransfer(employee, employee.getScheduledTransferDate(),
+                    employee.getScheduledTransferDepartmentId(),
+                    employee.getScheduledTransferSupervisorId(),
+                    SystemActor.SYSTEM_ACTOR_ID);
+                count++;
+            } catch (Exception e) {
+                log.error("Failed to execute scheduled transfer for employee {}", employee.getId(), e);
             }
         }
         return count;

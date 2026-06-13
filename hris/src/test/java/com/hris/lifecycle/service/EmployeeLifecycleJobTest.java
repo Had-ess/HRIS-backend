@@ -85,6 +85,36 @@ class EmployeeLifecycleJobTest {
     }
 
     @Test
+    void dueScheduledTransfersAreExecutedAsSystemActor() {
+        LocalDate due = LocalDate.now().minusDays(1);
+        UUID targetDepartmentId = UUID.randomUUID();
+        employee.setScheduledTransferDate(due);
+        employee.setScheduledTransferDepartmentId(targetDepartmentId);
+        when(employeeRepository.findDueScheduledTransfers(any())).thenReturn(List.of(employee));
+
+        int executed = job.executeDueTransfers();
+
+        assertThat(executed).isEqualTo(1);
+        verify(lifecycleService).executeTransfer(eq(employee), eq(due),
+            eq(targetDepartmentId), eq(null), eq(SystemActor.SYSTEM_ACTOR_ID));
+    }
+
+    @Test
+    void blockedDueTransferStaysPendingAndIsLogged() {
+        LocalDate due = LocalDate.now().minusDays(1);
+        employee.setScheduledTransferDate(due);
+        employee.setScheduledTransferDepartmentId(UUID.randomUUID());
+        when(employeeRepository.findDueScheduledTransfers(any())).thenReturn(List.of(employee));
+        when(lifecycleService.executeTransfer(any(), any(), any(), any(), any()))
+            .thenThrow(new IllegalArgumentException("Target department must be active"));
+
+        int executed = job.executeDueTransfers();
+
+        assertThat(executed).isZero();
+        assertThat(employee.getScheduledTransferDate()).isEqualTo(due);
+    }
+
+    @Test
     void overdueContractIsExpiredAndHrNotifiedOnce() {
         EmployeeContract contract = EmployeeContract.builder()
             .id(UUID.randomUUID()).employeeId(employeeId)

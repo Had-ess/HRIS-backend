@@ -6,6 +6,7 @@ import com.hris.lifecycle.dto.LifecycleDtos.CreateContractRequest;
 import com.hris.lifecycle.dto.LifecycleDtos.LifecycleStateDto;
 import com.hris.lifecycle.dto.LifecycleDtos.ReactivateRequest;
 import com.hris.lifecycle.dto.LifecycleDtos.TerminateRequest;
+import com.hris.lifecycle.dto.LifecycleDtos.TransferRequest;
 import com.hris.lifecycle.service.EmployeeContractService;
 import com.hris.lifecycle.service.EmployeeLifecycleService;
 import com.hris.security.PermissionAuthorizationService;
@@ -77,6 +78,24 @@ public class EmployeeLifecycleController {
         permissionAuthorizationService.authorize(authentication, "EMPLOYEE", "MANAGE");
         UUID actorId = SecurityUtils.getCurrentUserId(authentication);
         return ResponseEntity.ok(ApiResponse.ok(lifecycleService.cancelScheduledTermination(employeeId, actorId)));
+    }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<ApiResponse<LifecycleStateDto>> transfer(
+            @PathVariable UUID employeeId,
+            @Valid @RequestBody TransferRequest request,
+            Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "EMPLOYEE", "MANAGE");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(lifecycleService.transfer(employeeId, request, actorId)));
+    }
+
+    @PostMapping("/cancel-transfer")
+    public ResponseEntity<ApiResponse<LifecycleStateDto>> cancelTransfer(
+            @PathVariable UUID employeeId, Authentication authentication) {
+        permissionAuthorizationService.authorize(authentication, "EMPLOYEE", "MANAGE");
+        UUID actorId = SecurityUtils.getCurrentUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.ok(lifecycleService.cancelScheduledTransfer(employeeId, actorId)));
     }
 
     @PostMapping("/reactivate")

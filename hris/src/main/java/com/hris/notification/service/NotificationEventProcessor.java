@@ -240,6 +240,16 @@ public class NotificationEventProcessor {
                 map.getOrDefault("date", ""),
                 map.getOrDefault("contractType", "")
             };
+            case EMPLOYEE_TRANSFERRED -> new Object[] {
+                map.getOrDefault("employeeName", ""),
+                map.getOrDefault("date", ""),
+                map.getOrDefault("departmentName", "")
+            };
+            case DOCUMENT_EXPIRING, DOCUMENT_EXPIRED -> new Object[] {
+                map.getOrDefault("employeeName", ""),
+                map.getOrDefault("title", ""),
+                map.getOrDefault("date", "")
+            };
         };
     }
 
@@ -273,8 +283,9 @@ public class NotificationEventProcessor {
             case PROJECT_ASSIGNED -> NotificationType.TEAM;
             case TIMESHEET_SUBMITTED -> NotificationType.APPROVAL;
             case TIMESHEET_APPROVED, TIMESHEET_REJECTED -> NotificationType.REQUEST;
-            case EMPLOYEE_TERMINATED -> NotificationType.TEAM;
-            case CONTRACT_EXPIRING, CONTRACT_EXPIRED, PROBATION_ENDING -> NotificationType.SYSTEM;
+            case EMPLOYEE_TERMINATED, EMPLOYEE_TRANSFERRED -> NotificationType.TEAM;
+            case CONTRACT_EXPIRING, CONTRACT_EXPIRED, PROBATION_ENDING,
+                 DOCUMENT_EXPIRING, DOCUMENT_EXPIRED -> NotificationType.SYSTEM;
         };
     }
 

@@ -17,6 +17,7 @@ public interface DepartmentMapper {
             department.getName(),
             department.getCode(),
             department.getHeadEmployeeId(),
+            department.getParentDepartmentId(),
             department.isActive(),
             0L,
             0L,

@@ -24,6 +24,10 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
     Page<Department> findAllByIdIn(Collection<UUID> ids, Pageable pageable);
 
+    boolean existsByParentDepartmentId(UUID parentDepartmentId);
+
+    java.util.List<Department> findByParentDepartmentIdOrderByNameAsc(UUID parentDepartmentId);
+
     @Query("SELECT d.headEmployee FROM Department d WHERE d.id = :deptId")
     Optional<Employee> findDepartmentHead(@Param("deptId") UUID departmentId);
 }

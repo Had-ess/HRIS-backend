@@ -17,6 +17,8 @@ import com.hris.organisation.dto.TeamDto;
 import com.hris.organisation.dto.TeamUpdateDto;
 import com.hris.organisation.entity.Project;
 import com.hris.organisation.entity.Team;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyRelation;
+import com.hris.organisation.hierarchy.entity.TeamHierarchyStatus;
 import com.hris.organisation.hierarchy.repository.TeamHierarchyRelationRepository;
 import com.hris.organisation.repository.ProjectAssignmentRepository;
 import com.hris.organisation.repository.ProjectRepository;
@@ -30,6 +32,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.List;
@@ -91,6 +94,14 @@ public class TeamService {
             .isActive(true)
             .build();
         Team saved = teamRepository.save(team);
+        // seed the in-team approval chain head from the spine (overlay invariant:
+        // team.supervisor == active chain head)
+        teamHierarchyRelationRepository.save(TeamHierarchyRelation.builder()
+            .teamId(saved.getId())
+            .collaboratorEmployeeId(saved.getSupervisorEmployeeId())
+            .responsibleEmployeeId(null)
+            .startDate(LocalDate.now())
+            .build());
         auditLogService.log(actorId, AuditAction.CREATE, "team", saved.getId(), null, snapshot(saved));
         return toDto(saved);
     }
@@ -101,7 +112,9 @@ public class TeamService {
         String nextCode = dto.code() != null ? dto.code() : existing.getCode();
         String nextName = dto.name() != null ? dto.name() : existing.getName();
         UUID nextDepartmentId = dto.departmentId() != null ? dto.departmentId() : existing.getDepartmentId();
-        UUID nextProjectId = dto.projectId() != null ? dto.projectId() : existing.getProjectId();
+        UUID nextProjectId = Boolean.TRUE.equals(dto.clearProject())
+            ? null
+            : (dto.projectId() != null ? dto.projectId() : existing.getProjectId());
         UUID nextSupervisorEmployeeId = dto.supervisorEmployeeId() != null ? dto.supervisorEmployeeId() : existing.getSupervisorEmployeeId();
 
         validate(nextCode, nextName, nextDepartmentId, nextProjectId, nextSupervisorEmployeeId, id);
@@ -115,9 +128,12 @@ public class TeamService {
         if (dto.departmentId() != null) {
             existing.setDepartmentId(dto.departmentId());
         }
-        if (dto.projectId() != null) {
+        if (Boolean.TRUE.equals(dto.clearProject())) {
+            existing.setProjectId(null);
+        } else if (dto.projectId() != null) {
             existing.setProjectId(dto.projectId());
         }
+        UUID previousSupervisorId = existing.getSupervisorEmployeeId();
         if (dto.supervisorEmployeeId() != null) {
             existing.setSupervisorEmployeeId(dto.supervisorEmployeeId());
         }
@@ -125,8 +141,47 @@ public class TeamService {
             existing.setActive(dto.active());
         }
         Team saved = teamRepository.save(existing);
+        if (dto.supervisorEmployeeId() != null && !dto.supervisorEmployeeId().equals(previousSupervisorId)) {
+            repointChainHead(saved);
+        }
         auditLogService.log(actorId, AuditAction.UPDATE, "team", saved.getId(), previous, snapshot(saved));
         return toDto(saved);
+    }
+
+    /**
+     * Keeps the overlay invariant team.supervisor == active chain head: the new
+     * supervisor becomes (or gets) the responsible-less relation and the previous
+     * head is re-pointed under them.
+     */
+    private void repointChainHead(Team team) {
+        UUID newSupervisorId = team.getSupervisorEmployeeId();
+        List<TeamHierarchyRelation> active = teamHierarchyRelationRepository
+            .findByTeamIdAndStatusOrderByStartDateAscCollaboratorEmployeeIdAsc(
+                team.getId(), TeamHierarchyStatus.ACTIVE);
+
+        TeamHierarchyRelation newHead = active.stream()
+            .filter(relation -> newSupervisorId.equals(relation.getCollaboratorEmployeeId()))
+            .findFirst()
+            .orElse(null);
+        if (newHead != null) {
+            newHead.setResponsibleEmployeeId(null);
+            teamHierarchyRelationRepository.save(newHead);
+        } else {
+            teamHierarchyRelationRepository.save(TeamHierarchyRelation.builder()
+                .teamId(team.getId())
+                .collaboratorEmployeeId(newSupervisorId)
+                .responsibleEmployeeId(null)
+                .startDate(LocalDate.now())
+                .build());
+        }
+
+        for (TeamHierarchyRelation relation : active) {
+            if (relation.getResponsibleEmployeeId() == null
+                && !newSupervisorId.equals(relation.getCollaboratorEmployeeId())) {
+                relation.setResponsibleEmployeeId(newSupervisorId);
+                teamHierarchyRelationRepository.save(relation);
+            }
+        }
     }
 
     @Transactional
@@ -184,11 +239,11 @@ public class TeamService {
             throw new IllegalStateException("Team code must be unique");
         }
 
-        if (projectId == null) {
-            throw new IllegalArgumentException("Team project is required");
+        // standing teams (V72): the project attachment is optional
+        if (projectId != null) {
+            projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
         }
-        Project project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
         Department department = departmentRepository.findById(departmentId)
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -213,8 +268,10 @@ public class TeamService {
             .orElseThrow(() -> new EntityNotFoundException("Department not found"));
         Employee supervisor = employeeRepository.findById(team.getSupervisorEmployeeId())
             .orElseThrow(() -> new EntityNotFoundException("Supervisor not found"));
-        Project project = projectRepository.findById(team.getProjectId())
-            .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        Project project = team.getProjectId() != null
+            ? projectRepository.findById(team.getProjectId())
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"))
+            : null;
 
         return new TeamDto(
             team.getId(),
@@ -223,9 +280,9 @@ public class TeamService {
             department.getId(),
             department.getName(),
             department.getCode(),
-            project.getId(),
-            project.getName(),
-            project.getCode(),
+            project != null ? project.getId() : null,
+            project != null ? project.getName() : null,
+            project != null ? project.getCode() : null,
             supervisor.getId(),
             supervisor.getEmployeeCode(),
             resolveEmployeeName(supervisor),

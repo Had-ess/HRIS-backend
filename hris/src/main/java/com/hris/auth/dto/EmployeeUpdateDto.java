@@ -9,11 +9,13 @@ import java.util.UUID;
 public record EmployeeUpdateDto(
     String employeeCode,
     LocalDate hireDate,
-    String jobTitle,
+    UUID jobTitleId,
     EmployeeStatus status,
     ContractType contractType,
     UUID departmentId,
     UUID supervisorEmployeeId,
+    /** PATCH null means keep, so clearing the supervisor needs an explicit flag. */
+    Boolean clearSupervisor,
     UUID workScheduleId,
     String location,
     String cin
@@ -21,7 +23,7 @@ public record EmployeeUpdateDto(
     public EmployeeUpdateDto(
             String employeeCode,
             LocalDate hireDate,
-            String jobTitle,
+            UUID jobTitleId,
             EmployeeStatus status,
             ContractType contractType,
             UUID departmentId,
@@ -29,10 +31,11 @@ public record EmployeeUpdateDto(
         this(
             employeeCode,
             hireDate,
-            jobTitle,
+            jobTitleId,
             status,
             contractType,
             departmentId,
+            null,
             null,
             workScheduleId,
             null,

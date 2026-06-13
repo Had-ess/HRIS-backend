@@ -29,6 +29,9 @@ public class Department {
     @Column(name = "head_employee_id")
     private UUID headEmployeeId;
 
+    @Column(name = "parent_department_id")
+    private UUID parentDepartmentId;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
