@@ -56,6 +56,8 @@ public class TenantProvisioningService {
         "job_titles",
         "performance_rating_scales",
         "performance_rating_levels",
+        "performance_competencies",
+        "performance_competency_job_families",
         "public_holidays",
         "admin_request_types",
         "hr_calendars",

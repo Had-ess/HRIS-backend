@@ -48,6 +48,7 @@ public class PerformanceReviewService {
     private final PerformanceRatingLevelRepository levelRepository;
     private final PerformanceFactRepository performanceFactRepository;
     private final PerformanceGoalService goalService;
+    private final CompetencyService competencyService;
     private final PerformanceNotificationService notificationService;
     private final AccessScopeService accessScopeService;
     private final EmployeeRepository employeeRepository;
@@ -114,6 +115,8 @@ public class PerformanceReviewService {
             throw new IllegalStateException("This review is not awaiting manager review");
         }
         goalService.applyGoalRatings(review.getEmployeeId(), review.getCycleId(), dto.goalRatings());
+        // Competency ratings are advisory: persisted but never folded into computeScore.
+        competencyService.applyCompetencyRatings(review.getId(), dto.competencyRatings());
         if (dto.overallRatingLevelId() != null) {
             levelRepository.findById(dto.overallRatingLevelId())
                 .orElseThrow(() -> new EntityNotFoundException("Rating level not found"));
@@ -263,7 +266,7 @@ public class PerformanceReviewService {
             review.getSelfComments(), review.getManagerComments(), review.getOverallRatingLevelId(),
             review.getComputedScore(), review.getHrOverrideRatingLevelId(),
             review.getSelfSubmittedAt(), review.getManagerSubmittedAt(), review.getAcknowledgedAt(),
-            levels, goals);
+            levels, goals, competencyService.getReviewCompetencies(review.getId()));
     }
 
     private static ReviewGoalDto toReviewGoal(GoalDto g) {

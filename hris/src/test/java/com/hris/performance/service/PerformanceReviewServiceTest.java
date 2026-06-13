@@ -45,6 +45,7 @@ class PerformanceReviewServiceTest {
     @Mock private PerformanceRatingLevelRepository levelRepository;
     @Mock private PerformanceFactRepository performanceFactRepository;
     @Mock private PerformanceGoalService goalService;
+    @Mock private CompetencyService competencyService;
     @Mock private PerformanceNotificationService notificationService;
     @Mock private AccessScopeService accessScopeService;
     @Mock private EmployeeRepository employeeRepository;
@@ -71,6 +72,7 @@ class PerformanceReviewServiceTest {
         lenient().when(levelRepository.findByScaleIdOrderByDisplayOrderAsc(any())).thenReturn(List.of());
         lenient().when(employeeRepository.findById(empId)).thenReturn(Optional.of(me));
         lenient().when(userRepository.findById(any())).thenReturn(Optional.empty());
+        lenient().when(competencyService.getReviewCompetencies(any())).thenReturn(List.of());
     }
 
     private PerformanceReview review(ReviewStatus status, UUID employeeId, UUID reviewerId) {
@@ -127,9 +129,10 @@ class PerformanceReviewServiceTest {
         lenient().when(employeeRepository.findById(subjectId)).thenReturn(Optional.of(
             Employee.builder().id(subjectId).userId(UUID.randomUUID()).employeeCode("E2").build()));
 
-        service.managerSubmit(r.getId(), new ManagerSubmitDto("good", null, List.of()), userId);
+        service.managerSubmit(r.getId(), new ManagerSubmitDto("good", null, List.of(), List.of()), userId);
 
         verify(goalService).applyGoalRatings(subjectId, cycleId, List.of());
+        verify(competencyService).applyCompetencyRatings(r.getId(), List.of());
         assertThat(r.getStatus()).isEqualTo(ReviewStatus.PENDING_ACKNOWLEDGEMENT);
         assertThat(r.getComputedScore()).isEqualByComparingTo("3.00");
         assertThat(r.getManagerSubmittedAt()).isNotNull();
@@ -143,7 +146,7 @@ class PerformanceReviewServiceTest {
         when(reviewRepository.findById(r.getId())).thenReturn(Optional.of(r));
         when(accessScopeService.hasPermissionName(userId, "PERFORMANCE_MANAGE")).thenReturn(false);
 
-        assertThatThrownBy(() -> service.managerSubmit(r.getId(), new ManagerSubmitDto("x", null, List.of()), userId))
+        assertThatThrownBy(() -> service.managerSubmit(r.getId(), new ManagerSubmitDto("x", null, List.of(), List.of()), userId))
             .isInstanceOf(IllegalArgumentException.class);
     }
 

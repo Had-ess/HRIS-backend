@@ -1,5 +1,6 @@
 package com.hris.performance.dto;
 
+import com.hris.performance.enums.CompetencyCategory;
 import com.hris.performance.enums.CycleStatus;
 import com.hris.performance.enums.CycleType;
 import com.hris.performance.enums.GoalCategory;
@@ -130,7 +131,19 @@ public final class PerformanceDtos {
         Instant managerSubmittedAt,
         Instant acknowledgedAt,
         List<RatingLevelDto> scaleLevels,
-        List<ReviewGoalDto> goals
+        List<ReviewGoalDto> goals,
+        List<ReviewCompetencyDto> competencies
+    ) {
+    }
+
+    public record ReviewCompetencyDto(
+        UUID id,
+        UUID competencyId,
+        String competencyName,
+        CompetencyCategory category,
+        UUID ratingLevelId,
+        String comments,
+        int displayOrder
     ) {
     }
 
@@ -148,7 +161,15 @@ public final class PerformanceDtos {
     public record ManagerSubmitDto(
         @Size(max = 5000) String managerComments,
         UUID overallRatingLevelId,
-        @Valid List<GoalRatingInput> goalRatings
+        @Valid List<GoalRatingInput> goalRatings,
+        @Valid List<CompetencyRatingInput> competencyRatings
+    ) {
+    }
+
+    public record CompetencyRatingInput(
+        @NotNull UUID reviewCompetencyId,
+        UUID ratingLevelId,
+        @Size(max = 2000) String comments
     ) {
     }
 
@@ -208,6 +229,29 @@ public final class PerformanceDtos {
     public record CheckinCreateDto(
         @Size(max = 2000) String note,
         @NotNull @Min(0) @Max(100) Integer progressPct
+    ) {
+    }
+
+    // --- Competencies (per-tenant catalog) ---
+
+    public record CompetencyDto(
+        UUID id,
+        String name,
+        String description,
+        CompetencyCategory category,
+        boolean isCore,
+        boolean isActive,
+        List<String> jobFamilies
+    ) {
+    }
+
+    public record CompetencyCreateDto(
+        @NotBlank @Size(max = 150) String name,
+        @Size(max = 5000) String description,
+        CompetencyCategory category,
+        Boolean isCore,
+        Boolean isActive,
+        List<@NotBlank @Size(max = 150) String> jobFamilies
     ) {
     }
 }

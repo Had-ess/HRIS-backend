@@ -53,6 +53,7 @@ public class ReviewCycleService {
     private final DepartmentRepository departmentRepository;
     private final PerformanceReviewService reviewService;
     private final PerformanceNotificationService notificationService;
+    private final CompetencyService competencyService;
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
@@ -165,7 +166,7 @@ public class ReviewCycleService {
             if (reviewRepository.existsByCycleIdAndEmployeeId(cycle.getId(), employee.getId())) {
                 continue;
             }
-            reviewRepository.save(PerformanceReview.builder()
+            PerformanceReview review = reviewRepository.save(PerformanceReview.builder()
                 .cycleId(cycle.getId())
                 .employeeId(employee.getId())
                 .reviewerEmployeeId(resolveReviewer(employee, deptById))
@@ -173,6 +174,7 @@ public class ReviewCycleService {
                 .jobTitle(employee.getJobTitle())
                 .status(ReviewStatus.SELF_ASSESSMENT)
                 .build());
+            competencyService.snapshotForReview(review.getId(), employee);
             created++;
         }
         return created;

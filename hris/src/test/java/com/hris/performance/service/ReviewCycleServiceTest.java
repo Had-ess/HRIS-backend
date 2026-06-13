@@ -46,6 +46,7 @@ class ReviewCycleServiceTest {
     @Mock private DepartmentRepository departmentRepository;
     @Mock private PerformanceReviewService reviewService;
     @Mock private PerformanceNotificationService notificationService;
+    @Mock private CompetencyService competencyService;
     @Mock private AuditLogService auditLogService;
 
     @InjectMocks private ReviewCycleService service;
@@ -112,6 +113,7 @@ class ReviewCycleServiceTest {
             emp(fresh, UUID.randomUUID(), supervisor)));
         when(reviewRepository.existsByCycleIdAndEmployeeId(cycleId, existing)).thenReturn(true);
         when(reviewRepository.existsByCycleIdAndEmployeeId(cycleId, fresh)).thenReturn(false);
+        when(reviewRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         int created = service.generateReviews(cycle);
 
@@ -121,6 +123,8 @@ class ReviewCycleServiceTest {
         assertThat(captor.getValue().getEmployeeId()).isEqualTo(fresh);
         assertThat(captor.getValue().getReviewerEmployeeId()).isEqualTo(supervisor);
         assertThat(captor.getValue().getStatus()).isEqualTo(ReviewStatus.SELF_ASSESSMENT);
+        // each generated review gets its applicable competencies snapshotted
+        verify(competencyService).snapshotForReview(any(), any());
     }
 
     @Test
