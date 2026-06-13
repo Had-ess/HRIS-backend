@@ -6,6 +6,7 @@ import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.repository.AuditLogRepository;
 import com.hris.common.event.ActorType;
+import com.hris.common.event.SystemActor;
 import com.hris.config.AuditContextFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +40,12 @@ public class AuditLogService {
     public void log(UUID actorId, ActorType actorType, AuditAction action, String resource,
                     UUID resourceId, Object previousState, Object newState) {
         try {
+            // The system actor is not a real user — its all-zeros sentinel would
+            // violate audit_logs' FK to users, so store it as a null id / SYSTEM type.
+            boolean system = SystemActor.isSystemActor(actorId);
             AuditLog auditLog = AuditLog.builder()
-                .actorId(actorId)
-                .actorType(actorType != null ? actorType.name() : "USER")
+                .actorId(system ? null : actorId)
+                .actorType(system ? ActorType.SYSTEM.name() : (actorType != null ? actorType.name() : "USER"))
                 .action(action)
                 .resource(resource)
                 .resourceId(resourceId)

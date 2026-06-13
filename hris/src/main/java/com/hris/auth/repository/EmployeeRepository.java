@@ -47,6 +47,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     List<Employee> findBySupervisorEmployeeId(UUID supervisorEmployeeId);
 
+    /** Active employees in the tenant (review-cycle generation, all-scope). */
+    List<Employee> findByStatus(com.hris.auth.enums.EmployeeStatus status);
+
+    /** Active employees in the given departments (review-cycle generation, scoped). */
+    List<Employee> findByDepartmentIdInAndStatus(
+        List<UUID> departmentIds, com.hris.auth.enums.EmployeeStatus status);
+
     Page<Employee> findByDepartmentId(UUID departmentId, Pageable pageable);
 
     Page<Employee> findByDepartmentIdIn(List<UUID> departmentIds, Pageable pageable);

@@ -21,4 +21,15 @@ public final class SystemActor {
     public static boolean isSystemActor(UUID actorId) {
         return SYSTEM_ACTOR_ID.equals(actorId);
     }
+
+    /**
+     * Resolves an actor id for storage in a column that has a FK to {@code users}.
+     * The system actor is not a real user, so it is represented as {@code null}
+     * (every such column is nullable). Use this before persisting audit trails or
+     * history rows that may be written by a scheduled job — otherwise the FK
+     * rejects the all-zeros sentinel and rolls back the whole transaction.
+     */
+    public static UUID toUserReference(UUID actorId) {
+        return isSystemActor(actorId) ? null : actorId;
+    }
 }

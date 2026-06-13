@@ -5,6 +5,7 @@ import com.hris.auth.entity.EmployeeDepartmentHistory;
 import com.hris.auth.entity.EmployeeStatusHistory;
 import com.hris.auth.repository.EmployeeDepartmentHistoryRepository;
 import com.hris.auth.repository.EmployeeStatusHistoryRepository;
+import com.hris.common.event.SystemActor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class EmployeeHistoryService {
 
     public void recordHire(Employee employee, UUID actorId) {
         Instant recordedAt = Instant.now();
+        UUID changedBy = SystemActor.toUserReference(actorId);
 
         employeeStatusHistoryRepository.save(EmployeeStatusHistory.builder()
             .employeeId(employee.getId())
@@ -28,7 +30,7 @@ public class EmployeeHistoryService {
             .newStatus(employee.getStatus())
             .effectiveDate(employee.getHireDate())
             .reason("ONBOARDING")
-            .changedBy(actorId)
+            .changedBy(changedBy)
             .recordedAt(recordedAt)
             .build());
 
@@ -37,7 +39,7 @@ public class EmployeeHistoryService {
             .previousDepartmentId(null)
             .newDepartmentId(employee.getDepartmentId())
             .effectiveDate(employee.getHireDate())
-            .changedBy(actorId)
+            .changedBy(changedBy)
             .recordedAt(recordedAt)
             .build());
     }
@@ -52,7 +54,7 @@ public class EmployeeHistoryService {
             .previousDepartmentId(previous.getDepartmentId())
             .newDepartmentId(current.getDepartmentId())
             .effectiveDate(effectiveDate)
-            .changedBy(actorId)
+            .changedBy(SystemActor.toUserReference(actorId))
             .recordedAt(Instant.now())
             .build());
     }
@@ -68,7 +70,7 @@ public class EmployeeHistoryService {
             .newStatus(current.getStatus())
             .effectiveDate(effectiveDate)
             .reason(reason)
-            .changedBy(actorId)
+            .changedBy(SystemActor.toUserReference(actorId))
             .recordedAt(Instant.now())
             .build());
     }

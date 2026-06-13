@@ -54,6 +54,8 @@ public class TenantProvisioningService {
     private static final List<String> TEMPLATE_TABLES = List.of(
         "work_schedules",
         "job_titles",
+        "performance_rating_scales",
+        "performance_rating_levels",
         "public_holidays",
         "admin_request_types",
         "hr_calendars",

@@ -1,12 +1,15 @@
 package com.hris.analytics.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hris.analytics.entity.AuditLog;
 import com.hris.analytics.enums.AuditAction;
 import com.hris.analytics.repository.AuditLogRepository;
 import com.hris.common.event.ActorType;
+import com.hris.common.event.SystemActor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -92,6 +95,34 @@ class AuditLogServiceTest {
         auditLogService.log(actorId, AuditAction.CREATE, "EMPLOYEE", resourceId, null, "data");
 
         verify(auditLogRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("system actor is stored as a null id with SYSTEM type — avoids the users FK violation that rolled back scheduled-job transactions")
+    void log_systemActorStoredAsNullIdAndSystemType() {
+        ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
+
+        // The single-arg overload forces ActorType.USER; the system actor must still
+        // be normalized to a null id / SYSTEM type so the audit_logs FK to users holds.
+        auditLogService.log(SystemActor.SYSTEM_ACTOR_ID, AuditAction.UPDATE,
+                "employee_transfer", UUID.randomUUID(), null, "data");
+
+        verify(auditLogRepository).save(captor.capture());
+        assertThat(captor.getValue().getActorId()).isNull();
+        assertThat(captor.getValue().getActorType()).isEqualTo(ActorType.SYSTEM.name());
+    }
+
+    @Test
+    @DisplayName("a real user actor is stored verbatim with USER type")
+    void log_realUserStoredVerbatim() {
+        ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
+        UUID actorId = UUID.randomUUID();
+
+        auditLogService.log(actorId, AuditAction.UPDATE, "employee_transfer", UUID.randomUUID(), null, "data");
+
+        verify(auditLogRepository).save(captor.capture());
+        assertThat(captor.getValue().getActorId()).isEqualTo(actorId);
+        assertThat(captor.getValue().getActorType()).isEqualTo(ActorType.USER.name());
     }
 
     @Test

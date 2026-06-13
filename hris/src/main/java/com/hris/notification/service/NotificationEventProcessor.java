@@ -250,6 +250,15 @@ public class NotificationEventProcessor {
                 map.getOrDefault("title", ""),
                 map.getOrDefault("date", "")
             };
+            case PERFORMANCE_CYCLE_OPENED, PERFORMANCE_SELF_ASSESSMENT_DUE -> new Object[] {
+                map.getOrDefault("cycleName", ""),
+                map.getOrDefault("date", "")
+            };
+            case PERFORMANCE_REVIEW_SUBMITTED, PERFORMANCE_REVIEW_READY_FOR_ACK,
+                 PERFORMANCE_REVIEW_COMPLETED -> new Object[] {
+                map.getOrDefault("employeeName", ""),
+                map.getOrDefault("cycleName", "")
+            };
         };
     }
 
@@ -286,6 +295,9 @@ public class NotificationEventProcessor {
             case EMPLOYEE_TERMINATED, EMPLOYEE_TRANSFERRED -> NotificationType.TEAM;
             case CONTRACT_EXPIRING, CONTRACT_EXPIRED, PROBATION_ENDING,
                  DOCUMENT_EXPIRING, DOCUMENT_EXPIRED -> NotificationType.SYSTEM;
+            case PERFORMANCE_CYCLE_OPENED, PERFORMANCE_SELF_ASSESSMENT_DUE,
+                 PERFORMANCE_REVIEW_SUBMITTED, PERFORMANCE_REVIEW_READY_FOR_ACK,
+                 PERFORMANCE_REVIEW_COMPLETED -> NotificationType.PERFORMANCE;
         };
     }
 
