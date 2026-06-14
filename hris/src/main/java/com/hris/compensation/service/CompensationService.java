@@ -133,7 +133,7 @@ public class CompensationService {
         return annualBase.divide(mid, 4, RoundingMode.HALF_UP);
     }
 
-    private static BigDecimal annualize(BigDecimal amount, PayFrequency freq) {
+    static BigDecimal annualize(BigDecimal amount, PayFrequency freq) {
         if (amount == null || freq == null) {
             return amount;
         }
