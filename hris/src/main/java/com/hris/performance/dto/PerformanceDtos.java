@@ -127,6 +127,7 @@ public final class PerformanceDtos {
         String selfComments,
         String managerComments,
         UUID overallRatingLevelId,
+        UUID potentialRatingLevelId,
         BigDecimal computedScore,
         UUID hrOverrideRatingLevelId,
         Instant selfSubmittedAt,
@@ -163,6 +164,7 @@ public final class PerformanceDtos {
     public record ManagerSubmitDto(
         @Size(max = 5000) String managerComments,
         UUID overallRatingLevelId,
+        UUID potentialRatingLevelId,
         @Valid List<GoalRatingInput> goalRatings,
         @Valid List<CompetencyRatingInput> competencyRatings
     ) {
@@ -339,6 +341,47 @@ public final class PerformanceDtos {
         @Size(max = 5000) String strengths,
         @Size(max = 5000) String improvements,
         @Valid List<FeedbackCompetencyRatingInput> competencyRatings
+    ) {
+    }
+
+    // --- 9-box calibration ---
+
+    /** One review's placement on the grid. A band is 1 (Low) / 2 (Mid) / 3 (High), or null if unset. */
+    public record CalibrationReviewDto(
+        UUID reviewId,
+        UUID employeeId,
+        String employeeName,
+        String jobTitle,
+        UUID departmentId,
+        ReviewStatus status,
+        UUID performanceLevelId,
+        String performanceLabel,
+        Integer performanceValue,
+        Integer performanceBand,
+        UUID potentialLevelId,
+        String potentialLabel,
+        Integer potentialValue,
+        Integer potentialBand,
+        boolean adjusted
+    ) {
+    }
+
+    /** The per-cycle 9-box: scale legend, placed reviews (both axes set), and unplaced ones. */
+    public record CalibrationGridDto(
+        UUID cycleId,
+        String cycleName,
+        CycleStatus cycleStatus,
+        List<RatingLevelDto> scaleLevels,
+        List<CalibrationReviewDto> placed,
+        List<CalibrationReviewDto> unplaced
+    ) {
+    }
+
+    /** An HR move: the target cell's bands (1-3) plus an optional calibration note. */
+    public record CalibrationAdjustDto(
+        @NotNull @Min(1) @Max(3) Integer performanceBand,
+        @NotNull @Min(1) @Max(3) Integer potentialBand,
+        @Size(max = 2000) String note
     ) {
     }
 }

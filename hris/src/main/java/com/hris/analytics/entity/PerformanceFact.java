@@ -42,6 +42,9 @@ public class PerformanceFact {
     @Column(name = "overall_rating_value")
     private Integer overallRatingValue;
 
+    @Column(name = "potential_rating_value")
+    private Integer potentialRatingValue;
+
     @Column(name = "computed_score")
     private BigDecimal computedScore;
 

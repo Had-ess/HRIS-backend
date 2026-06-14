@@ -129,7 +129,7 @@ class PerformanceReviewServiceTest {
         lenient().when(employeeRepository.findById(subjectId)).thenReturn(Optional.of(
             Employee.builder().id(subjectId).userId(UUID.randomUUID()).employeeCode("E2").build()));
 
-        service.managerSubmit(r.getId(), new ManagerSubmitDto("good", null, List.of(), List.of()), userId);
+        service.managerSubmit(r.getId(), new ManagerSubmitDto("good", null, null, List.of(), List.of()), userId);
 
         verify(goalService).applyGoalRatings(subjectId, cycleId, List.of());
         verify(competencyService).applyCompetencyRatings(r.getId(), List.of());
@@ -146,7 +146,7 @@ class PerformanceReviewServiceTest {
         when(reviewRepository.findById(r.getId())).thenReturn(Optional.of(r));
         when(accessScopeService.hasPermissionName(userId, "PERFORMANCE_MANAGE")).thenReturn(false);
 
-        assertThatThrownBy(() -> service.managerSubmit(r.getId(), new ManagerSubmitDto("x", null, List.of(), List.of()), userId))
+        assertThatThrownBy(() -> service.managerSubmit(r.getId(), new ManagerSubmitDto("x", null, null, List.of(), List.of()), userId))
             .isInstanceOf(IllegalArgumentException.class);
     }
 

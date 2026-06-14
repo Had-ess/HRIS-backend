@@ -121,8 +121,14 @@ public class PerformanceReviewService {
             levelRepository.findById(dto.overallRatingLevelId())
                 .orElseThrow(() -> new EntityNotFoundException("Rating level not found"));
         }
+        // Potential is the confidential 9-box vertical axis: validated, persisted, advisory.
+        if (dto.potentialRatingLevelId() != null) {
+            levelRepository.findById(dto.potentialRatingLevelId())
+                .orElseThrow(() -> new EntityNotFoundException("Rating level not found"));
+        }
         review.setManagerComments(dto.managerComments());
         review.setOverallRatingLevelId(dto.overallRatingLevelId());
+        review.setPotentialRatingLevelId(dto.potentialRatingLevelId());
         review.setComputedScore(goalService.computeScore(review.getEmployeeId(), review.getCycleId()));
         review.setManagerSubmittedAt(Instant.now());
         review.setStatus(ReviewStatus.PENDING_ACKNOWLEDGEMENT);
@@ -179,14 +185,15 @@ public class PerformanceReviewService {
         UUID effectiveLevelId = review.getHrOverrideRatingLevelId() != null
             ? review.getHrOverrideRatingLevelId()
             : review.getOverallRatingLevelId();
-        Integer ratingValue = effectiveLevelId == null ? null
-            : levelRepository.findById(effectiveLevelId).map(PerformanceRatingLevel::getNumericValue).orElse(null);
+        Integer ratingValue = numericValue(effectiveLevelId);
+        Integer potentialValue = numericValue(review.getPotentialRatingLevelId());
         performanceFactRepository.save(PerformanceFact.builder()
             .cycleId(review.getCycleId())
             .employeeId(review.getEmployeeId())
             .departmentId(review.getDepartmentId())
             .jobTitle(review.getJobTitle())
             .overallRatingValue(ratingValue)
+            .potentialRatingValue(potentialValue)
             .computedScore(review.getComputedScore())
             .completedAt(Instant.now())
             .build());
@@ -220,6 +227,11 @@ public class PerformanceReviewService {
                 && scope.departmentIds().contains(review.getDepartmentId());
         }
         return false;
+    }
+
+    private Integer numericValue(UUID levelId) {
+        return levelId == null ? null
+            : levelRepository.findById(levelId).map(PerformanceRatingLevel::getNumericValue).orElse(null);
     }
 
     private Employee employee(UUID userId) {
@@ -264,6 +276,7 @@ public class PerformanceReviewService {
             review.getReviewerEmployeeId(), reviewer == null ? null : displayName(reviewer),
             review.getDepartmentId(), review.getJobTitle(), review.getStatus(),
             review.getSelfComments(), review.getManagerComments(), review.getOverallRatingLevelId(),
+            review.getPotentialRatingLevelId(),
             review.getComputedScore(), review.getHrOverrideRatingLevelId(),
             review.getSelfSubmittedAt(), review.getManagerSubmittedAt(), review.getAcknowledgedAt(),
             levels, goals, competencyService.getReviewCompetencies(review.getId()));

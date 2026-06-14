@@ -59,6 +59,10 @@ public class PerformanceReview {
     @Column(name = "overall_rating_level_id")
     private UUID overallRatingLevelId;
 
+    /** Confidential manager-set potential rating (the 9-box vertical axis); calibration may overwrite. */
+    @Column(name = "potential_rating_level_id")
+    private UUID potentialRatingLevelId;
+
     @Column(name = "computed_score")
     private BigDecimal computedScore;
 
