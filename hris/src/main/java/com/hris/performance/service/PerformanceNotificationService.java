@@ -70,6 +70,22 @@ public class PerformanceNotificationService {
                 personParams(employeeName, cycleName), linkPath));
     }
 
+    /** Notifies a nominated rater that peer feedback was requested from them. */
+    public void notifyFeedbackRequested(UUID raterUserId, String subjectName, String cycleName) {
+        userRepository.findById(raterUserId).ifPresent(user ->
+            publish(NotificationEventType.PERFORMANCE_FEEDBACK_REQUESTED, user,
+                "performance.feedback.requested.title", "performance.feedback.requested.body",
+                personParams(subjectName, cycleName), "/performance/feedback"));
+    }
+
+    /** Notifies the reviewer that a nominated rater submitted their feedback. */
+    public void notifyFeedbackSubmitted(UUID reviewerUserId, String subjectName, String cycleName) {
+        userRepository.findById(reviewerUserId).ifPresent(user ->
+            publish(NotificationEventType.PERFORMANCE_FEEDBACK_SUBMITTED, user,
+                "performance.feedback.submitted.title", "performance.feedback.submitted.body",
+                personParams(subjectName, cycleName), "/performance/team"));
+    }
+
     private Map<String, Object> cycleParams(String cycleName, String date) {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("cycleName", cycleName != null ? cycleName : "");

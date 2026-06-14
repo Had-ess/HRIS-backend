@@ -255,7 +255,8 @@ public class NotificationEventProcessor {
                 map.getOrDefault("date", "")
             };
             case PERFORMANCE_REVIEW_SUBMITTED, PERFORMANCE_REVIEW_READY_FOR_ACK,
-                 PERFORMANCE_REVIEW_COMPLETED -> new Object[] {
+                 PERFORMANCE_REVIEW_COMPLETED,
+                 PERFORMANCE_FEEDBACK_REQUESTED, PERFORMANCE_FEEDBACK_SUBMITTED -> new Object[] {
                 map.getOrDefault("employeeName", ""),
                 map.getOrDefault("cycleName", "")
             };
@@ -297,7 +298,8 @@ public class NotificationEventProcessor {
                  DOCUMENT_EXPIRING, DOCUMENT_EXPIRED -> NotificationType.SYSTEM;
             case PERFORMANCE_CYCLE_OPENED, PERFORMANCE_SELF_ASSESSMENT_DUE,
                  PERFORMANCE_REVIEW_SUBMITTED, PERFORMANCE_REVIEW_READY_FOR_ACK,
-                 PERFORMANCE_REVIEW_COMPLETED -> NotificationType.PERFORMANCE;
+                 PERFORMANCE_REVIEW_COMPLETED,
+                 PERFORMANCE_FEEDBACK_REQUESTED, PERFORMANCE_FEEDBACK_SUBMITTED -> NotificationType.PERFORMANCE;
         };
     }
 

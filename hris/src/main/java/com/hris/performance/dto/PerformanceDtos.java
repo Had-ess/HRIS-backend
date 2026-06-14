@@ -3,6 +3,7 @@ package com.hris.performance.dto;
 import com.hris.performance.enums.CompetencyCategory;
 import com.hris.performance.enums.CycleStatus;
 import com.hris.performance.enums.CycleType;
+import com.hris.performance.enums.FeedbackRequestStatus;
 import com.hris.performance.enums.GoalCategory;
 import com.hris.performance.enums.GoalStatus;
 import com.hris.performance.enums.ReviewStatus;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -252,6 +254,91 @@ public final class PerformanceDtos {
         Boolean isCore,
         Boolean isActive,
         List<@NotBlank @Size(max = 150) String> jobFamilies
+    ) {
+    }
+
+    // --- 360 / peer feedback ---
+
+    /** An active employee eligible to be nominated as a rater (picker option). */
+    public record FeedbackCandidateDto(
+        UUID employeeId,
+        String name
+    ) {
+    }
+
+    /** A single competency line on a feedback request (snapshot + the rater's rating). */
+    public record FeedbackCompetencyRatingDto(
+        UUID id,
+        UUID competencyId,
+        String competencyName,
+        CompetencyCategory category,
+        UUID ratingLevelId,
+        int displayOrder
+    ) {
+    }
+
+    /** Attributed view of one rater's request — reviewer + HR only. */
+    public record FeedbackRequestDto(
+        UUID id,
+        UUID reviewId,
+        UUID raterEmployeeId,
+        String raterName,
+        FeedbackRequestStatus status,
+        String strengths,
+        String improvements,
+        Instant submittedAt,
+        List<FeedbackCompetencyRatingDto> competencyRatings
+    ) {
+    }
+
+    /** The rater's working copy of a request they were nominated for (their inbox). */
+    public record MyFeedbackRequestDto(
+        UUID id,
+        UUID reviewId,
+        String subjectName,
+        String cycleName,
+        FeedbackRequestStatus status,
+        String strengths,
+        String improvements,
+        List<RatingLevelDto> scaleLevels,
+        List<FeedbackCompetencyRatingDto> competencyRatings
+    ) {
+    }
+
+    /** Anonymized aggregate the subject sees — identities hidden, SUBMITTED only. */
+    public record FeedbackAggregateDto(
+        int responseCount,
+        int pendingCount,
+        List<FeedbackAggregateCompetencyDto> competencies,
+        List<String> strengths,
+        List<String> improvements
+    ) {
+    }
+
+    public record FeedbackAggregateCompetencyDto(
+        UUID competencyId,
+        String competencyName,
+        CompetencyCategory category,
+        Double averageRating,
+        int ratedCount
+    ) {
+    }
+
+    public record FeedbackNominateDto(
+        @NotEmpty List<@NotNull UUID> raterEmployeeIds
+    ) {
+    }
+
+    public record FeedbackCompetencyRatingInput(
+        @NotNull UUID feedbackCompetencyRatingId,
+        UUID ratingLevelId
+    ) {
+    }
+
+    public record FeedbackSubmitDto(
+        @Size(max = 5000) String strengths,
+        @Size(max = 5000) String improvements,
+        @Valid List<FeedbackCompetencyRatingInput> competencyRatings
     ) {
     }
 }

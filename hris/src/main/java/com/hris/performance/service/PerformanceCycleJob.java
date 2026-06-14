@@ -3,10 +3,13 @@ package com.hris.performance.service;
 import com.hris.auth.entity.Employee;
 import com.hris.auth.repository.EmployeeRepository;
 import com.hris.common.event.SystemActor;
+import com.hris.performance.entity.PerformanceFeedbackRequest;
 import com.hris.performance.entity.PerformanceReview;
 import com.hris.performance.entity.PerformanceReviewCycle;
 import com.hris.performance.enums.CycleStatus;
+import com.hris.performance.enums.FeedbackRequestStatus;
 import com.hris.performance.enums.ReviewStatus;
+import com.hris.performance.repository.PerformanceFeedbackRequestRepository;
 import com.hris.performance.repository.PerformanceReviewCycleRepository;
 import com.hris.performance.repository.PerformanceReviewRepository;
 import com.hris.tenancy.TenantJobRunner;
@@ -44,6 +47,7 @@ public class PerformanceCycleJob {
 
     private final PerformanceReviewCycleRepository cycleRepository;
     private final PerformanceReviewRepository reviewRepository;
+    private final PerformanceFeedbackRequestRepository feedbackRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final ReviewCycleService reviewCycleService;
     private final PerformanceNotificationService notificationService;
@@ -62,9 +66,11 @@ public class PerformanceCycleJob {
             int opened = openDueCycles();
             int advanced = advanceDueCycles();
             int reminders = sendSelfAssessmentReminders();
+            int feedbackReminders = sendFeedbackReminders();
             int closed = closeDueCycles();
-            log.info("Performance sweep for tenant {}: {} cycles opened, {} advanced, {} reminders sent, {} closed",
-                tenant.getSlug(), opened, advanced, reminders, closed);
+            log.info("Performance sweep for tenant {}: {} cycles opened, {} advanced, {} self-assessment "
+                    + "reminders, {} feedback reminders, {} closed",
+                tenant.getSlug(), opened, advanced, reminders, feedbackReminders, closed);
         });
     }
 
@@ -141,6 +147,32 @@ public class PerformanceCycleJob {
                 review.setSelfRemindedAt(Instant.now());
                 reviewRepository.save(review);
                 sent++;
+            }
+        }
+        return sent;
+    }
+
+    /** Reminds raters of still-pending 360/peer feedback on open cycles, once per request. */
+    @Transactional
+    public int sendFeedbackReminders() {
+        int sent = 0;
+        for (CycleStatus status : List.of(CycleStatus.ACTIVE, CycleStatus.IN_REVIEW)) {
+            for (PerformanceReviewCycle cycle : cycleRepository.findByStatus(status)) {
+                for (PerformanceFeedbackRequest request : feedbackRequestRepository.findByCycleIdAndStatus(
+                        cycle.getId(), FeedbackRequestStatus.PENDING)) {
+                    if (request.getRemindedAt() != null) {
+                        continue;
+                    }
+                    Employee rater = employeeRepository.findById(request.getRaterEmployeeId()).orElse(null);
+                    if (rater == null) {
+                        continue;
+                    }
+                    notificationService.notifyFeedbackRequested(rater.getUserId(),
+                        request.getSubjectName(), cycle.getName());
+                    request.setRemindedAt(Instant.now());
+                    feedbackRequestRepository.save(request);
+                    sent++;
+                }
             }
         }
         return sent;
