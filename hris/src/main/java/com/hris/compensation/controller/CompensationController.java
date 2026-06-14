@@ -14,6 +14,17 @@ import com.hris.compensation.dto.CompensationReviewDtos.ProposalDto;
 import com.hris.compensation.dto.CompensationReviewDtos.ProposalUpdateDto;
 import com.hris.compensation.dto.CompensationReviewDtos.ReviewCycleCreateDto;
 import com.hris.compensation.dto.CompensationReviewDtos.ReviewCycleDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusAwardDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusAwardUpdateDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusCycleCreateDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusCycleDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusPlanCreateDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusPlanDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusPoolDto;
+import com.hris.compensation.dto.CompensationBonusDtos.BonusPoolUpdateDto;
+import com.hris.compensation.dto.CompensationBonusDtos.SpotAwardCreateDto;
+import com.hris.compensation.service.BonusCycleService;
+import com.hris.compensation.service.BonusPlanService;
 import com.hris.compensation.service.CompensationReviewService;
 import com.hris.compensation.service.CompensationService;
 import com.hris.compensation.service.MeritMatrixService;
@@ -39,6 +50,8 @@ public class CompensationController {
     private final PayGradeService payGradeService;
     private final MeritMatrixService meritMatrixService;
     private final CompensationReviewService reviewService;
+    private final BonusPlanService bonusPlanService;
+    private final BonusCycleService bonusCycleService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     // --- Self-view ------------------------------------------------------------
@@ -249,5 +262,177 @@ public class CompensationController {
         permissionAuthorizationService.authorize(auth, "COMPENSATION", "REVIEW");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(reviewService.saveProposal(proposalId, dto, userId)));
+    }
+
+    // === Phase 3: variable / bonus pay =======================================
+
+    // --- Bonus plans (HR) -----------------------------------------------------
+
+    @GetMapping("/bonus-plans")
+    public ResponseEntity<ApiResponse<List<BonusPlanDto>>> getBonusPlans(
+            @RequestParam(name = "activeOnly", defaultValue = "false") boolean activeOnly, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        return ResponseEntity.ok(ApiResponse.ok(bonusPlanService.getAll(activeOnly)));
+    }
+
+    @PostMapping("/bonus-plans")
+    public ResponseEntity<ApiResponse<BonusPlanDto>> createBonusPlan(
+            @Valid @RequestBody BonusPlanCreateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(bonusPlanService.create(dto, userId)));
+    }
+
+    @PatchMapping("/bonus-plans/{id}")
+    public ResponseEntity<ApiResponse<BonusPlanDto>> updateBonusPlan(
+            @PathVariable UUID id, @Valid @RequestBody BonusPlanCreateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusPlanService.update(id, dto, userId)));
+    }
+
+    @DeleteMapping("/bonus-plans/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteBonusPlan(@PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        bonusPlanService.delete(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(null));
+    }
+
+    // --- Bonus cycles (HR) ----------------------------------------------------
+
+    @GetMapping("/bonus-cycles")
+    public ResponseEntity<ApiResponse<List<BonusCycleDto>>> getBonusCycles(Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.getAll()));
+    }
+
+    @GetMapping("/bonus-cycles/{id}")
+    public ResponseEntity<ApiResponse<BonusCycleDto>> getBonusCycle(@PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.get(id)));
+    }
+
+    @PostMapping("/bonus-cycles")
+    public ResponseEntity<ApiResponse<BonusCycleDto>> createBonusCycle(
+            @Valid @RequestBody BonusCycleCreateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(bonusCycleService.create(dto, userId)));
+    }
+
+    @PatchMapping("/bonus-cycles/{id}")
+    public ResponseEntity<ApiResponse<BonusCycleDto>> updateBonusCycle(
+            @PathVariable UUID id, @Valid @RequestBody BonusCycleCreateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.update(id, dto, userId)));
+    }
+
+    @PostMapping("/bonus-cycles/{id}/activate")
+    public ResponseEntity<ApiResponse<BonusCycleDto>> activateBonusCycle(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.activate(id, userId)));
+    }
+
+    @PostMapping("/bonus-cycles/{id}/advance-review")
+    public ResponseEntity<ApiResponse<BonusCycleDto>> advanceBonusCycle(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.advanceToReview(id, userId)));
+    }
+
+    @PostMapping("/bonus-cycles/{id}/apply")
+    public ResponseEntity<ApiResponse<BonusCycleDto>> applyBonusCycle(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.applyAndClose(id, userId)));
+    }
+
+    // --- Bonus pools (HR) -----------------------------------------------------
+
+    @GetMapping("/bonus-cycles/{id}/pools")
+    public ResponseEntity<ApiResponse<List<BonusPoolDto>>> getBonusPools(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.getPools(id)));
+    }
+
+    @PatchMapping("/bonus-pools/{poolId}")
+    public ResponseEntity<ApiResponse<BonusPoolDto>> updateBonusPool(
+            @PathVariable UUID poolId, @Valid @RequestBody BonusPoolUpdateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.updatePool(poolId, dto, userId)));
+    }
+
+    // --- Bonus awards (HR view + approval + spot) -----------------------------
+
+    @GetMapping("/bonus-cycles/{id}/awards")
+    public ResponseEntity<ApiResponse<List<BonusAwardDto>>> getBonusAwards(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.listAwards(id)));
+    }
+
+    @PostMapping("/bonus-awards/{awardId}/approve")
+    public ResponseEntity<ApiResponse<BonusAwardDto>> approveBonusAward(
+            @PathVariable UUID awardId, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.approve(awardId, userId)));
+    }
+
+    @PostMapping("/bonus-awards/{awardId}/reject")
+    public ResponseEntity<ApiResponse<BonusAwardDto>> rejectBonusAward(
+            @PathVariable UUID awardId, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.reject(awardId, userId)));
+    }
+
+    @PostMapping("/bonus-awards/spot")
+    public ResponseEntity<ApiResponse<BonusAwardDto>> grantSpotBonus(
+            @Valid @RequestBody SpotAwardCreateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(bonusCycleService.grantSpot(dto, userId)));
+    }
+
+    // --- Bonus awards (manager surface, scoped to own reports) ----------------
+
+    @GetMapping("/bonus-cycles/mine")
+    public ResponseEntity<ApiResponse<List<BonusCycleDto>>> getMyBonusCycles(Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "REVIEW");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.myCycles(userId)));
+    }
+
+    @GetMapping("/bonus-cycles/{id}/my-pools")
+    public ResponseEntity<ApiResponse<List<BonusPoolDto>>> getMyBonusPools(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "REVIEW");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.myPools(id, userId)));
+    }
+
+    @GetMapping("/bonus-cycles/{id}/my-awards")
+    public ResponseEntity<ApiResponse<List<BonusAwardDto>>> getMyBonusAwards(
+            @PathVariable UUID id, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "REVIEW");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.myAwards(id, userId)));
+    }
+
+    @PatchMapping("/bonus-awards/{awardId}")
+    public ResponseEntity<ApiResponse<BonusAwardDto>> saveBonusAward(
+            @PathVariable UUID awardId, @Valid @RequestBody BonusAwardUpdateDto dto, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "REVIEW");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.saveAward(awardId, dto, userId)));
     }
 }

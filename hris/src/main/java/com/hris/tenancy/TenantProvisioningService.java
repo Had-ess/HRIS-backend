@@ -60,6 +60,7 @@ public class TenantProvisioningService {
         "performance_competency_job_families",
         "compensation_pay_grades",
         "compensation_merit_matrix",
+        "compensation_bonus_plans",
         "public_holidays",
         "admin_request_types",
         "hr_calendars",
