@@ -24,6 +24,10 @@ public interface BonusAwardRepository extends JpaRepository<BonusAward, UUID> {
 
     List<BonusAward> findByEmployeeIdOrderByCreatedAtDesc(UUID employeeId);
 
+    List<BonusAward> findByEmployeeIdAndStatus(UUID employeeId, BonusAwardStatus status);
+
+    List<BonusAward> findByStatus(BonusAwardStatus status);
+
     boolean existsByCycleIdAndEmployeeId(UUID cycleId, UUID employeeId);
 
     boolean existsByBonusPlanId(UUID bonusPlanId);

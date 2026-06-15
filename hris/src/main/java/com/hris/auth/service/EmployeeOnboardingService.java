@@ -18,6 +18,7 @@ import com.hris.common.exception.EntityNotFoundException;
 import com.hris.identity.account.LocalAccountService;
 import com.hris.lifecycle.dto.LifecycleDtos.CreateContractRequest;
 import com.hris.lifecycle.service.EmployeeContractService;
+import com.hris.recruitment.service.NewHireHandoffService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,7 @@ public class EmployeeOnboardingService {
     private final AnalyticsEventPublisher analyticsEventPublisher;
     private final EmployeeHistoryService employeeHistoryService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final NewHireHandoffService newHireHandoffService;
 
     @Transactional
     public EmployeeResponseDto onboard(EmployeeCreateDto dto, UUID actorId) {
@@ -91,6 +93,12 @@ public class EmployeeOnboardingService {
         auditLogService.log(actorId, AuditAction.CREATE, "employee", saved.getId(), null, saved);
         applicationEventPublisher.publishEvent(StructuralChangeEvent.of(
             StructuralEventType.EMPLOYEE_ONBOARDED, user.getId(), saved.getId(), actorId));
+        // Close the recruitment loop when this employee was created from a hire handoff:
+        // links the employee, increments the requisition's filled count, auto-FILLED when
+        // full. Shares this transaction, so a failed handoff completion rolls onboarding back.
+        if (dto.newHireId() != null) {
+            newHireHandoffService.complete(dto.newHireId(), saved.getId(), actorId);
+        }
         return employeeMapper.toDto(saved);
     }
 

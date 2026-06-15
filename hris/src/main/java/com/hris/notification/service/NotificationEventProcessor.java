@@ -260,6 +260,13 @@ public class NotificationEventProcessor {
                 map.getOrDefault("employeeName", ""),
                 map.getOrDefault("cycleName", "")
             };
+            case REQUISITION_SUBMITTED, REQUISITION_APPROVED, REQUISITION_REJECTED -> new Object[] {
+                map.getOrDefault("title", "")
+            };
+            case NEW_HIRE_HANDOFF -> new Object[] {
+                map.getOrDefault("candidateName", ""),
+                map.getOrDefault("title", "")
+            };
         };
     }
 
@@ -300,6 +307,8 @@ public class NotificationEventProcessor {
                  PERFORMANCE_REVIEW_SUBMITTED, PERFORMANCE_REVIEW_READY_FOR_ACK,
                  PERFORMANCE_REVIEW_COMPLETED,
                  PERFORMANCE_FEEDBACK_REQUESTED, PERFORMANCE_FEEDBACK_SUBMITTED -> NotificationType.PERFORMANCE;
+            case REQUISITION_SUBMITTED -> NotificationType.APPROVAL;
+            case REQUISITION_APPROVED, REQUISITION_REJECTED, NEW_HIRE_HANDOFF -> NotificationType.REQUEST;
         };
     }
 

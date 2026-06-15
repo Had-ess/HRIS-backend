@@ -43,6 +43,7 @@ class EmployeeOnboardingServiceTest {
     @Mock private AnalyticsEventPublisher analyticsEventPublisher;
     @Mock private EmployeeHistoryService employeeHistoryService;
     @Mock private org.springframework.context.ApplicationEventPublisher applicationEventPublisher;
+    @Mock private com.hris.recruitment.service.NewHireHandoffService newHireHandoffService;
 
     @InjectMocks private EmployeeOnboardingService employeeOnboardingService;
 
@@ -124,6 +125,44 @@ class EmployeeOnboardingServiceTest {
             any(com.hris.lifecycle.dto.LifecycleDtos.CreateContractRequest.class), eq(actorId));
         verify(employeeService).initializeLeaveBalancesForNewEmployee(savedEmployee.getId());
         verify(accountProvisioningService).provision(any(AccountProvisioningRequest.class), eq(actorId));
+    }
+
+    @Test
+    @DisplayName("completes the recruitment new-hire handoff when onboarding from one")
+    void completesNewHireHandoffWhenPresent() {
+        UUID actorId = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID jobTitleId = UUID.randomUUID();
+        UUID newHireId = UUID.randomUUID();
+
+        EmployeeCreateDto dto = new EmployeeCreateDto(
+            "leila.dev", "leila@demo.hris.local", "Leila", "Bouaziz",
+            List.of(roleId), "EMP-901", LocalDate.of(2026, 6, 15), jobTitleId,
+            ContractType.PERMANENT, null, null, UUID.randomUUID(), null,
+            UUID.randomUUID(), null, null, newHireId);
+
+        User provisionedUser = User.builder().id(userId).email(dto.email())
+            .firstName(dto.firstName()).lastName(dto.lastName()).isActive(true).build();
+        Employee savedEmployee = Employee.builder()
+            .id(UUID.randomUUID()).userId(userId).employeeCode(dto.employeeCode())
+            .hireDate(dto.hireDate()).jobTitle("Software Engineer").jobTitleId(jobTitleId)
+            .status(EmployeeStatus.ACTIVE).contractType(dto.contractType())
+            .departmentId(dto.departmentId()).workScheduleId(dto.workScheduleId()).build();
+
+        when(employeeRepository.findByEmployeeCode("EMP-901")).thenReturn(Optional.empty());
+        when(employeeService.resolveActiveJobTitle(jobTitleId)).thenReturn(jobTitle(jobTitleId));
+        when(accountProvisioningService.provision(any(AccountProvisioningRequest.class), eq(actorId))).thenReturn(provisionedUser);
+        when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
+        when(employeeMapper.toDto(savedEmployee)).thenReturn(
+            new EmployeeResponseDto(savedEmployee.getId(), userId, savedEmployee.getEmployeeCode(),
+                savedEmployee.getHireDate(), savedEmployee.getJobTitle(), savedEmployee.getStatus(),
+                savedEmployee.getContractType(), savedEmployee.getDepartmentId(),
+                savedEmployee.getWorkScheduleId(), null));
+
+        employeeOnboardingService.onboard(dto, actorId);
+
+        verify(newHireHandoffService).complete(newHireId, savedEmployee.getId(), actorId);
     }
 
     @Test

@@ -247,8 +247,8 @@ class BonusCycleServiceTest {
     }
 
     @Test
-    @DisplayName("grantSpot creates an APPROVED spot award with no cycle")
-    void grantSpot_createsApprovedSpotAward() {
+    @DisplayName("grantSpot creates a PAID spot award with no cycle")
+    void grantSpot_createsPaidSpotAward() {
         Employee emp = new Employee();
         emp.setId(employeeId);
         emp.setDepartmentId(deptId);
@@ -267,6 +267,6 @@ class BonusCycleServiceTest {
         assertThat(result.awardType()).isEqualTo(BonusAwardType.SPOT);
         assertThat(result.cycleId()).isNull();
         assertThat(result.awardedAmount()).isEqualByComparingTo("2500");
-        assertThat(result.status()).isEqualTo(BonusAwardStatus.APPROVED);
+        assertThat(result.status()).isEqualTo(BonusAwardStatus.PAID);
     }
 }

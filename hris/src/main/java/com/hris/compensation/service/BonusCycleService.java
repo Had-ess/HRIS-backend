@@ -293,8 +293,10 @@ public class BonusCycleService {
             .companyFactor(BigDecimal.ONE)
             .suggestedAmount(dto.awardedAmount())
             .awardedAmount(dto.awardedAmount())
-            .payoutDate(dto.payoutDate())
-            .status(BonusAwardStatus.APPROVED)
+            // A spot bonus is an immediate disbursement: stamp it PAID now (with a
+            // payout date, defaulting to today) so it counts as received variable pay.
+            .payoutDate(dto.payoutDate() != null ? dto.payoutDate() : java.time.LocalDate.now())
+            .status(BonusAwardStatus.PAID)
             .note(trimmedOrNull(dto.note()))
             .proposedBy(actorId)
             .approvedBy(actorId)

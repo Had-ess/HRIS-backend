@@ -36,7 +36,13 @@ public record EmployeeCreateDto(
     UUID supervisorEmployeeId,
     @NotNull UUID workScheduleId,
     String location,
-    @Pattern(regexp = "^[01][0-9]{7}$", message = "CIN must be 8 digits starting with 0 or 1") String cin
+    @Pattern(regexp = "^[01][0-9]{7}$", message = "CIN must be 8 digits starting with 0 or 1") String cin,
+    /**
+     * Optional recruitment new-hire handoff this employee is being created from.
+     * When present, onboarding completes the handoff (links the employee, fills the
+     * requisition headcount) in the same transaction.
+     */
+    UUID newHireId
 ) {
     public EmployeeCreateDto(
             String username,
@@ -65,6 +71,7 @@ public record EmployeeCreateDto(
             departmentId,
             null,
             workScheduleId,
+            null,
             null,
             null
         );

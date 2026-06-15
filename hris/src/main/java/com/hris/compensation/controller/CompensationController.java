@@ -23,12 +23,17 @@ import com.hris.compensation.dto.CompensationBonusDtos.BonusPlanDto;
 import com.hris.compensation.dto.CompensationBonusDtos.BonusPoolDto;
 import com.hris.compensation.dto.CompensationBonusDtos.BonusPoolUpdateDto;
 import com.hris.compensation.dto.CompensationBonusDtos.SpotAwardCreateDto;
+import com.hris.compensation.dto.CompensationAnalyticsDtos.CompensationAnalyticsDto;
+import com.hris.compensation.dto.CompensationAnalyticsDtos.GroupBy;
+import com.hris.compensation.dto.CompensationAnalyticsDtos.TotalRewardsDto;
 import com.hris.compensation.service.BonusCycleService;
 import com.hris.compensation.service.BonusPlanService;
+import com.hris.compensation.service.CompensationAnalyticsService;
 import com.hris.compensation.service.CompensationReviewService;
 import com.hris.compensation.service.CompensationService;
 import com.hris.compensation.service.MeritMatrixService;
 import com.hris.compensation.service.PayGradeService;
+import com.hris.compensation.service.TotalRewardsService;
 import com.hris.security.PermissionAuthorizationService;
 import com.hris.security.SecurityUtils;
 import jakarta.validation.Valid;
@@ -52,6 +57,8 @@ public class CompensationController {
     private final CompensationReviewService reviewService;
     private final BonusPlanService bonusPlanService;
     private final BonusCycleService bonusCycleService;
+    private final TotalRewardsService totalRewardsService;
+    private final CompensationAnalyticsService analyticsService;
     private final PermissionAuthorizationService permissionAuthorizationService;
 
     // --- Self-view ------------------------------------------------------------
@@ -434,5 +441,40 @@ public class CompensationController {
         permissionAuthorizationService.authorize(auth, "COMPENSATION", "REVIEW");
         UUID userId = SecurityUtils.getCurrentUserId(auth);
         return ResponseEntity.ok(ApiResponse.ok(bonusCycleService.saveAward(awardId, dto, userId)));
+    }
+
+    // --- Phase 4: total-rewards statement -------------------------------------
+
+    @GetMapping("/total-rewards/me")
+    public ResponseEntity<ApiResponse<TotalRewardsDto>> myTotalRewards(
+            @RequestParam(name = "year", required = false) Integer year, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "VIEW_OWN");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(totalRewardsService.getMine(userId, resolveYear(year))));
+    }
+
+    @GetMapping("/total-rewards/employees/{employeeId}")
+    public ResponseEntity<ApiResponse<TotalRewardsDto>> employeeTotalRewards(
+            @PathVariable UUID employeeId,
+            @RequestParam(name = "year", required = false) Integer year, Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        UUID userId = SecurityUtils.getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(
+            totalRewardsService.getForEmployee(employeeId, userId, resolveYear(year))));
+    }
+
+    // --- Phase 4: compensation analytics (HR) ---------------------------------
+
+    @GetMapping("/analytics")
+    public ResponseEntity<ApiResponse<CompensationAnalyticsDto>> analytics(
+            @RequestParam(name = "year", required = false) Integer year,
+            @RequestParam(name = "groupBy", defaultValue = "DEPARTMENT") GroupBy groupBy,
+            Authentication auth) {
+        permissionAuthorizationService.authorize(auth, "COMPENSATION", "MANAGE");
+        return ResponseEntity.ok(ApiResponse.ok(analyticsService.analytics(resolveYear(year), groupBy)));
+    }
+
+    private static int resolveYear(Integer year) {
+        return year != null ? year : java.time.Year.now().getValue();
     }
 }
